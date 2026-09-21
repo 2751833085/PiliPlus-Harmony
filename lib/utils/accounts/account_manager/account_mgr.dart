@@ -16,7 +16,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:os_type/os_type.dart';
 
 final _setCookieReg = RegExp('(?<=)(,)(?=[^;]+?=)');
 
@@ -266,9 +265,8 @@ class AccountManager extends Interceptor {
       case .unknown:
         String desc;
         try {
-          // TODO 鸿蒙待适配 Connectivity Checks the connection status of the device.
-          // 在 OHOS 上调用 Connectivity 可能因权限未授予而报 201，直接跳过。
-          desc = PlatformUtils.isMobile && !OS.isHarmony
+          // The OHOS plugin is registered; a denied permission falls back below.
+          desc = PlatformUtils.isMobile
               ? (await Connectivity().checkConnectivity()).first.desc
               : '';
         } catch (_) {

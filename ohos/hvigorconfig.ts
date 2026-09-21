@@ -6,6 +6,7 @@ import { injectNativeModules } from 'flutter-hvigor-plugin'
 // 将版本信息注入到 Flutter 的 DART_DEFINES，便于 BuildConfig 读取
 (() => {
   const projectRoot = path.dirname(__dirname)
+  const gitOptions = { cwd: process.env.HARMONY_SOURCE_ROOT || projectRoot }
 
   const readPubVersion = () => {
     try {
@@ -18,7 +19,7 @@ import { injectNativeModules } from 'flutter-hvigor-plugin'
 
   const gitRevCount = () => {
     try {
-      return parseInt(execSync('git rev-list --count HEAD').toString().trim(), 10)
+      return parseInt(execSync('git rev-list --count HEAD', gitOptions).toString().trim(), 10)
     } catch (_) {
       return 1
     }
@@ -26,7 +27,7 @@ import { injectNativeModules } from 'flutter-hvigor-plugin'
 
   const gitShortHash = () => {
     try {
-      return execSync('git rev-parse --short=9 HEAD').toString().trim()
+      return execSync('git rev-parse --short=9 HEAD', gitOptions).toString().trim()
     } catch (_) {
       return 'N/A'
     }
@@ -34,7 +35,7 @@ import { injectNativeModules } from 'flutter-hvigor-plugin'
 
   const gitCommitTime = () => {
     try {
-      return parseInt(execSync('git show -s --format=%ct HEAD').toString().trim(), 10)
+      return parseInt(execSync('git show -s --format=%ct HEAD', gitOptions).toString().trim(), 10)
     } catch (_) {
       return Math.floor(Date.now() / 1000)
     }

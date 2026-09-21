@@ -1,0 +1,1337 @@
+{
+  "upstream": "e4185e5b1d0eebfefb9cb6f32933401a4aa23c29",
+  "harmony_base": "381dc884d2cb908d682c357f768d46cdcb929f25",
+  "primary_device": "Huawei Mate XTS",
+  "features": [
+    {
+      "id": "F001",
+      "section": "feat",
+      "feature": "编辑动态",
+      "upstream_readme_line": 46,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F002",
+      "section": "feat",
+      "feature": "DLNA 投屏",
+      "upstream_readme_line": 47,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F003",
+      "section": "feat",
+      "feature": "离线缓存/播放",
+      "upstream_readme_line": 48,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F004",
+      "section": "feat",
+      "feature": "移动端支持点击弹幕悬停，点赞、复制、举报 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstream_readme_line": 49,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F005",
+      "section": "feat",
+      "feature": "播放音频",
+      "upstream_readme_line": 50,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F006",
+      "section": "feat",
+      "feature": "跳过番剧片头/片尾",
+      "upstream_readme_line": 51,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F007",
+      "section": "feat",
+      "feature": "安卓端 `loudnorm` 适配 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstream_readme_line": 52,
+      "status": "unverified",
+      "evidence": {
+        "implementation": "HarmonyOS enables the audio normalization settings and Media.extras filter graph; local ARM64 libmpv built with loudnorm/dynaudnorm and available FFmpeg filters.",
+        "build": "tool/native_mpv/sources.json; config_components confirms filters enabled; actual playback not yet verified."
+      },
+      "system_permission_exception": null
+    },
+    {
+      "id": "F008",
+      "section": "feat",
+      "feature": "Win/Mac 支持极验、短信登录 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstream_readme_line": 53,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F009",
+      "section": "feat",
+      "feature": "视频截取动图 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstream_readme_line": 54,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F010",
+      "section": "feat",
+      "feature": "AI 原声翻译",
+      "upstream_readme_line": 55,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F011",
+      "section": "feat",
+      "feature": "SuperChat",
+      "upstream_readme_line": 56,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F012",
+      "section": "feat",
+      "feature": "播放课堂视频",
+      "upstream_readme_line": 57,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F013",
+      "section": "feat",
+      "feature": "发起投票",
+      "upstream_readme_line": 58,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F014",
+      "section": "feat",
+      "feature": "发布动态/评论支持`富文本编辑`/`表情显示`/`@用户`",
+      "upstream_readme_line": 59,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F015",
+      "section": "feat",
+      "feature": "修改消息设置",
+      "upstream_readme_line": 60,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F016",
+      "section": "feat",
+      "feature": "修改聊天设置",
+      "upstream_readme_line": 61,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F017",
+      "section": "feat",
+      "feature": "展示折叠消息",
+      "upstream_readme_line": 62,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F018",
+      "section": "feat",
+      "feature": "查看用户图文",
+      "upstream_readme_line": 63,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F019",
+      "section": "feat",
+      "feature": "动态话题",
+      "upstream_readme_line": 64,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F020",
+      "section": "feat",
+      "feature": "直播分区",
+      "upstream_readme_line": 65,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F021",
+      "section": "feat",
+      "feature": "分享`视频`/`番剧`/`动态`/`专栏`/`直播`至消息",
+      "upstream_readme_line": 66,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F022",
+      "section": "feat",
+      "feature": "创建/修改/删除关注分组",
+      "upstream_readme_line": 67,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F023",
+      "section": "feat",
+      "feature": "移除粉丝",
+      "upstream_readme_line": 68,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F024",
+      "section": "feat",
+      "feature": "直播弹幕发送表情",
+      "upstream_readme_line": 69,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F025",
+      "section": "feat",
+      "feature": "收藏夹排序",
+      "upstream_readme_line": 70,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F026",
+      "section": "feat",
+      "feature": "稍后再看 ~~`未看`~~ / `未看完` / ~~`已看完`~~ 分类",
+      "upstream_readme_line": 71,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F027",
+      "section": "feat",
+      "feature": "WebDAV 备份/恢复设置",
+      "upstream_readme_line": 72,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F028",
+      "section": "feat",
+      "feature": "保存评论/动态",
+      "upstream_readme_line": 73,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F029",
+      "section": "feat",
+      "feature": "高级弹幕 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstream_readme_line": 74,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F030",
+      "section": "feat",
+      "feature": "取消/置顶评论",
+      "upstream_readme_line": 75,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F031",
+      "section": "feat",
+      "feature": "记笔记",
+      "upstream_readme_line": 76,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F032",
+      "section": "feat",
+      "feature": "多账号支持 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstream_readme_line": 77,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F033",
+      "section": "feat",
+      "feature": "屏蔽带货动态/评论",
+      "upstream_readme_line": 78,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F034",
+      "section": "feat",
+      "feature": "互动视频",
+      "upstream_readme_line": 79,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F035",
+      "section": "feat",
+      "feature": "发评/动态反诈",
+      "upstream_readme_line": 80,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F036",
+      "section": "feat",
+      "feature": "高能进度条",
+      "upstream_readme_line": 81,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F037",
+      "section": "feat",
+      "feature": "滑动跳转预览视频缩略图",
+      "upstream_readme_line": 82,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F038",
+      "section": "feat",
+      "feature": "Live Photo",
+      "upstream_readme_line": 83,
+      "status": "unverified",
+      "evidence": {
+        "implementation": "lib/utils/image_utils.dart -> HarmonyChannel.saveMovingPhoto -> MovingPhotoSave.ets; JPEG cover + video submitted as MOVING_PHOTO through native SaveButton.",
+        "validation": "Release ArkTS compiled; bridge success/cancel/error tests passed. Actual gallery result needs device verification."
+      },
+      "system_permission_exception": null
+    },
+    {
+      "id": "F039",
+      "section": "feat",
+      "feature": "复制/移动/排序收藏夹/稍后再看视频",
+      "upstream_readme_line": 84,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F040",
+      "section": "feat",
+      "feature": "超分辨率",
+      "upstream_readme_line": 85,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F041",
+      "section": "feat",
+      "feature": "合并弹幕",
+      "upstream_readme_line": 86,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F042",
+      "section": "feat",
+      "feature": "会员彩色弹幕",
+      "upstream_readme_line": 87,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F043",
+      "section": "feat",
+      "feature": "播放全部/继续播放/倒序播放",
+      "upstream_readme_line": 88,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F044",
+      "section": "feat",
+      "feature": "Cookie登录",
+      "upstream_readme_line": 89,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F045",
+      "section": "feat",
+      "feature": "显示视频分段信息",
+      "upstream_readme_line": 90,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F046",
+      "section": "feat",
+      "feature": "调节字幕大小",
+      "upstream_readme_line": 91,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F047",
+      "section": "feat",
+      "feature": "调节全屏弹幕大小",
+      "upstream_readme_line": 92,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F048",
+      "section": "feat",
+      "feature": "收藏夹/稍后再看多选删除",
+      "upstream_readme_line": 93,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F049",
+      "section": "feat",
+      "feature": "搜索用户动态",
+      "upstream_readme_line": 94,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F050",
+      "section": "feat",
+      "feature": "直播弹幕",
+      "upstream_readme_line": 95,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F051",
+      "section": "feat",
+      "feature": "修改头像/用户名/签名/性别/生日",
+      "upstream_readme_line": 96,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F052",
+      "section": "feat",
+      "feature": "创建/编辑/删除收藏夹",
+      "upstream_readme_line": 97,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F053",
+      "section": "feat",
+      "feature": "评论楼中楼查看对话",
+      "upstream_readme_line": 98,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F054",
+      "section": "feat",
+      "feature": "评论楼中楼定位点击查看的评论",
+      "upstream_readme_line": 99,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F055",
+      "section": "feat",
+      "feature": "评论楼中楼按热度/时间排序",
+      "upstream_readme_line": 100,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F056",
+      "section": "feat",
+      "feature": "评论点踩",
+      "upstream_readme_line": 101,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F057",
+      "section": "feat",
+      "feature": "私信发图",
+      "upstream_readme_line": 102,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F058",
+      "section": "feat",
+      "feature": "投币动画",
+      "upstream_readme_line": 103,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F059",
+      "section": "feat",
+      "feature": "取消/追番，更新追番状态",
+      "upstream_readme_line": 104,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F060",
+      "section": "feat",
+      "feature": "取消/订阅合集",
+      "upstream_readme_line": 105,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F061",
+      "section": "feat",
+      "feature": "SponsorBlock",
+      "upstream_readme_line": 106,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F062",
+      "section": "feat",
+      "feature": "显示视频完整合集",
+      "upstream_readme_line": 107,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F063",
+      "section": "feat",
+      "feature": "三连动画",
+      "upstream_readme_line": 108,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F064",
+      "section": "feat",
+      "feature": "番剧三连",
+      "upstream_readme_line": 109,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F065",
+      "section": "feat",
+      "feature": "带图评论",
+      "upstream_readme_line": 110,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F066",
+      "section": "feat",
+      "feature": "视频TAG",
+      "upstream_readme_line": 111,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F067",
+      "section": "feat",
+      "feature": "筛选搜索",
+      "upstream_readme_line": 112,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F068",
+      "section": "feat",
+      "feature": "转发动态",
+      "upstream_readme_line": 113,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F069",
+      "section": "feat",
+      "feature": "合集图片",
+      "upstream_readme_line": 114,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F070",
+      "section": "feat",
+      "feature": "删除/置顶/撤回私信",
+      "upstream_readme_line": 115,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F071",
+      "section": "feat",
+      "feature": "举报用户/评论/视频/动态",
+      "upstream_readme_line": 116,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F072",
+      "section": "feat",
+      "feature": "删除/发布/置顶文本/图片动态",
+      "upstream_readme_line": 117,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F073",
+      "section": "feat",
+      "feature": "其他",
+      "upstream_readme_line": 118,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F074",
+      "section": "opt",
+      "feature": "专栏界面",
+      "upstream_readme_line": 122,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F075",
+      "section": "opt",
+      "feature": "私信界面",
+      "upstream_readme_line": 123,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F076",
+      "section": "opt",
+      "feature": "收藏面板",
+      "upstream_readme_line": 124,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F077",
+      "section": "opt",
+      "feature": "PIP",
+      "upstream_readme_line": 125,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F078",
+      "section": "opt",
+      "feature": "视频封面",
+      "upstream_readme_line": 126,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F079",
+      "section": "opt",
+      "feature": "回复界面",
+      "upstream_readme_line": 127,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F080",
+      "section": "opt",
+      "feature": "系统通知",
+      "upstream_readme_line": 128,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F081",
+      "section": "opt",
+      "feature": "评论显示",
+      "upstream_readme_line": 129,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F082",
+      "section": "opt",
+      "feature": "亮度调节",
+      "upstream_readme_line": 130,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F083",
+      "section": "opt",
+      "feature": "视频播放",
+      "upstream_readme_line": 131,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F084",
+      "section": "opt",
+      "feature": "视频staff",
+      "upstream_readme_line": 132,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F085",
+      "section": "opt",
+      "feature": "防止bottomsheet遮挡全屏视频",
+      "upstream_readme_line": 133,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F086",
+      "section": "opt",
+      "feature": "其他",
+      "upstream_readme_line": 134,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F087",
+      "section": "fix",
+      "feature": "番剧分集点赞/投币/收藏",
+      "upstream_readme_line": 138,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F088",
+      "section": "fix",
+      "feature": "bugs",
+      "upstream_readme_line": 139,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F089",
+      "section": "功能",
+      "feature": "推荐视频列表(app端)",
+      "upstream_readme_line": 145,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F090",
+      "section": "功能",
+      "feature": "最热视频列表",
+      "upstream_readme_line": 146,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F091",
+      "section": "功能",
+      "feature": "热门直播",
+      "upstream_readme_line": 147,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F092",
+      "section": "功能",
+      "feature": "番剧列表",
+      "upstream_readme_line": 148,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F093",
+      "section": "功能",
+      "feature": "屏蔽黑名单内用户视频",
+      "upstream_readme_line": 149,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F094",
+      "section": "功能",
+      "feature": "无痕模式（播放视为未登录）",
+      "upstream_readme_line": 150,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F095",
+      "section": "功能",
+      "feature": "游客模式（推荐视为未登录）",
+      "upstream_readme_line": 151,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F096",
+      "section": "功能",
+      "feature": "用户相关",
+      "upstream_readme_line": 153,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F097",
+      "section": "功能",
+      "feature": "粉丝、关注用户、拉黑用户查看",
+      "upstream_readme_line": 154,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F098",
+      "section": "功能",
+      "feature": "用户主页查看",
+      "upstream_readme_line": 155,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F099",
+      "section": "功能",
+      "feature": "关注/取关用户",
+      "upstream_readme_line": 156,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F100",
+      "section": "功能",
+      "feature": "离线缓存",
+      "upstream_readme_line": 157,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F101",
+      "section": "功能",
+      "feature": "稍后再看",
+      "upstream_readme_line": 158,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F102",
+      "section": "功能",
+      "feature": "观看记录",
+      "upstream_readme_line": 159,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F103",
+      "section": "功能",
+      "feature": "我的收藏",
+      "upstream_readme_line": 160,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F104",
+      "section": "功能",
+      "feature": "站内私信",
+      "upstream_readme_line": 161,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F105",
+      "section": "功能",
+      "feature": "动态相关",
+      "upstream_readme_line": 163,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F106",
+      "section": "功能",
+      "feature": "全部、投稿、番剧分类查看",
+      "upstream_readme_line": 164,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F107",
+      "section": "功能",
+      "feature": "动态评论查看",
+      "upstream_readme_line": 165,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F108",
+      "section": "功能",
+      "feature": "动态评论回复功能",
+      "upstream_readme_line": 166,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F109",
+      "section": "功能",
+      "feature": "视频播放相关",
+      "upstream_readme_line": 168,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F110",
+      "section": "功能",
+      "feature": "双击快进/快退",
+      "upstream_readme_line": 169,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F111",
+      "section": "功能",
+      "feature": "双击播放/暂停",
+      "upstream_readme_line": 170,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F112",
+      "section": "功能",
+      "feature": "垂直方向调节亮度/音量",
+      "upstream_readme_line": 171,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F113",
+      "section": "功能",
+      "feature": "垂直方向上滑全屏、下滑退出全屏",
+      "upstream_readme_line": 172,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F114",
+      "section": "功能",
+      "feature": "水平方向手势快进/快退",
+      "upstream_readme_line": 173,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F115",
+      "section": "功能",
+      "feature": "全屏方向设置",
+      "upstream_readme_line": 174,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F116",
+      "section": "功能",
+      "feature": "倍速选择/长按2倍速",
+      "upstream_readme_line": 175,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F117",
+      "section": "功能",
+      "feature": "硬件加速（视机型而定）",
+      "upstream_readme_line": 176,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F118",
+      "section": "功能",
+      "feature": "画质选择（高清画质未解锁）",
+      "upstream_readme_line": 177,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F119",
+      "section": "功能",
+      "feature": "音质选择（视视频而定）",
+      "upstream_readme_line": 178,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F120",
+      "section": "功能",
+      "feature": "解码格式选择（视视频而定）",
+      "upstream_readme_line": 179,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F121",
+      "section": "功能",
+      "feature": "弹幕",
+      "upstream_readme_line": 180,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F122",
+      "section": "功能",
+      "feature": "字幕",
+      "upstream_readme_line": 181,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F123",
+      "section": "功能",
+      "feature": "记忆播放",
+      "upstream_readme_line": 182,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F124",
+      "section": "功能",
+      "feature": "视频比例：高度/宽度适应、填充、包含等",
+      "upstream_readme_line": 183,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F125",
+      "section": "功能",
+      "feature": "搜索相关",
+      "upstream_readme_line": 185,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F126",
+      "section": "功能",
+      "feature": "热搜",
+      "upstream_readme_line": 186,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F127",
+      "section": "功能",
+      "feature": "搜索历史",
+      "upstream_readme_line": 187,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F128",
+      "section": "功能",
+      "feature": "默认搜索词",
+      "upstream_readme_line": 188,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F129",
+      "section": "功能",
+      "feature": "投稿、番剧、直播间、用户搜索",
+      "upstream_readme_line": 189,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F130",
+      "section": "功能",
+      "feature": "视频搜索排序、按时长筛选",
+      "upstream_readme_line": 190,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F131",
+      "section": "功能",
+      "feature": "视频详情页相关",
+      "upstream_readme_line": 192,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F132",
+      "section": "功能",
+      "feature": "视频选集(分p)切换",
+      "upstream_readme_line": 193,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F133",
+      "section": "功能",
+      "feature": "点赞、投币、收藏/取消收藏",
+      "upstream_readme_line": 194,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F134",
+      "section": "功能",
+      "feature": "相关视频查看",
+      "upstream_readme_line": 195,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F135",
+      "section": "功能",
+      "feature": "评论用户身份标识",
+      "upstream_readme_line": 196,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F136",
+      "section": "功能",
+      "feature": "评论(排序)查看、二楼评论查看",
+      "upstream_readme_line": 197,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F137",
+      "section": "功能",
+      "feature": "主楼、二楼评论回复功能",
+      "upstream_readme_line": 198,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F138",
+      "section": "功能",
+      "feature": "评论点赞",
+      "upstream_readme_line": 199,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F139",
+      "section": "功能",
+      "feature": "评论笔记图片查看、保存",
+      "upstream_readme_line": 200,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F140",
+      "section": "功能",
+      "feature": "设置相关",
+      "upstream_readme_line": 202,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F141",
+      "section": "功能",
+      "feature": "画质、音质、解码方式预设      ",
+      "upstream_readme_line": 203,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F142",
+      "section": "功能",
+      "feature": "图片质量设定",
+      "upstream_readme_line": 204,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F143",
+      "section": "功能",
+      "feature": "主题模式：亮色/暗色/跟随系统",
+      "upstream_readme_line": 205,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F144",
+      "section": "功能",
+      "feature": "震动反馈(可选)",
+      "upstream_readme_line": 206,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F145",
+      "section": "功能",
+      "feature": "高帧率",
+      "upstream_readme_line": 207,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F146",
+      "section": "功能",
+      "feature": "自动全屏",
+      "upstream_readme_line": 208,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    },
+    {
+      "id": "F147",
+      "section": "功能",
+      "feature": "横屏适配",
+      "upstream_readme_line": 209,
+      "status": "unverified",
+      "evidence": null,
+      "system_permission_exception": null
+    }
+  ],
+  "primary_device_system": "HarmonyOS 7.0.0.107 SP8 (user reported)"
+}

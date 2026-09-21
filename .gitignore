@@ -151,9 +151,28 @@ dist
 
 test*
 
+# Track HarmonyOS regression tests; keep SDKs and signing material local.
+!test/
+!test/harmony_adapt/
+!test/harmony_adapt/**
+.toolchains/
+.harmony-env.local
+*.p12
+*.p7b
+*.cer
+ohos/build-profile.local.json5
+
 .agents
 skills-lock.json
 
 ohos/.codegenie
 .codex/skills/deveco-cli/SKILL.md
 .claude/skills/deveco-cli/SKILL.md
+
+# Local release binaries; metadata and checksums stay versioned.
+/releases/**/*.hap
+/releases/**/*.app
+/releases/**/*.zip
+/packages/media_kit_libs_ohos/ohos/build/
+/packages/media_kit_libs_ohos/ohos/.hvigor/
+/packages/media_kit_libs_ohos/ohos/oh_modules/

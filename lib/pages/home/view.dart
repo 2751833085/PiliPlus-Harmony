@@ -7,7 +7,6 @@ import 'package:PiliPlus/pages/home/controller.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
-import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
@@ -94,9 +93,7 @@ class _HomePageState extends CommonPageState<HomePage>
     }
     return Column(
       children: [
-        if (!useNativeTopBar &&
-            !_mainController.useSideBar &&
-            MediaQuery.sizeOf(context).isPortrait)
+        if (!useNativeTopBar && _mainController.useBottomNav)
           customAppBar(theme)
         else if (!useNativeTopBar)
           SizedBox(height: MediaQuery.of(context).padding.top),
@@ -168,9 +165,7 @@ class _HomePageState extends CommonPageState<HomePage>
         return Obx(() {
           final showSearchBar = showTopBar.value;
           return Container(
-            padding: EdgeInsets.only(
-              top: statusBarHeight
-            ),
+            padding: EdgeInsets.only(top: statusBarHeight),
             child: AnimatedOpacity(
               opacity: showSearchBar ? 1 : 0,
               duration: const Duration(milliseconds: 300),

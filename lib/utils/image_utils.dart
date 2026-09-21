@@ -5,6 +5,7 @@ import 'dart:typed_data' show Uint8List;
 
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/init.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
 import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
@@ -16,7 +17,7 @@ import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/share_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/utils.dart';
-import 'package:dio/dio.dart';
+import 'package:path/path.dart' as path;
 import 'package:file_picker_ohos/file_picker_ohos.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -106,7 +107,19 @@ abstract final class ImageUtils {
       final res = await Request().downloadFile(liveUrl.http2https, videoPath);
       if (res.statusCode != 200) throw '${res.statusCode}';
 
-      if (Platform.isIOS) {
+      if (OS.isHarmony) {
+        final imageFile = await CacheManager.manager.getSingleFile(
+          url.http2https,
+        );
+        // Native SaveButton owns the authorization UI after the download.
+        if (!silentDownImg) SmartDialog.dismiss(status: SmartStatus.loading);
+        final saved = await HarmonyChannel.saveMovingPhoto(
+          imagePath: imageFile.path,
+          videoPath: videoPath,
+        ).whenComplete(File(videoPath).tryDel);
+        SmartDialog.showToast(saved ? ' 已保存动态照片 ' : '已取消保存');
+        return saved;
+      } else if (Platform.isIOS) {
         final imageFile = await CacheManager.manager.getSingleFile(
           url.http2https,
         );
@@ -146,68 +159,62 @@ abstract final class ImageUtils {
     if (PlatformUtils.isMobile && !await checkPermissionDependOnSdkInt()) {
       return false;
     }
-    CancelToken? cancelToken;
     if (!silentDownImg) {
-      cancelToken = CancelToken();
-      SmartDialog.showLoading(
-        msg: '正在下载原图',
-        clickMaskDismiss: true,
-        onDismiss: cancelToken.cancel,
-      );
+      SmartDialog.showLoading(msg: '正在下载原图');
     }
+    final futures = imgList.map((url) async {
+      final name = Utils.getFileName(url);
+      final file = await CacheManager.manager.getSingleFile(url.http2https);
+      return (file, name);
+    });
+    final List<(File, String)> result;
     try {
-      final futures = imgList.map((url) async {
-        final name = Utils.getFileName(url);
-
-        final file = await CacheManager.manager.getSingleFile(
-          url.http2https,
+      try {
+        result = await Future.wait(
+          futures,
+          eagerError: true,
+          cleanUp: (successValue) => successValue.$1.tryDel(),
         );
-        return (filePath: file.path, name: name, statusCode: 200);
-      });
-      final result = await Future.wait(futures, eagerError: true);
-      bool success = true;
-      SaveResult? saveRes;
-      if (PlatformUtils.isMobile) {
+      } catch (e) {
+        SmartDialog.showToast('保存失败');
+        return false;
+      }
+      if (PlatformUtils.isMobile || OS.isHarmony) {
         final saveList = <SaveFileData>[];
         for (final i in result) {
-          if (i.statusCode == 200) {
-            saveList.add(
-              SaveFileData(
-                filePath: i.filePath,
-                fileName: i.name,
-                androidRelativePath: _albumPath,
-              ),
-            );
-          } else {
-            success = false;
-          }
+          saveList.add(
+            SaveFileData(
+              filePath: i.$1.path,
+              fileName: i.$2,
+              androidRelativePath: _albumPath,
+            ),
+          );
         }
-        saveRes = await SaverGallery.saveFiles(saveList, skipIfExists: false);
-      } else {
-        for (final res in result) {
-          if (res.statusCode == 200) {
-            await saveFileImg(filePath: res.filePath, fileName: res.name);
-          } else {
-            success = false;
-          }
+        final saveRes = await SaverGallery.saveFiles(
+          saveList,
+          skipIfExists: false,
+        );
+        if (!saveRes.isSuccess) {
+          SmartDialog.showToast('保存失败，${saveRes.errorMessage}');
+          return false;
         }
-      }
-      if (cancelToken?.isCancelled == true) {
-        SmartDialog.showToast('已取消下载');
-        return false;
       } else {
-        SmartDialog.showToast(success && saveRes?.isSuccess==true ? ' 已保存 ' : '保存失败');
+        final dst = await FilePicker.platform.getDirectoryPath();
+        if (dst == null) {
+          SmartDialog.showToast('取消保存');
+          return false;
+        }
+        await Future.wait([
+          for (final (src, name) in result) src.copy(path.join(dst, name)),
+        ]);
       }
-      return success;
-    } catch (e) {
-      if (cancelToken?.isCancelled == true) {
-        SmartDialog.showToast('已取消下载');
-      } else {
-        SmartDialog.showToast(e.toString());
-      }
+      SmartDialog.showToast(' 已保存 ');
+      return true;
+    } catch (error) {
+      SmartDialog.showToast('保存失败：$error');
       return false;
     } finally {
-      if (!silentDownImg) SmartDialog.dismiss(status: SmartStatus.loading);
+      if (!silentDownImg) SmartDialog.dismiss(status: .loading);
     }
   }
 
@@ -291,11 +298,12 @@ abstract final class ImageUtils {
     required Uint8List bytes,
     required String fileName,
     String ext = 'png',
+    bool showLoading = true,
   }) async {
     SaveResult? res;
     fileName += '.$ext';
     if (PlatformUtils.isMobile || OS.isHarmony) {
-      SmartDialog.showLoading(msg: '正在保存');
+      if (showLoading) SmartDialog.showLoading(msg: '正在保存');
       res = await SaverGallery.saveImage(
         bytes,
         fileName: fileName,

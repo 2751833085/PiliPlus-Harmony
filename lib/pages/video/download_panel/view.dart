@@ -155,7 +155,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
               stream: Connectivity().onConnectivityChanged,
               builder: (context, snapshot) {
                 if (snapshot.data case final data?) {
-                  final network = data == ConnectivityResult.wifi
+                  final network = data.contains(ConnectivityResult.wifi)
                       ? 'WIFI'
                       : '数据';
                   return Text('当前网络：$network', style: textStyle);

@@ -11,6 +11,17 @@ import 'package:get/get.dart';
 import 'package:os_type/os_type.dart';
 
 abstract class HarmonyChannel {
+  /// Completes only after the system save button succeeds or the user cancels.
+  static Future<bool> saveMovingPhoto({
+    required String imagePath,
+    required String videoPath,
+  }) async =>
+      await _channel.invokeMethod<bool>('saveMovingPhoto', {
+        'imagePath': imagePath,
+        'videoPath': videoPath,
+      }) ??
+      false;
+
   static double? _systemFontWeightScale;
 
   static double? get systemFontWeightScale => _systemFontWeightScale;
@@ -33,7 +44,8 @@ abstract class HarmonyChannel {
         _updateDecorTop(call.arguments['top']);
         break;
       case 'onFontWeightScaleChange':
-        final fontWeightScale = (call.arguments['fontWeightScale'] as num?)?.toDouble();
+        final fontWeightScale = (call.arguments['fontWeightScale'] as num?)
+            ?.toDouble();
         _systemFontWeightScale = fontWeightScale;
         if (Pref.appFontWeight == -1) {
           Get.updateMyAppTheme();
@@ -128,15 +140,19 @@ abstract class HarmonyChannel {
 
   /// 控制原生 HDS 底栏/顶栏的显隐（弹窗、全屏页等场景）
   static Future<void> setShellBarsHidden(
-    bool hidden, 
-    {bool retry = false, bool force = false,}
-  ) async {
+    bool hidden, {
+    bool retry = false,
+    bool force = false,
+  }) async {
     if (!OS.isHarmony) return;
     _hiddenByPage = hidden;
     final int total = retry ? 8 : 1;
     for (int i = 0; i < total; i++) {
       try {
-        _channel.invokeMethod('setShellBarsHidden', {'hidden': hidden,'force': force});
+        _channel.invokeMethod('setShellBarsHidden', {
+          'hidden': hidden,
+          'force': force,
+        });
         return;
       } catch (_) {
         if (i == total - 1) return;
@@ -286,8 +302,9 @@ abstract class HarmonyChannel {
   static Future<void> setWindowOrientation(int orientation) async {
     if (!OS.isHarmony) return;
     try {
-      await _channel.invokeMethod(
-          'setWindowOrientation', {'orientation': orientation});
+      await _channel.invokeMethod('setWindowOrientation', {
+        'orientation': orientation,
+      });
     } catch (_) {}
   }
 

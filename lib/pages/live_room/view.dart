@@ -190,6 +190,7 @@ class _LiveRoomPageState extends State<LiveRoomPage>
 
   @override
   void dispose() {
+    _pipModeWorker?.dispose();
     removeObserverMobile(this);
     videoPlayerServiceHandler?.onVideoDetailDispose(heroTag);
     HarmonyChannel.releaseDecorDark(this);

@@ -5,6 +5,7 @@ import common from '@ohos.app.ability.common';
 import image from '@ohos.multimedia.image';
 import window from '@ohos.window';
 import { FlutterPage } from '@ohos/flutter_ohos';
+import { MovingPhotoSave } from '../plugins/MovingPhotoSave';
 
 let storage = LocalStorage.getShared();
 
@@ -82,6 +83,9 @@ function navTabLabel(typeIndex: number): string {
 @Entry(storage)
 @Component
 struct Index {
+  @StorageLink('movingPhotoSaveVisible') movingPhotoSaveVisible: boolean = false;
+  @StorageLink('movingPhotoSaving') movingPhotoSaving: boolean = false;
+  @StorageLink('movingPhotoPreview') movingPhotoPreview: string = '';
   private context = getContext(this) as common.UIAbilityContext;
   @LocalStorageLink('viewId') viewId: string = "";
   @StorageLink('useNativeTabs') useNativeTabs: boolean = false;
@@ -272,6 +276,7 @@ struct Index {
   }
 
   aboutToDisappear(): void {
+    MovingPhotoSave.cancel();
     if (this.win !== null) {
       try {
         if (this.sizeCallback !== null) {
@@ -840,6 +845,44 @@ struct Index {
   }
 
 
+  @Builder
+  movingPhotoDialog() {
+    Stack({ alignContent: Alignment.Center }) {
+      Column().width('100%').height('100%').backgroundColor('#80000000')
+      Scroll() {
+        Column({ space: 16 }) {
+          Text('保存动态照片').fontSize(20).fontWeight(FontWeight.Medium)
+          Image(this.movingPhotoPreview)
+            .height(Math.min(180, this.winHeight * 0.3))
+            .width('100%').objectFit(ImageFit.Contain)
+          if (this.movingPhotoSaving) {
+            LoadingProgress().width(40).height(40)
+            Text('正在保存到图库…').fontSize(14)
+          } else {
+            SaveButton({ icon: SaveIconStyle.FULL_FILLED, text: SaveDescription.SAVE_TO_GALLERY,
+              buttonType: ButtonType.Capsule })
+              .onClick((_event: ClickEvent, result: SaveButtonOnClickResult) => {
+                if (result === SaveButtonOnClickResult.SUCCESS) {
+                  MovingPhotoSave.save(this.context);
+                } else {
+                  MovingPhotoSave.denied();
+                }
+              })
+            Button('取消').onClick(() => MovingPhotoSave.cancel())
+          }
+        }.width('100%')
+      }
+      .width('90%')
+      .constraintSize({ maxWidth: 420, maxHeight: Math.max(120, this.winHeight - 48) })
+      .padding(24)
+      .borderRadius(20)
+      .backgroundColor($r('app.color.start_window_background'))
+    }
+    .width('100%')
+    .height('100%')
+    .hitTestBehavior(HitTestMode.Default)
+  }
+
   build() {
     Stack({ alignContent: Alignment.Top }) {
       FlutterPage({ viewId: this.viewId, xComponentRenderFit: RenderFit.TOP })
@@ -871,6 +914,9 @@ struct Index {
           .hitTestBehavior(HitTestMode.None)
           .syncLoad(true)
       }
+      if (this.movingPhotoSaveVisible) {
+        this.movingPhotoDialog()
+      }
     }
     .width(this.winWidth > 0 ? this.winWidth : '100%')
     .height(this.winHeight > 0 ? this.winHeight : '100%')
@@ -878,6 +924,10 @@ struct Index {
   }
 
   onBackPress(): boolean {
+    if (this.movingPhotoSaveVisible) {
+      MovingPhotoSave.cancel();
+      return true;
+    }
     this.context.eventHub.emit(EVENT_BACK_PRESS)
     return true
   }

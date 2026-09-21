@@ -1,4 +1,6 @@
 import 'package:PiliPlus/common/widgets/flutter/draggable_scrollable_sheet.dart';
+import 'dart:async';
+
 import 'package:PiliPlus/common/widgets/flutter/text_field/text_field.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/http/dynamics.dart';
@@ -205,7 +207,7 @@ class _RepostPanelState extends CommonRichTextPubPageState<RepostPanel> {
     behavior: HitTestBehavior.opaque,
     onTap: () {
       setState(() => _isMax = true);
-      Future.delayed(const Duration(milliseconds: 300), () {
+      Timer(const Duration(milliseconds: 300), () {
         if (mounted) {
           focusNode.requestFocus();
           setState(() => _isExpanded = true);

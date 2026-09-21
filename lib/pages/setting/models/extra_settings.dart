@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, Directory;
 import 'dart:math' show max;
 
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
@@ -285,7 +285,7 @@ List<SettingsModel> get extraSettings => [
     defaultVal: false,
     needReboot: true,
   ),
-  if (kDebugMode || Platform.isAndroid)
+  if (kDebugMode || Platform.isAndroid || OS.isHarmony)
     NormalModel(
       title: '音量均衡',
       leading: const Icon(Icons.multitrack_audio),
@@ -752,6 +752,13 @@ void _showDownPathDialog(BuildContext context, VoidCallback setState) {
         DialogOption(
           onPressed: () {
             Get.back();
+            PathUtils.openDir(downloadPath);
+          },
+          child: const Text('打开'),
+        ),
+        DialogOption(
+          onPressed: () {
+            Get.back();
             Utils.copyText(downloadPath);
           },
           child: const Text('复制', style: TextStyle(fontSize: 14)),
@@ -771,7 +778,11 @@ void _showDownPathDialog(BuildContext context, VoidCallback setState) {
         DialogOption(
           onPressed: () async {
             Get.back();
-            final path = await FilePicker.platform.getDirectoryPath();
+            final path = await FilePicker.platform.getDirectoryPath(
+              initialDirectory: Directory(downloadPath).existsSync()
+                  ? downloadPath
+                  : null,
+            );
             if (path == null || path == downloadPath) return;
             downloadPath = path;
             setState();

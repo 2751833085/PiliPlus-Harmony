@@ -9,7 +9,6 @@ import 'package:PiliPlus/pages/audio/controller.dart';
 import 'package:PiliPlus/pages/audio/view.dart';
 import 'package:PiliPlus/pages/live_room/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';

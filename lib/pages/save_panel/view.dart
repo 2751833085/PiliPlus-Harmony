@@ -200,7 +200,8 @@ class _SavePanelState extends State<SavePanel> {
         final ctr = Get.find<MusicDetailController>(
           tag: Get.parameters['musicId'],
         );
-        enterUri = 'enterUri=${Uri.encodeComponent(ctr.shareUrl)}'; // official client cannot parse it
+        enterUri =
+            'enterUri=${Uri.encodeComponent(ctr.shareUrl)}'; // official client cannot parse it
         final data = ctr.infoState.value.dataOrNull;
         if (data != null) {
           coverType = _CoverType.square;
@@ -301,7 +302,7 @@ class _SavePanelState extends State<SavePanel> {
       image.dispose();
       final pngBytes = byteData!.buffer.asUint8List();
       final picName =
-          "${Constants.appName}_${itemType}_${DateFormat('yyyyMMddHHmmss').format(DateTime.now())}";
+          "${Constants.appName}_${itemType}_${DateFormatUtils.only0_9.format(DateTime.now())}";
       if (isShare) {
         Get.back();
         SmartDialog.dismiss();

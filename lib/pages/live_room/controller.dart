@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -25,11 +26,11 @@ import 'package:PiliPlus/pages/live_room/send_danmaku/view.dart';
 import 'package:PiliPlus/pages/video/widgets/header_control.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/data_source.dart';
-import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/danmaku_options.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/tcp/live.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/android/bindings.g.dart';
 import 'package:PiliPlus/utils/connectivity_utils.dart';
 import 'package:PiliPlus/utils/danmaku_utils.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
@@ -316,7 +317,7 @@ class LiveRoomController extends GetxController {
           autoplay: autoplay,
           autoFullScreenFlag: autoFullScreenFlag,
         ),
-        if (isLogin && !isLoaded.value) _fetchBlockRules(),
+        if (!isLoaded.value && Accounts.heartbeat.isLogin) _fetchBlockRules(),
       ]);
       isLoaded.value = true;
     } else {
@@ -603,7 +604,7 @@ class LiveRoomController extends GetxController {
   }
 
   void initDm(LiveDmInfoData info) {
-    if (info.hostList.isNullOrEmpty) {
+    if (info.hostList.isEmpty) {
       return;
     }
     _msgStream =
@@ -701,8 +702,10 @@ class LiveRoomController extends GetxController {
           );
           break;
         case 'SUPER_CHAT_MESSAGE' when showSuperChat:
-          final item = SuperChatItem.fromJson(obj['data']);
+          final item = SuperChatItem.fromJson(obj['data'], roomId);
           superChatMsg.insert(0, item);
+          addDm(item);
+          if (Platform.isAndroid && AndroidHelper.isPipMode) return;
           if (plPlayerController.showDanmaku &&
               (isFullScreen || plPlayerController.isDesktopPip)) {
             fsSC.value = item.copyWith(
@@ -712,7 +715,6 @@ class LiveRoomController extends GetxController {
               ),
             );
           }
-          addDm(item);
           break;
         // case 'SUPER_CHAT_MESSAGE_DELETE' when showSuperChat:
         //   if (obj['roomid'] == roomId) {

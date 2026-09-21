@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:PiliPlus/models/video/play/url.dart' show Volume;
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:os_type/os_type.dart';
 
 enum AudioNormalization {
   disable('禁用'),
@@ -57,7 +58,7 @@ enum AudioNormalization {
 mixin AudioNormalizationMixin {
   late final _audioNormalization = Pref.audioNormalization;
   late final enableAudioNormalization =
-      Platform.isAndroid && _audioNormalization != '0';
+      (Platform.isAndroid || OS.isHarmony) && _audioNormalization != '0';
   late final _param = AudioNormalization.getParamFromConfig(
     _audioNormalization,
   );
@@ -71,7 +72,10 @@ mixin AudioNormalizationMixin {
     if (!enableAudioNormalization) return map;
     var audioNormalization = AudioNormalization.parse(volume, _param);
     if (audioNormalization.isEmpty) return map;
-    audioNormalization = '"[aid1] $audioNormalization [ao]"';
+    audioNormalization = '[aid1] $audioNormalization [ao]';
+    // The OHOS backend passes this directly to mpv_set_property_string.
+    // Shell/loadfile option quoting would become part of the filter graph.
+    if (!OS.isHarmony) audioNormalization = '"$audioNormalization"';
     if (map != null) {
       map[_kNormalizationKey] = audioNormalization;
       return map;

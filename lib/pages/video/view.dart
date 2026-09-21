@@ -137,6 +137,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// 全屏横屏视频时竖屏窗口是稳定状态而非瞬态，同样排除。
   bool get _layoutFullScreen {
     if (!isFullScreen) return false;
+
     /// 应用窗口是否处于受限窗口模式（分屏/自由多窗/悬浮窗等非全屏窗口）。
     /// 此模式下窗口宽高比不代表设备方向，且窗口无法旋转到全屏横屏
     /// 仍应按 isFullScreen 渲染全屏布局，
@@ -250,7 +251,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       heroTag is String &&
       ((heroTag as String).startsWith('video_hero_') ||
           (heroTag as String).startsWith('pgc_hero_'));
-  late bool _waitingHero = _enableHero && (heroTag as String).startsWith('video_hero_');
+  late bool _waitingHero =
+      _enableHero && (heroTag as String).startsWith('video_hero_');
   final _heroDuration = const Duration(milliseconds: 300);
   @override
   void initState() {
@@ -366,7 +368,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
 
     // 横屏分栏没有 ExtendedNestedScrollView，各 tab 是自己维护的列表
-    final hasIntroTab = !(videoDetailController.isVertical.value && !isPortrait);
+    final hasIntroTab =
+        !(videoDetailController.isVertical.value && !isPortrait);
     final tabIndex = videoDetailController.tabCtr.index;
     final replyIndex = hasIntroTab ? 1 : 0;
     final seasonIndex = replyIndex + (videoDetailController.showReply ? 1 : 0);
@@ -578,7 +581,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     videoDetailController
       ..videoState.value = false
       ..cancelBlockListener()
-      ..playerStatus = plPlayerController?.playerStatus.value
+      ..playerStatus = plPlayerController?.playerStatus
       ..brightness = plPlayerController?.brightness.value;
     if (plPlayerController != null) {
       videoDetailController.makeHeartBeat();
@@ -671,10 +674,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final size = MediaQuery.sizeOf(context);
     maxWidth = size.width;
     maxHeight = size.height;
-    isWindowMode = MaxScreenSize.isWindowMode(
-      width: maxWidth * videoDetailController.uiScale,
-      height: maxHeight * videoDetailController.uiScale,
-    ) ||
+    isWindowMode =
+        MaxScreenSize.isWindowMode(
+          width: maxWidth * videoDetailController.uiScale,
+          height: maxHeight * videoDetailController.uiScale,
+        ) ||
         (OS.isHarmony && HarmonyChannel.isWindowMode);
     videoDetailController.plPlayerController.screenRatio = maxHeight / maxWidth;
 
@@ -729,7 +733,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       // triggerFullScreen 内），否则状态栏不会被隐藏。上游通过设备方向监听器
       // 同样无条件自动进全屏（与播放器是否初始化无关），这里行为保持一致。
       final player = videoDetailController.plPlayerController;
-      final aspectIsOrientation = !OS.isHarmony ||
+      final aspectIsOrientation =
+          !OS.isHarmony ||
           (!HarmonyChannel.isMiniWindow && !HarmonyChannel.isWindowMode);
       if (!isPortrait &&
           !isFullScreen &&

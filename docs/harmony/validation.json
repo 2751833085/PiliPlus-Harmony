@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-21",
+  "hap": "build/harmony/release/default/outputs/default/entry-default-unsigned.hap",
+  "sha256": "542eab5a8f37f5e9a754e7fd3bac09daa165903b6944b6687bbb26f1a12e4284",
+  "bytes": 32828474,
+  "signed": false,
+  "source_tree_sha256": "a7b2aaaa4dccf0f37f301a116c2c59794dec2e2cb5161857a905ed99adc42ea8",
+  "native_library_sha256": "38664cf7dc7af1b3093a731c94f6e48f9c1092c97a774656e6c2b59cfe0df99e",
+  "build": "release ARM64 / SDK 26.0.0.105",
+  "regression_tests": {
+    "passed": 7,
+    "scope": [
+      "navigation breakpoint",
+      "folding state and scroll preservation",
+      "moving photo save/cancel/error bridge",
+      "outlined subtitle rendering and updates"
+    ],
+    "limitations": "Mock channels and synthetic window sizes; not device playback tests."
+  },
+  "dart_analyze": {
+    "errors": 0,
+    "warnings": 6,
+    "infos": 64
+  },
+  "device": {
+    "model": "Huawei Mate XTS (GRL-AL20)",
+    "version": "7.0.0.107(SP8C00E105R5P4)",
+    "api": 26,
+    "evidence": "HDC param get",
+    "installed": false
+  },
+  "package_checks": [
+    "ZIP CRC",
+    "ArkTS bytecode",
+    "Flutter AOT",
+    "ARM64 libmpv hash",
+    "Flutter bundled native license notices"
+  ],
+  "pending": [
+    "Huawei developer account sign-in and debug signing profile",
+    "Install and launch on Mate XTS",
+    "Physical fold/unfold and playback verification",
+    "147-item feature acceptance and regression on phone/tablet"
+  ]
+}

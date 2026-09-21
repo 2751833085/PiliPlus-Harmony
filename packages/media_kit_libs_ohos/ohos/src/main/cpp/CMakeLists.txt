@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.15)
+project(mediakit_libs_ohos)
+# The local library restores FFmpeg filters and AV3A omitted by the old archive.
+# Rebuild from pinned sources with tool/rebuild_harmony_mpv.py.
+set(LIBMPV "${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/arm64-v8a/libmpv.so")
+if(NOT EXISTS "${LIBMPV}")
+  message(FATAL_ERROR "Missing libmpv.so; run tool/rebuild_harmony_mpv.py")
+endif()
+file(SHA256 "${LIBMPV}" ACTUAL_SHA)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/libmpv.sha256" EXPECTED_SHA)
+string(STRIP "${EXPECTED_SHA}" EXPECTED_SHA)
+if(NOT ACTUAL_SHA STREQUAL EXPECTED_SHA)
+  message(FATAL_ERROR "libmpv.so does not match the recorded build hash")
+endif()
+link_libraries(DART_SHARED_LIB "${LIBMPV}")

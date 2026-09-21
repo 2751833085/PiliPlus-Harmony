@@ -1,0 +1,31 @@
+diff --git a/scripts/ffmpeg.sh b/scripts/ffmpeg.sh
+index 35d298c..28c8f37 100755
+--- a/scripts/ffmpeg.sh
++++ b/scripts/ffmpeg.sh
+@@ -71,14 +71,14 @@ cd .build
+   --disable-vulkan \
+   \
+   --enable-decoder=h264,h264_oh,hevc,hevc_oh,libdav1d,mjpeg,png \
+-  --enable-decoder=aac,aac_latm,mp3,opus,ac3,eac3,flac \
++  --enable-decoder=aac,aac_latm,mp3,opus,ac3,eac3,flac,av3a_oh \
+   --enable-decoder=pcm_s16le,pcm_s16be,pcm_s32le,pcm_f32le,pcm_u8 \
+   --enable-decoder=ass,ssa,subrip,mov_text,webvtt,text \
+   \
+   --enable-demuxer=mov,flv,mpegts,mp3,aac,hls,dash \
+   --enable-demuxer=ass,ssa,srt,webvtt \
+   \
+-  --enable-parser=h264,hevc,av1,aac,mpegaudio,ac3,opus,mjpeg,vp8 \
++  --enable-parser=h264,hevc,av1,aac,mpegaudio,ac3,opus,mjpeg,vp8,av3a \
+   \
+   --enable-bsf=h264_mp4toannexb,hevc_mp4toannexb,aac_adtstoasc,extract_extradata \
+   \
+@@ -88,7 +88,8 @@ cd .build
+   --enable-muxer=png,mjpeg,webp \
+   \
+   --enable-filter=aresample,aformat,format,scale,anull,atrim,asetpts,setpts,volume,trim \
+-  --enable-filter=abuffer,abuffersink,buffersink,buffer
++  --enable-filter=abuffer,abuffersink,buffersink,buffer \
++  --enable-filters
+ make -j$CORES
+ make install
+ 

@@ -3,18 +3,20 @@ import 'dart:io';
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/style.dart';
+import 'package:PiliPlus/common/widgets/adaptive_navigation_body.dart';
 import 'package:PiliPlus/common/widgets/floating_navigation_bar.dart';
 import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
 import 'package:PiliPlus/common/widgets/flutter/tabs.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
+import 'package:PiliPlus/harmony_adapt/window_layout.dart';
 import 'package:PiliPlus/main.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
 import 'package:PiliPlus/pages/home/view.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
-import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
+
 import 'package:PiliPlus/utils/android/android_helper.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
@@ -77,7 +79,9 @@ class _MainAppState extends PopScopeState<MainApp>
     });
     // 仅启用沉浸光感顶栏（未启用底栏）时，也要补发主题色：
     // 顶栏的分类高亮、图标颜色均读取 tabSelectedColor。
-    _nativeTopBarWorker = ever(_mainController.useNativeTopBar, (useNativeTopBar) {
+    _nativeTopBarWorker = ever(_mainController.useNativeTopBar, (
+      useNativeTopBar,
+    ) {
       if (!mounted || !useNativeTopBar) return;
       // 同样补发首帧时因 useNativeTopBar 未就绪而跳过的顶栏显隐同步：
       // 横屏（侧栏布局）或已有子页面覆盖主页时，原生顶栏不应显示
@@ -97,8 +101,8 @@ class _MainAppState extends PopScopeState<MainApp>
         trayManager.addListener(this);
         _handleTray();
       }
-    } else {
-      // FlutterSmartDialog throws
+    }
+    if (!Platform.isMacOS) {
       PiliScheme.init();
     }
   }
@@ -118,7 +122,12 @@ class _MainAppState extends PopScopeState<MainApp>
       }
     }
     if (!_mainController.useSideBar) {
-      _mainController.useBottomNav = MediaQuery.sizeOf(context).isPortrait;
+      final size = MediaQuery.sizeOf(context);
+      _mainController.useBottomNav = OS.isHarmony
+          ? HarmonyWindowLayout.useBottomNavigation(
+              size.width - _padding.horizontal,
+            )
+          : size.isPortrait;
     }
     // 横竖屏切换时同步原生 HDS 沉浸底栏/顶栏显隐
     // 由 ShellBarsObserver 统一管理，避免与路由观察者冲突。
@@ -566,23 +575,16 @@ class _MainAppState extends PopScopeState<MainApp>
       );
     }
 
-    Widget? bottomNav;
-    if (_mainController.useBottomNav) {
-      bottomNav = _bottomNav;
-      child = Row(children: [Expanded(child: child)]);
-    } else {
-      child = Row(
-        children: [
-          _sideBar(theme),
-          VerticalDivider(
-            width: 1,
-            endIndent: _padding.bottom,
-            color: theme.colorScheme.outline.withValues(alpha: 0.06),
-          ),
-          Expanded(child: child),
-        ],
-      );
-    }
+    final bottomNav = _mainController.useBottomNav ? _bottomNav : null;
+    child = AdaptiveNavigationBody(
+      navigation: _mainController.useBottomNav ? null : _sideBar(theme),
+      divider: VerticalDivider(
+        width: 1,
+        endIndent: _padding.bottom,
+        color: theme.colorScheme.outline.withValues(alpha: 0.06),
+      ),
+      child: child,
+    );
 
     // Flutter 在鸿蒙平台上的状态栏颜色依赖于AppBar设置的backgroundColor进行取色，因此需要写这个神人代码保证取色能力正常
     final backgroundColor =

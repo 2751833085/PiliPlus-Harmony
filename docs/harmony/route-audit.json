@@ -1,0 +1,7 @@
+{
+  "upstream_route_count": 70,
+  "harmony_route_count": 70,
+  "missing_named_routes": [],
+  "extra_named_routes": [],
+  "note": "Static named-route inventory only; does not prove page behavior or cover dynamically pushed pages."
+}

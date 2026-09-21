@@ -156,6 +156,7 @@ abstract final class SettingBoxKey {
       enableTapDm = 'enableTapDm',
       setSystemBrightness = 'setSystemBrightness',
       downloadPath = 'downloadPath',
+      imageSavePath = 'imageSavePath',
       followOrderType = 'followOrderType',
       enableImgMenu = 'enableImgMenu',
       showDynDispute = 'showDynDispute',
@@ -163,8 +164,9 @@ abstract final class SettingBoxKey {
       floatingNavBar = 'floatingNavBar',
       removeSafeArea = 'removeSafeArea',
       angleDegrees = 'angleDegrees',
-      // 全屏方向旧默认值（平板 + 横屏适配 → 不改变当前方向）的一次性迁移标记
-      fullScreenModeMigrated = 'fullScreenModeMigrated',
+          // 全屏方向旧默认值（平板 + 横屏适配 → 不改变当前方向）的一次性迁移标记
+          fullScreenModeMigrated =
+          'fullScreenModeMigrated',
       liveStream = 'liveStream',
       enableDocProvider = 'enableDocProvider',
       enableEmoteTooltip = 'enableEmoteTooltip';

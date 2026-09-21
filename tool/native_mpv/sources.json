@@ -1,0 +1,101 @@
+{
+  "builder": {
+    "url": "https://github.com/cnoim/libmpv-ohos-build.git",
+    "commit": "c8d5731ba5ba7623081795db52b2578d975cb3e7"
+  },
+  "media_kit_plugin": {
+    "url": "https://github.com/cnoim/media-kit.git",
+    "commit": "762fdc6368fb95ad61ab2d99a9cf70a59a00c2e3"
+  },
+  "dependencies": {
+    "dav1d": {
+      "url": "https://code.videolan.org/videolan/dav1d.git",
+      "commit": "42b2b24fb8819f1ed3643aa9cf2a62f03868e3aa"
+    },
+    "dovi_tools": {
+      "url": "https://github.com/quietvoid/dovi_tool.git",
+      "commit": "b25558062e4a56973482ec70133bd7b891320e48"
+    },
+    "ffmpeg": {
+      "url": "https://github.com/cnoim/FFmpeg.git",
+      "commit": "12d3b88527659b03c6c72d33f58086ddfa21ae24"
+    },
+    "fontconfig": {
+      "url": "https://gitlab.freedesktop.org/fontconfig/fontconfig.git",
+      "commit": "6d0a98982ec351c165c9224c8b7dbdfca3010e47"
+    },
+    "freetype": {
+      "url": "https://gitlab.freedesktop.org/freetype/freetype.git",
+      "commit": "42608f77f20749dd6ddc9e0536788eaad70ea4b5"
+    },
+    "fribidi": {
+      "url": "https://github.com/fribidi/fribidi.git",
+      "commit": "68162babff4f39c4e2dc164a5e825af93bda9983"
+    },
+    "harfbuzz": {
+      "url": "https://github.com/harfbuzz/harfbuzz.git",
+      "commit": "22f77d48abc35c1e053d02f1ada0d8f1ce1b8423"
+    },
+    "lcms": {
+      "url": "https://github.com/mm2/Little-CMS.git",
+      "commit": "5176347635785e53ee5cee92328f76fda766ecc6"
+    },
+    "libass": {
+      "url": "https://github.com/libass/libass.git",
+      "commit": "bbb3c7f1570a4a021e52683f3fbdf74fe492ae84"
+    },
+    "libplacebo": {
+      "url": "https://code.videolan.org/videolan/libplacebo.git",
+      "commit": "cee9b076f2c63104ccfd497fa79c39a867293ec4"
+    },
+    "libxml2": {
+      "url": "https://gitlab.gnome.org/GNOME/libxml2.git",
+      "commit": "b7fa62cbe8ef0df5869e000d5b690bdedd07f33e"
+    },
+    "mpv": {
+      "url": "https://github.com/cnoim/mpv.git",
+      "commit": "b1b1bc3aa8503d529cbae4e4dfa7d27e7d7c5333"
+    },
+    "shaderc": {
+      "url": "https://github.com/google/shaderc.git",
+      "commit": "73743588fe9c39f2f1c780a087d94afac691a189"
+    }
+  },
+  "archives": {
+    "mbedtls": {
+      "url": "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.4/mbedtls-3.6.4.tar.bz2",
+      "sha256": "ec35b18a6c593cf98c3e30db8b98ff93e8940a8c4e690e66b41dfc011d678110"
+    },
+    "libwebp": {
+      "url": "https://github.com/webmproject/libwebp/archive/refs/tags/v1.4.0.tar.gz",
+      "sha256": "12af50c45530f0a292d39a88d952637e43fb2d4ab1883c44ae729840f7273381"
+    },
+    "lua": {
+      "url": "https://www.lua.org/ftp/lua-5.2.4.tar.gz",
+      "sha256": "b9e2e4aad6789b3b63a056d442f7b39f0ecfca3ae0f1fc0ae4e9614401b69f4b"
+    }
+  },
+  "build": {
+    "host": "macOS arm64",
+    "sdk": "26.0.0.105",
+    "compiler": "BiSheng bundled in SDK 26",
+    "host_sdk": "MacOSX14.4.sdk",
+    "rust": "1.98.1",
+    "cargo_c": "0.10.25+cargo-0.99.0",
+    "meson": "1.12.0",
+    "ninja": "1.13.2",
+    "filters": [
+      "loudnorm",
+      "dynaudnorm",
+      "all available non-GPL FFmpeg filters"
+    ],
+    "av3a_decoder": true,
+    "lto": false,
+    "strip": "llvm-strip --strip-all"
+  },
+  "library": {
+    "sha256": "38664cf7dc7af1b3093a731c94f6e48f9c1092c97a774656e6c2b59cfe0df99e",
+    "bytes": 28514840,
+    "unstripped_sha256": "4c935e9fa9c83412ac61ce322860ba3edf65043091210ed363bba372eed9f6f9"
+  }
+}

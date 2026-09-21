@@ -1,0 +1,15 @@
+{
+  "flutter": {
+    "source": "https://gitcode.com/CPF-Flutter/flutter_flutter.git",
+    "tag": "3.44.9+ohos-0.0.1-canary1",
+    "commit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6"
+  },
+  "harmony_sdk": {
+    "release": "26.0.0.821",
+    "sdk_version": "26.0.0.105",
+    "api": 26,
+    "source": "https://github.com/ErBWs/ohos-sdk/releases/tag/26.0.0.821",
+    "archive_sha256": "d53802c52d3d0a6a0836333c9e8f2bb73d9f6753d1658185539e2659c46df1ad",
+    "provenance": "Same distribution and version as the community HarmonyOS branch CI."
+  }
+}

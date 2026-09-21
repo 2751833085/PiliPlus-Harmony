@@ -1,0 +1,42 @@
+e4185e5b1 refa update PlaybackState
+682ada6c4 fix geetest patch
+48f075758 refa emote tooltip
+92f53a997 opt sc item
+ee148aa64 Partial Revert "feat: upgrade media-kit (#2961)"
+6755d0942 show js error (#3027)
+d1d5c323c tweaks (#3025)
+a85ae21c0 opt linux webview (#3016)
+5d02a625d fix close image save dialog
+c61777333 add search btn by default for SelectionText
+89fe1755f opt search esports title
+fbc22f530 fix geetest patch
+2eeb745b7 embedded linux webview (#3014)
+7afc32cf8 feat: sc to image
+2408a7f4d opt search history item
+c876e5d8b update popular api headers
+92c455be7 support custom color seed
+1cf440ed9 fix update PlaybackState
+c8cee1bc3 opt default hwdec
+41fe78223 do not pass part title
+94e413ac0 opt update PlaybackState
+df86de3ec fix #3005
+20b1cb5c0 refresh search suggest if needed
+41ccd5801 fix #2761
+0a6fe28a1 Revert "fix #2761"
+9d3e8b626 upgrade deps
+47230b61c fix #2761
+faf49b355 fix #2971
+08a9f5509 opt parse app rcmd
+2b0ffa12f tweaks
+b0e7e4eb1 opt: save all images (#2983)
+6fd7987cf fix(desktop): lower the minimum size of pip window (#2982)
+00cb572cc feat: upgrade media-kit (#2961)
+455254ee6 fix: mouse input stuck after middle-click fullscreen (#2917) (#2976)
+b6908e515 save all images support on desktop
+7399f3507 update app rcmd params
+a3f9c90d3 feat(windows): support video URL activation (#2673)
+9adad75dd linux deeplink (#2931)
+f1a41ed0f fix #2963
+e9008c8eb fix #2966
+8b6abc07d fix search esports team score
+11e02b866 tweaks (#2962)

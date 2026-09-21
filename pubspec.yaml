@@ -37,7 +37,7 @@ dependencies:
     sdk: flutter
 
   # Flutter 3.47 起 Material/Cupertino 被拆成独立 pub 包，上上游已全量迁移。
-  # 鸿蒙 fork 仍在 3.41，这里用仓库内的本地 shim 把这两个包名映射回 SDK 内置
+  # 鸿蒙 fork 使用 3.44.9，这里用仓库内的本地 shim 把这两个包名映射回 SDK 内置
   # 实现，从而可以原样接受上游的 import 写法（详见 packages/*/pubspec.yaml）。
   # 鸿蒙升到 3.47 后改回 `^1.0.0` 并删掉 packages/ 下两个目录即可。
   material_ui:
@@ -292,6 +292,32 @@ dependencies:
   package_info_plus: ">=4.0.0 <11.0.0"
 
 dependency_overrides:
+  # Same locked commits at the canonical repository; avoid cloning the old alias again.
+  image_picker_ohos:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/image_picker/image_picker_ohos
+      ref: 57dbefb489a3db11a95295f8eb77b7de6761f67d
+  path_provider_ohos:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/path_provider/path_provider_ohos
+      ref: fd410050c6842717ee1b851ca7640c294de9568c
+  pigeon:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/pigeon
+      ref: fadef928861f00e88e5f6b802a2b0145eb54349e
+  shared_preferences_ohos:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/shared_preferences/shared_preferences_ohos
+      ref: 19bd50ff6d5eaa96f18c63796c51e1b4e78a7480
+  video_player_ohos:
+    git:
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
+      path: packages/video_player/video_player_ohos
+      ref: fadef928861f00e88e5f6b802a2b0145eb54349e
   # 强制第三方包里的 material_ui/cupertino_ui 也走本地 shim
   material_ui:
     path: packages/material_ui
@@ -314,9 +340,9 @@ dependency_overrides:
       ref: "br_v6.1.5_ohos_dev"
   video_player: # 视频播放器.鸿蒙适配
     git:
-      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      url: https://gitcode.com/CPF-Flutter/flutter_packages.git
       path: packages/video_player/video_player
-      ref: br_video_player-v2.11.1_ohos
+      ref: fadef928861f00e88e5f6b802a2b0145eb54349e
   url_launcher: # 打开链接.鸿蒙适配
     git:
       url: https://gitcode.com/hellozeronick/url_launcher.git
@@ -324,8 +350,9 @@ dependency_overrides:
       ref: main
   path_provider: # 应用可用路径.鸿蒙适配
     git:
-      url: "https://gitcode.com/openharmony-tpc/flutter_packages.git"
+      url: "https://gitcode.com/CPF-Flutter/flutter_packages.git"
       path: "packages/path_provider/path_provider"
+      ref: fd410050c6842717ee1b851ca7640c294de9568c
   share_plus: # 分享.鸿蒙适配
     git:
       url: https://gitcode.com/CPF-Flutter/flutter_plus_plugins.git
@@ -355,10 +382,7 @@ dependency_overrides:
       ref: feat-ohos
       path: ./libs/macos/media_kit_libs_macos_video
   media_kit_libs_ohos:
-    git:
-      url: https://github.com/cnoim/media-kit.git
-      ref: feat-ohos
-      path: ./libs/ohos/media_kit_libs_ohos
+    path: packages/media_kit_libs_ohos
   # media_kit_libs_android_video:
   #   git:
   #     url: https://github.com/cnoim/media-kit.git

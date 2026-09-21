@@ -19,6 +19,7 @@ import {
 } from "@ohos/flutter_ohos";
 
 import display from "@ohos.display";
+import { MovingPhotoSave } from './MovingPhotoSave';
 
 const colorModeMap: Record<string, ConfigurationConstant.ColorMode> = {
   "light": ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT,
@@ -56,6 +57,7 @@ export default class HarmonyChannel implements FlutterPlugin {
   }
 
   onDetachedFromEngine(binding: FlutterPluginBinding): void {
+    MovingPhotoSave.detach();
     this.channel?.setMethodCallHandler(null);
     this.stopCutoutListener();
     this.stopDecorListener();
@@ -392,6 +394,12 @@ export default class HarmonyChannel implements FlutterPlugin {
 
   async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     switch (call.method) {
+      case "saveMovingPhoto": {
+        const imagePath: string = call.argument("imagePath") ?? '';
+        const videoPath: string = call.argument("videoPath") ?? '';
+        await MovingPhotoSave.request(imagePath, videoPath, result);
+        break;
+      }
       case "setFullScreenBars": {
         const fullscreen: boolean = call.argument("fullscreen") ?? false;
         await this.setFullScreenBars(fullscreen);
