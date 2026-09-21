@@ -1,6 +1,11 @@
 // ignore_for_file: constant_identifier_names
 
 abstract final class SettingBoxKey {
+  static const String harmonyFoldOrientation = 'harmonyFoldOrientation';
+  static const String harmonyUI = 'harmonyUI',
+      harmonyKeepDock = 'harmonyKeepDock',
+      harmonyHandedness = 'harmonyHandedness';
+
   static const String enableLGBar = 'enableLGBar',
       enableStatusBarTapToTop = 'enableStatusBarTapToTop',
       showActualVolume = 'showActualVolume',

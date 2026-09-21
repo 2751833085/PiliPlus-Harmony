@@ -604,6 +604,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       _cancelAutoExitFs();
       return;
     }
+    if (this.isFullScreen.value &&
+        (followExpandedFold ||
+            (OS.isHarmony &&
+                Pref.harmonyFoldOrientation &&
+                HarmonyChannel.foldTransitionActive))) {
+      _cancelAutoExitFs();
+      return; // The system knows the active panels; phone sensor axes do not.
+    }
     if (Platform.isIOS && !visible) return;
     final isFullScreen = this.isFullScreen.value;
     if (checkIsAutoRotate &&
@@ -649,7 +657,24 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   // 添加一个私有构造函数
+  bool get followExpandedFold =>
+      OS.isHarmony &&
+      Pref.harmonyFoldOrientation &&
+      HarmonyChannel.foldExpanded.value &&
+      !HarmonyChannel.isWindowMode;
+
+  void _onFoldPostureChanged() {
+    if (!isFullScreen.value ||
+        !Pref.harmonyFoldOrientation ||
+        HarmonyChannel.isWindowMode)
+      return;
+    _cancelAutoExitFs();
+    changeOrientation(isVertical: isVertical);
+  }
+
   PlPlayerController._() {
+    if (OS.isHarmony)
+      HarmonyChannel.foldExpanded.addListener(_onFoldPostureChanged);
     if (PlatformUtils.isMobile) {
       _orientationListener = NativeDeviceOrientationCommunicator()
           .onOrientationChanged(
@@ -1789,6 +1814,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     required bool isVertical,
     DeviceOrientation? orientation,
   }) {
+    if (followExpandedFold) {
+      // Harmony window.Orientation.AUTO_ROTATION. Clears the old single-panel
+      // lock and lets the system resolve orientation across both fold axes.
+      return harmonyFollowFold();
+    }
     if (orientation == null && (mode == .none || mode == .gravity)) {
       return null;
     }
@@ -1845,14 +1875,15 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             // 手动进全屏的目标方向：横屏时等视口真正变横屏再置全屏布局，
             // 避免全屏先在竖屏/中间尺寸渲染，导致比例错误和动画跳变。
             final targetLandscape =
-                orientation != null ||
-                switch (mode) {
-                  .vertical => false,
-                  .horizontal => true,
-                  .auto => !isVertical,
-                  .ratio => !isVertical && screenRatio >= kScreenRatio,
-                  _ => false,
-                };
+                !followExpandedFold &&
+                (orientation != null ||
+                    switch (mode) {
+                      .vertical => false,
+                      .horizontal => true,
+                      .auto => !isVertical,
+                      .ratio => !isVertical && screenRatio >= kScreenRatio,
+                      _ => false,
+                    });
             if (targetLandscape) {
               await _waitForLandscapeViewport();
             }
@@ -2043,6 +2074,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       showSystemBar();
     }
     danmakuController = null;
+    if (OS.isHarmony)
+      HarmonyChannel.foldExpanded.removeListener(_onFoldPostureChanged);
     _stopOrientationListener();
     _disableAutoEnterPip();
     setPlayCallBack(null);

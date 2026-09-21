@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
 import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -97,11 +99,16 @@ class _WhisperLinkSettingPageState extends State<WhisperLinkSettingPage> {
       title: const Text('加入黑名单', style: TextStyle(fontSize: 14)),
       trailing: Transform.scale(
         alignment: Alignment.centerRight,
-        scale: 0.8,
-        child: Switch(
-          value: isBlocked,
-          onChanged: (value) => _controller.setBlock(isBlocked),
-        ),
+        scale: HarmonyStyle.enabled(context) ? 1 : 0.8,
+        child: HarmonyStyle.enabled(context)
+            ? HarmonySwitch(
+                value: isBlocked,
+                onChanged: (value) => _controller.setBlock(isBlocked),
+              )
+            : Switch(
+                value: isBlocked,
+                onChanged: (value) => _controller.setBlock(isBlocked),
+              ),
       ),
     );
   }
@@ -198,12 +205,18 @@ class _WhisperLinkSettingPageState extends State<WhisperLinkSettingPage> {
                   ),
                   trailing: Transform.scale(
                     alignment: Alignment.centerRight,
-                    scale: 0.8,
-                    child: Switch(
-                      value: response.pushSetting == 0,
-                      onChanged: (value) =>
-                          _controller.setPush(response.pushSetting == 0),
-                    ),
+                    scale: HarmonyStyle.enabled(context) ? 1 : 0.8,
+                    child: HarmonyStyle.enabled(context)
+                        ? HarmonySwitch(
+                            value: response.pushSetting == 0,
+                            onChanged: (value) =>
+                                _controller.setPush(response.pushSetting == 0),
+                          )
+                        : Switch(
+                            value: response.pushSetting == 0,
+                            onChanged: (value) =>
+                                _controller.setPush(response.pushSetting == 0),
+                          ),
                   ),
                 ),
               divider2,
@@ -214,11 +227,16 @@ class _WhisperLinkSettingPageState extends State<WhisperLinkSettingPage> {
                   title: const Text('置顶聊天', style: TextStyle(fontSize: 14)),
                   trailing: Transform.scale(
                     alignment: Alignment.centerRight,
-                    scale: 0.8,
-                    child: Switch(
-                      value: _controller.isPinned.value,
-                      onChanged: (value) => _controller.setPin(),
-                    ),
+                    scale: HarmonyStyle.enabled(context) ? 1 : 0.8,
+                    child: HarmonyStyle.enabled(context)
+                        ? HarmonySwitch(
+                            value: _controller.isPinned.value,
+                            onChanged: (value) => _controller.setPin(),
+                          )
+                        : Switch(
+                            value: _controller.isPinned.value,
+                            onChanged: (value) => _controller.setPin(),
+                          ),
                   ),
                 ),
               ),
@@ -244,12 +262,18 @@ class _WhisperLinkSettingPageState extends State<WhisperLinkSettingPage> {
                 title: const Text('消息免打扰', style: TextStyle(fontSize: 14)),
                 trailing: Transform.scale(
                   alignment: Alignment.centerRight,
-                  scale: 0.8,
-                  child: Switch(
-                    value: response.first.setting == 1,
-                    onChanged: (value) =>
-                        _controller.setMute(response.first.setting == 1),
-                  ),
+                  scale: HarmonyStyle.enabled(context) ? 1 : 0.8,
+                  child: HarmonyStyle.enabled(context)
+                      ? HarmonySwitch(
+                          value: response.first.setting == 1,
+                          onChanged: (value) =>
+                              _controller.setMute(response.first.setting == 1),
+                        )
+                      : Switch(
+                          value: response.first.setting == 1,
+                          onChanged: (value) =>
+                              _controller.setMute(response.first.setting == 1),
+                        ),
                 ),
               )
             : const SizedBox.shrink(),

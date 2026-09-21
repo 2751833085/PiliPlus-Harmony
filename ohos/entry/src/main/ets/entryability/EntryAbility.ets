@@ -53,6 +53,9 @@ export default class EntryAbility extends FlutterAbility {
 
   /// 监听 Index.ets eventHub 的底栏切换事件，转发给 Flutter
   private initShellEventListeners(): void {
+    this.context.eventHub.on('EVENT_DOCK_METRICS', (bottom: number) => {
+      this.flutterChannel?.invokeMethod('onDockMetrics', { bottom: bottom });
+    });
     this.context.eventHub.on(EVENT_TAB_SWITCH, (index: number) => {
       this.flutterChannel?.invokeMethod('showTab', { index: index });
     });
@@ -90,6 +93,16 @@ export default class EntryAbility extends FlutterAbility {
     const initialFontWeightScale = this.context.config.fontWeightScale;
     console.info(`EntryAbility: initial fontWeightScale is ${initialFontWeightScale}`);
     this.flutterChannel?.invokeMethod("onFontWeightScaleChange", { fontWeightScale: initialFontWeightScale });
+  }
+
+  onForeground(): void {
+    super.onForeground();
+    this.harmonyChannel.setForeground(true);
+  }
+
+  onBackground(): void {
+    this.harmonyChannel.setForeground(false);
+    super.onBackground();
   }
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
@@ -292,6 +305,8 @@ export default class EntryAbility extends FlutterAbility {
   }
 
   onDestroy(): void {
+    this.harmonyChannel.setForeground(false);
+    this.context.eventHub.off('EVENT_DOCK_METRICS');
     if (this.envChangeListener !== null) {
       this.context.getApplicationContext().off('environment', this.envChangeListener);
     }

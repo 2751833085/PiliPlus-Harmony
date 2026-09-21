@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/cover_hero.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
@@ -41,35 +42,40 @@ class PgcCardVTimeline extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AspectRatio(
+            CoverHero(
+              tag: heroTag,
+              cover: item.cover,
               aspectRatio: 0.75,
-              child: LayoutBuilder(
-                builder: (context, boxConstraints) {
-                  final double maxWidth = boxConstraints.maxWidth;
-                  final double maxHeight = boxConstraints.maxHeight;
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      NetworkImgLayer(
-                        src: item.cover,
-                        width: maxWidth,
-                        height: maxHeight,
-                      ),
-                      if (item.follow == 1)
-                        const PBadge(
-                          text: '已追番',
-                          right: 6,
-                          top: 6,
+              child: AspectRatio(
+                aspectRatio: 0.75,
+                child: LayoutBuilder(
+                  builder: (context, boxConstraints) {
+                    final double maxWidth = boxConstraints.maxWidth;
+                    final double maxHeight = boxConstraints.maxHeight;
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        NetworkImgLayer(
+                          src: item.cover,
+                          width: maxWidth,
+                          height: maxHeight,
                         ),
-                      PBadge(
-                        text: '${item.pubTime}',
-                        left: 6,
-                        bottom: 6,
-                        type: PBadgeType.gray,
-                      ),
-                    ],
-                  );
-                },
+                        if (item.follow == 1)
+                          const PBadge(
+                            text: '已追番',
+                            right: 6,
+                            top: 6,
+                          ),
+                        PBadge(
+                          text: '${item.pubTime}',
+                          left: 6,
+                          bottom: 6,
+                          type: PBadgeType.gray,
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
             content(context),
@@ -77,12 +83,6 @@ class PgcCardVTimeline extends StatelessWidget {
         ),
       ),
     );
-    if (heroTag != null) {
-      card = Hero(
-        tag: heroTag,
-        child: RepaintBoundary(child: card),
-      );
-    }
     return card;
   }
 

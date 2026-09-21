@@ -767,6 +767,18 @@ abstract final class Pref {
   static bool get enableLGBar =>
       _setting.get(SettingBoxKey.enableLGBar, defaultValue: false);
 
+  static bool get harmonyFoldOrientation =>
+      _setting.get(SettingBoxKey.harmonyFoldOrientation, defaultValue: true);
+  static bool get harmonyUI =>
+      OS.isHarmony &&
+      _setting.get(SettingBoxKey.harmonyUI, defaultValue: false);
+
+  static bool get harmonyKeepDock =>
+      _setting.get(SettingBoxKey.harmonyKeepDock, defaultValue: true);
+
+  static bool get harmonyHandedness =>
+      _setting.get(SettingBoxKey.harmonyHandedness, defaultValue: false);
+
   static bool get enableHdsBar =>
       _setting.get(SettingBoxKey.enableHdsBar, defaultValue: false);
 

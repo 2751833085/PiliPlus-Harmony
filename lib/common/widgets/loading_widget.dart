@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 import 'package:PiliPlus/common/widgets/custom_arc.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -29,12 +31,17 @@ class LoadingWidget extends StatelessWidget {
         children: [
           //loading animation
           Obx(
-            () => Arc(
-              size: 40,
-              color: onSurfaceVariant,
-              strokeWidth: 3,
-              progress: progress.value,
-            ),
+            () => HarmonyStyle.enabled(context)
+                ? HarmonyLoadingIndicator(
+                    color: onSurfaceVariant,
+                    value: progress.value,
+                  )
+                : Arc(
+                    size: 40,
+                    color: onSurfaceVariant,
+                    strokeWidth: 3,
+                    progress: progress.value,
+                  ),
           ),
           //msg
           Text(msg, style: TextStyle(color: onSurfaceVariant)),

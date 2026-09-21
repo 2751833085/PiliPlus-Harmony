@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
 // 定时关闭服务
 
 import 'dart:async' show Timer;
@@ -321,11 +323,16 @@ class ShutdownTimerService {
                         title: const Text('额外等待视频播放完毕', style: titleStyle),
                         trailing: Transform.scale(
                           alignment: .centerRight,
-                          scale: 0.8,
-                          child: Switch(
-                            value: _waitUntilCompleted,
-                            onChanged: onChanged,
-                          ),
+                          scale: HarmonyStyle.enabled(context) ? 1 : 0.8,
+                          child: HarmonyStyle.enabled(context)
+                              ? HarmonySwitch(
+                                  value: _waitUntilCompleted,
+                                  onChanged: onChanged,
+                                )
+                              : Switch(
+                                  value: _waitUntilCompleted,
+                                  onChanged: onChanged,
+                                ),
                         ),
                       );
                     },

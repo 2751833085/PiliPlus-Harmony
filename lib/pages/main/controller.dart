@@ -176,6 +176,12 @@ class MainController extends GetxController
   }
 
   /// 鸿蒙：查询 API 版本，结合用户偏好分别计算底栏/顶栏开关，通知 ArkTS
+  final harmonyAppearanceRevision = 0.obs;
+  Future<void> refreshHarmonyAppearance() async {
+    await _initHdsBar();
+    harmonyAppearanceRevision.value++;
+  }
+
   Future<void> _initHdsBar() async {
     if (!OS.isHarmony) {
       useNativeTabs.value = false;
@@ -186,17 +192,23 @@ class MainController extends GetxController
         (await DeviceInfoPlugin().ohosInfo).sdkApiVersion ?? 0;
     // 底栏/顶栏均自 API 23（鸿蒙 6.1）起可用：ArkTS 侧 API 26+ 走 Navigation
     // 标题栏 + ArkUI systemMaterial，API 23~25 走 HdsNavigation 标题栏材质
-    final useHdsBar = Pref.enableHdsBar && sdkApiVersion > 22;
-    final useHdsTopBar = Pref.enableHdsTopBar && sdkApiVersion > 22;
+    final useHdsBar =
+        (Pref.harmonyUI || Pref.enableHdsBar) && sdkApiVersion > 22;
+    final useHdsTopBar =
+        (Pref.harmonyUI || Pref.enableHdsTopBar) && sdkApiVersion > 22;
     useNativeTabs.value = useHdsBar;
     useNativeTopBar.value = useHdsTopBar;
     _syncNativeTopBarActive();
-    HarmonyChannel.setShellBars(useNativeTabs: useHdsBar);
+    HarmonyChannel.setShellBars(
+      useNativeTabs: useHdsBar,
+      handedness: Pref.harmonyHandedness,
+    );
+    HarmonyChannel.setHandednessEnabled(Pref.harmonyHandedness);
     HarmonyChannel.setShellTopBar(useNativeTopBar: useHdsTopBar);
     // 同步 Navbar 页签数量与顺序到原生 HDS 底栏（与设置内 Navbar 编辑一致）
     if (useHdsBar) {
       HarmonyChannel.setNavBarConfig(navigationBars);
-      HarmonyChannel.changeTabIndex(Pref.defaultHomePage.index);
+      HarmonyChannel.changeTabIndex(selectedIndex.value);
       // 初始动态角标（数量与模式）同步到原生 HDS 底栏
       if (hasDyn) {
         HarmonyChannel.setDynamicBadge(
@@ -220,7 +232,9 @@ class MainController extends GetxController
       );
       // 初始头像（登录态）
       HarmonyChannel.setHomeFaceUrl(
-        accountService.isLogin.value ? '${accountService.face.value}@200w_200h_10q.webp' : '',
+        accountService.isLogin.value
+            ? '${accountService.face.value}@200w_200h_10q.webp'
+            : '',
       );
       // 初始搜索默认词（若已在异步拉取中就绪）
       if (homeController.enableSearchWord &&

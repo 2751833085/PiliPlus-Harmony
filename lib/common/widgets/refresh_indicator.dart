@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -26,6 +28,7 @@ class _RefreshIndicatorState extends State<RefreshIndicator_>
     _scaleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
+      value: widget.isRefreshing ? 1 : 0,
     );
     _progressController = AnimationController(
       vsync: this,
@@ -46,19 +49,32 @@ class _RefreshIndicatorState extends State<RefreshIndicator_>
     if (oldWidget.isRefreshing != widget.isRefreshing) {
       if (widget.isRefreshing) {
         _scaleController.value = 1;
-        _progressController
-          ..value = 0.0
-          ..repeat();
+        _syncProgress();
       } else {
-        _scaleController.reverse();
+        if (MediaQuery.disableAnimationsOf(context)) {
+          _scaleController.value = 0;
+        } else {
+          _scaleController.reverse();
+        }
         _progressController.stop();
       }
+    }
+  }
+
+  void _syncProgress() {
+    if (widget.isRefreshing &&
+        !HarmonyStyle.enabled(context) &&
+        !MediaQuery.disableAnimationsOf(context)) {
+      if (!_progressController.isAnimating) _progressController.repeat();
+    } else {
+      _progressController.stop();
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _syncProgress();
     final colorScheme = ColorScheme.of(context);
     _color = colorScheme.isDark
         ? colorScheme.onInverseSurface
@@ -78,10 +94,15 @@ class _RefreshIndicatorState extends State<RefreshIndicator_>
             color: _color,
             child: Padding(
               padding: const .all(6),
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                controller: _progressController,
-              ),
+              child: HarmonyStyle.enabled(context)
+                  ? TickerMode(
+                      enabled: widget.isRefreshing,
+                      child: const HarmonyLoadingIndicator(size: 28),
+                    )
+                  : CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      controller: _progressController,
+                    ),
             ),
           ),
         ),

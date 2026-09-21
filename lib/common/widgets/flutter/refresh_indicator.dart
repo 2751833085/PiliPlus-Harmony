@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -528,13 +530,17 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           ? null
           : AnimatedBuilder(
               animation: _positionController,
-              builder: (context, child) => RefreshProgressIndicator(
-                value: showIndeterminateIndicator ? null : _value.value,
-                valueColor: _valueColor,
-                backgroundColor: widget.backgroundColor,
-                strokeWidth: widget.strokeWidth,
-                elevation: widget.elevation,
-              ),
+              builder: (context, child) => HarmonyStyle.enabled(context)
+                  ? HarmonyLoadingIndicator(
+                      value: showIndeterminateIndicator ? null : _value.value,
+                    )
+                  : RefreshProgressIndicator(
+                      value: showIndeterminateIndicator ? null : _value.value,
+                      valueColor: _valueColor,
+                      backgroundColor: widget.backgroundColor,
+                      strokeWidth: widget.strokeWidth,
+                      elevation: widget.elevation,
+                    ),
             ),
     );
 

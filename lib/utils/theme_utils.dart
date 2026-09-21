@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
@@ -232,6 +233,7 @@ abstract final class ThemeUtils {
         },
       ),
     );
+    if (OS.isHarmony && Pref.harmonyUI) theme = HarmonyTheme.apply(theme);
     if (isDark && Pref.isPureBlackTheme) {
       return darkenTheme(theme);
     }

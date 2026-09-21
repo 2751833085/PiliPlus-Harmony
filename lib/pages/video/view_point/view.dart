@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -50,11 +52,16 @@ class _ViewPointsPageState extends State<ViewPointsPage>
           Obx(
             () => Transform.scale(
               alignment: Alignment.centerLeft,
-              scale: 0.8,
-              child: Switch(
-                value: videoDetailController.showVP.value,
-                onChanged: videoDetailController.showVP.call,
-              ),
+              scale: HarmonyStyle.enabled(context) ? 1 : 0.8,
+              child: HarmonyStyle.enabled(context)
+                  ? HarmonySwitch(
+                      value: videoDetailController.showVP.value,
+                      onChanged: videoDetailController.showVP.call,
+                    )
+                  : Switch(
+                      value: videoDetailController.showVP.value,
+                      onChanged: videoDetailController.showVP.call,
+                    ),
             ),
           ),
           iconButton(

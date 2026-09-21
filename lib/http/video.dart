@@ -791,23 +791,22 @@ abstract final class VideoHttp {
     required int cid,
     int? upMid,
   }) async {
+    if (upMid == null || upMid <= 0) {
+      final detail = await videoIntro(bvid: bvid);
+      upMid = detail.dataOrNull?.owner?.mid;
+      if (upMid == null || upMid <= 0) return const Error('未能获取视频作者信息，请重试');
+    }
     final params = await WbiSign.makSign({
       'bvid': bvid,
       'cid': cid,
-      'up_mid': ?upMid,
+      'up_mid': upMid,
     });
     final res = await Request().get(Api.aiConclusion, queryParameters: params);
     final int? code = res.data['code'];
-    if (code == 0) {
-      final int? dataCode = res.data['data']?['code'];
-      if (dataCode == 0) {
-        return Success(AiConclusionData.fromJson(res.data['data']));
-      } else {
-        return Error(null, code: dataCode);
-      }
-    } else {
-      return Error(res.data['message']);
-    }
+    if (code != 0) return Error(res.data['message'], code: code);
+    final data = res.data['data'];
+    if (data is! Map<String, dynamic>) return const Error('AI 总结返回内容异常，请重试');
+    return Success(AiConclusionData.fromJson(data));
   }
 
   static Future<LoadingState<PlayInfoData>> playInfo({

@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
 import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
@@ -121,11 +123,16 @@ class _SpaceSettingPageState extends State<SpaceSettingPage> {
           ),
           trailing: Transform.scale(
             alignment: Alignment.centerRight,
-            scale: 0.8,
-            child: Switch(
-              value: item.boolVal,
-              onChanged: onChanged,
-            ),
+            scale: HarmonyStyle.enabled(context) ? 1 : 0.8,
+            child: HarmonyStyle.enabled(context)
+                ? HarmonySwitch(
+                    value: item.boolVal,
+                    onChanged: onChanged,
+                  )
+                : Switch(
+                    value: item.boolVal,
+                    onChanged: onChanged,
+                  ),
           ),
         );
       },

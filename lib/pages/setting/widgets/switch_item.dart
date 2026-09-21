@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -87,18 +89,24 @@ class _SetSwitchItemState extends State<SetSwitchItem> {
               ? theme.colorScheme.outline
               : null,
         );
-    final subTitleStyle = theme.textTheme.labelMedium!.copyWith(
-      color: theme.colorScheme.outline,
-    );
+    final subTitleStyle =
+        (HarmonyStyle.enabled(context)
+                ? theme.textTheme.bodyMedium!
+                : theme.textTheme.labelMedium!)
+            .copyWith(
+              color: theme.colorScheme.outline,
+            );
 
-    final switchBtn = Transform.scale(
-      scale: 0.8,
-      alignment: .centerRight,
-      child: Switch(
-        value: val,
-        onChanged: switchChange,
-      ),
-    );
+    final switchBtn = HarmonyStyle.enabled(context)
+        ? HarmonySwitch(value: val, onChanged: switchChange)
+        : Transform.scale(
+            scale: 0.8,
+            alignment: .centerRight,
+            child: Switch(
+              value: val,
+              onChanged: switchChange,
+            ),
+          );
 
     Widget child(Widget? trailing) => ListTile(
       contentPadding: widget.contentPadding,

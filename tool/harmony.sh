@@ -136,5 +136,6 @@ for path in paths:
     }
     target.with_suffix('.build.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n')
     print(f'{target}\nSHA256 {digest}')
-print('Unsigned HAPs require development signing before installation on a phone.')
+if os.environ['HARMONY_SIGNED'] != '1':
+    print('Unsigned HAPs require development signing before installation on a phone.')
 PY

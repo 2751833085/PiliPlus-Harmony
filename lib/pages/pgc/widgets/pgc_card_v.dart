@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/cover_hero.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
@@ -33,42 +34,48 @@ class PgcCardV extends StatelessWidget {
         borderRadius: Style.mdRadius,
         onLongPress: onLongPress,
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
-        onTap: () => PageUtils.viewPgc(seasonId: item.seasonId, heroTag: heroTag),
+        onTap: () =>
+            PageUtils.viewPgc(seasonId: item.seasonId, heroTag: heroTag),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AspectRatio(
+            CoverHero(
+              tag: heroTag,
+              cover: item.cover,
               aspectRatio: 0.75,
-              child: LayoutBuilder(
-                builder: (context, boxConstraints) {
-                  final double maxWidth = boxConstraints.maxWidth;
-                  final double maxHeight = boxConstraints.maxHeight;
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      NetworkImgLayer(
-                        src: item.cover,
-                        width: maxWidth,
-                        height: maxHeight,
-                      ),
-                      PBadge(
-                        text: item.badge,
-                        top: 6,
-                        right: 6,
-                        bottom: null,
-                        left: null,
-                      ),
-                      if (item.isFinish == 0 &&
-                          item.renewalTime?.isNotEmpty == true)
-                        PBadge(
-                          text: item.renewalTime,
-                          bottom: 6,
-                          left: 6,
-                          type: PBadgeType.gray,
+              child: AspectRatio(
+                aspectRatio: 0.75,
+                child: LayoutBuilder(
+                  builder: (context, boxConstraints) {
+                    final double maxWidth = boxConstraints.maxWidth;
+                    final double maxHeight = boxConstraints.maxHeight;
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        NetworkImgLayer(
+                          src: item.cover,
+                          width: maxWidth,
+                          height: maxHeight,
                         ),
-                    ],
-                  );
-                },
+                        PBadge(
+                          text: item.badge,
+                          top: 6,
+                          right: 6,
+                          bottom: null,
+                          left: null,
+                        ),
+                        if (item.isFinish == 0 &&
+                            item.renewalTime?.isNotEmpty == true)
+                          PBadge(
+                            text: item.renewalTime,
+                            bottom: 6,
+                            left: 6,
+                            type: PBadgeType.gray,
+                          ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
             content(context),
@@ -76,12 +83,6 @@ class PgcCardV extends StatelessWidget {
         ),
       ),
     );
-    if (heroTag != null) {
-      card = Hero(
-        tag: heroTag,
-        child: RepaintBoundary(child: card),
-      );
-    }
     return card;
   }
 

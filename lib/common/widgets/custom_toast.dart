@@ -1,5 +1,9 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:get/get.dart';
+import 'package:PiliPlus/common/widgets/scale_app.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
+import 'package:PiliPlus/harmony_adapt/toast_layout.dart';
 import 'package:material_ui/material_ui.dart';
 
 class CustomToast extends StatelessWidget {
@@ -12,21 +16,31 @@ class CustomToast extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.of(context);
-    return Container(
-      margin: .only(
-        bottom: MediaQuery.viewPaddingOf(context).bottom 
-          +((Get.currentRoute=='/'&&Pref.enableHdsBar) ? 80 : 30), //避免toast被沉浸光感底栏覆盖
-      ),
-      padding: const .symmetric(horizontal: 17, vertical: 10),
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withValues(alpha: toastOpacity),
-        borderRadius: const .all(.circular(20)),
-      ),
-      child: Text(
-        msg,
-        style: TextStyle(
-          fontSize: 13,
-          color: colorScheme.onPrimaryContainer,
+    return ValueListenableBuilder<double>(
+      valueListenable: HarmonyChannel.nativeDockInset,
+      builder: (context, dockBottom, child) => Container(
+        constraints: const BoxConstraints(maxWidth: 560),
+        margin: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          bottom: HarmonyToastLayout.bottom(
+            safeBottom: MediaQuery.viewPaddingOf(context).bottom,
+            keyboardBottom: MediaQuery.viewInsetsOf(context).bottom,
+            dockBottom: dockBottom,
+            scale: ScaledWidgetsFlutterBinding.effectiveScaleFactor,
+          ),
+        ),
+        padding: const .symmetric(horizontal: 17, vertical: 10),
+        decoration: BoxDecoration(
+          color: colorScheme.primaryContainer.withValues(alpha: toastOpacity),
+          borderRadius: const .all(.circular(20)),
+        ),
+        child: Text(
+          msg,
+          style: TextStyle(
+            fontSize: 13,
+            color: colorScheme.onPrimaryContainer,
+          ),
         ),
       ),
     );
@@ -54,10 +68,13 @@ class LoadingWidget extends StatelessWidget {
         mainAxisSize: .min,
         children: [
           //loading animation
-          CircularProgressIndicator(
-            strokeWidth: 3,
-            valueColor: AlwaysStoppedAnimation(onSurfaceVariant),
-          ),
+          if (HarmonyStyle.enabled(context))
+            HarmonyLoadingIndicator(color: onSurfaceVariant)
+          else
+            CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation(onSurfaceVariant),
+            ),
           //msg
           Text(msg, style: TextStyle(color: onSurfaceVariant)),
         ],

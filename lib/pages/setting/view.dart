@@ -1,3 +1,6 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/window_layout.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_settings_list.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/http/login.dart';
@@ -76,7 +79,7 @@ class _SettingPageState extends State<SettingPage> {
     ),
     _SettingsModel(
       type: SettingType.experimentalSetting,
-      subtitle: '沉浸光感导航栏、状态栏回顶、接续、后台下载等',
+      subtitle: '界面风格、展开 Dock、智感握姿、全屏折叠适配等',
       icon: Icon(Icons.science_outlined),
     ),
     _SettingsModel(
@@ -94,7 +97,13 @@ class _SettingPageState extends State<SettingPage> {
     super.didChangeDependencies();
 
     theme = Theme.of(context);
-    _isPortrait = MediaQuery.sizeOf(context).isPortrait;
+    _isPortrait = HarmonyStyle.enabled(context)
+        ? !HarmonyWindowLayout.useSettingsSplit(
+            MediaQuery.sizeOf(context).width -
+                MediaQuery.viewPaddingOf(context).horizontal,
+            MediaQuery.textScalerOf(context).scale(16) / 16,
+          )
+        : MediaQuery.sizeOf(context).isPortrait;
   }
 
   @override
@@ -109,10 +118,10 @@ class _SettingPageState extends State<SettingPage> {
             : Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 4,
-                    child: _buildList(theme),
-                  ),
+                  if (HarmonyStyle.enabled(context))
+                    SizedBox(width: 300, child: _buildList(theme))
+                  else
+                    Expanded(flex: 4, child: _buildList(theme)),
                   VerticalDivider(
                     width: 1,
                     color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -182,47 +191,54 @@ class _SettingPageState extends State<SettingPage> {
   Widget _buildList(ThemeData theme) {
     final padding = MediaQuery.viewPaddingOf(context);
     TextStyle titleStyle = theme.textTheme.titleMedium!;
-    TextStyle subTitleStyle = theme.textTheme.labelMedium!.copyWith(
-      color: theme.colorScheme.outline,
-    );
-    return ListView(
-      padding: EdgeInsets.only(bottom: padding.bottom + 100),
-      children: [
-        _buildSearchItem(theme),
-        ..._items
-            .take(_items.length - 1)
-            .map(
-              (item) => ListTile(
-                tileColor: _getTileColor(theme, item.type),
-                onTap: () => _toPage(item.type),
-                leading: item.icon,
-                title: Text(item.type.title, style: titleStyle),
-                subtitle: item.subtitle == null
-                    ? null
-                    : Text(item.subtitle!, style: subTitleStyle),
-              ),
+    TextStyle subTitleStyle =
+        (HarmonyStyle.enabled(context)
+                ? theme.textTheme.bodyMedium!
+                : theme.textTheme.labelMedium!)
+            .copyWith(
+              color: theme.colorScheme.outline,
+            );
+    final children = <Widget>[
+      _buildSearchItem(theme),
+      ..._items
+          .take(_items.length - 1)
+          .map(
+            (item) => ListTile(
+              tileColor: _getTileColor(theme, item.type),
+              onTap: () => _toPage(item.type),
+              leading: item.icon,
+              title: Text(item.type.title, style: titleStyle),
+              subtitle: item.subtitle == null
+                  ? null
+                  : Text(item.subtitle!, style: subTitleStyle),
             ),
-        ListTile(
-          onTap: () => LoginPageController.switchAccountDialog(context),
-          leading: const Icon(Icons.switch_account_outlined),
-          title: Text('切换账号', style: titleStyle),
-        ),
-        Obx(
-          () => _noAccount.value
-              ? const SizedBox.shrink()
-              : ListTile(
-                  leading: const Icon(Icons.logout_outlined),
-                  onTap: () => _logoutDialog(context),
-                  title: Text('退出登录', style: titleStyle),
-                ),
-        ),
-        ListTile(
-          tileColor: _getTileColor(theme, _items.last.type),
-          onTap: () => _toPage(_items.last.type),
-          leading: _items.last.icon,
-          title: Text(_items.last.type.title, style: titleStyle),
-        ),
-      ],
+          ),
+      ListTile(
+        onTap: () => LoginPageController.switchAccountDialog(context),
+        leading: const Icon(Icons.switch_account_outlined),
+        title: Text('切换账号', style: titleStyle),
+      ),
+      Obx(
+        () => _noAccount.value
+            ? const SizedBox.shrink()
+            : ListTile(
+                leading: const Icon(Icons.logout_outlined),
+                onTap: () => _logoutDialog(context),
+                title: Text('退出登录', style: titleStyle),
+              ),
+      ),
+      ListTile(
+        tileColor: _getTileColor(theme, _items.last.type),
+        onTap: () => _toPage(_items.last.type),
+        leading: _items.last.icon,
+        title: Text(_items.last.type.title, style: titleStyle),
+      ),
+    ];
+    return HarmonySettingsList(
+      key: const PageStorageKey('settings-categories'),
+      padding: EdgeInsets.only(bottom: padding.bottom + 100),
+      itemCount: children.length,
+      itemBuilder: (context, index) => children[index],
     );
   }
 

@@ -1,3 +1,5 @@
+import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_hand_dock.dart';
 import 'package:PiliPlus/harmony_adapt/outlined_subtitles.dart';
 import 'dart:async';
 import 'dart:io';
@@ -1716,18 +1718,25 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     controller: _animationController,
                     isFullScreen: isFullScreen,
                     removeSafeArea: plPlayerController.removeSafeArea,
-                    child:
-                        widget.bottomControl ??
-                        BottomControl(
-                          maxWidth: maxWidth,
-                          isFullScreen: isFullScreen,
-                          controller: plPlayerController,
-                          videoDetailController: videoDetailController,
-                          buildBottomControl: () => buildBottomControl(
-                            videoDetailController,
-                            maxWidth > maxHeight,
+                    child: HarmonyHandDock(
+                      enabled:
+                          OS.isHarmony &&
+                          Pref.harmonyHandedness &&
+                          isFullScreen,
+                      width: maxWidth,
+                      builder: (controlWidth) =>
+                          widget.bottomControl ??
+                          BottomControl(
+                            maxWidth: controlWidth,
+                            isFullScreen: isFullScreen,
+                            controller: plPlayerController,
+                            videoDetailController: videoDetailController,
+                            buildBottomControl: () => buildBottomControl(
+                              videoDetailController,
+                              maxWidth > maxHeight,
+                            ),
                           ),
-                        ),
+                    ),
                   ),
                 ],
               ),

@@ -70,6 +70,7 @@ class VideoPopupMenu extends StatelessWidget {
                           videoItem.bvid!,
                           videoItem.cid!,
                           videoItem.owner.mid,
+                          isCurrent: () => context.mounted,
                         );
                         if (res != null && context.mounted) {
                           showDialog(

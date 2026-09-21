@@ -10,7 +10,20 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:os_type/os_type.dart';
 
+enum HarmonyHandSide { center, left, right }
+
 abstract class HarmonyChannel {
+  static final nativeDockInset = ValueNotifier<double>(0);
+  static final handSide = ValueNotifier(HarmonyHandSide.center);
+  static final handAvailable = ValueNotifier(false);
+  static final foldExpanded = ValueNotifier(false);
+  static DateTime _foldChangedAt = DateTime.fromMillisecondsSinceEpoch(0);
+  static bool get foldTransitionActive =>
+      OS.isHarmony &&
+      Pref.harmonyFoldOrientation &&
+      DateTime.now().difference(_foldChangedAt) <
+          const Duration(milliseconds: 900);
+
   /// Completes only after the system save button succeeds or the user cancels.
   static Future<bool> saveMovingPhoto({
     required String imagePath,
@@ -31,6 +44,22 @@ abstract class HarmonyChannel {
 
   static Future<dynamic> handler(MethodCall call) async {
     switch (call.method) {
+      case 'onDockMetrics':
+        nativeDockInset.value =
+            ((call.arguments['bottom'] as num?)?.toDouble() ?? 0).clamp(0, 200);
+        break;
+      case 'onHoldingHandChanged':
+        handAvailable.value = call.arguments['available'] == true;
+        handSide.value = switch (call.arguments['side']) {
+          'left' => HarmonyHandSide.left,
+          'right' => HarmonyHandSide.right,
+          _ => HarmonyHandSide.center,
+        };
+        break;
+      case 'onFoldPostureChanged':
+        _foldChangedAt = DateTime.now();
+        foldExpanded.value = call.arguments['expanded'] == true;
+        break;
       case 'onFloatingWindowChange':
         onLandscapeOrMiniWindowChange(null, call.arguments['isFloatingWindow']);
         break;
@@ -121,8 +150,16 @@ abstract class HarmonyChannel {
   }
 
   /// 向原生发送 shell 配置（Flutter 侧计算后通知 ArkTS）
-  static Future<void> setShellBars({required bool useNativeTabs}) =>
-      _invoke('setShellBars', {'useNativeTabs': useNativeTabs});
+  static Future<void> setShellBars({
+    required bool useNativeTabs,
+    bool handedness = false,
+  }) => _invoke('setShellBars', {
+    'useNativeTabs': useNativeTabs,
+    'handedness': handedness,
+  });
+
+  static Future<void> setHandednessEnabled(bool enabled) =>
+      _invoke('setHandednessEnabled', {'enabled': enabled});
 
   /// 同步 Navbar 页签（数量与顺序，与设置内「Navbar 编辑」一致）到 ArkTS HdsTabs
   static Future<void> setNavBarConfig(List<NavigationBarType> bars) =>
@@ -391,6 +428,10 @@ abstract class HarmonyChannel {
   /// 一致（并把 viewPadding.top 钉成三键高度）。
   static Future<void> initWindowState() async {
     if (!OS.isHarmony) return;
+    try {
+      foldExpanded.value =
+          await _channel.invokeMethod<bool>('getFoldExpanded') ?? false;
+    } catch (_) {}
     try {
       final state = await _channel.invokeMethod<Map>('getWindowState');
       if (state != null) {

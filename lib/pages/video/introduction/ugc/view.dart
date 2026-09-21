@@ -981,6 +981,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           if (introController.aiConclusionResult == null) {
             await introController.aiConclusion();
           }
+          if (!mounted) return;
           if (introController.aiConclusionResult case AiConclusionResult(
             :final summary,
             :final outline,

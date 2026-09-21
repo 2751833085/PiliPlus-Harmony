@@ -1,16 +1,59 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
+import 'package:PiliPlus/pages/main/controller.dart';
+import 'package:PiliPlus/utils/extension/get_ext.dart';
+import 'package:get/get.dart';
+
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
+void _refreshHarmony(bool _) {
+  Get.updateMyAppTheme();
+  if (Get.isRegistered<MainController>()) {
+    Get.find<MainController>().refreshHarmonyAppearance();
+  }
+}
+
 List<SettingsModel> experimentalSettings = [
   SwitchModel(
+    title: '鸿蒙界面风格',
+    subtitle: '使用鸿蒙风格的设置、开关、弹层和星球加载动画，配合系统沉浸光感导航；随时可切回原有风格',
+    leading: const Icon(Icons.auto_awesome_outlined),
+    setKey: SettingBoxKey.harmonyUI,
+    onChanged: _refreshHarmony,
+  ),
+  SwitchModel(
+    title: '展开时保留悬浮 Dock',
+    subtitle: '启用鸿蒙界面风格或沉浸光感导航栏时，双折、三折展开继续使用底部 Dock；关闭后按窗口宽度切换侧栏',
+    leading: const Icon(Icons.tablet_mac_outlined),
+    setKey: SettingBoxKey.harmonyKeepDock,
+    defaultVal: true,
+    onChanged: _refreshHarmony,
+  ),
+  SwitchModel(
+    title: '智感握姿',
+    subtitle: '接入系统握持识别，让悬浮 Dock 和展开屏幕的全屏播放按钮靠近握持侧；不支持的设备保持居中',
+    leading: const Icon(Icons.back_hand_outlined),
+    setKey: SettingBoxKey.harmonyHandedness,
+    onChanged: _refreshHarmony,
+  ),
+  const SwitchModel(
+    title: '全屏跟随折叠形态',
+    subtitle: '默认开启：单屏全屏播放时展开，会按展开后的屏幕形态重新适配方向；关闭后保留进入全屏时的方向设置',
+    leading: Icon(Icons.screen_rotation_alt_outlined),
+    setKey: SettingBoxKey.harmonyFoldOrientation,
+    defaultVal: true,
+  ),
+  SwitchModel(
     title: '鸿蒙沉浸光感导航栏',
-    subtitle: '使用鸿蒙的悬浮页签栏与沉浸光感\n仅在鸿蒙6.1及以上支持，不支持的平台会回退到传统底栏\n开启平板适配后在横屏模式下不显示',
+    subtitle:
+        '使用鸿蒙的悬浮页签栏与沉浸光感\n仅在鸿蒙6.1及以上支持，不支持的平台会回退到传统底栏\n可配合“展开时保留悬浮 Dock”在大屏继续使用',
     leading: const Icon(Icons.water_drop_outlined),
     setKey: SettingBoxKey.enableHdsBar,
     defaultVal: false,
-    onChanged: (_) => SmartDialog.showToast("重启生效"),
+    onChanged: _refreshHarmony,
   ),
   SwitchModel(
     title: '鸿蒙沉浸光感顶栏',
@@ -19,7 +62,7 @@ List<SettingsModel> experimentalSettings = [
     leading: const Icon(Icons.blur_on_outlined),
     setKey: SettingBoxKey.enableHdsTopBar,
     defaultVal: false,
-    onChanged: (_) => SmartDialog.showToast("重启生效"),
+    onChanged: _refreshHarmony,
   ),
   const SwitchModel(
     title: '显示实际百分比音量',
@@ -48,36 +91,40 @@ List<SettingsModel> experimentalSettings = [
     title: '应用接续',
     subtitle: '相同华为用户播放视频时可在另一个设备的Dock栏中快速流转，无缝衔接上一个设备的视频。（始终开启）',
     leading: const Icon(Icons.devices_other),
-    getTrailing: (theme) => IgnorePointer(
-      child: Transform.scale(
-        scale: 0.8,
-        alignment: Alignment.centerRight,
-        child: Switch(
-          value: true,
-          onChanged: (_) {},
-          thumbIcon: WidgetStateProperty.all(
-            const Icon(Icons.lock_outline_rounded),
+    getTrailing: (theme) => theme.extension<HarmonyStyle>() != null
+        ? const HarmonySwitch(value: true, onChanged: null)
+        : IgnorePointer(
+            child: Transform.scale(
+              scale: 0.8,
+              alignment: Alignment.centerRight,
+              child: Switch(
+                value: true,
+                onChanged: (_) {},
+                thumbIcon: WidgetStateProperty.all(
+                  const Icon(Icons.lock_outline_rounded),
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
-    ),
   ),
-    NormalModel(
+  NormalModel(
     title: '后台下载离线缓存视频',
     subtitle: '接入鸿蒙后台任务，切换至后台不中断离线缓存视频下载（始终开启）',
     leading: const Icon(Icons.downloading),
-    getTrailing: (theme) => IgnorePointer(
-      child: Transform.scale(
-        scale: 0.8,
-        alignment: Alignment.centerRight,
-        child: Switch(
-          value: true,
-          onChanged: (_) {},
-          thumbIcon: WidgetStateProperty.all(
-            const Icon(Icons.lock_outline_rounded),
+    getTrailing: (theme) => theme.extension<HarmonyStyle>() != null
+        ? const HarmonySwitch(value: true, onChanged: null)
+        : IgnorePointer(
+            child: Transform.scale(
+              scale: 0.8,
+              alignment: Alignment.centerRight,
+              child: Switch(
+                value: true,
+                onChanged: (_) {},
+                thumbIcon: WidgetStateProperty.all(
+                  const Icon(Icons.lock_outline_rounded),
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
-    ),
   ),
 ];

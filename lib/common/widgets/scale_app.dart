@@ -18,6 +18,7 @@ class ScaledWidgetsFlutterBinding extends WidgetsFlutterBinding {
   double _scaleFactor;
 
   double get scaleFactor => _scaleFactor;
+  static double get effectiveScaleFactor => _binding?._scaleFactor ?? 1;
 
   /// scaleFactor 的可监听镜像。缩放变化只影响 RenderView 配置（画布逻辑
   /// 尺寸），根 View 的 MediaQuery 数据（physicalSize/dpr 来自引擎）并不会

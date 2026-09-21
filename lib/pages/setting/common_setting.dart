@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_settings_list.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/models/common/setting_type.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
@@ -50,7 +51,7 @@ class _CommonSettingState extends State<CommonSetting> {
     final showAppBar = widget.showAppBar;
     return SimpleScaffold(
       appBar: showAppBar ? AppBar(title: Text(widget.settingType.title)) : null,
-      body: ListView.builder(
+      body: HarmonySettingsList(
         key: ValueKey(widget.settingType),
         padding: EdgeInsets.only(
           left: showAppBar ? padding.left : 0,

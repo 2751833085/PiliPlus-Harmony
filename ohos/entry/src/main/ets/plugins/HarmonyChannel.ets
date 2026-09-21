@@ -1,3 +1,4 @@
+import { SystemPosture } from './SystemPosture';
 import { common, wantAgent, WantAgent } from "@kit.AbilityKit";
 import { BusinessError, deviceInfo } from "@kit.BasicServicesKit";
 import { http } from "@kit.NetworkKit";
@@ -29,6 +30,10 @@ const colorModeMap: Record<string, ConfigurationConstant.ColorMode> = {
 
 export default class HarmonyChannel implements FlutterPlugin {
   private channel: MethodChannel | null = null;
+  private posture: SystemPosture | null = null;
+  setForeground(active: boolean): void {
+    if (active) this.posture?.start(); else this.posture?.stop();
+  }
   private lastWindow: window.Window | null = null;
   private bgTaskPromise: Promise<void> = Promise.resolve();
   private isBackgroundTaskRunning: boolean = false;
@@ -48,6 +53,8 @@ export default class HarmonyChannel implements FlutterPlugin {
   onAttachedToEngine(binding: FlutterPluginBinding): void {
     this.channel = new MethodChannel(binding.getBinaryMessenger(), "harmonyChannel");
     this.channel.setMethodCallHandler(this);
+    this.posture = new SystemPosture(this.channel);
+    this.posture.start();
     // // 监听画面方向
     // display.on('change', () => {
     //   // 获取当前旋转角度
@@ -57,6 +64,8 @@ export default class HarmonyChannel implements FlutterPlugin {
   }
 
   onDetachedFromEngine(binding: FlutterPluginBinding): void {
+    this.posture?.stop();
+    this.posture = null;
     MovingPhotoSave.detach();
     this.channel?.setMethodCallHandler(null);
     this.stopCutoutListener();
@@ -394,6 +403,16 @@ export default class HarmonyChannel implements FlutterPlugin {
 
   async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     switch (call.method) {
+      case "getFoldExpanded": {
+        result.success(this.posture?.isExpanded() ?? false);
+        break;
+      }
+      case "setHandednessEnabled": {
+        const enabled: boolean = call.argument('enabled') ?? false;
+        this.posture?.setHandEnabled(enabled);
+        result.success(true);
+        break;
+      }
       case "saveMovingPhoto": {
         const imagePath: string = call.argument("imagePath") ?? '';
         const videoPath: string = call.argument("videoPath") ?? '';
@@ -485,6 +504,8 @@ export default class HarmonyChannel implements FlutterPlugin {
         const useNativeTabs: boolean = call.argument('useNativeTabs') ?? false;
         console.log(`is use native tabs: ${useNativeTabs}`);
         AppStorage.setOrCreate('useNativeTabs', useNativeTabs);
+        const handedness: boolean = call.argument('handedness') ?? false;
+        AppStorage.setOrCreate('handednessEnabled', handedness);
         result.success(true);
         break;
       }

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:material_ui/material_ui.dart' hide ListTile;
 
@@ -37,9 +38,13 @@ class _NormalItemState extends State<NormalItem> {
     if ((widget.subtitle ?? widget.getSubtitle?.call()) case final text?) {
       subtitle = Text(
         text,
-        style: theme.textTheme.labelMedium!.copyWith(
-          color: theme.colorScheme.outline,
-        ),
+        style:
+            (HarmonyStyle.enabled(context)
+                    ? theme.textTheme.bodyMedium!
+                    : theme.textTheme.labelMedium!)
+                .copyWith(
+                  color: theme.colorScheme.outline,
+                ),
       );
     }
     return ListTile(
@@ -53,7 +58,11 @@ class _NormalItemState extends State<NormalItem> {
       ),
       subtitle: subtitle,
       leading: widget.leading,
-      trailing: widget.getTrailing?.call(theme),
+      trailing:
+          widget.getTrailing?.call(theme) ??
+          (HarmonyStyle.enabled(context) && widget.onTap != null
+              ? const Icon(Icons.chevron_right_rounded, size: 20)
+              : null),
     );
   }
 

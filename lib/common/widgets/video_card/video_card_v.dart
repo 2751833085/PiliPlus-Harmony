@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/cover_hero.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
@@ -104,33 +105,20 @@ class VideoCardV extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _CoverBuilder(
+            CoverHero(
+              tag: heroTag,
               cover: videoItem.cover,
-              duration: videoItem.duration,
+              aspectRatio: Style.aspectRatio,
+              child: _CoverBuilder(
+                cover: videoItem.cover,
+                duration: videoItem.duration,
+              ),
             ),
             content(context),
           ],
         ),
       ),
     );
-    if (heroTag != null) {
-      card = Hero(
-        tag: heroTag,
-        flightShuttleBuilder: videoItem.goto == 'av'
-            ? (flightContext, animation, flightDirection, fromHeroContext,
-                toHeroContext) {
-                // 源卡片 Hero 占位区域宽度 = 卡片宽度 = 封面宽度
-                final size = (fromHeroContext.findRenderObject() as RenderBox?)
-                    ?.size;
-                return _VideoCardShuttle(
-                  videoItem: videoItem,
-                  coverWidth: size?.width,
-                );
-              }
-            : null,
-        child: RepaintBoundary(child: card),
-      );
-    }
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -278,49 +266,6 @@ class VideoCardV extends StatelessWidget {
         //   const SizedBox(width: 2),
         // ]
       ],
-    );
-  }
-}
-
-/// Hero 飞行物：仅包含圆角卡片底层、封面。
-/// 飞行封面与卡片封面复用同一缓存
-class _VideoCardShuttle extends StatelessWidget {
-  const _VideoCardShuttle({
-    required this.videoItem,
-    this.coverWidth,
-  });
-
-  final BaseRcmdVideoItemModel videoItem;
-  final double? coverWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    final double width = coverWidth ?? 200;
-    final double height = width / Style.aspectRatio;
-    return Card(
-      clipBehavior: Clip.hardEdge,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: Style.aspectRatio,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              clipBehavior: Clip.hardEdge,
-              child: SizedBox(
-                width: width,
-                height: height,
-                child: NetworkImgLayer(
-                  src: videoItem.cover,
-                  width: width,
-                  height: height,
-                  borderRadius: BorderRadius.zero,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

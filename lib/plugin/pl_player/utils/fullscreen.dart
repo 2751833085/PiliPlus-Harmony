@@ -96,6 +96,12 @@ Future<void>? fullMode() {
   );
 }
 
+/// Clear the phone-only cache before the system takes over expanded panels.
+Future<void> harmonyFollowFold() {
+  _lastOrientation = null;
+  return HarmonyChannel.setWindowOrientation(5);
+}
+
 /// 鸿蒙强制窗口转回竖屏（修mate80 横屏无法退出全屏bug）
 Future<void>? harmonyForcePortrait() {
   if (!OS.isHarmony) return null;

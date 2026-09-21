@@ -1,3 +1,4 @@
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'dart:io';
 
 import 'package:PiliPlus/common/assets.dart';
@@ -54,6 +55,7 @@ class _MainAppState extends PopScopeState<MainApp>
   late ThemeData theme;
   Brightness? _brightness;
   Worker? _nativeTabsWorker;
+  Worker? _harmonyAppearanceWorker;
   Worker? _nativeTopBarWorker;
 
   @override
@@ -63,12 +65,19 @@ class _MainAppState extends PopScopeState<MainApp>
   void initState() {
     super.initState();
     addObserverMobile(this);
+    _harmonyAppearanceWorker = ever(_mainController.harmonyAppearanceRevision, (
+      _,
+    ) {
+      if (!mounted) return;
+      _updateNavigationLayout();
+      setState(() {});
+    });
     // 监听 useNativeTabs 异步赋值（_initHdsBar 完成时触发）。
     // 首帧是按 false 构建的，此时 Flutter 底栏已经建出来了，而 _bottomNav 中
     // 的提前返回分支不读任何 Rx（不能用 Obx 包裹，否则抛 ObxError），所以必须
     // 在这里主动重建把它移除，否则会与原生 HDS 底栏重叠显示。
     _nativeTabsWorker = ever(_mainController.useNativeTabs, (useNativeTabs) {
-      if (!mounted || !useNativeTabs) return;
+      if (!mounted) return;
       setState(() {});
       // 补发首帧时因 useNativeTabs 未就绪而跳过的原生底栏状态同步：
       // 横屏（侧栏布局）或已有子页面覆盖主页时，原生底栏不应显示
@@ -82,7 +91,7 @@ class _MainAppState extends PopScopeState<MainApp>
     _nativeTopBarWorker = ever(_mainController.useNativeTopBar, (
       useNativeTopBar,
     ) {
-      if (!mounted || !useNativeTopBar) return;
+      if (!mounted) return;
       // 同样补发首帧时因 useNativeTopBar 未就绪而跳过的顶栏显隐同步：
       // 横屏（侧栏布局）或已有子页面覆盖主页时，原生顶栏不应显示
       MyApp.shellBarsObserver.onOrientationChanged(
@@ -107,6 +116,29 @@ class _MainAppState extends PopScopeState<MainApp>
     }
   }
 
+  void _updateNavigationLayout() {
+    final size = MediaQuery.sizeOf(context);
+    if (OS.isHarmony) {
+      _mainController.useBottomNav = HarmonyWindowLayout.useBottomNavigation(
+        size.width - _padding.horizontal,
+        keepDock: Pref.harmonyKeepDock && (Pref.harmonyUI || Pref.enableHdsBar),
+        sideBar: _mainController.useSideBar,
+      );
+    } else if (!_mainController.useSideBar) {
+      _mainController.useBottomNav = size.isPortrait;
+    }
+    // 横竖屏切换时同步原生 HDS 沉浸底栏/顶栏显隐
+    // 由 ShellBarsObserver 统一管理，避免与路由观察者冲突。
+    // 顶栏与底栏是两个独立开关，只启用其一时也要通知，否则横屏下
+    // ArkTS 顶栏不会隐藏。
+    if (_mainController.useNativeTabs.value ||
+        _mainController.useNativeTopBar.value) {
+      MyApp.shellBarsObserver.onOrientationChanged(
+        _mainController.useBottomNav,
+      );
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -121,24 +153,7 @@ class _MainAppState extends PopScopeState<MainApp>
         windowManager.setBrightness(brightness);
       }
     }
-    if (!_mainController.useSideBar) {
-      final size = MediaQuery.sizeOf(context);
-      _mainController.useBottomNav = OS.isHarmony
-          ? HarmonyWindowLayout.useBottomNavigation(
-              size.width - _padding.horizontal,
-            )
-          : size.isPortrait;
-    }
-    // 横竖屏切换时同步原生 HDS 沉浸底栏/顶栏显隐
-    // 由 ShellBarsObserver 统一管理，避免与路由观察者冲突。
-    // 顶栏与底栏是两个独立开关，只启用其一时也要通知，否则横屏下
-    // ArkTS 顶栏不会隐藏。
-    if (_mainController.useNativeTabs.value ||
-        _mainController.useNativeTopBar.value) {
-      MyApp.shellBarsObserver.onOrientationChanged(
-        _mainController.useBottomNav,
-      );
-    }
+    _updateNavigationLayout();
     // 总是同步主题色到 ArkTS（底栏/顶栏共用 tabSelectedColor），
     // 不依赖 useNativeTabs：仅启用顶栏时也需加载主题色。
     _syncPrimaryColor();
@@ -180,6 +195,7 @@ class _MainAppState extends PopScopeState<MainApp>
 
   @override
   void dispose() {
+    _harmonyAppearanceWorker?.dispose();
     _nativeTabsWorker?.dispose();
     _nativeTopBarWorker?.dispose();
     if (Platform.isMacOS) {

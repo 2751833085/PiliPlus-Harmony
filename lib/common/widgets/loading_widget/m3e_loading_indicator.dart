@@ -16,6 +16,8 @@
  */
 
 import 'dart:math' as math;
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 
 import 'package:PiliPlus/common/widgets/loading_widget/morphs.dart';
 import 'package:material_ui/material_ui.dart';
@@ -25,9 +27,24 @@ import 'package:material_new_shapes/material_new_shapes.dart';
 
 /// reimplement of https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/loading_indicator_m3e
 
-class M3ELoadingIndicator extends StatefulWidget {
+class M3ELoadingIndicator extends StatelessWidget {
   const M3ELoadingIndicator({
     super.key,
+    this.morphs,
+    this.color,
+    this.size = const Size.square(40),
+  });
+  final List<Morph>? morphs;
+  final Color? color;
+  final Size size;
+  @override
+  Widget build(BuildContext context) => HarmonyStyle.enabled(context)
+      ? HarmonyLoadingIndicator(size: size.shortestSide, color: color)
+      : _MaterialLoadingIndicator(morphs: morphs, color: color, size: size);
+}
+
+class _MaterialLoadingIndicator extends StatefulWidget {
+  const _MaterialLoadingIndicator({
     // this.childKey,
     this.morphs,
     this.color,
@@ -40,10 +57,10 @@ class M3ELoadingIndicator extends StatefulWidget {
   // final Key? childKey;
 
   @override
-  State<M3ELoadingIndicator> createState() => _M3ELoadingIndicatorState();
+  State<_MaterialLoadingIndicator> createState() => _M3ELoadingIndicatorState();
 }
 
-class _M3ELoadingIndicatorState extends State<M3ELoadingIndicator>
+class _M3ELoadingIndicatorState extends State<_MaterialLoadingIndicator>
     with SingleTickerProviderStateMixin {
   static const int _morphIntervalMs = 650;
   static const double _fullRotation = 2 * math.pi;

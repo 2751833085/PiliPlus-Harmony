@@ -176,3 +176,6 @@ ohos/.codegenie
 /packages/media_kit_libs_ohos/ohos/build/
 /packages/media_kit_libs_ohos/ohos/.hvigor/
 /packages/media_kit_libs_ohos/ohos/oh_modules/
+
+# Native posture regression harness.
+!/tool/test_harmony_posture.cjs

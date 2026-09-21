@@ -88,8 +88,9 @@ struct Index {
   @StorageLink('movingPhotoPreview') movingPhotoPreview: string = '';
   private context = getContext(this) as common.UIAbilityContext;
   @LocalStorageLink('viewId') viewId: string = "";
-  @StorageLink('useNativeTabs') useNativeTabs: boolean = false;
-  @StorageLink('shellBarsHidden') shellBarsHidden: boolean = false;
+  @StorageLink('handednessEnabled') handednessEnabled: boolean = false;
+  @StorageLink('useNativeTabs') @Watch('syncDockMetrics') useNativeTabs: boolean = false;
+  @StorageLink('shellBarsHidden') @Watch('syncDockMetrics') shellBarsHidden: boolean = false;
   @StorageLink('__scrollHidden') @Watch('onScrollHiddenChanged') shellBarsScrollHidden: boolean = false;
   @StorageLink('tabSelectedColor') navSelected: string = '#3367D6';
   @StorageLink('tabSelectedSubColor') navSelectedSub: string = '#503367D6';
@@ -104,7 +105,7 @@ struct Index {
   @StorageLink('homeActiveTabIndex') @Watch('onHomeTabIndexChanged') homeActiveTabIndex: number = 0;
   /// 底部 Navbar 页签（NavigationBarType 索引，由 Flutter 按设置内
   /// Navbar 编辑同步；默认 首页/动态/我的）
-  @StorageLink('navTabs') navTabs: number[] = [0, 1, 2];
+  @StorageLink('navTabs') @Watch('syncDockMetrics') navTabs: number[] = [0, 1, 2];
   /// 动态页签角标模式（与 Flutter DynamicBadgeMode 一致：0=隐藏 1=红点 2=数字）
   @StorageLink('dynBadgeMode') dynBadgeMode: number = 0;
   /// 动态页签角标数量（由 Flutter 按未读动态数同步）
@@ -115,7 +116,7 @@ struct Index {
   @State categoryCurrentIndex: number = 0;
   @State winWidth: number = 0;
   @State winHeight: number = 0;
-  @State bottomAvoidAreaHeight: number = 0;
+  @State @Watch('syncDockMetrics') bottomAvoidAreaHeight: number = 0;
   @State bgColor: ResourceColor = $r("app.color.start_window_background")
 
   private categoryController: TabsController = new TabsController();
@@ -143,7 +144,14 @@ struct Index {
     return this.homeHideTopBar && this.topBarCollapsed;
   }
 
+  syncDockMetrics(): void {
+    const visible = this.useNativeTabs && !this.shellBarsHidden && !this.shellBarsScrollHidden && this.navTabs.length > 1;
+    const bottom = visible ? 56 + this.bottomAvoidAreaHeight : 0;
+    this.context.eventHub.emit('EVENT_DOCK_METRICS', bottom);
+  }
+
   onScrollHiddenChanged(): void {
+    this.syncDockMetrics();
     if (!this.useNativeTabs || this.shellBarsHidden) {
       return;
     }
@@ -276,6 +284,7 @@ struct Index {
   }
 
   aboutToDisappear(): void {
+    this.context.eventHub.emit('EVENT_DOCK_METRICS', 0);
     MovingPhotoSave.cancel();
     if (this.win !== null) {
       try {
@@ -831,7 +840,8 @@ struct Index {
     .barHeight(56)
     .barFloatingStyle({
       barBottomMargin: this.bottomAvoidAreaHeight,
-      adaptToHandedness: true,
+      adaptToHandedness: this.handednessEnabled,
+      barWidth: { smallWidth: Math.min(280, Math.max(160, this.winWidth - 32)), mediumWidth: 320, largeWidth: 360 },
       systemMaterialEffect: {
         materialType: hdsMaterial.MaterialType.IMMERSIVE,
         materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE

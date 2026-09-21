@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_settings_list.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/pages/setting/models/experimental_settings.dart';
 import 'package:flutter/material.dart';
@@ -19,14 +20,15 @@ class _ExperimentalPageState extends State<ExperimentalPage> {
     final showAppBar = widget.showAppBar;
     final padding = MediaQuery.viewPaddingOf(context);
     return SimpleScaffold(
-      appBar: showAppBar ? AppBar(title: const Text('试验性功能')) : null,
-      body: ListView(
+      appBar: showAppBar ? AppBar(title: const Text('鸿蒙特色功能')) : null,
+      body: HarmonySettingsList(
         padding: EdgeInsets.only(
           left: showAppBar ? padding.left : 0,
           right: showAppBar ? padding.right : 0,
           bottom: padding.bottom + 100,
         ),
-        children: settings.map((item) => item.widget).toList(),
+        itemCount: settings.length,
+        itemBuilder: (context, index) => settings[index].widget,
       ),
     );
   }

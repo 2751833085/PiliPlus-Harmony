@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/http/api.dart';
+import 'package:PiliPlus/http/ai_conclusion_request.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -500,6 +501,8 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         }
       }
 
+      if (this.cid.value != cid || this.bvid != bvid) aiConclusionResult = null;
+
       videoDetailCtr
         ..plPlayerController.pause()
         ..makeHeartBeat()
@@ -752,38 +755,73 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     return false;
   }
 
-  // ai总结
+  // One request at a time also prevents stacked loading dialogs on rapid taps.
+  static bool _aiLoading = false;
   static Future<AiConclusionResult?> getAiConclusion(
     String bvid,
     int cid,
-    int? mid,
-  ) async {
+    int? mid, {
+    bool Function()? isCurrent,
+  }) async {
     if (!Accounts.heartbeat.isLogin) {
-      SmartDialog.showToast("账号未登录");
+      SmartDialog.showToast('用于播放记录的账号未登录，请检查账号设置');
       return null;
     }
-    SmartDialog.showLoading(msg: '正在获取AI总结');
-    final res = await VideoHttp.aiConclusion(
-      bvid: bvid,
-      cid: cid,
-      upMid: mid,
+    if (_aiLoading) return null;
+    _aiLoading = true;
+    final request = AiConclusionRequest();
+    final route = Get.currentRoute;
+    bool stillCurrent() =>
+        Get.currentRoute == route && isCurrent?.call() != false;
+    SmartDialog.showLoading(
+      msg: '正在获取 AI 总结，返回可取消',
+      backType: SmartBackType.normal,
+      onDismiss: request.cancel,
     );
-    SmartDialog.dismiss();
-    if (res case Success(:final response)) {
-      return response.modelResult;
-    } else if (res is Error && res.code == 1) {
-      SmartDialog.showToast("AI处理中，请稍后再试");
-    } else {
-      SmartDialog.showToast("当前视频暂不支持AI视频总结");
+    String? message;
+    try {
+      final res = await request.run(
+        () => VideoHttp.aiConclusion(bvid: bvid, cid: cid, upMid: mid),
+        isCurrent: stillCurrent,
+      );
+      if (res case Success(:final response)) {
+        if (response.hasContent) return response.modelResult;
+        message = response.unavailableMessage;
+      } else if (res case Error(:final code, :final errMsg)) {
+        message = switch (code) {
+          -101 => '登录状态已失效，请重新登录后获取 AI 总结',
+          -412 || -352 => '哔哩哔哩暂时限制了此请求，请稍后重试',
+          _ =>
+            errMsg?.isNotEmpty == true
+                ? '获取 AI 总结失败：$errMsg'
+                : '获取 AI 总结失败${code == null ? '' : '（$code）'}',
+        };
+      }
+    } catch (_) {
+      if (!request.isCancelled && stillCurrent()) {
+        message = '获取 AI 总结失败，请检查网络后重试';
+      }
+    } finally {
+      if (!request.isCancelled) {
+        await SmartDialog.dismiss(status: SmartStatus.loading);
+      }
+      _aiLoading = false;
+      if (message != null && stillCurrent()) SmartDialog.showToast(message);
     }
     return null;
   }
 
   Future<void> aiConclusion() async {
-    aiConclusionResult = await getAiConclusion(
-      bvid,
-      cid.value,
+    final requestedBvid = bvid;
+    final requestedCid = cid.value;
+    final result = await getAiConclusion(
+      requestedBvid,
+      requestedCid,
       videoDetail.value.owner?.mid,
+      isCurrent: () =>
+          !isClosed && bvid == requestedBvid && cid.value == requestedCid,
     );
+    if (!isClosed && bvid == requestedBvid && cid.value == requestedCid)
+      aiConclusionResult = result;
   }
 }
