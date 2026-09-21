@@ -368,14 +368,37 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                           ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            owner?.name ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                          child: InkWell(
+                            onTap: owner?.mid == null
+                                ? null
+                                : () =>
+                                      Get.toNamed('/member?mid=${owner!.mid}'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  owner?.name ?? '',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (ready &&
+                                    widget.intro.userStat.value.follower !=
+                                        null)
+                                  Text(
+                                    '${NumUtils.numFormat(widget.intro.userStat.value.follower!)} 粉丝',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),

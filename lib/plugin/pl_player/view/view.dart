@@ -1120,6 +1120,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   @override
   void didUpdateWidget(covariant PLVideoPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!oldWidget.shortMode && widget.shortMode) _removeDmAction();
     if (Platform.isAndroid && AndroidHelper.isPipMode ||
         OS.isHarmony && plPlayerController.isPipMode) {
       plPlayerController.controls = false;
@@ -1358,6 +1359,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onTapDown(TapDownDetails details) {
+    if (widget.shortMode) return;
     final ctr = plPlayerController.danmakuController;
     if (ctr != null) {
       final pos = details.localPosition;

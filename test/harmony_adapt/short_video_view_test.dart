@@ -1,3 +1,4 @@
+import 'package:PiliPlus/models_new/member_card_info/data.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
@@ -317,6 +318,8 @@ class _FakeIntro implements UgcIntroController {
   ).obs;
   @override
   final followStatus = RelationData(attribute: 0).obs;
+  @override
+  final userStat = MemberCardInfoData(follower: 2945000).obs;
   @override
   final total = '11'.obs;
   @override

@@ -538,6 +538,8 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         hasFav.value = false;
         favIds = null;
         total.value = '1';
+        userStat.value = MemberCardInfoData();
+        followStatus.value = RelationData();
 
         if (cover != null && cover.isNotEmpty) {
           videoDetailCtr.cover.value = cover;
