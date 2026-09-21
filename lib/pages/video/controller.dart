@@ -1,3 +1,4 @@
+import 'package:PiliPlus/utils/overseas_playback.dart';
 import 'package:PiliPlus/plugin/pl_player/models/playback_owner.dart';
 import 'package:PiliPlus/pages/video/shorts/request_queue.dart';
 import 'dart:async';
@@ -86,7 +87,7 @@ import 'package:path/path.dart' as path;
 
 class VideoDetailController extends GetxController
     with GetTickerProviderStateMixin, BlockMixin
-    implements PortraitPlaybackOwner {
+    implements PortraitPlaybackOwner, NetworkPlaybackOwner {
   /// 路由传参
   late final Map args;
   late String bvid;
@@ -703,6 +704,7 @@ class VideoDetailController extends GetxController
   /// [autoplay] 默认 true（用户主动切画质/编码时理应继续播）；因链路变化触发的
   /// 换流则应沿用换流前的播放状态，见 [_onNetworkScopeChanged]。
   void updatePlayer({bool autoplay = true}) {
+    _manualRoute = false;
     final currentVideoQa = this.currentVideoQa.value;
     if (currentVideoQa == null) return;
     _autoPlay.value = autoplay;
@@ -838,68 +840,153 @@ class VideoDetailController extends GetxController
     return null;
   }
 
+  final _playerRequests = VideoRequestQueue();
+  OverseasPlaybackRoutes? _overseasRoutes;
+  Timer? _routeRetry;
+  int _routeRetries = 0;
+  bool _manualRoute = false;
+
+  @override
+  bool get usesOverseasRoutes =>
+      Pref.overseasMode &&
+      !isFileSource &&
+      !_manualRoute &&
+      data.dash?.video?.isNotEmpty == true;
+
+  @override
+  void retryNetworkRoute() {
+    if (!usesOverseasRoutes ||
+        isClosed ||
+        _routeRetry != null ||
+        _routeRetries >= 2 ||
+        !identical(plPlayerController.sourceOwner, this))
+      return;
+    final source = (bvid, cid.value);
+    final failedVideo = videoUrl;
+    final failedAudio = audioUrl;
+    _routeRetry = Timer(const Duration(milliseconds: 700), () async {
+      _routeRetry = null;
+      if (isClosed ||
+          source != (bvid, cid.value) ||
+          !identical(plPlayerController.sourceOwner, this) ||
+          failedVideo != videoUrl ||
+          !usesOverseasRoutes)
+        return;
+      // Initial opening already owns the serial queue; enqueue after it, while
+      // preserving a user's pause and the current position for interrupted play.
+      _routeRetries++;
+      _overseasRoutes?.video.reject(failedVideo);
+      _overseasRoutes?.audio.reject(failedAudio);
+      playedTime =
+          plPlayerController.videoPlayerController?.state.position ??
+          playedTime;
+      final resume = plPlayerController.intendsPlayback;
+      try {
+        await playerInit(autoplay: resume);
+      } catch (_) {
+        // Existing error/retry UI remains available after the bounded attempts.
+      }
+    });
+  }
+
   Future<void> playerInit({
     bool? autoplay,
     bool autoFullScreenFlag = false,
-  }) async {
+    bool resolveRoutes = true,
+  }) {
+    if (!resolveRoutes) _manualRoute = true;
     final source = (bvid, cid.value);
-    plPlayerController.sourceOwner = this;
-    Duration? seek = defaultST ?? playedTime;
-    if (seek == .zero) seek = null;
-    seek ??= getFirstSegment();
-    await plPlayerController.setDataSource(
-      isFileSource
-          ? FileSource(
-              dir: args['dirPath'],
-              typeTag: entry.typeTag!,
-              isMp4: entry.mediaType == 1,
-              hasDashAudio: entry.hasDashAudio,
-            )
-          : NetworkSource(
-              videoSource: videoUrl!,
-              audioSource: audioUrl,
+    return _playerRequests.run((ticket) async {
+      if (isClosed ||
+          source != (bvid, cid.value) ||
+          (!isFileSource && videoUrl == null))
+        return;
+      plPlayerController.sourceOwner = this;
+      if (resolveRoutes &&
+          usesOverseasRoutes &&
+          data.dash?.video?.isNotEmpty == true) {
+        final routes = _overseasRoutes ??= OverseasPlaybackRoutes();
+        final audios = data.dash?.audio;
+        final selectedAudio =
+            audios
+                ?.where((item) => item.id == currentAudioQa?.code)
+                .firstOrNull ??
+            audios?.firstOrNull;
+        final selected = await Future.wait([
+          routes.video.resolve(firstVideo.playUrls, fallback: videoUrl!),
+          if (selectedAudio != null)
+            routes.audio.resolve(
+              selectedAudio.playUrls,
+              fallback: audioUrl ?? '',
             ),
-      seekTo: seek,
-      duration: data.timeLength == null
-          ? null
-          : Duration(milliseconds: data.timeLength!),
-      isVertical: isVertical.value,
-      aid: aid,
-      bvid: bvid,
-      cid: cid.value,
-      autoplay: autoplay ?? _autoPlay.value,
-      epid: isUgc ? null : epId,
-      seasonId: isUgc ? null : seasonId,
-      pgcType: isUgc ? null : pgcType,
-      videoType: videoType,
-      onInit: () {
-        if (isClosed || source != (bvid, cid.value)) return;
-        videoState.value = true;
-        setSubtitle(vttSubtitlesIndex.value);
-      },
-      width: firstVideo.width,
-      height: firstVideo.height,
-      volume: volume,
-      autoFullScreenFlag: autoFullScreenFlag,
-    );
+        ]);
+        if (isClosed ||
+            !_playerRequests.isCurrent(ticket) ||
+            source != (bvid, cid.value) ||
+            !identical(plPlayerController.sourceOwner, this))
+          return;
+        videoUrl = selected.first;
+        if (selected.length > 1) audioUrl = selected[1];
+      }
+      Duration? seek = defaultST ?? playedTime;
+      if (seek == .zero) seek = null;
+      seek ??= getFirstSegment();
+      var initialized = false;
+      await plPlayerController.setDataSource(
+        isFileSource
+            ? FileSource(
+                dir: args['dirPath'],
+                typeTag: entry.typeTag!,
+                isMp4: entry.mediaType == 1,
+                hasDashAudio: entry.hasDashAudio,
+              )
+            : NetworkSource(
+                videoSource: videoUrl!,
+                audioSource: audioUrl,
+              ),
+        seekTo: seek,
+        duration: data.timeLength == null
+            ? null
+            : Duration(milliseconds: data.timeLength!),
+        isVertical: isVertical.value,
+        aid: aid,
+        bvid: bvid,
+        cid: cid.value,
+        autoplay: autoplay ?? _autoPlay.value,
+        epid: isUgc ? null : epId,
+        seasonId: isUgc ? null : seasonId,
+        pgcType: isUgc ? null : pgcType,
+        videoType: videoType,
+        onInit: () {
+          if (isClosed || source != (bvid, cid.value)) return;
+          initialized = true;
+          videoState.value = true;
+          setSubtitle(vttSubtitlesIndex.value);
+        },
+        width: firstVideo.width,
+        height: firstVideo.height,
+        volume: volume,
+        autoFullScreenFlag: autoFullScreenFlag,
+      );
 
-    if (isClosed || source != (bvid, cid.value)) return;
+      if (!initialized || isClosed || source != (bvid, cid.value)) return;
 
-    if (!isFileSource) {
-      if (plPlayerController.enableBlock) {
-        initSkip();
+      if (!isFileSource) {
+        if (plPlayerController.enableBlock) {
+          initSkip();
+        }
+
+        if (vttSubtitlesIndex.value == -1) {
+          _queryPlayInfo();
+        }
+
+        if (plPlayerController.showDmChart && dmTrend.value == null) {
+          _getDmTrend();
+        }
       }
 
-      if (vttSubtitlesIndex.value == -1) {
-        _queryPlayInfo();
-      }
-
-      if (plPlayerController.showDmChart && dmTrend.value == null) {
-        _getDmTrend();
-      }
-    }
-
-    defaultST = null;
+      defaultST = null;
+    });
   }
 
   bool isQuerying = false;
@@ -938,7 +1025,10 @@ class VideoDetailController extends GetxController
     final quality = data.missingVideoQualityBelowHighest;
     if (quality == -1) return;
     final result = await _getVideoUrl(quality);
-    if (!_videoRequests.isCurrent(ticket) || isClosed) return;
+    if (!_videoRequests.isCurrent(ticket) ||
+        isClosed ||
+        !identical(target, data))
+      return;
     if (result case Success(:final response)) {
       target.dash!.video!.merge(response.dash?.video);
     }
@@ -993,7 +1083,11 @@ class VideoDetailController extends GetxController
 
     if (result case Success(:final response)) {
       data = response;
-      if (data.dash != null) await _supplementVideoQualities(ticket);
+      final deferQualities =
+          Pref.overseasMode &&
+          data.canDeferQualitySupplement(plPlayerController.cacheVideoQa!);
+      if (data.dash != null && !deferQualities)
+        await _supplementVideoQualities(ticket);
       if (!_videoRequests.isCurrent(ticket) || isClosed) return;
 
       languages.value = data.language?.items;
@@ -1120,6 +1214,9 @@ class VideoDetailController extends GetxController
         audioUrl = '';
       }
       await _initPlayerIfNeeded(autoFullScreenFlag);
+      if (deferQualities && _videoRequests.isCurrent(ticket) && !isClosed) {
+        unawaited(_supplementVideoQualities(ticket).catchError((Object _) {}));
+      }
     } else {
       _autoPlay.value = false;
       videoState.value = false;
@@ -1397,6 +1494,9 @@ class VideoDetailController extends GetxController
 
   @override
   void onClose() {
+    _routeRetry?.cancel();
+    _overseasRoutes?.dispose();
+    _playerRequests.dispose();
     _videoRequests.dispose();
     _networkScopeSub?.cancel();
     _networkScopeSub = null;
@@ -1420,6 +1520,11 @@ class VideoDetailController extends GetxController
   }
 
   void onReset({bool isStein = false}) {
+    _routeRetry?.cancel();
+    _routeRetry = null;
+    _routeRetries = 0;
+    _manualRoute = false;
+    _playerRequests.invalidate();
     _videoRequests.invalidate();
     if (isFileSource) {
       cacheLocalProgress();
@@ -1719,7 +1824,7 @@ class VideoDetailController extends GetxController
               Get.back();
               this.videoUrl = videoUrl;
               this.audioUrl = audioUrl;
-              playerInit();
+              playerInit(resolveRoutes: false);
             },
             child: const Text('确定'),
           ),

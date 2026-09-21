@@ -6,6 +6,63 @@ void main() {
   const a = ShortVideoEntry(bvid: 'a');
   const b = ShortVideoEntry(bvid: 'b');
   test(
+    'first-page refresh replaces the first video and discards stale metadata',
+    () async {
+      final old = Completer<List<ShortVideoEntry>>();
+      final play = Completer<bool>();
+      final session = ShortVideoSession(
+        initial: a,
+        loadRelated: (_) => old.future,
+        loadFresh: () async => [a, b, b, const ShortVideoEntry(bvid: 'c')],
+        play: (_) => play.future,
+      );
+      final stale = session.loadMore();
+      final refreshing = session.refresh();
+      await Future<void>.delayed(Duration.zero);
+      expect(session.current.bvid, 'a');
+      expect(await session.refresh(), isFalse);
+      expect(await session.select(1), isFalse);
+      play.complete(true);
+      expect(await refreshing, isTrue);
+      old.complete([const ShortVideoEntry(bvid: 'stale')]);
+      await stale;
+      expect(session.entries.map((e) => e.bvid), ['b', 'c']);
+      expect(session.index, 0);
+      expect(session.refreshing, isFalse);
+      session.dispose();
+    },
+  );
+  test(
+    'failed/empty refresh retains first video and later pages do not refresh',
+    () async {
+      var plays = 0;
+      var fail = true;
+      final session = ShortVideoSession(
+        initial: a,
+        loadRelated: (_) async => [b],
+        loadFresh: () async {
+          if (fail) throw StateError('offline');
+          return [a];
+        },
+        play: (_) async {
+          plays++;
+          return true;
+        },
+      );
+      await session.loadMore();
+      expect(await session.refresh(), isFalse);
+      fail = false;
+      expect(await session.refresh(), isFalse);
+      expect(plays, 0);
+      expect(session.current.bvid, 'a');
+      expect(session.error, isNotNull);
+      await session.select(1);
+      expect(await session.refresh(), isFalse);
+      expect(session.current.bvid, 'b');
+      session.dispose();
+    },
+  );
+  test(
     'feed deduplicates, preserves previous entries and serializes switches',
     () async {
       final playback = Completer<bool>();

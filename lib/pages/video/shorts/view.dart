@@ -68,37 +68,44 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
         color: Colors.black,
         child: LayoutBuilder(
           builder: (context, bounds) {
-            if (widget.fullscreen)
-              return widget.playerBuilder(bounds.maxWidth, bounds.maxHeight);
             return SafeArea(
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
+                  constraints: BoxConstraints(
+                    maxWidth: bounds.maxWidth >= 720 || widget.fullscreen
+                        ? double.infinity
+                        : 600,
+                  ),
                   child: LayoutBuilder(
-                    builder: (context, pane) => ShortVideoPager(
-                      session: session,
-                      onError: (message) => SmartDialog.showToast(message),
-                      builder: (context, index, active) {
-                        if (active) return _currentPage(pane);
-                        return Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            if (session.entries[index].cover case final cover?)
-                              NetworkImgLayer(
-                                src: cover,
-                                fit: BoxFit.contain,
-                                width: pane.maxWidth,
-                                height: pane.maxHeight,
+                    builder: (context, pane) => Obx(
+                      () => ShortVideoPager(
+                        session: session,
+                        enabled:
+                            !widget.video.plPlayerController.controlsLock.value,
+                        onError: (message) => SmartDialog.showToast(message),
+                        builder: (context, index, active) {
+                          if (active) return _currentPage(pane);
+                          return Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (session.entries[index].cover
+                                  case final cover?)
+                                NetworkImgLayer(
+                                  src: cover,
+                                  fit: BoxFit.contain,
+                                  width: pane.maxWidth,
+                                  height: pane.maxHeight,
+                                ),
+                              Center(
+                                child: Text(
+                                  session.switching ? '正在打开视频' : '松手切换视频',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
                               ),
-                            Center(
-                              child: Text(
-                                session.switching ? '正在打开视频' : '松手切换视频',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -153,6 +160,35 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
 
   Widget _currentPage(BoxConstraints pane) {
     final player = widget.video.plPlayerController;
+    if (widget.fullscreen)
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          widget.playerBuilder(pane.maxWidth, pane.maxHeight),
+          Positioned(
+            right: 16,
+            bottom: 76,
+            child: Obx(
+              () => !player.controlsLock.value && player.showControls.value
+                  ? FilledButton.tonalIcon(
+                      onPressed: widget.onComments,
+                      icon: const Icon(Icons.chat_bubble_outline),
+                      label: const Text('评论'),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ),
+          if (session.refreshing)
+            const Positioned(
+              top: 56,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Text('正在刷新视频列表', style: TextStyle(color: Colors.white)),
+              ),
+            ),
+        ],
+      );
     final bottomHeight = ShortVideoControls.heightFor(
       MediaQuery.textScalerOf(context),
     );
@@ -232,16 +268,23 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
             ],
           ),
         ),
-        if (!session.hasNext && (session.loading || session.error != null))
+        if (session.refreshing ||
+            (!session.hasNext && (session.loading || session.error != null)))
           Positioned(
             top: 52,
             left: 16,
             right: 16,
             child: Center(
               child: TextButton(
-                onPressed: session.loading ? null : session.loadMore,
+                onPressed: session.loading || session.refreshing
+                    ? null
+                    : session.loadMore,
                 child: Text(
-                  session.loading ? '正在获取更多视频' : session.error!,
+                  session.refreshing
+                      ? '正在刷新视频列表'
+                      : session.loading
+                      ? '正在获取更多视频'
+                      : session.error!,
                   style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ),

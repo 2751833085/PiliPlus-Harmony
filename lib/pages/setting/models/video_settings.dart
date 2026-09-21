@@ -57,6 +57,8 @@ List<SettingsModel> get videoSettings => [
   ),
   NormalModel(
     title: 'CDN 设置',
+    disabledReason: () =>
+        Pref.overseasMode ? '已开启海外模式，视频和音频线路由应用自动选择。关闭海外模式后可恢复手动设置。' : null,
     leading: const Icon(MdiIcons.cloudPlusOutline),
     getSubtitle: () =>
         '当前使用：${VideoUtils.cdnService.desc}，部分 CDN 可能失效，如无法播放请尝试切换',
@@ -77,6 +79,8 @@ List<SettingsModel> get videoSettings => [
   ),
   SwitchModel(
     title: '音频不跟随 CDN 设置',
+    disabledReason: () =>
+        Pref.overseasMode ? '已开启海外模式，音频会单独探测并选择可用线路。关闭海外模式后可恢复此设置。' : null,
     subtitle: '直接采用备用 URL，可解决部分视频无声',
     leading: const Icon(MdiIcons.musicNotePlus),
     setKey: SettingBoxKey.disableAudioCDN,

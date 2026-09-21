@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/shorts/seek_gesture.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
@@ -109,6 +110,7 @@ class PLVideoPlayer extends StatefulWidget {
     this.showViewPoints,
     this.topInset,
     this.shortMode = false,
+    this.feedGestures = false,
     this.onEnterShortMode,
     this.onShortDoubleTap,
     this.fill = Colors.black,
@@ -117,6 +119,7 @@ class PLVideoPlayer extends StatefulWidget {
   });
 
   final bool shortMode;
+  final bool feedGestures;
   final VoidCallback? onEnterShortMode, onShortDoubleTap;
   final double maxWidth;
   final double maxHeight;
@@ -441,6 +444,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     _longPressRecognizer?.dispose();
     _doubleTapGestureRecognizer.dispose();
     _scaleGestureRecognizer.dispose();
+    _feedSeek.dispose();
     _brightnessListener?.cancel();
     _controlsListener?.cancel();
     HarmonyAppearance.revision.removeListener(_refreshControlAppearance);
@@ -1410,6 +1414,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   late final ImmediateTapGestureRecognizer _tapGestureRecognizer;
   late final DoubleTapGestureRecognizer _doubleTapGestureRecognizer;
   late final PlayerScaleGestureRecognizer _scaleGestureRecognizer;
+  late final _feedSeek = feedSeekRecognizer(
+    onStart: _onHorizontalDragStart,
+    onUpdate: _onHorizontalDragUpdate,
+    onEnd: _onHorizontalDragEnd,
+    onCancel: () {
+      plPlayerController.seekToPos = null;
+      if (plPlayerController.isSeeking.value) plPlayerController.onSeekEnd();
+    },
+  );
 
   StreamSubscription<bool>? _danmakuListener;
 
@@ -1447,7 +1460,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           _doubleTapGestureRecognizer.addPointer(event);
           longPressRecognizer.addPointer(event);
         }
-        if (!widget.shortMode)
+        if (widget.feedGestures) {
+          _feedSeek.addPointer(event);
+        } else
           _scaleGestureRecognizer
             ..isPosAllowed = _isPositionAllowed(event.localPosition)
             ..addPointer(event);
@@ -1460,7 +1475,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         _doubleTapGestureRecognizer.addPointer(event);
         longPressRecognizer.addPointer(event);
       }
-      if (!widget.shortMode) _scaleGestureRecognizer.addPointer(event);
+      if (widget.feedGestures) {
+        _feedSeek.addPointer(event);
+      } else {
+        _scaleGestureRecognizer.addPointer(event);
+      }
     }
   }
 
@@ -1487,6 +1506,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   void _onPointerPanZoomUpdate(PointerPanZoomUpdateEvent event) {
     if (plPlayerController.controlsLock.value) return;
+    if (widget.feedGestures && event.pan.dy.abs() >= event.pan.dx.abs()) return;
     if (_gestureType == null) {
       final pan = event.pan;
       if (pan.distanceSquared < 1) return;

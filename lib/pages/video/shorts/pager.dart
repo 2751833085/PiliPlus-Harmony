@@ -9,10 +9,12 @@ class ShortVideoPager extends StatefulWidget {
     required this.session,
     required this.builder,
     this.onError,
+    this.enabled = true,
   });
   final ShortVideoSession session;
   final Widget Function(BuildContext context, int index, bool active) builder;
   final ValueChanged<String>? onError;
+  final bool enabled;
   @override
   State<ShortVideoPager> createState() => _ShortVideoPagerState();
 }
@@ -21,6 +23,9 @@ class _ShortVideoPagerState extends State<ShortVideoPager> {
   late final PageController _pages = PageController(
     initialPage: widget.session.index,
   );
+  double _pull = 0;
+  bool _armed = false;
+  bool _startedAtFirst = false;
   ShortVideoSession get session => widget.session;
   @override
   void initState() {
@@ -50,20 +55,60 @@ class _ShortVideoPagerState extends State<ShortVideoPager> {
     if (session.entries.length - session.index <= 3) session.loadMore();
   }
 
+  bool _onScroll(ScrollNotification event) {
+    if (event.depth != 0 || event.metrics.axis != Axis.vertical) return false;
+    if (event is ScrollStartNotification) {
+      _pull = 0;
+      _armed = false;
+      _startedAtFirst = session.index == 0 && event.metrics.pixels <= 0;
+    }
+    if (event.metrics.pixels > 0) _armed = false;
+    if (event is OverscrollNotification &&
+        event.dragDetails != null &&
+        _startedAtFirst &&
+        session.index == 0 &&
+        event.metrics.pixels <= 0 &&
+        widget.enabled &&
+        !session.switching &&
+        !session.interacting &&
+        !session.refreshing) {
+      _pull = (_pull - event.overscroll).clamp(0, 160);
+      if (_pull >= 72 && session.loadFresh != null) _armed = true;
+    }
+    if (event is ScrollEndNotification && _armed) {
+      _armed = false;
+      session.refresh().then((_) {
+        if (mounted && session.error != null)
+          widget.onError?.call(session.error!);
+      });
+    }
+    return false;
+  }
+
   @override
-  Widget build(BuildContext context) => PageView.builder(
-    controller: _pages,
-    scrollDirection: Axis.vertical,
-    physics: session.switching || session.interacting
-        ? const NeverScrollableScrollPhysics()
-        : const ClampingScrollPhysics(),
-    onPageChanged: _select,
-    itemCount: session.entries.length,
-    itemBuilder: (context, index) => _RetainedVideoPage(
-      active: index == session.index,
-      child: widget.builder(context, index, index == session.index),
-    ),
-  );
+  Widget build(BuildContext context) =>
+      NotificationListener<ScrollNotification>(
+        onNotification: _onScroll,
+        child: PageView.builder(
+          controller: _pages,
+          scrollDirection: Axis.vertical,
+          physics:
+              !widget.enabled ||
+                  session.switching ||
+                  session.refreshing ||
+                  session.interacting
+              ? const NeverScrollableScrollPhysics()
+              : const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                ),
+          onPageChanged: _select,
+          itemCount: session.entries.length,
+          itemBuilder: (context, index) => _RetainedVideoPage(
+            active: index == session.index,
+            child: widget.builder(context, index, index == session.index),
+          ),
+        ),
+      );
 }
 
 /// A slow network request can outlast the page animation. Retain the old live

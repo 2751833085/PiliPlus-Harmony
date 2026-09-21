@@ -68,6 +68,15 @@ class PlayUrlModel {
     }
   }
 
+  /// Supplemental qualities need not block the first frame when the selected
+  /// quality is already present. Missing requested qualities still wait.
+  bool canDeferQualitySupplement(int preferredQuality) {
+    final videos = dash?.video;
+    if (videos == null || videos.isEmpty) return false;
+    final target = findAvailableVideoQuality(preferredQuality);
+    return videos.any((video) => video.quality.code == target);
+  }
+
   @pragma('vm:notify-debugger-on-exception')
   int get missingVideoQualityBelowHighest {
     int best = -1;

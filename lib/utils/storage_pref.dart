@@ -768,6 +768,9 @@ abstract final class Pref {
   static bool get enableLGBar =>
       _setting.get(SettingBoxKey.enableLGBar, defaultValue: false);
 
+  static bool get overseasMode =>
+      _setting.get(SettingBoxKey.overseasMode, defaultValue: false);
+
   static bool get shortVideoMode =>
       _setting.get(SettingBoxKey.shortVideoMode, defaultValue: false);
 

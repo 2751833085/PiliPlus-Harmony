@@ -151,6 +151,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   /// （从视频页再点开一个视频），链路变化这类被动事件必须据此判断自己是否仍是
   /// 播放器的持有者，否则后台的页面会把播放器抢回自己的源。
   Object? sourceOwner;
+  bool _playbackIntent = false;
+  bool get intendsPlayback => _playbackIntent;
   int? _epid;
   int? _seasonId;
   int? _pgcType;
@@ -861,6 +863,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       this.height = height;
       this.dataSource = dataSource;
       _autoPlay = autoplay;
+      _playbackIntent = autoplay;
       // 初始化数据加载状态
       dataStatus.value = DataStatus.loading;
       // 初始化全屏方向
@@ -1062,6 +1065,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         extras.addAll(liveBuffer);
       } else {
         extras.addAll(buffer);
+        if (sourceOwner case NetworkPlaybackOwner(usesOverseasRoutes: true)) {
+          extras['network-timeout'] = '8';
+          // Refill continuously within the user's existing cache limits.
+          extras['demuxer-hysteresis-secs'] = '0';
+        }
       }
     }
 
@@ -1337,6 +1345,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             //tcp: ffurl_read returned 0xdfb9b0bb
             //tcp: ffurl_read returned 0xffffff99
             event.startsWith('tcp: ffurl_read returned ')) {
+          if (sourceOwner case NetworkPlaybackOwner(usesOverseasRoutes: true)) {
+            (sourceOwner as NetworkPlaybackOwner).retryNetworkRoute();
+            return;
+          }
           EasyThrottle.throttle(
             'controllerStream.error.listen',
             const Duration(milliseconds: 10000),
@@ -1522,6 +1534,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Future<void> play({bool repeat = false, bool hideControls = true}) async {
     if (_playerCount == 0) return;
     _pauseRequestedByApp = false;
+    _playbackIntent = true;
     // 播放时自动隐藏控制条
     controls = !hideControls;
     // repeat为true，将从头播放
@@ -1588,6 +1601,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   Future<void> pause({bool notify = true, bool isInterrupt = false}) async {
     _pauseRequestedByApp = true;
+    if (notify || isInterrupt) _playbackIntent = false;
     await _videoPlayerController?.pause();
     playerStatus = .paused;
 

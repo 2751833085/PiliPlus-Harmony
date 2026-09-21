@@ -189,7 +189,7 @@ void main() {
             bvid: 'a',
             title: '很长的视频标题：从单屏展开到三屏时依然可以查看所有操作',
           ),
-          loadRelated: (_) async => [],
+          loadRelated: (_) async => const [ShortVideoEntry(bvid: 'next')],
           play: (_) async => true,
         );
         final player = _FakePlayer();
@@ -249,6 +249,18 @@ void main() {
         await tester.pumpAndSettle();
         expect(playerKey.currentState, same(state));
         expect(find.byType(ShortVideoControls), findsNothing);
+        expect(find.text('评论'), findsOneWidget);
+        await tester.drag(find.byType(PageView), Offset(0, -size.height * .75));
+        await tester.pumpAndSettle();
+        expect(session.index, 1);
+        expect(playerKey.currentState, same(state));
+        player.controlsLock.value = true;
+        await tester.pumpAndSettle();
+        expect(find.text('评论'), findsNothing);
+        await tester.drag(find.byType(PageView), Offset(0, size.height * .75));
+        await tester.pumpAndSettle();
+        expect(session.index, 1);
+        player.controlsLock.value = false;
         await tester.pumpWidget(build(false));
         await tester.pumpAndSettle();
         expect(playerKey.currentState, same(state));
@@ -276,6 +288,10 @@ class _PlayerFixtureState extends State<_PlayerFixture> {
 }
 
 class _FakePlayer implements PlPlayerController {
+  @override
+  final controlsLock = false.obs;
+  @override
+  final showControls = true.obs;
   @override
   final enableShowDanmaku = true.obs;
   @override

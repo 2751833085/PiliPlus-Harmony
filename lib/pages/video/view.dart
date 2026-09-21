@@ -104,6 +104,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   bool _shortMode = false;
   ShortVideoSession? _shortSession;
+  int _shortRefreshIndex = 1;
   bool _shortPreference = Pref.shortVideoMode;
   Worker? _shortEpisodeWorker;
   bool get _supportsShortMode =>
@@ -125,6 +126,24 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       return [
         for (final item in response.dataOrNull ?? [])
           if (item.bvid != null && item.redirectUrl == null)
+            ShortVideoEntry(
+              bvid: item.bvid!,
+              aid: item.aid,
+              cid: item.cid,
+              cover: item.cover,
+              title: item.title,
+            ),
+      ];
+    },
+    loadFresh: () async {
+      final response = await VideoHttp.rcmdVideoList(
+        ps: 20,
+        freshIdx: _shortRefreshIndex++,
+      );
+      if (!response.isSuccess) throw StateError('refresh unavailable');
+      return [
+        for (final item in response.dataOrNull ?? [])
+          if (item.bvid?.isNotEmpty == true)
             ShortVideoEntry(
               bvid: item.bvid!,
               aid: item.aid,
@@ -198,33 +217,43 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       context: context,
       useSafeArea: true,
       isScrollControlled: true,
-      builder: (context) => SizedBox(
-        height: MediaQuery.sizeOf(context).height * .72,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
-              child: Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      '评论',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+      constraints: const BoxConstraints(maxWidth: 720),
+      showDragHandle: true,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: SizedBox(
+          height:
+              (MediaQuery.sizeOf(context).height -
+                  MediaQuery.viewInsetsOf(context).bottom) *
+              .78,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        '评论',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: '关闭评论',
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
+                    IconButton(
+                      tooltip: '关闭评论',
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(child: videoReplyPanel()),
-          ],
+              Expanded(child: videoReplyPanel()),
+            ],
+          ),
         ),
       ),
     );
@@ -1684,6 +1713,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               maxWidth: width,
               maxHeight: height,
               shortMode: _shortMode && !isFullScreen,
+              feedGestures: _shortMode,
               onShortDoubleTap: () {
                 if (_shortMode &&
                     _supportsShortMode &&

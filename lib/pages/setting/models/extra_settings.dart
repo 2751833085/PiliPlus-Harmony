@@ -67,9 +67,17 @@ List<SettingsModel> get extraSettings => [
   SwitchModel(
     section: '播放器体验',
     title: '竖屏短视频模式',
-    subtitle: 'V2.5：普通视频以竖屏信息流打开，上下滑动连续观看；可随时返回普通详情。番剧、直播与批量播放列表保留原布局',
+    subtitle: '普通视频以信息流打开，单屏、展开和横屏均可上下切换、左右调整进度；第一条下拉刷新。可随时返回普通详情',
     leading: const Icon(Icons.stay_current_portrait_outlined),
     setKey: SettingBoxKey.shortVideoMode,
+    onChanged: (_) => HarmonyAppearance.changed(),
+  ),
+  SwitchModel(
+    section: '网络与加载',
+    title: '海外模式',
+    subtitle: '适合中国大陆以外网络。视频与音频优先尝试海外线路，异常时自动回退；小流量探测会消耗少量流量，保留所选画质。下次打开视频生效',
+    leading: const Icon(Icons.public),
+    setKey: SettingBoxKey.overseasMode,
     onChanged: (_) => HarmonyAppearance.changed(),
   ),
   if (PlatformUtils.isDesktop) ...[
