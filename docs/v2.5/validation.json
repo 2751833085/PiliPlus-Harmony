@@ -1,0 +1,43 @@
+{
+  "recorded_at": "2026-09-21T09:30:53.609284+00:00",
+  "version": "2.5.0+6085",
+  "base_commit": "cf4716e4ed6f65fc7e1a5e44fb1f114877b64374",
+  "artifact_sha256": "608d93ee93227769ef13669e22552674af4a1f881ff8874af2a117bdce1071d4",
+  "checks": {
+    "flutter_tests_passed": 41,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "native_posture_isolated_tests": "passed",
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed"
+  },
+  "device": {
+    "model": "HUAWEI Mate XTS / GRL-AL20",
+    "system": "HarmonyOS 7.0.0.107(SP8C00E105R5P4)",
+    "api": 26,
+    "overwrite_install": "passed",
+    "installed_version": "2.5.0",
+    "installed_version_code": 6085,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "app_id_preserved": true,
+    "app_identifier_preserved": true,
+    "launch": "blocked_screen_locked",
+    "launch_error_code": 10106102,
+    "uninstalled_or_cleared_data": false
+  },
+  "not_verified": [
+    "V2.5 real-network playback and feed gestures",
+    "physical fold transitions on V2.5",
+    "native LoadingProgress visual quality",
+    "logged-in AI service responses",
+    "real account write actions",
+    "frame time, memory, power and extended background/PiP sessions",
+    "all 147 upstream feature matrix entries"
+  ],
+  "remote_push": false
+}

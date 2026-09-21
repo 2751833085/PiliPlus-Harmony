@@ -21,7 +21,7 @@ bash tool/harmony.sh release
 | --- | --- | --- |
 | V1 | 功能移植与回退基线，标签 `harmony-v1.0.0` | [版本记录](releases/v1.0.0/README.md) |
 | V2 RC2 | 统一界面、设置互斥、原生加载与播放器控制改进 | [HAP 与版本记录](releases/v2.0.0-rc2/README.md) · [验证记录](docs/v2/VALIDATION.md) |
-| V2.5 | 竖屏短视频信息流，其他设置手动启用 | [使用与实现](docs/v2.5/README.md) · [验证记录](docs/v2.5/VALIDATION.md) |
+| V2.5 RC1 | 竖屏短视频信息流，其他设置手动启用 | [签名 HAP 与记录](releases/v2.5.0-rc1/README.md) · [使用说明](docs/v2.5/README.md) · [验证记录](docs/v2.5/VALIDATION.md) |
 
 [更新记录](CHANGELOG.md) · [开发约定](CONTRIBUTING.md) · [文档目录](docs/README.md) · [147 项功能核对](docs/harmony/feature-matrix.json)
 
