@@ -1,3 +1,6 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
 import 'dart:io' show Platform, Directory;
 import 'dart:math' show max;
 
@@ -55,6 +58,24 @@ import 'package:os_type/os_type.dart';
 import 'package:material_ui/material_ui.dart' hide RefreshIndicator;
 
 List<SettingsModel> get extraSettings => [
+  SwitchModel(
+    section: '播放器体验',
+    title: '哔哩哔哩式播放器控制栏',
+    subtitle: '更紧凑的播放、进度与全屏布局，控制栏渐显渐隐，四周渐变阴影；更多播放功能保留在控制栏菜单中',
+    leading: const Icon(Icons.smart_display_outlined),
+    setKey: SettingBoxKey.biliPlayerControls,
+    onChanged: (_) => HarmonyAppearance.changed(),
+  ),
+  NormalModel(
+    section: '播放器体验',
+    title: '竖屏短视频模式',
+    subtitle: 'V3 计划，暂未开放',
+    leading: const Icon(Icons.stay_current_portrait_outlined),
+    disabledReason: () => '竖屏短视频模式计划在 V3 中评估和开发，当前版本尚未实现，因此暂时无法开启。',
+    getTrailing: (theme) => theme.extension<HarmonyStyle>() != null
+        ? const HarmonySwitch(value: false, onChanged: null)
+        : const Switch(value: false, onChanged: null),
+  ),
   if (PlatformUtils.isDesktop) ...[
     SwitchModel(
       title: '退出时最小化',

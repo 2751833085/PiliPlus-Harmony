@@ -4,4 +4,7 @@
 /// invalid_export_of_internal_element，业务代码也用不到，这里隐藏掉。
 library;
 
-export 'package:flutter/material.dart' hide TranslateAnimationSource;
+export 'package:flutter/material.dart'
+    hide TranslateAnimationSource, PopupMenuButton, showMenu;
+export 'src/popup_surface.dart'
+    show PopupMenuButton, showMenu, PopupSurfaceStyle;

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/setting/widgets/setting_access.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/models/common/enum_with_label.dart';
 import 'package:PiliPlus/pages/setting/widgets/normal_item.dart';
@@ -16,6 +17,16 @@ sealed class SettingsModel {
   final Widget? leading;
   final EdgeInsetsGeometry? contentPadding;
   final TextStyle? titleStyle;
+  final String? section;
+  final ValueGetter<String?>? disabledReason;
+
+  Widget present(Widget child) => disabledReason == null
+      ? child
+      : SettingAccess(
+          title: effectiveTitle,
+          reason: disabledReason!,
+          child: child,
+        );
 
   String? get title;
   Widget get widget;
@@ -27,6 +38,8 @@ sealed class SettingsModel {
     this.leading,
     this.contentPadding,
     this.titleStyle,
+    this.section,
+    this.disabledReason,
   });
 }
 
@@ -34,6 +47,8 @@ class SplitModel extends SettingsModel {
   const SplitModel({
     super.contentPadding,
     super.titleStyle,
+    super.section,
+    super.disabledReason,
     required this.normalModel,
     required this.switchModel,
   });
@@ -52,18 +67,20 @@ class SplitModel extends SettingsModel {
   final SwitchModel switchModel;
 
   @override
-  Widget get widget => SetSwitchItem(
-    title: effectiveTitle,
-    subtitle: effectiveSubtitle,
-    setKey: switchModel.setKey,
-    defaultVal: switchModel.defaultVal,
-    onChanged: switchModel.onChanged,
-    needReboot: switchModel.needReboot,
-    leading: normalModel.leading,
-    onTap: switchModel.onTap,
-    contentPadding: contentPadding,
-    titleStyle: titleStyle,
-    isSplit: true,
+  Widget get widget => present(
+    SetSwitchItem(
+      title: effectiveTitle,
+      subtitle: effectiveSubtitle,
+      setKey: switchModel.setKey,
+      defaultVal: switchModel.defaultVal,
+      onChanged: switchModel.onChanged,
+      needReboot: switchModel.needReboot,
+      leading: normalModel.leading,
+      onTap: switchModel.onTap,
+      contentPadding: contentPadding,
+      titleStyle: titleStyle,
+      isSplit: true,
+    ),
   );
 }
 
@@ -73,6 +90,8 @@ class PopupModel<T extends EnumWithLabel> extends SettingsModel {
     super.leading,
     super.contentPadding,
     super.titleStyle,
+    super.section,
+    super.disabledReason,
     required this.value,
     required this.items,
     required this.onSelected,
@@ -92,16 +111,18 @@ class PopupModel<T extends EnumWithLabel> extends SettingsModel {
   final PopupMenuItemSelected<T> onSelected;
 
   @override
-  Widget get widget => PopupListTile<T>(
-    safeArea: false,
-    leading: leading,
-    title: Text(title),
-    value: () {
-      final v = value();
-      return (v, v.label);
-    },
-    itemBuilder: (_) => enumItemBuilder(items),
-    onSelected: onSelected,
+  Widget get widget => present(
+    PopupListTile<T>(
+      safeArea: false,
+      leading: leading,
+      title: Text(title),
+      value: () {
+        final v = value();
+        return (v, v.label);
+      },
+      itemBuilder: (_) => enumItemBuilder(items),
+      onSelected: onSelected,
+    ),
   );
 }
 
@@ -118,6 +139,8 @@ class NormalModel extends SettingsModel {
     super.leading,
     super.contentPadding,
     super.titleStyle,
+    super.section,
+    super.disabledReason,
     this.title,
     this.getTitle,
     this.getSubtitle,
@@ -130,6 +153,8 @@ class NormalModel extends SettingsModel {
     super.leading,
     super.contentPadding,
     super.titleStyle,
+    super.section,
+    super.disabledReason,
     this.title,
     this.getTitle,
     this.getSubtitle,
@@ -143,16 +168,18 @@ class NormalModel extends SettingsModel {
   String? get effectiveSubtitle => subtitle ?? getSubtitle?.call();
 
   @override
-  Widget get widget => NormalItem(
-    title: title,
-    getTitle: getTitle,
-    subtitle: subtitle,
-    getSubtitle: getSubtitle,
-    leading: leading,
-    getTrailing: getTrailing,
-    onTap: onTap,
-    contentPadding: contentPadding,
-    titleStyle: titleStyle,
+  Widget get widget => present(
+    NormalItem(
+      title: title,
+      getTitle: getTitle,
+      subtitle: subtitle,
+      getSubtitle: getSubtitle,
+      leading: leading,
+      getTrailing: getTrailing,
+      onTap: onTap,
+      contentPadding: contentPadding,
+      titleStyle: titleStyle,
+    ),
   );
 }
 
@@ -170,6 +197,8 @@ class SwitchModel extends SettingsModel {
     super.leading,
     super.contentPadding,
     super.titleStyle,
+    super.section,
+    super.disabledReason,
     required String this.title,
     required this.setKey,
     this.defaultVal = false,
@@ -192,17 +221,19 @@ class SwitchModel extends SettingsModel {
   String? get effectiveSubtitle => subtitle;
 
   @override
-  Widget get widget => SetSwitchItem(
-    title: title!,
-    subtitle: subtitle,
-    setKey: setKey,
-    defaultVal: defaultVal,
-    onChanged: onChanged,
-    needReboot: needReboot,
-    leading: leading,
-    onTap: onTap,
-    contentPadding: contentPadding,
-    titleStyle: titleStyle,
+  Widget get widget => present(
+    SetSwitchItem(
+      title: title!,
+      subtitle: subtitle,
+      setKey: setKey,
+      defaultVal: defaultVal,
+      onChanged: onChanged,
+      needReboot: needReboot,
+      leading: leading,
+      onTap: onTap,
+      contentPadding: contentPadding,
+      titleStyle: titleStyle,
+    ),
   );
 }
 

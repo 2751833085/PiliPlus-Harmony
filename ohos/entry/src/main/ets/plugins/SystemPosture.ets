@@ -52,9 +52,9 @@ export class SystemPosture {
     if (!this.active) return;
     try {
       const status = display.getFoldStatus();
+      if (status === display.FoldStatus.FOLD_STATUS_UNKNOWN) return;
       // A tri-fold reports additional states (11, 12, 13, 21, 22, 23).
-      const expanded = status !== display.FoldStatus.FOLD_STATUS_UNKNOWN &&
-        status !== display.FoldStatus.FOLD_STATUS_FOLDED;
+      const expanded = status !== display.FoldStatus.FOLD_STATUS_FOLDED;
       this.channel.invokeMethod('onFoldPostureChanged', { expanded: expanded, status: status });
     } catch (_) {}
   }

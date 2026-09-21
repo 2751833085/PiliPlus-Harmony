@@ -1,3 +1,4 @@
+import 'package:material_ui/material_ui.dart' show PopupSurfaceStyle;
 import 'package:flutter/material.dart';
 
 /// A theme marker keeps the alternative appearance independent of persisted
@@ -21,7 +22,27 @@ abstract final class HarmonyTheme {
   static const panelDark = Color(0xFF1C1D20);
   static const cardRadius = BorderRadius.all(Radius.circular(20));
 
-  static ThemeData apply(ThemeData base) {
+  static ColorScheme nativeColors(Brightness brightness) {
+    final dark = brightness == Brightness.dark;
+    final accent = dark ? const Color(0xFFFF85AC) : const Color(0xFFD93670);
+    return ColorScheme.fromSeed(
+      seedColor: const Color(0xFFFB7299),
+      brightness: brightness,
+    ).copyWith(
+      primary: accent,
+      secondary: accent,
+      tertiary: accent,
+      onPrimary: dark ? const Color(0xFF3D0019) : Colors.white,
+      onSecondary: dark ? const Color(0xFF3D0019) : Colors.white,
+      onSurface: dark ? const Color(0xFFF1F3F5) : const Color(0xFF191A1C),
+      onSurfaceVariant: dark
+          ? const Color(0xFFB9BBC1)
+          : const Color(0xFF62656B),
+      outline: dark ? const Color(0xFFA3A5AB) : const Color(0xFF74777D),
+    );
+  }
+
+  static ThemeData apply(ThemeData base, {bool immersive = false}) {
     final dark = base.brightness == Brightness.dark;
     final background = dark ? backgroundDark : backgroundLight;
     final panel = dark ? panelDark : Colors.white;
@@ -54,7 +75,11 @@ abstract final class HarmonyTheme {
       animationDuration: const Duration(milliseconds: 180),
     );
     return base.copyWith(
-      extensions: [...base.extensions.values, const HarmonyStyle()],
+      extensions: [
+        ...base.extensions.values,
+        const HarmonyStyle(),
+        if (immersive) const PopupSurfaceStyle(),
+      ],
       colorScheme: scheme,
       scaffoldBackgroundColor: background,
       canvasColor: background,
@@ -118,9 +143,16 @@ abstract final class HarmonyTheme {
         dragHandleColor: scheme.outlineVariant,
       ),
       popupMenuTheme: base.popupMenuTheme.copyWith(
-        color: panel,
+        color: immersive ? Colors.transparent : panel,
         surfaceTintColor: Colors.transparent,
-        shape: shape,
+        shape: RoundedRectangleBorder(
+          borderRadius: cardRadius,
+          side: BorderSide(
+            color: scheme.onSurface.withValues(alpha: immersive ? .1 : 0),
+            width: .5,
+          ),
+        ),
+        menuPadding: EdgeInsets.zero,
         elevation: 4,
       ),
       listTileTheme: base.listTileTheme.copyWith(

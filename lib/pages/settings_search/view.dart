@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/view_sliver_safe_area.dart';
@@ -39,7 +40,7 @@ class _SettingsSearchPageState
   late final RxList<String> _history = RxList<String>.from(
     GStorage.historyWord.get(_historyKey) ?? const <String>[],
   );
-  late final _settings = [
+  List<SettingsModel> get _settings => [
     ...extraSettings,
     ...privacySettings,
     ...recommendSettings,
@@ -48,6 +49,14 @@ class _SettingsSearchPageState
     ...styleSettings,
     ...experimentalSettings,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    HarmonyAppearance.revision.addListener(_refreshResults);
+  }
+
+  void _refreshResults() => onValueChanged(_textEditingController.text);
 
   @override
   void onValueChanged(String value) {
@@ -107,6 +116,7 @@ class _SettingsSearchPageState
 
   @override
   void dispose() {
+    HarmonyAppearance.revision.removeListener(_refreshResults);
     _saveHistory();
     _textEditingController.dispose();
     super.dispose();

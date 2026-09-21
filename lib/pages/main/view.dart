@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'dart:io';
 
@@ -121,7 +123,11 @@ class _MainAppState extends PopScopeState<MainApp>
     if (OS.isHarmony) {
       _mainController.useBottomNav = HarmonyWindowLayout.useBottomNavigation(
         size.width - _padding.horizontal,
-        keepDock: Pref.harmonyKeepDock && (Pref.harmonyUI || Pref.enableHdsBar),
+        keepDock:
+            Pref.harmonyUI &&
+            (Pref.harmonyNavigation == HarmonyNavigation.bottomBar ||
+                (Pref.harmonyNavigation == HarmonyNavigation.floatingDock &&
+                    Pref.harmonyKeepDock)),
         sideBar: _mainController.useSideBar,
       );
     } else if (!_mainController.useSideBar) {
@@ -384,7 +390,29 @@ class _MainAppState extends PopScopeState<MainApp>
       if (_mainController.useNativeTabs.value) {
         return null;
       }
-      if (_mainController.floatingNavBar) {
+      if (HarmonyStyle.enabled(context)) {
+        bottomNav = Material(
+          color: theme.colorScheme.surface,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Obx(
+                () => Row(
+                  children: [
+                    for (
+                      var i = 0;
+                      i < _mainController.navigationBars.length;
+                      i++
+                    )
+                      Expanded(child: _harmonyDestination(i, vertical: false)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      } else if (_mainController.floatingNavBar) {
         // 悬浮底栏必须拿到「松」的宽度约束才能保持自身 destinations.length * 86 的
         // 宽度。上游从 `e89241109 opt ui` 起把主页换成了自绘的 MainLayout，那里给
         // bottomNav 的是 constraints.loosen() 再手动水平居中；鸿蒙没跟进这个骨架
@@ -482,7 +510,88 @@ class _MainAppState extends PopScopeState<MainApp>
     return bottomNav;
   }
 
+  Widget _harmonyDestination(int index, {required bool vertical}) {
+    final item = _mainController.navigationBars[index];
+    final selected = _mainController.selectedIndex.value == index;
+    final color = selected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurfaceVariant;
+    final children = <Widget>[
+      IconTheme(
+        data: IconThemeData(color: color, size: 24),
+        child: _buildIcon(type: item, selected: selected),
+      ),
+      Text(
+        item.label,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+        ),
+      ),
+    ];
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => _mainController.setIndex(index),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 56),
+          margin: EdgeInsets.symmetric(
+            horizontal: vertical ? 8 : 4,
+            vertical: vertical ? 4 : 0,
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: selected && vertical
+                ? color.withValues(alpha: .12)
+                : Colors.transparent,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: children,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _sideBar(ThemeData theme) {
+    if (HarmonyStyle.enabled(context))
+      return SafeArea(
+        right: false,
+        child: SizedBox(
+          width: 96,
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              userAndSearchVertical(theme),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Obx(
+                      () => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (
+                            var i = 0;
+                            i < _mainController.navigationBars.length;
+                            i++
+                          )
+                            _harmonyDestination(i, vertical: true),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     final Widget sideBar = _mainController.navigationBars.length > 1
         ? context.isTablet && _mainController.optTabletNav
               ? Column(

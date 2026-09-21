@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/common/widgets/animated_height.dart';
 import 'dart:io' show Platform;
 
@@ -69,6 +70,17 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
 
   @override
   Widget build(BuildContext context) {
+    final blocked = HarmonyAppearance.colorsUnavailable();
+    if (blocked != null)
+      return SimpleScaffold(
+        appBar: AppBar(title: const Text('选择应用主题')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(blocked, textAlign: TextAlign.center),
+          ),
+        ),
+      );
     final titleStyle = theme.textTheme.titleMedium!;
     final subTitleStyle = theme.textTheme.labelMedium!.copyWith(
       color: theme.colorScheme.outline,

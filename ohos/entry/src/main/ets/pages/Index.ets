@@ -88,6 +88,7 @@ struct Index {
   @StorageLink('movingPhotoPreview') movingPhotoPreview: string = '';
   private context = getContext(this) as common.UIAbilityContext;
   @LocalStorageLink('viewId') viewId: string = "";
+  @StorageLink('immersiveEnabled') immersiveEnabled: boolean = false;
   @StorageLink('handednessEnabled') handednessEnabled: boolean = false;
   @StorageLink('useNativeTabs') @Watch('syncDockMetrics') useNativeTabs: boolean = false;
   @StorageLink('shellBarsHidden') @Watch('syncDockMetrics') shellBarsHidden: boolean = false;
@@ -401,7 +402,8 @@ struct Index {
     .width(size)
     .height(size)
     .borderRadius(size / 2)
-    .systemMaterial(topBarMaterial(true))
+    .backgroundColor(this.immersiveEnabled ? Color.Transparent : $r('sys.color.comp_background_tertiary'))
+    .systemMaterial(this.immersiveEnabled ? topBarMaterial(true) : undefined)
     .onClick(onClick)
   }
 
@@ -440,7 +442,8 @@ struct Index {
         .onClick(() => {
           this.context.eventHub.emit(EVENT_TOP_MINE);
         })
-        .systemMaterial(topBarMaterial(true))
+        .backgroundColor(this.immersiveEnabled ? Color.Transparent : $r('sys.color.comp_background_tertiary'))
+    .systemMaterial(this.immersiveEnabled ? topBarMaterial(true) : undefined)
     } else {
       this.circleIconButton($r('sys.symbol.person_crop_circle_fill'), 44, 26, () => {
         this.context.eventHub.emit(EVENT_TOP_MINE);
@@ -515,7 +518,8 @@ struct Index {
             .borderRadius(22)
             .layoutWeight(1)
             .height(44)
-            .systemMaterial(topBarMaterial(true))
+            .backgroundColor(this.immersiveEnabled ? Color.Transparent : $r('sys.color.comp_background_tertiary'))
+    .systemMaterial(this.immersiveEnabled ? topBarMaterial(true) : undefined)
             .onClick(() => {
               this.context.eventHub.emit(EVENT_TOP_SEARCH);
             })
@@ -656,12 +660,12 @@ struct Index {
         // 主题切换后默认遮罩色未刷新就成了按钮旁的灰色方块
         gradientMask: { maskColor: '#00000000', maskHeight: 1 },
         systemMaterialEffect: {
-          materialType: hdsMaterial.MaterialType.IMMERSIVE,
+          materialType: this.immersiveEnabled ? hdsMaterial.MaterialType.IMMERSIVE : hdsMaterial.MaterialType.NONE,
           // 浅色模式下 ADAPTIVE 几乎看不出材质，按钮很小，直接用最高等级
           materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
         }
       })
-      .barBackgroundColor('#00000000')
+      .barBackgroundColor(this.immersiveEnabled ? '#00000000' : $r('sys.color.comp_background_tertiary'))
       .onTabBarClick(() => {
         this.context.eventHub.emit(EVENT_TOP_MSG);
       })
@@ -838,12 +842,13 @@ struct Index {
     .barPosition(BarPosition.End)
     .vertical(false)
     .barHeight(56)
+    .barBackgroundColor(this.immersiveEnabled ? '#00000000' : $r('sys.color.comp_background_tertiary'))
     .barFloatingStyle({
       barBottomMargin: this.bottomAvoidAreaHeight,
       adaptToHandedness: this.handednessEnabled,
       barWidth: { smallWidth: Math.min(280, Math.max(160, this.winWidth - 32)), mediumWidth: 320, largeWidth: 360 },
       systemMaterialEffect: {
-        materialType: hdsMaterial.MaterialType.IMMERSIVE,
+        materialType: this.immersiveEnabled ? hdsMaterial.MaterialType.IMMERSIVE : hdsMaterial.MaterialType.NONE,
         materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
       }
     })

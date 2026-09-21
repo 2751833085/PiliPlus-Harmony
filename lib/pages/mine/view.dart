@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:async';
 
 import 'package:PiliPlus/common/assets.dart';
@@ -69,6 +70,8 @@ class _MediaPageState extends CommonPageState<MinePage>
     super.build(context);
     final theme = Theme.of(context);
     final secondary = theme.colorScheme.secondary;
+    if (HarmonyStyle.enabled(context))
+      return _buildHarmonyPage(theme, secondary);
     return SafeArea(
       // 避让安全区
       child: Column(
@@ -104,6 +107,142 @@ class _MediaPageState extends CommonPageState<MinePage>
       ),
     );
   }
+
+  Widget _buildHarmonyPage(ThemeData theme, Color accent) => SafeArea(
+    child: Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1120),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: _buildHeaderActions,
+            ),
+            Expanded(
+              child: refreshIndicator(
+                onRefresh: controller.onRefresh,
+                child: onBuild(
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final split =
+                          constraints.maxWidth >=
+                          840 * MediaQuery.textScalerOf(context).scale(16) / 16;
+                      Widget panel(
+                        Widget child, {
+                        EdgeInsets padding = const EdgeInsets.symmetric(
+                          vertical: 16,
+                        ),
+                      }) => Material(
+                        color: theme.colorScheme.surface,
+                        borderRadius: HarmonyTheme.cardRadius,
+                        clipBehavior: Clip.antiAlias,
+                        child: Padding(padding: padding, child: child),
+                      );
+                      final account = panel(_buildUserInfo(theme, accent));
+                      final actions = panel(
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final columns = constraints.maxWidth >= 480 ? 4 : 2;
+                            return Wrap(
+                              children: [
+                                for (final action in controller.list)
+                                  SizedBox(
+                                    width: constraints.maxWidth / columns,
+                                    child: InkWell(
+                                      onTap: action.onTap,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Column(
+                                          spacing: 10,
+                                          children: [
+                                            Container(
+                                              width: 44,
+                                              height: 44,
+                                              decoration: BoxDecoration(
+                                                color: accent.withValues(
+                                                  alpha: .1,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                              ),
+                                              child: Icon(
+                                                action.icon,
+                                                color: accent,
+                                                size: 24,
+                                              ),
+                                            ),
+                                            Text(
+                                              action.title,
+                                              textAlign: TextAlign.center,
+                                              style: theme.textTheme.bodyMedium,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      );
+                      final favorites = Obx(
+                        () => controller.loadingState.value is Loading
+                            ? const SizedBox.shrink()
+                            : panel(
+                                _buildFav(theme, accent),
+                                padding: EdgeInsets.zero,
+                              ),
+                      );
+                      return ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          Text(
+                            '我的',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          if (split)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: 340,
+                                  child: Column(
+                                    children: [
+                                      account,
+                                      const SizedBox(height: 16),
+                                      actions,
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(child: favorites),
+                              ],
+                            )
+                          else ...[
+                            account,
+                            const SizedBox(height: 16),
+                            actions,
+                            const SizedBox(height: 16),
+                            favorites,
+                          ],
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 
   Widget _buildActions(Color primary) {
     return Row(
@@ -452,10 +591,11 @@ class _MediaPageState extends CommonPageState<MinePage>
   Widget _buildFav(ThemeData theme, Color secondary) {
     return Column(
       children: [
-        Divider(
-          height: 20,
-          color: theme.dividerColor.withValues(alpha: 0.1),
-        ),
+        if (!HarmonyStyle.enabled(context))
+          Divider(
+            height: 20,
+            color: theme.dividerColor.withValues(alpha: 0.1),
+          ),
         ListTile(
           onTap: () => Get.toNamed('/fav')?.whenComplete(_autoRefresh),
           dense: true,

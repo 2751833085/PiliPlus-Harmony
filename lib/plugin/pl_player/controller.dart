@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
+import 'package:PiliPlus/harmony_adapt/fold_playback.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -604,11 +605,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       _cancelAutoExitFs();
       return;
     }
-    if (this.isFullScreen.value &&
-        (followExpandedFold ||
-            (OS.isHarmony &&
-                Pref.harmonyFoldOrientation &&
-                HarmonyChannel.foldTransitionActive))) {
+    if ((this.isFullScreen.value && followExpandedFold) ||
+        HarmonyChannel.foldTransitionActive ||
+        (_keepInlineAfterFold &&
+            !this.isFullScreen.value &&
+            !horizontalScreen)) {
       _cancelAutoExitFs();
       return; // The system knows the active panels; phone sensor axes do not.
     }
@@ -663,13 +664,41 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       HarmonyChannel.foldExpanded.value &&
       !HarmonyChannel.isWindowMode;
 
+  final _foldPlayback = HarmonyFoldPlayback();
+  bool get _keepInlineAfterFold =>
+      OS.isHarmony &&
+      Pref.harmonyFoldOrientation &&
+      !HarmonyChannel.isWindowMode &&
+      _foldPlayback.keepInline;
+
   void _onFoldPostureChanged() {
-    if (!isFullScreen.value ||
-        !Pref.harmonyFoldOrientation ||
-        HarmonyChannel.isWindowMode)
-      return;
     _cancelAutoExitFs();
-    changeOrientation(isVertical: isVertical);
+    _applyFoldPlaybackAction(
+      _foldPlayback.changed(
+        enabled: Pref.harmonyFoldOrientation,
+        windowMode: HarmonyChannel.isWindowMode,
+        expanded: HarmonyChannel.foldExpanded.value,
+        fullscreen: isFullScreen.value,
+        transitioning: _fsProcessing,
+      ),
+    );
+  }
+
+  void _applyFoldPlaybackAction(HarmonyFoldPlaybackAction action) {
+    switch (action) {
+      case HarmonyFoldPlaybackAction.none:
+        break;
+      case HarmonyFoldPlaybackAction.followSystem:
+        changeOrientation(isVertical: isVertical);
+      case HarmonyFoldPlaybackAction.exitFullscreen:
+        unawaited(
+          triggerFullScreen(
+            status: false,
+            isManualFS: false,
+            foldToInline: true,
+          ),
+        );
+    }
   }
 
   PlPlayerController._() {
@@ -1802,8 +1831,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   /// 不看这个时间戳，所以退出后立刻转回横屏依然能正常进全屏。
   DateTime _lastFsExitAt = DateTime.fromMillisecondsSinceEpoch(0);
   bool get suppressAutoFullScreen =>
+      _keepInlineAfterFold ||
       DateTime.now().difference(_lastFsExitAt) <
-      const Duration(milliseconds: 600);
+          const Duration(milliseconds: 600);
   // 每次读取而不缓存：播放器是跨页面存活的单例，缓存会让在设置页改完
   // 「默认全屏方向」后本次会话仍用旧值，表现为「改了没反应」
   FullScreenMode get mode => Pref.fullScreenMode;
@@ -1853,11 +1883,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     bool inAppFullScreen = false,
     DeviceOrientation? orientation,
     bool isManualFS = true,
+    bool foldToInline = false,
   }) async {
     if (isDesktopPip) return;
     if (isFullScreen.value == status) return;
 
     if (_fsProcessing) return;
+    if (status && _keepInlineAfterFold && !isManualFS) return;
+    if (status && isManualFS) _foldPlayback.reset();
     _fsProcessing = true;
     // 任何一次真正的全屏切换都作废挂起的自动退出确认，避免刚切完又被延迟退出。
     // 由 _scheduleAutoExitFullScreen 的回调调用时定时器已置空，这里是空操作。
@@ -1896,16 +1929,17 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           if (!removeSafeArea) {
             showSystemBar();
           }
-          if (orientation == null && mode == .none) {
+          if (!foldToInline && orientation == null && mode == .none) {
             return;
           }
           _lastFsExitAt = DateTime.now();
           // 鸿蒙mate80开启旋转锁定时，原生setPreferredOrientation可能长时间
           // 不返回。加超时保证退出
-          await resetScreenRotation()?.timeout(
-            const Duration(milliseconds: 500),
-            onTimeout: () {},
-          );
+          await (foldToInline ? harmonyForcePortrait() : resetScreenRotation())
+              ?.timeout(
+                const Duration(milliseconds: 500),
+                onTimeout: () {},
+              );
           // 退出全屏时，延迟等待方向旋转后改变组件
           if (OS.isHarmony && !HarmonyChannel.isWindowMode) {
             await Future<void>.delayed(const Duration(milliseconds: 32));
@@ -1917,6 +1951,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     } finally {
       _setFullScreen(status);
       _fsProcessing = false;
+      _applyFoldPlaybackAction(
+        _foldPlayback.transitionFinished(fullscreen: status),
+      );
     }
   }
 
@@ -2076,6 +2113,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     danmakuController = null;
     if (OS.isHarmony)
       HarmonyChannel.foldExpanded.removeListener(_onFoldPostureChanged);
+    _foldPlayback.reset();
     _stopOrientationListener();
     _disableAutoEnterPip();
     setPlayCallBack(null);

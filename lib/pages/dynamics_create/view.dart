@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:math' show max;
 
 import 'package:PiliPlus/common/style.dart';
@@ -73,31 +74,44 @@ class CreateDynPanel extends CommonRichTextPubPage {
     ({Object dynId, Object? repostDynId})? editConfig,
     VoidCallback? onSuccess,
   }) {
+    final harmony = HarmonyStyle.enabled(context);
     final wasVisible = HarmonyChannel.hdsBarVisible;
     HarmonyChannel.setShellBarsHidden(true);
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
       isScrollControlled: true,
-      builder: (context) => DynDraggableScrollableSheet(
-        snap: true,
-        expand: false,
-        initialChildSize: 1,
-        minChildSize: 0,
-        maxChildSize: 1,
-        snapSizes: const [1],
-        builder: (context, scrollController) => CreateDynPanel(
-          scrollController: scrollController,
-          title: title,
-          items: items,
-          pics: pics,
-          topic: topic,
-          isPrivate: isPrivate,
-          editConfig: editConfig,
-          replyOption: replyOption,
-          onSuccess: onSuccess,
-        ),
-      ),
+      constraints: harmony ? const BoxConstraints(maxWidth: 840) : null,
+      builder: (context) => harmony
+          ? CreateDynPanel(
+              title: title,
+              items: items,
+              pics: pics,
+              topic: topic,
+              isPrivate: isPrivate,
+              editConfig: editConfig,
+              replyOption: replyOption,
+              onSuccess: onSuccess,
+            )
+          : DynDraggableScrollableSheet(
+              snap: true,
+              expand: false,
+              initialChildSize: 1,
+              minChildSize: 0,
+              maxChildSize: 1,
+              snapSizes: const [1],
+              builder: (context, scrollController) => CreateDynPanel(
+                scrollController: scrollController,
+                title: title,
+                items: items,
+                pics: pics,
+                topic: topic,
+                isPrivate: isPrivate,
+                editConfig: editConfig,
+                replyOption: replyOption,
+                onSuccess: onSuccess,
+              ),
+            ),
     ).then((_) {
       if (wasVisible) HarmonyChannel.setShellBarsHidden(false);
     });
@@ -135,151 +149,160 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildAppBar(),
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            controller: widget.scrollController,
-            physics: const ClampingScrollPhysics(),
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Obx(
-                  () {
-                    final hasTopic = _topic.value != null;
-                    return Row(
-                      spacing: 10,
-                      children: [
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            overlayColor: hasTopic ? Colors.transparent : null,
-                            splashFactory: hasTopic
-                                ? NoSplash.splashFactory
-                                : null,
-                            shape: hasTopic
-                                ? null
-                                : RoundedRectangleBorder(
-                                    side: BorderSide(
-                                      color: hasTopic
-                                          ? Colors.transparent
-                                          : theme.colorScheme.outline
-                                                .withValues(alpha: 0.2),
-                                    ),
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(25),
-                                    ),
-                                  ),
-                            minimumSize: Size.zero,
-                            padding: hasTopic
-                                ? const EdgeInsets.symmetric(vertical: 12)
-                                : const EdgeInsets.all(12),
-                            visualDensity: VisualDensity.compact,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          onPressed: _onSelectTopic,
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                WidgetSpan(
-                                  alignment: PlaceholderAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 5),
-                                    child: Icon(
-                                      CustomIcons.topic_tag,
-                                      size: 18,
-                                      color: hasTopic
-                                          ? null
-                                          : theme.colorScheme.outline,
-                                    ),
-                                  ),
-                                ),
+    return SafeArea(
+      top: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildAppBar(),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              controller: widget.scrollController,
+              physics: const ClampingScrollPhysics(),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Obx(
+                    () {
+                      final hasTopic = _topic.value != null;
+                      return Row(
+                        spacing: 10,
+                        children: [
+                          Flexible(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                overlayColor: hasTopic
+                                    ? Colors.transparent
+                                    : null,
+                                splashFactory: hasTopic
+                                    ? NoSplash.splashFactory
+                                    : null,
+                                shape: hasTopic
+                                    ? null
+                                    : RoundedRectangleBorder(
+                                        side: BorderSide(
+                                          color: hasTopic
+                                              ? Colors.transparent
+                                              : theme.colorScheme.outline
+                                                    .withValues(alpha: 0.2),
+                                        ),
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(25),
+                                        ),
+                                      ),
+                                minimumSize: Size.zero,
+                                padding: hasTopic
+                                    ? const EdgeInsets.symmetric(vertical: 12)
+                                    : const EdgeInsets.all(12),
+                                visualDensity: VisualDensity.compact,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: _onSelectTopic,
+                              child: Text.rich(
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 TextSpan(
-                                  text: hasTopic
-                                      ? _topic.value!.second
-                                      : '选择话题',
-                                  style: TextStyle(
-                                    color: hasTopic
-                                        ? null
-                                        : theme.colorScheme.outline,
-                                  ),
+                                  children: [
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 5,
+                                        ),
+                                        child: Icon(
+                                          CustomIcons.topic_tag,
+                                          size: 18,
+                                          color: hasTopic
+                                              ? null
+                                              : theme.colorScheme.outline,
+                                        ),
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: hasTopic
+                                          ? _topic.value!.second
+                                          : '选择话题',
+                                      style: TextStyle(
+                                        color: hasTopic
+                                            ? null
+                                            : theme.colorScheme.outline,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                        if (hasTopic)
-                          iconButton(
-                            size: 22,
-                            iconSize: 16,
-                            icon: const Icon(Icons.clear),
-                            bgColor: theme.colorScheme.onInverseSurface,
-                            iconColor: theme.colorScheme.onSurfaceVariant,
-                            onPressed: () => _topic.value = null,
-                          ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 5),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  controller: _titleEditCtr,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  decoration: InputDecoration(
-                    hintText: '标题，选填20字',
-                    isDense: true,
-                    visualDensity: VisualDensity.standard,
-                    contentPadding: EdgeInsets.zero,
-                    border: const OutlineInputBorder(
-                      gapPadding: 0,
-                      borderSide: BorderSide.none,
-                    ),
-                    hintStyle: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.outline.withValues(alpha: 0.7),
-                    ),
+                          if (hasTopic)
+                            iconButton(
+                              size: 22,
+                              iconSize: 16,
+                              icon: const Icon(Icons.clear),
+                              bgColor: theme.colorScheme.onInverseSurface,
+                              iconColor: theme.colorScheme.onSurfaceVariant,
+                              onPressed: () => _topic.value = null,
+                            ),
+                        ],
+                      );
+                    },
                   ),
-                  inputFormatters: [LengthLimitingTextInputFormatter(20)],
                 ),
-              ),
-              const SizedBox(height: 5),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildEditWidget(),
-              ),
-              const SizedBox(height: 16),
-              _buildReserveItem(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Obx(() => _buildPubTimeWidget),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Obx(_buildReplyOptionWidget),
-                        const SizedBox(height: 5),
-                        Obx(_buildPrivateWidget),
-                      ],
+                const SizedBox(height: 5),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: _titleEditCtr,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    decoration: InputDecoration(
+                      hintText: '标题，选填20字',
+                      filled: false,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      isDense: true,
+                      visualDensity: VisualDensity.standard,
+                      contentPadding: EdgeInsets.zero,
+                      border: const OutlineInputBorder(
+                        gapPadding: 0,
+                        borderSide: BorderSide.none,
+                      ),
+                      hintStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.outline.withValues(alpha: 0.7),
+                      ),
                     ),
-                  ],
+                    inputFormatters: [LengthLimitingTextInputFormatter(20)],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              _buildImageList(),
-            ],
+                const SizedBox(height: 5),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _buildEditWidget(),
+                ),
+                const SizedBox(height: 16),
+                _buildReserveItem(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Obx(() => _buildPubTimeWidget),
+                      Obx(_buildReplyOptionWidget),
+                      Obx(_buildPrivateWidget),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _buildImageList(),
+              ],
+            ),
           ),
-        ),
-        _buildToolbar,
-        buildPanelContainer(Colors.transparent),
-      ],
+          _buildToolbar,
+          buildPanelContainer(),
+        ],
+      ),
     );
   }
 
@@ -324,55 +347,29 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
     ),
   );
 
-  Widget _buildAppBar() => Container(
-    height: 66,
-    padding: const EdgeInsets.all(16),
-    child: Stack(
-      clipBehavior: Clip.none,
+  Widget _buildAppBar() => Padding(
+    padding: const EdgeInsets.fromLTRB(12, 12, 16, 16),
+    child: Row(
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            width: 34,
-            height: 34,
-            child: IconButton(
-              tooltip: '返回',
-              style: ButtonStyle(
-                padding: const WidgetStatePropertyAll(EdgeInsets.zero),
-                backgroundColor: WidgetStatePropertyAll(
-                  theme.colorScheme.secondaryContainer,
-                ),
-              ),
-              onPressed: Get.back,
-              icon: Icon(
-                Icons.arrow_back_outlined,
-                size: 18,
-                color: theme.colorScheme.onSecondaryContainer,
-              ),
-            ),
-          ),
+        IconButton(
+          tooltip: '返回',
+          onPressed: Get.back,
+          icon: const Icon(Icons.arrow_back_outlined),
         ),
-        Center(
+        const SizedBox(width: 8),
+        Expanded(
           child: Text(
             _isEdit ? '编辑动态' : '发布动态',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Obx(
-            () => FilledButton.tonal(
-              onPressed: enablePublish.value ? onPublishThrottle : null,
-              style: FilledButton.styleFrom(
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                visualDensity: VisualDensity.compact,
-              ),
-              child: Text(_publishTime.value == null ? '发布' : '定时发布'),
-            ),
+        const SizedBox(width: 12),
+        Obx(
+          () => FilledButton(
+            onPressed: enablePublish.value ? onPublishThrottle : null,
+            child: Text(_publishTime.value == null ? '发布' : '定时发布'),
           ),
         ),
       ],
@@ -406,7 +403,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -462,7 +459,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
           )
           .toList(),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -570,8 +567,9 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
 
   Widget get _buildToolbar => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: Row(
+    child: Wrap(
       spacing: 16,
+      runSpacing: 8,
       children: [
         emojiBtn,
         atBtn,
@@ -720,6 +718,9 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
         hintText: '说点什么吧',
+        filled: false,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
         visualDensity: VisualDensity.standard,
         hintStyle: TextStyle(color: theme.colorScheme.outline),
         border: const OutlineInputBorder(

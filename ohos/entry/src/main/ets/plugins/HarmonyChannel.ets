@@ -506,6 +506,8 @@ export default class HarmonyChannel implements FlutterPlugin {
         AppStorage.setOrCreate('useNativeTabs', useNativeTabs);
         const handedness: boolean = call.argument('handedness') ?? false;
         AppStorage.setOrCreate('handednessEnabled', handedness);
+        const immersive: boolean = call.argument('immersive') ?? false;
+        AppStorage.setOrCreate('immersiveEnabled', immersive);
         result.success(true);
         break;
       }

@@ -67,6 +67,8 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
   f.fold(11);
   assert.equal(f.messages.at(-1).expanded, true, 'tri-fold must clear phone orientation before viewport changes');
   f.flush();
+  f.fold(0); f.flush();
+  assert.equal(f.messages.at(-1).expanded, true, 'unknown fold samples must not force an exit');
   f.fold(2);
   assert.equal(f.messages.at(-1).expanded, false);
   f.service.stop();

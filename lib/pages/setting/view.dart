@@ -110,7 +110,9 @@ class _SettingPageState extends State<SettingPage> {
   Widget build(BuildContext context) {
     return SimpleScaffold(
       appBar: AppBar(
-        title: _isPortrait ? const Text('设置') : Text(_type.title),
+        title: _isPortrait || HarmonyStyle.enabled(context)
+            ? const Text('设置')
+            : Text(_type.title),
       ),
       body: ViewSafeArea(
         child: _isPortrait
@@ -128,24 +130,39 @@ class _SettingPageState extends State<SettingPage> {
                   ),
                   Expanded(
                     flex: 6,
-                    child: switch (_type) {
-                      .privacySetting ||
-                      .recommendSetting ||
-                      .videoSetting ||
-                      .playSetting ||
-                      .styleSetting ||
-                      .extraSetting => CommonSetting(
-                        settingType: _type,
-                        showAppBar: false,
-                      ),
-                      .webdavSetting => const WebDavSettingPage(
-                        showAppBar: false,
-                      ),
-                      .experimentalSetting => const ExperimentalPage(
-                        showAppBar: false,
-                      ),
-                      .about => const AboutPage(showAppBar: false),
-                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (HarmonyStyle.enabled(context))
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(32, 16, 24, 8),
+                            child: Text(
+                              _type.title,
+                              style: theme.textTheme.titleLarge,
+                            ),
+                          ),
+                        Expanded(
+                          child: switch (_type) {
+                            .privacySetting ||
+                            .recommendSetting ||
+                            .videoSetting ||
+                            .playSetting ||
+                            .styleSetting ||
+                            .extraSetting => CommonSetting(
+                              settingType: _type,
+                              showAppBar: false,
+                            ),
+                            .webdavSetting => const WebDavSettingPage(
+                              showAppBar: false,
+                            ),
+                            .experimentalSetting => const ExperimentalPage(
+                              showAppBar: false,
+                            ),
+                            .about => const AboutPage(showAppBar: false),
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -184,7 +201,11 @@ class _SettingPageState extends State<SettingPage> {
     if (_isPortrait) {
       return null;
     } else {
-      return type == _type ? theme.colorScheme.onInverseSurface : null;
+      return type == _type
+          ? (HarmonyStyle.enabled(context)
+                ? theme.colorScheme.primary.withValues(alpha: .1)
+                : theme.colorScheme.onInverseSurface)
+          : null;
     }
   }
 
@@ -206,7 +227,26 @@ class _SettingPageState extends State<SettingPage> {
             (item) => ListTile(
               tileColor: _getTileColor(theme, item.type),
               onTap: () => _toPage(item.type),
-              leading: item.icon,
+              leading: HarmonyStyle.enabled(context)
+                  ? Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: .08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconTheme(
+                        data: IconThemeData(
+                          size: 21,
+                          color: theme.colorScheme.primary,
+                        ),
+                        child: item.icon,
+                      ),
+                    )
+                  : item.icon,
+              trailing: HarmonyStyle.enabled(context) && _isPortrait
+                  ? const Icon(Icons.chevron_right_rounded, size: 20)
+                  : null,
               title: Text(item.type.title, style: titleStyle),
               subtitle: item.subtitle == null
                   ? null
@@ -236,6 +276,8 @@ class _SettingPageState extends State<SettingPage> {
     ];
     return HarmonySettingsList(
       key: const PageStorageKey('settings-categories'),
+      bareIndices: const {0},
+      sectionBuilder: (index) => index <= _items.length - 1 ? '应用设置' : '账号与应用',
       padding: EdgeInsets.only(bottom: padding.bottom + 100),
       itemCount: children.length,
       itemBuilder: (context, index) => children[index],
@@ -323,39 +365,41 @@ class _SettingPageState extends State<SettingPage> {
     );
   }
 
-  Widget _buildSearchItem(ThemeData theme) => Padding(
-    padding: const EdgeInsets.only(
-      left: 16,
-      right: 16,
-      bottom: 8,
-    ),
-    child: Material(
-      color: theme.colorScheme.onInverseSurface,
-      borderRadius: const BorderRadius.all(Radius.circular(50)),
-      child: InkWell(
-        onTap: () => Get.toNamed('/settingsSearch'),
-        borderRadius: const BorderRadius.all(Radius.circular(50)),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  size: 18,
-                  applyTextScaling: true,
-                  Icons.search,
+  Widget _buildSearchItem(ThemeData theme) => HarmonyStyle.enabled(context)
+      ? HarmonySettingsSearch(onTap: () => Get.toNamed('/settingsSearch'))
+      : Padding(
+          padding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: 8,
+          ),
+          child: Material(
+            color: theme.colorScheme.onInverseSurface,
+            borderRadius: const BorderRadius.all(Radius.circular(50)),
+            child: InkWell(
+              onTap: () => Get.toNamed('/settingsSearch'),
+              borderRadius: const BorderRadius.all(Radius.circular(50)),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        size: 18,
+                        applyTextScaling: true,
+                        Icons.search,
+                      ),
+                      Text(
+                        ' 搜索',
+                        style: TextStyle(height: 1),
+                        strutStyle: StrutStyle(height: 1, leading: 0),
+                      ),
+                    ],
+                  ),
                 ),
-                Text(
-                  ' 搜索',
-                  style: TextStyle(height: 1),
-                  strutStyle: StrutStyle(height: 1, leading: 0),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
-    ),
-  );
+        );
 }

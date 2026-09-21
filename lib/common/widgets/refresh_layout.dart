@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
     show displacement, kIndicatorSize;
 import 'package:PiliPlus/common/widgets/slotted_layout_helper.dart';
@@ -15,12 +16,14 @@ class RefreshLayout
     required this.indicator,
     required this.body,
     this.edgeOffset = 0.0,
+    this.bodyOverscroll,
   });
 
   final Animation<double> scale;
   final Animation<double> position;
   final Widget? indicator;
   final Widget body;
+  final ValueListenable<double>? bodyOverscroll;
 
   /// 指示器出现位置相对顶边的下移量，对应 RefreshIndicator.edgeOffset。
   /// 上游 RefreshLayout 无此参数；鸿蒙沉浸顶栏下列表顶边在 ArkTS 顶栏
@@ -42,6 +45,7 @@ class RefreshLayout
       scale: scale,
       position: position,
       edgeOffset: edgeOffset,
+      bodyOverscroll: bodyOverscroll,
     );
   }
 
@@ -50,7 +54,9 @@ class RefreshLayout
     BuildContext context,
     RenderRefreshLayout renderObject,
   ) {
-    renderObject.edgeOffset = edgeOffset;
+    renderObject
+      ..edgeOffset = edgeOffset
+      ..bodyOverscroll = bodyOverscroll;
   }
 }
 
@@ -60,7 +66,9 @@ class RenderRefreshLayout extends RenderBox
     required this.scale,
     required this.position,
     double edgeOffset = 0.0,
+    ValueListenable<double>? bodyOverscroll,
   }) : _edgeOffset = edgeOffset {
+    this.bodyOverscroll = bodyOverscroll;
     scale.addListener(_scaleListener);
     position.addListener(_positionListener);
   }
@@ -68,6 +76,28 @@ class RenderRefreshLayout extends RenderBox
   final Animation<double> scale;
 
   final Animation<double> position;
+
+  ValueListenable<double>? _bodyOverscroll;
+  set bodyOverscroll(ValueListenable<double>? value) {
+    if (_bodyOverscroll == value) return;
+    _bodyOverscroll?.removeListener(_bodyPositionChanged);
+    _bodyOverscroll = value;
+    value?.addListener(_bodyPositionChanged);
+    _bodyPositionChanged();
+  }
+
+  void _bodyPositionChanged() {
+    if (!hasSize) return;
+    final target = (kIndicatorSize + displacement) * heightFactor * scaleFactor;
+    // A bouncing viewport already shifts its contents. Only supply the missing
+    // displacement, then hold it after the viewport springs back to zero.
+    final shift = _bodyOverscroll == null
+        ? 0.0
+        : (target - _bodyOverscroll!.value).clamp(0.0, target);
+    setOffset(body, Offset(0, shift));
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
 
   double _edgeOffset;
   double get edgeOffset => _edgeOffset;
@@ -77,6 +107,7 @@ class RenderRefreshLayout extends RenderBox
     }
     _edgeOffset = value;
     _layoutIndicator();
+    _bodyPositionChanged();
     markNeedsPaint();
   }
 
@@ -88,6 +119,7 @@ class RenderRefreshLayout extends RenderBox
     }
     _heightFactor = value;
     _layoutIndicator();
+    _bodyPositionChanged();
     markNeedsPaint();
   }
 
@@ -99,6 +131,7 @@ class RenderRefreshLayout extends RenderBox
     }
     _scaleFactor = value;
     _layoutIndicator();
+    _bodyPositionChanged();
     markNeedsPaint();
   }
 
@@ -112,6 +145,7 @@ class RenderRefreshLayout extends RenderBox
 
   @override
   void dispose() {
+    _bodyOverscroll?.removeListener(_bodyPositionChanged);
     scale.removeListener(_scaleListener);
     position.removeListener(_positionListener);
     super.dispose();
@@ -127,6 +161,7 @@ class RenderRefreshLayout extends RenderBox
 
     final body = this.body..layout(constraints);
     setOffset(body, .zero);
+    _bodyPositionChanged();
 
     _layoutIndicator();
   }
@@ -178,6 +213,12 @@ class RenderRefreshLayout extends RenderBox
     } else {
       layer = null;
     }
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    final offset = getOffset(child);
+    transform.translateByDouble(offset.dx, offset.dy, 0, 1);
   }
 
   @override

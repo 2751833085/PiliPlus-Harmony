@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_settings_list.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/models/common/setting_type.dart';
@@ -51,15 +53,27 @@ class _CommonSettingState extends State<CommonSetting> {
     final showAppBar = widget.showAppBar;
     return SimpleScaffold(
       appBar: showAppBar ? AppBar(title: Text(widget.settingType.title)) : null,
-      body: HarmonySettingsList(
-        key: ValueKey(widget.settingType),
-        padding: EdgeInsets.only(
-          left: showAppBar ? padding.left : 0,
-          right: showAppBar ? padding.right : 0,
-          bottom: padding.bottom + 100,
-        ),
-        itemCount: settings.length,
-        itemBuilder: (context, index) => settings[index].widget,
+      body: ValueListenableBuilder<int>(
+        valueListenable: HarmonyAppearance.revision,
+        builder: (context, _, _) {
+          final rows = HarmonyStyle.enabled(context)
+              ? <SettingsModel>[
+                  for (final group in settings.map((e) => e.section).toSet())
+                    ...settings.where((e) => e.section == group),
+                ]
+              : settings;
+          return HarmonySettingsList(
+            sectionBuilder: (index) => rows[index].section,
+            key: ValueKey(widget.settingType),
+            padding: EdgeInsets.only(
+              left: showAppBar ? padding.left : 0,
+              right: showAppBar ? padding.right : 0,
+              bottom: padding.bottom + 100,
+            ),
+            itemCount: rows.length,
+            itemBuilder: (context, index) => rows[index].widget,
+          );
+        },
       ),
     );
   }

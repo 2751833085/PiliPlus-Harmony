@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'dart:io';
 
 import 'package:PiliPlus/common/widgets/pair.dart';
@@ -767,11 +768,30 @@ abstract final class Pref {
   static bool get enableLGBar =>
       _setting.get(SettingBoxKey.enableLGBar, defaultValue: false);
 
+  static bool get biliPlayerControls =>
+      _setting.get(SettingBoxKey.biliPlayerControls, defaultValue: false);
+
   static bool get harmonyFoldOrientation =>
       _setting.get(SettingBoxKey.harmonyFoldOrientation, defaultValue: true);
   static bool get harmonyUI =>
       OS.isHarmony &&
       _setting.get(SettingBoxKey.harmonyUI, defaultValue: false);
+
+  static HarmonyNavigation get harmonyNavigation =>
+      HarmonyNavigation.values[(_setting.get(
+                SettingBoxKey.harmonyNavigation,
+                defaultValue: 0,
+              )
+              as int)
+          .clamp(0, HarmonyNavigation.values.length - 1)];
+
+  static bool get harmonyImmersive =>
+      harmonyUI &&
+      _setting.get(SettingBoxKey.harmonyImmersive, defaultValue: true);
+
+  static bool get harmonyNativeColors =>
+      harmonyUI &&
+      _setting.get(SettingBoxKey.harmonyNativeColors, defaultValue: false);
 
   static bool get harmonyKeepDock =>
       _setting.get(SettingBoxKey.harmonyKeepDock, defaultValue: true);

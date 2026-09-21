@@ -20,7 +20,7 @@ bash tool/harmony.sh release
 | 版本 | 定位 | 入口 |
 | --- | --- | --- |
 | V1 | 功能移植与回退基线，标签 `harmony-v1.0.0` | [版本记录](releases/v1.0.0/README.md) |
-| V2 | 鸿蒙体验改造，分支 `harmony/v2-native-ui` | [计划与验收](docs/v2/PLAN.md) |
+| V2 RC1 | 鸿蒙体验候选版，已签名并在 Mate XTS 覆盖安装 | [HAP 与版本记录](releases/v2.0.0-rc1/README.md) · [验证记录](docs/v2/VALIDATION.md) |
 
 [更新记录](CHANGELOG.md) · [开发约定](CONTRIBUTING.md) · [文档目录](docs/README.md) · [147 项功能核对](docs/harmony/feature-matrix.json)
 

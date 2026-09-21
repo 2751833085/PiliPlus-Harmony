@@ -54,6 +54,12 @@ abstract final class ThemeUtils {
     required bool isDynamic,
     bool isDark = false,
   }) {
+    if (Pref.harmonyNativeColors) {
+      colorScheme = HarmonyTheme.nativeColors(
+        isDark ? Brightness.dark : Brightness.light,
+      );
+      isDynamic = false;
+    }
     final appFontWeight = Pref.appFontWeight.clamp(
       -1,
       FontWeight.values.length - 1,
@@ -102,8 +108,7 @@ abstract final class ThemeUtils {
     //（含自定义导入字体）。鸿蒙没有枚举系统字体的通道，用户不导入字体时它为
     // null，回落到鸿蒙一贯的 HarmonyOS Sans；在本仓库的安卓 / Windows / Linux
     // 构建上则由用户的选择覆盖。
-    late final fontFamily =
-        FontUtils.fontFamily ?? "HarmonyOS Sans";
+    late final fontFamily = FontUtils.fontFamily ?? "HarmonyOS Sans";
     late final textStyle = TextStyle(
       fontWeight: fontWeight,
       fontFamily: fontFamily,
@@ -233,8 +238,8 @@ abstract final class ThemeUtils {
         },
       ),
     );
-    if (OS.isHarmony && Pref.harmonyUI) theme = HarmonyTheme.apply(theme);
-    if (isDark && Pref.isPureBlackTheme) {
+    if (OS.isHarmony && Pref.harmonyUI) theme = HarmonyTheme.apply(theme, immersive: Pref.harmonyImmersive);
+    if (isDark && Pref.isPureBlackTheme && !Pref.harmonyNativeColors) {
       return darkenTheme(theme);
     }
     return theme;

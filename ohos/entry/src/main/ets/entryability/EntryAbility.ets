@@ -7,6 +7,7 @@ import type Want from "@ohos.app.ability.Want";
 import window from "@ohos.window";
 import { FlutterAbility, FlutterEngine, MethodChannel } from "@ohos/flutter_ohos";
 import { GeneratedPluginRegistrant } from "../plugins/GeneratedPluginRegistrant";
+import HarmonyLoadingPlugin from '../plugins/HarmonyLoadingPlugin';
 import HarmonyChannel from "../plugins/HarmonyChannel";
 
 /// 跨设备接续数据在 want.parameters 中的键
@@ -46,6 +47,7 @@ export default class EntryAbility extends FlutterAbility {
     super.configureFlutterEngine(flutterEngine);
     GeneratedPluginRegistrant.registerWith(flutterEngine);
     flutterEngine.getPlugins()?.add(this.harmonyChannel);
+    flutterEngine.getPlugins()?.add(new HarmonyLoadingPlugin());
     this.flutterChannel = this.harmonyChannel.getChannel();
     this.initFontWeightListener();
     this.initShellEventListeners();

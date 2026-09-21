@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+import 'package:os_type/os_type.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -28,7 +30,8 @@ class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
   );
 
   void _syncAnimation() {
-    if (widget.value == null &&
+    if (!OS.isHarmony &&
+        widget.value == null &&
         !MediaQuery.disableAnimationsOf(context) &&
         TickerMode.of(context)) {
       if (!_orbit.isAnimating) _orbit.repeat();
@@ -64,13 +67,35 @@ class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
     child: RepaintBoundary(
       child: SizedBox.square(
         dimension: widget.size,
-        child: CustomPaint(
-          painter: _PlanetPainter(
-            _orbit,
-            widget.color ?? Theme.of(context).colorScheme.primary,
-            widget.value,
-          ),
-        ),
+        child: OS.isHarmony
+            ? LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth < 1 || constraints.maxHeight < 1)
+                    return const SizedBox.shrink();
+                  final color =
+                      (widget.color ?? Theme.of(context).colorScheme.primary)
+                          .toARGB32();
+                  final animate =
+                      widget.value == null &&
+                      !MediaQuery.disableAnimationsOf(context) &&
+                      TickerMode.of(context);
+                  return IgnorePointer(
+                    child: OhosView(
+                      key: ValueKey((color, animate)),
+                      viewType: 'piliplus/native-loading',
+                      creationParamsCodec: const StandardMessageCodec(),
+                      creationParams: {'color': color, 'animate': animate},
+                    ),
+                  );
+                },
+              )
+            : CustomPaint(
+                painter: _PlanetPainter(
+                  _orbit,
+                  widget.color ?? Theme.of(context).colorScheme.primary,
+                  widget.value,
+                ),
+              ),
       ),
     ),
   );

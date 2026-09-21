@@ -12,9 +12,11 @@ class AppBarAni extends StatelessWidget {
     required this.isFullScreen,
     required this.removeSafeArea,
     this.topInset,
+    this.fadeOnly = false,
   });
 
   final Widget child;
+  final bool fadeOnly;
   final AnimationController controller;
   final bool isTop;
   final bool isFullScreen;
@@ -82,6 +84,18 @@ class AppBarAni extends StatelessWidget {
       // 仅顶部栏需要，底部栏不避让
       result = TopInsetPadding(inset: isTop ? top : null, child: result);
     }
+    if (fadeOnly)
+      return AnimatedBuilder(
+        animation: controller,
+        child: result,
+        builder: (context, child) => IgnorePointer(
+          ignoring: controller.value == 0,
+          child: ExcludeSemantics(
+            excluding: controller.value == 0,
+            child: FadeTransition(opacity: controller, child: child),
+          ),
+        ),
+      );
     return SlideTransition(
       position: controller.drive(isTop ? _topPos : _bottomPos),
       child: DecoratedBox(

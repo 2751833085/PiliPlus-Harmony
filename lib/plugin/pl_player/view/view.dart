@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_hand_dock.dart';
 import 'package:PiliPlus/harmony_adapt/outlined_subtitles.dart';
@@ -275,9 +276,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
     _transformationController = TransformationController();
 
+    HarmonyAppearance.revision.addListener(_refreshControlAppearance);
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 100),
+      duration: Duration(milliseconds: Pref.biliPlayerControls ? 200 : 100),
     );
     videoController = plPlayerController.videoController!;
 
@@ -434,6 +436,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     _scaleGestureRecognizer.dispose();
     _brightnessListener?.cancel();
     _controlsListener?.cancel();
+    HarmonyAppearance.revision.removeListener(_refreshControlAppearance);
     _animationController.dispose();
     _transformationController.dispose();
     _removeDmAction();
@@ -444,10 +447,19 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   // 动态构建底部控制条
+  void _refreshControlAppearance() {
+    if (!mounted) return;
+    _animationController.duration = Duration(
+      milliseconds: Pref.biliPlayerControls ? 200 : 100,
+    );
+    setState(() {});
+  }
+
   Widget buildBottomControl(
     VideoDetailController videoDetailController,
-    bool isLandscape,
-  ) {
+    bool isLandscape, [
+    Widget? progress,
+  ]) {
     final videoDetail = introController.videoDetail.value;
     final isSeason = videoDetail.ugcSeason != null;
     final isPart = videoDetail.pages != null && videoDetail.pages!.length > 1;
@@ -957,6 +969,88 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       if (isNotFileSource && flag) .qa,
       if (!plPlayerController.isDesktopPip) .fullscreen,
     ];
+    if (Pref.biliPlayerControls && progress != null) {
+      final controls = [...userSpecifyItemLeft, ...userSpecifyItemRight]
+          .where(
+            (e) =>
+                e != BottomControlType.playOrPause &&
+                e != BottomControlType.time &&
+                e != BottomControlType.fullscreen,
+          )
+          .toSet();
+      const labels = <BottomControlType, String>{
+        BottomControlType.pre: '上一集',
+        BottomControlType.next: '下一集',
+        BottomControlType.episode: '选集',
+        BottomControlType.fit: '画面比例',
+        BottomControlType.subtitle: '字幕',
+        BottomControlType.speed: '倍速',
+        BottomControlType.viewPoints: '章节',
+        BottomControlType.superResolution: '超分辨率',
+        BottomControlType.dmChart: '弹幕趋势',
+        BottomControlType.qa: '画质',
+        BottomControlType.aiTranslate: '字幕翻译',
+      };
+      return Row(
+        children: [
+          progressWidget(BottomControlType.playOrPause),
+          Expanded(child: progress),
+          progressWidget(BottomControlType.time),
+          IconButton(
+            tooltip: '更多播放控制',
+            iconSize: 20,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 40),
+            padding: const EdgeInsets.all(6),
+            icon: const Icon(Icons.more_horiz, color: Colors.white),
+            onPressed: () {
+              plPlayerController.controls = true;
+              showModalBottomSheet<void>(
+                context: context,
+                useSafeArea: true,
+                isScrollControlled: true,
+                backgroundColor: const Color(0xFF242428),
+                builder: (context) => SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      20,
+                      16,
+                      MediaQuery.viewPaddingOf(context).bottom + 20,
+                    ),
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 20,
+                      children: [
+                        for (final control in controls)
+                          SizedBox(
+                            width: 100,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                progressWidget(control),
+                                const SizedBox(height: 6),
+                                Text(
+                                  labels[control] ?? '',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ).whenComplete(() => plPlayerController.controls = true);
+            },
+          ),
+          if (!plPlayerController.isDesktopPip)
+            progressWidget(BottomControlType.fullscreen),
+        ],
+      );
+    }
     return PlayerBar(
       children: [
         Row(
@@ -1690,6 +1784,47 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           ),
         ),
 
+        if (Pref.biliPlayerControls)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: FadeTransition(
+                opacity: _animationController,
+                child: const Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xA6000000),
+                            Colors.transparent,
+                            Colors.transparent,
+                            Color(0xB3000000),
+                          ],
+                          stops: [0, .3, .65, 1],
+                        ),
+                      ),
+                    ),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0x40000000),
+                            Colors.transparent,
+                            Colors.transparent,
+                            Color(0x40000000),
+                          ],
+                          stops: [0, .18, .82, 1],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         // 头部、底部控制条
         Positioned.fill(
           top: -1,
@@ -1702,6 +1837,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   AppBarAni(
                     isTop: true,
                     controller: _animationController,
+                    fadeOnly: Pref.biliPlayerControls,
                     isFullScreen: isFullScreen,
                     removeSafeArea: plPlayerController.removeSafeArea,
                     topInset: widget.topInset,
@@ -1716,6 +1852,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   AppBarAni(
                     isTop: false,
                     controller: _animationController,
+                    fadeOnly: Pref.biliPlayerControls,
                     isFullScreen: isFullScreen,
                     removeSafeArea: plPlayerController.removeSafeArea,
                     child: HarmonyHandDock(
@@ -1731,10 +1868,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                             isFullScreen: isFullScreen,
                             controller: plPlayerController,
                             videoDetailController: videoDetailController,
-                            buildBottomControl: () => buildBottomControl(
-                              videoDetailController,
-                              maxWidth > maxHeight,
-                            ),
+                            buildBottomControl: (progress) =>
+                                buildBottomControl(
+                                  videoDetailController,
+                                  maxWidth > maxHeight,
+                                  progress,
+                                ),
                           ),
                     ),
                   ),

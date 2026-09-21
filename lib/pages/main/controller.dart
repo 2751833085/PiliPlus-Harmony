@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -90,7 +91,9 @@ class MainController extends GetxController
   }
 
   final floatingNavBar = Pref.floatingNavBar;
-  final useSideBar = Pref.useSideBar;
+  bool get useSideBar => Pref.harmonyUI
+      ? Pref.harmonyNavigation == HarmonyNavigation.sideBar
+      : Pref.useSideBar;
   final mainTabBarView = Pref.mainTabBarView;
   late final optTabletNav = Pref.optTabletNav;
 
@@ -193,15 +196,17 @@ class MainController extends GetxController
     // 底栏/顶栏均自 API 23（鸿蒙 6.1）起可用：ArkTS 侧 API 26+ 走 Navigation
     // 标题栏 + ArkUI systemMaterial，API 23~25 走 HdsNavigation 标题栏材质
     final useHdsBar =
-        (Pref.harmonyUI || Pref.enableHdsBar) && sdkApiVersion > 22;
-    final useHdsTopBar =
-        (Pref.harmonyUI || Pref.enableHdsTopBar) && sdkApiVersion > 22;
+        Pref.harmonyUI &&
+        Pref.harmonyNavigation == HarmonyNavigation.floatingDock &&
+        sdkApiVersion > 22;
+    final useHdsTopBar = Pref.harmonyUI && sdkApiVersion > 22;
     useNativeTabs.value = useHdsBar;
     useNativeTopBar.value = useHdsTopBar;
     _syncNativeTopBarActive();
     HarmonyChannel.setShellBars(
       useNativeTabs: useHdsBar,
       handedness: Pref.harmonyHandedness,
+      immersive: Pref.harmonyImmersive,
     );
     HarmonyChannel.setHandednessEnabled(Pref.harmonyHandedness);
     HarmonyChannel.setShellTopBar(useNativeTopBar: useHdsTopBar);

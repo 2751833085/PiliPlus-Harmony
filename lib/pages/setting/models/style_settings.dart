@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -63,6 +64,7 @@ List<SettingsModel> get styleSettings => [
   if (Platform.isLinux) _useSSDModel(),
   SwitchModel(
     title: '横屏适配',
+    section: '界面与布局',
     subtitle: '启用横屏布局与逻辑，平板、折叠屏等可开启；建议全屏方向设为【不改变当前方向】',
     leading: const Icon(Icons.phonelink_outlined),
     setKey: SettingBoxKey.horizontalScreen,
@@ -77,6 +79,8 @@ List<SettingsModel> get styleSettings => [
   ),
   const SwitchModel(
     title: '改用侧边栏',
+    section: '导航与首页',
+    disabledReason: HarmonyAppearance.navigationUnavailable,
     subtitle: '开启后底栏与顶栏被替换，且相关设置失效',
     leading: Icon(Icons.chrome_reader_mode_outlined),
     setKey: SettingBoxKey.useSideBar,
@@ -85,24 +89,29 @@ List<SettingsModel> get styleSettings => [
   ),
   NormalModel(
     title: 'App字体设置',
+    section: '界面与布局',
     subtitle: '点击设置',
     leading: const Icon(Icons.text_fields),
     onTap: (context, setState) => Get.toNamed('/fontSetting'),
   ),
   NormalModel(
     title: '界面缩放',
+    section: '界面与布局',
     getSubtitle: () => '当前缩放比例：${Pref.uiScale.toStringAsFixed(2)}',
     leading: const Icon(Icons.zoom_in_outlined),
     onTap: _showUiScaleDialog,
   ),
   NormalModel(
     title: '页面过渡动画',
+    section: '界面与布局',
     leading: const Icon(Icons.animation),
     getSubtitle: () => '当前：${Pref.pageTransition.name}',
     onTap: _showTransitionDialog,
   ),
   const SwitchModel(
     title: '优化平板导航栏',
+    section: '导航与首页',
+    disabledReason: HarmonyAppearance.navigationUnavailable,
     leading: Icon(Icons.auto_fix_high),
     setKey: SettingBoxKey.optTabletNav,
     defaultVal: true,
@@ -110,6 +119,8 @@ List<SettingsModel> get styleSettings => [
   ),
   const SwitchModel(
     title: 'MD3样式底栏',
+    section: '导航与首页',
+    disabledReason: HarmonyAppearance.navigationUnavailable,
     subtitle: 'Material You设计规范底栏，关闭可变窄',
     leading: Icon(Icons.design_services_outlined),
     setKey: SettingBoxKey.enableMYBar,
@@ -118,6 +129,8 @@ List<SettingsModel> get styleSettings => [
   ),
   const SwitchModel(
     title: '悬浮底栏',
+    section: '导航与首页',
+    disabledReason: HarmonyAppearance.navigationUnavailable,
     leading: Icon(MdiIcons.soundbar),
     setKey: SettingBoxKey.floatingNavBar,
     defaultVal: false,
@@ -126,24 +139,28 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     leading: const Icon(Icons.calendar_view_week_outlined),
     title: '列表宽度（dp）限制',
+    section: '界面与布局',
     getSubtitle: () =>
         '当前: 主页${Pref.recommendCardWidth.toInt()}dp 其他${Pref.smallCardWidth.toInt()}dp，屏幕宽度:${DoubleExt(MediaQuery.widthOf(Get.context!)).toPrecision(2)}dp。宽度越小列数越多。',
     onTap: _showCardWidthDialog,
   ),
   const SwitchModel(
     title: '播放页移除安全边距',
+    section: '界面与布局',
     leading: Icon(Icons.fit_screen_outlined),
     setKey: SettingBoxKey.removeSafeArea,
     defaultVal: false,
   ),
   const SwitchModel(
     title: '视频播放页使用深色主题',
+    section: '界面与布局',
     leading: Icon(Icons.dark_mode_outlined),
     setKey: SettingBoxKey.darkVideoPage,
     defaultVal: false,
   ),
   SwitchModel(
     title: '动态页启用瀑布流',
+    section: '动态与消息',
     subtitle: '关闭会显示为单列',
     leading: const Icon(Icons.view_array_outlined),
     setKey: SettingBoxKey.dynamicsWaterfallFlow,
@@ -152,6 +169,7 @@ List<SettingsModel> get styleSettings => [
   ),
   PopupModel(
     title: '动态页UP主显示位置',
+    section: '动态与消息',
     leading: const Icon(Icons.person_outlined),
     value: () => Pref.upPanelPosition,
     items: UpPanelPosition.values,
@@ -164,6 +182,7 @@ List<SettingsModel> get styleSettings => [
   ),
   const SwitchModel(
     title: '动态页显示所有已关注UP主',
+    section: '动态与消息',
     leading: Icon(Icons.people_alt_outlined),
     setKey: SettingBoxKey.dynamicsShowAllFollowedUp,
     defaultVal: false,
@@ -171,6 +190,7 @@ List<SettingsModel> get styleSettings => [
   ),
   const SwitchModel(
     title: '动态页展开正在直播UP列表',
+    section: '动态与消息',
     leading: Icon(Icons.live_tv),
     setKey: SettingBoxKey.expandDynLivePanel,
     defaultVal: false,
@@ -178,6 +198,7 @@ List<SettingsModel> get styleSettings => [
   ),
   PopupModel(
     title: '动态未读标记',
+    section: '动态与消息',
     leading: const Icon(Icons.motion_photos_on_outlined),
     value: () => Pref.dynamicBadgeType,
     items: DynamicBadgeMode.values,
@@ -185,6 +206,7 @@ List<SettingsModel> get styleSettings => [
   ),
   PopupModel(
     title: '消息未读标记',
+    section: '动态与消息',
     leading: const Icon(MdiIcons.bellBadgeOutline),
     value: () => Pref.msgBadgeMode,
     items: DynamicBadgeMode.values,
@@ -193,12 +215,14 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     onTap: _showMsgUnReadDialog,
     title: '消息未读类型',
+    section: '动态与消息',
     leading: const Icon(MdiIcons.bellCogOutline),
     getSubtitle: () =>
         '当前消息类型：${Pref.msgUnReadTypeV2.map((item) => item.title).join('、')}',
   ),
   PopupModel(
     title: '顶/底栏收起类型',
+    section: '导航与首页',
     leading: const Icon(MdiIcons.arrowExpandVertical),
     value: () => Pref.barHideType,
     items: BarHideType.values,
@@ -211,6 +235,7 @@ List<SettingsModel> get styleSettings => [
   ),
   SwitchModel(
     title: '首页顶栏收起',
+    section: '导航与首页',
     subtitle: '首页列表滑动时，收起顶栏',
     leading: const Icon(Icons.vertical_align_top_outlined),
     setKey: SettingBoxKey.hideTopBar,
@@ -219,6 +244,7 @@ List<SettingsModel> get styleSettings => [
   ),
   SwitchModel(
     title: '首页底栏收起',
+    section: '导航与首页',
     subtitle: '首页列表滑动时，收起底栏',
     leading: const Icon(Icons.vertical_align_bottom_outlined),
     setKey: SettingBoxKey.hideBottomBar,
@@ -242,6 +268,7 @@ List<SettingsModel> get styleSettings => [
       },
     ),
     title: '图片质量',
+    section: '主题与显示',
     subtitle: '选择合适的图片清晰度，上限100%',
     leading: const Icon(Icons.image_outlined),
     getTrailing: (theme) => Text(
@@ -260,6 +287,7 @@ List<SettingsModel> get styleSettings => [
       },
     ),
     title: '查看大图质量',
+    section: '主题与显示',
     subtitle: '选择合适的图片清晰度，上限100%',
     leading: const Icon(Icons.image_outlined),
     getTrailing: (theme) => Text(
@@ -270,6 +298,7 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     onTap: _showReduceColorDialog,
     title: '深色下图片颜色叠加',
+    section: '主题与显示',
     subtitle: '显示颜色=图片原色x所选颜色，大图查看不受影响',
     leading: const Icon(Icons.format_color_fill_outlined),
     getTrailing: (theme) => Container(
@@ -284,6 +313,7 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     leading: const Icon(Icons.opacity_outlined),
     title: '气泡提示不透明度',
+    section: '主题与显示',
     subtitle: '自定义气泡提示(Toast)不透明度',
     getTrailing: (theme) => Text(
       CustomToast.toastOpacity.toStringAsFixed(1),
@@ -294,6 +324,7 @@ List<SettingsModel> get styleSettings => [
   PopupModel(
     leading: const Icon(Icons.flashlight_on_outlined),
     title: '主题模式',
+    section: '主题与显示',
     value: () => Pref.themeType,
     items: ThemeType.values,
     onSelected: _setThemeType,
@@ -301,6 +332,8 @@ List<SettingsModel> get styleSettings => [
   SwitchModel(
     leading: const Icon(Icons.invert_colors),
     title: '纯黑主题',
+    section: '主题与显示',
+    disabledReason: HarmonyAppearance.colorsUnavailable,
     setKey: SettingBoxKey.isPureBlackTheme,
     defaultVal: false,
     onChanged: (value) {
@@ -313,6 +346,8 @@ List<SettingsModel> get styleSettings => [
     onTap: (context, setState) => Get.toNamed('/colorSetting'),
     leading: const Icon(Icons.color_lens_outlined),
     title: '应用主题',
+    section: '主题与显示',
+    disabledReason: HarmonyAppearance.colorsUnavailable,
     getSubtitle: () => '当前主题：${Pref.dynamicColor ? '动态取色' : '指定颜色'}',
     getTrailing: (theme) {
       if (Pref.dynamicColor) {
@@ -338,6 +373,7 @@ List<SettingsModel> get styleSettings => [
   PopupModel(
     leading: const Icon(Icons.home_outlined),
     title: '默认启动页',
+    section: '导航与首页',
     value: () => Pref.defaultHomePage,
     items: NavigationBarType.values,
     onSelected: (value, setState) {
@@ -349,6 +385,7 @@ List<SettingsModel> get styleSettings => [
   ),
   const NormalModel(
     title: '滑动动画弹簧参数',
+    section: '界面与布局',
     leading: Icon(Icons.chrome_reader_mode_outlined),
     onTap: _showSpringDialog,
   ),
@@ -362,6 +399,7 @@ List<SettingsModel> get styleSettings => [
       },
     ),
     title: '首页标签页',
+    section: '导航与首页',
     subtitle: '删除或调换首页标签页',
     leading: const Icon(Icons.toc_outlined),
   ),
@@ -375,11 +413,13 @@ List<SettingsModel> get styleSettings => [
       },
     ),
     title: 'Navbar编辑',
+    section: '导航与首页',
     subtitle: '删除或调换Navbar',
     leading: const Icon(Icons.toc_outlined),
   ),
   SwitchModel(
     title: '返回时直接退出',
+    section: '导航与首页',
     subtitle: '开启后在主页任意tab按返回键都直接退出，关闭则先回到Navbar的第一个tab',
     leading: const Icon(Icons.exit_to_app_outlined),
     setKey: SettingBoxKey.directExitOnBack,
@@ -390,6 +430,7 @@ List<SettingsModel> get styleSettings => [
     NormalModel(
       onTap: (context, setState) => Get.toNamed('/displayModeSetting'),
       title: '屏幕帧率',
+      section: '界面与布局',
       leading: const Icon(Icons.autofps_select_outlined),
     ),
 ];

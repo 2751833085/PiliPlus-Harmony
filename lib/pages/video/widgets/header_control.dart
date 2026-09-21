@@ -439,12 +439,13 @@ class HeaderControlState extends State<HeaderControl>
                       ? ShutdownPanel(
                           buildCountdownText: (text) =>
                               Text(text == null ? '已结束' : '剩余 $text'),
-                          builder: (
-                            context,
-                            countdown,
-                            onCountdown,
-                            setState,
-                          ) => countdown,
+                          builder:
+                              (
+                                context,
+                                countdown,
+                                onCountdown,
+                                setState,
+                              ) => countdown,
                         )
                       : null,
                 ),
@@ -1775,11 +1776,13 @@ class HeaderControlState extends State<HeaderControl>
       foregroundColor: Colors.white,
       primary: false,
       automaticallyImplyLeading: false,
-      toolbarHeight: showFSActionItem ? 112 : null,
+      toolbarHeight: showFSActionItem
+          ? 112
+          : (Pref.biliPlayerControls ? 48 : null),
       flexibleSpace: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 11),
+          SizedBox(height: Pref.biliPlayerControls ? 4 : 11),
           Row(
             children: [
               SizedBox(

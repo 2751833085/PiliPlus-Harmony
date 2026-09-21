@@ -224,6 +224,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   RefreshIndicatorStatus? _status;
   late Future<void> _pendingRefreshFuture;
   double? _dragOffset;
+  final _bodyOverscroll = ValueNotifier<double>(0);
 
   // 鸿蒙保留kDragContainerExtentPercentage= Pref.refreshDragPercentage所需
   double _containerExtent = 0.0;
@@ -278,6 +279,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   @protected
   @override
   void dispose() {
+    _bodyOverscroll.dispose();
     _positionController.dispose();
     _scaleController.dispose();
     super.dispose();
@@ -322,6 +324,11 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
+    if (notification.metrics.axis != Axis.vertical) return false;
+    _bodyOverscroll.value = (-notification.metrics.pixels).clamp(
+      0.0,
+      double.infinity,
+    );
     final viewportDimension = notification.metrics.viewportDimension;
     if (viewportDimension > 0) {
       _containerExtent = viewportDimension;
@@ -447,7 +454,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     assert(_status != RefreshIndicatorStatus.snap);
     final Completer<void> completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
-    _status = RefreshIndicatorStatus.snap;
+    setState(() => _status = RefreshIndicatorStatus.snap);
     _positionController
         .animateTo(
           1.0 / _kDragSizeFactorLimit,
@@ -460,7 +467,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
               _status = RefreshIndicatorStatus.refresh;
             });
 
-            widget.onRefresh().whenComplete(() {
+            Future<void>.sync(widget.onRefresh).whenComplete(() {
               if (mounted && _status == RefreshIndicatorStatus.refresh) {
                 completer.complete();
                 _dismiss(RefreshIndicatorStatus.done);
@@ -523,6 +530,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
 
     child = RefreshLayout(
       body: child,
+      bodyOverscroll: HarmonyStyle.enabled(context) ? _bodyOverscroll : null,
       scale: _scaleFactor,
       position: _positionFactor,
       edgeOffset: widget.edgeOffset,
