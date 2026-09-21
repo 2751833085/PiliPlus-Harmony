@@ -1,0 +1,43 @@
+{
+  "recorded_at": "2026-09-21T16:28:14.692813+00:00",
+  "version": "2.6.0+6086",
+  "base_commit": "5073838c4482f4f1e3e1ede2c4f53d882be42cd3",
+  "artifact_sha256": "72111966a6dcf1d94b3e2aa8ef17c431cf8f93ea0bdb6db924b100bfd987e01f",
+  "checks": {
+    "flutter_tests_passed": 51,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "native_posture_isolated_tests": "passed",
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "widget_layout_preview": "320x640, 840x800, 600x320 at 1.8 text scale; fixture media"
+  },
+  "device": {
+    "model": "HUAWEI Mate XTS / GRL-AL20",
+    "system": "HarmonyOS 7.0.0.107(SP8C00E105R5P4)",
+    "api": 26,
+    "overwrite_install": "passed",
+    "installed_version": "2.6.0",
+    "installed_version_code": 6086,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "app_id_preserved": true,
+    "app_identifier_preserved": true,
+    "launch": "blocked_screen_locked",
+    "launch_error_code": 10106102,
+    "uninstalled_or_cleared_data": false
+  },
+  "not_verified": [
+    "V2.6 real-device media playback and physical fold transitions",
+    "overseas cellular/Wi-Fi first-frame latency, sustained throughput and rebuffering",
+    "real native decoder network recovery and pause continuity",
+    "frame time, power, memory and extended playback/PiP sessions",
+    "real account write actions",
+    "all 147 upstream feature matrix entries"
+  ],
+  "remote_push": false
+}
