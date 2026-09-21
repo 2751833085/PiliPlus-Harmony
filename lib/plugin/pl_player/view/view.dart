@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_hand_dock.dart';
@@ -106,11 +108,16 @@ class PLVideoPlayer extends StatefulWidget {
     this.showEpisodes,
     this.showViewPoints,
     this.topInset,
+    this.shortMode = false,
+    this.onEnterShortMode,
+    this.onShortDoubleTap,
     this.fill = Colors.black,
     this.alignment = Alignment.center,
     super.key,
   });
 
+  final bool shortMode;
+  final VoidCallback? onEnterShortMode, onShortDoubleTap;
   final double maxWidth;
   final double maxHeight;
   final PlPlayerController plPlayerController;
@@ -995,7 +1002,24 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         children: [
           progressWidget(BottomControlType.playOrPause),
           Expanded(child: progress),
-          progressWidget(BottomControlType.time),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: progressWidget(BottomControlType.time),
+            ),
+          ),
+          if (widget.onEnterShortMode != null)
+            IconButton(
+              tooltip: '竖屏短视频',
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 40),
+              padding: const EdgeInsets.all(6),
+              onPressed: widget.onEnterShortMode,
+              icon: const Icon(
+                Icons.stay_current_portrait_outlined,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
           IconButton(
             tooltip: '更多播放控制',
             iconSize: 20,
@@ -1059,7 +1083,19 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         ),
         Row(
           mainAxisSize: .min,
-          children: userSpecifyItemRight.map(progressWidget).toList(),
+          children: [
+            if (widget.onEnterShortMode != null)
+              IconButton(
+                tooltip: '竖屏短视频',
+                onPressed: widget.onEnterShortMode,
+                icon: const Icon(
+                  Icons.stay_current_portrait_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ...userSpecifyItemRight.map(progressWidget),
+          ],
         ),
       ],
     );
@@ -1282,6 +1318,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void onDoubleTapDownMobile(TapDownDetails details) {
+    if (widget.shortMode) {
+      widget.onShortDoubleTap?.call();
+      return;
+    }
     if (plPlayerController.isLive || plPlayerController.controlsLock.value) {
       return;
     }
@@ -1299,6 +1339,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onTapUp(TapUpDetails details) {
+    if (widget.shortMode) {
+      plPlayerController.onDoubleTapCenter();
+      return;
+    }
     switch (details.kind) {
       case ui.PointerDeviceKind.mouse when PlatformUtils.isDesktop:
         plPlayerController.onDoubleTapCenter();
@@ -1337,6 +1381,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   void _onDoubleTapDown(TapDownDetails details) {
+    if (widget.shortMode) {
+      widget.onShortDoubleTap?.call();
+      return;
+    }
     switch (details.kind) {
       case ui.PointerDeviceKind.mouse when PlatformUtils.isDesktop:
         plPlayerController.triggerFullScreen(status: !isFullScreen);
@@ -1397,9 +1445,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           _doubleTapGestureRecognizer.addPointer(event);
           longPressRecognizer.addPointer(event);
         }
-        _scaleGestureRecognizer
-          ..isPosAllowed = _isPositionAllowed(event.localPosition)
-          ..addPointer(event);
+        if (!widget.shortMode)
+          _scaleGestureRecognizer
+            ..isPosAllowed = _isPositionAllowed(event.localPosition)
+            ..addPointer(event);
       }
     } else if (controlsUnlock) {
       if (plPlayerController.isLive) {
@@ -1409,7 +1458,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         _doubleTapGestureRecognizer.addPointer(event);
         longPressRecognizer.addPointer(event);
       }
-      _scaleGestureRecognizer.addPointer(event);
+      if (!widget.shortMode) _scaleGestureRecognizer.addPointer(event);
     }
   }
 
@@ -1784,7 +1833,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           ),
         ),
 
-        if (Pref.biliPlayerControls)
+        if (Pref.biliPlayerControls && !widget.shortMode)
           Positioned.fill(
             child: IgnorePointer(
               child: FadeTransition(
@@ -1831,53 +1880,56 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           bottom: -1,
           child: ClipRect(
             child: RepaintBoundary(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  AppBarAni(
-                    isTop: true,
-                    controller: _animationController,
-                    fadeOnly: Pref.biliPlayerControls,
-                    isFullScreen: isFullScreen,
-                    removeSafeArea: plPlayerController.removeSafeArea,
-                    topInset: widget.topInset,
-                    child: plPlayerController.isDesktopPip
-                        ? GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onPanStart: (_) => windowManager.startDragging(),
-                            child: widget.headerControl,
-                          )
-                        : widget.headerControl,
-                  ),
-                  AppBarAni(
-                    isTop: false,
-                    controller: _animationController,
-                    fadeOnly: Pref.biliPlayerControls,
-                    isFullScreen: isFullScreen,
-                    removeSafeArea: plPlayerController.removeSafeArea,
-                    child: HarmonyHandDock(
-                      enabled:
-                          OS.isHarmony &&
-                          Pref.harmonyHandedness &&
-                          isFullScreen,
-                      width: maxWidth,
-                      builder: (controlWidth) =>
-                          widget.bottomControl ??
-                          BottomControl(
-                            maxWidth: controlWidth,
-                            isFullScreen: isFullScreen,
-                            controller: plPlayerController,
-                            videoDetailController: videoDetailController,
-                            buildBottomControl: (progress) =>
-                                buildBottomControl(
-                                  videoDetailController,
-                                  maxWidth > maxHeight,
-                                  progress,
-                                ),
-                          ),
+              child: Offstage(
+                offstage: widget.shortMode,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AppBarAni(
+                      isTop: true,
+                      controller: _animationController,
+                      fadeOnly: Pref.biliPlayerControls,
+                      isFullScreen: isFullScreen,
+                      removeSafeArea: plPlayerController.removeSafeArea,
+                      topInset: widget.topInset,
+                      child: plPlayerController.isDesktopPip
+                          ? GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onPanStart: (_) => windowManager.startDragging(),
+                              child: widget.headerControl,
+                            )
+                          : widget.headerControl,
                     ),
-                  ),
-                ],
+                    AppBarAni(
+                      isTop: false,
+                      controller: _animationController,
+                      fadeOnly: Pref.biliPlayerControls,
+                      isFullScreen: isFullScreen,
+                      removeSafeArea: plPlayerController.removeSafeArea,
+                      child: HarmonyHandDock(
+                        enabled:
+                            OS.isHarmony &&
+                            Pref.harmonyHandedness &&
+                            isFullScreen,
+                        width: maxWidth,
+                        builder: (controlWidth) =>
+                            widget.bottomControl ??
+                            BottomControl(
+                              maxWidth: controlWidth,
+                              isFullScreen: isFullScreen,
+                              controller: plPlayerController,
+                              videoDetailController: videoDetailController,
+                              buildBottomControl: (progress) =>
+                                  buildBottomControl(
+                                    videoDetailController,
+                                    maxWidth > maxHeight,
+                                    progress,
+                                  ),
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1948,7 +2000,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         ),
 
         /// 进度条 live模式下禁用
-        if (!isLive)
+        if (!isLive && !widget.shortMode)
           Positioned(
             bottom: -2.2,
             left: 0,
@@ -2155,13 +2207,19 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(
-                        Assets.buffering,
-                        height: 25,
-                        cacheHeight: 25.cacheSize(context),
-                        semanticLabel: "加载中",
-                        color: Colors.white,
-                      ),
+                      if (HarmonyStyle.enabled(context))
+                        const HarmonyLoadingIndicator(
+                          size: 28,
+                          color: Colors.white,
+                        )
+                      else
+                        Image.asset(
+                          Assets.buffering,
+                          height: 25,
+                          cacheHeight: 25.cacheSize(context),
+                          semanticLabel: "加载中",
+                          color: Colors.white,
+                        ),
                       if (plPlayerController.isBuffering.value)
                         Obx(() {
                           final buffered = plPlayerController.buffered.value;

@@ -92,7 +92,9 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
   @override
   Future<void> queryVideoIntro() async {
     queryVideoTags();
-    final res = await VideoHttp.videoIntro(bvid: bvid);
+    final requestedBvid = bvid;
+    final res = await VideoHttp.videoIntro(bvid: requestedBvid);
+    if (isClosed || requestedBvid != bvid) return;
     if (res case Success(:final response)) {
       if (response.redirectUrl != null &&
           videoDetailCtr.epId == null &&
@@ -149,11 +151,13 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
 
   // 获取up主粉丝数
   Future<void> queryUserStat(List<Staff>? staff) async {
+    final requestedBvid = bvid;
     if (staff != null && staff.isNotEmpty) {
       final res = await Request().get(
         Api.relations,
         queryParameters: {'fids': staff.map((item) => item.mid).join(',')},
       );
+      if (isClosed || requestedBvid != bvid) return;
       if (res.data['code'] == 0) {
         staffRelations.addAll({'status': true, ...?res.data['data']});
       }
@@ -163,6 +167,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         return;
       }
       final res = await MemberHttp.memberCardInfo(mid: mid);
+      if (isClosed || requestedBvid != bvid) return;
       if (res case Success(:final response)) {
         userStat.value = response;
       }
@@ -170,7 +175,9 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
   }
 
   Future<void> queryAllStatus() async {
-    final result = await VideoHttp.videoRelation(bvid: bvid);
+    final requestedBvid = bvid;
+    final result = await VideoHttp.videoRelation(bvid: requestedBvid);
+    if (isClosed || requestedBvid != bvid) return;
     if (result case Success(:final response)) {
       late final stat = videoDetail.value.stat;
       if (response.like!) {
@@ -199,7 +206,9 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
       SmartDialog.showToast('已三连');
       return;
     }
-    final result = await VideoHttp.ugcTriple(bvid: bvid);
+    final requestedBvid = bvid;
+    final result = await VideoHttp.ugcTriple(bvid: requestedBvid);
+    if (isClosed || requestedBvid != bvid) return;
     if (result case Success(:final response)) {
       late final stat = videoDetail.value.stat;
       if (response.like == true && !hasLike.value) {
@@ -236,8 +245,10 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     if (videoDetail.value.stat == null) {
       return;
     }
+    final requestedBvid = bvid;
     final newVal = !hasLike.value;
-    final result = await VideoHttp.likeVideo(bvid: bvid, type: newVal);
+    final result = await VideoHttp.likeVideo(bvid: requestedBvid, type: newVal);
+    if (isClosed || requestedBvid != bvid) return;
     if (result case Success(:final response)) {
       SmartDialog.showToast(newVal ? response : '取消赞');
       videoDetail.value.stat?.like += newVal ? 1 : -1;
@@ -410,7 +421,9 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     if (videoDetail.owner == null || videoDetail.staff?.isNotEmpty == true) {
       return;
     }
+    final requestedBvid = bvid;
     final res = await UserHttp.userRelation(videoDetail.owner!.mid!);
+    if (isClosed || requestedBvid != bvid) return;
     if (res case Success(:final response)) {
       if (response.special == 1) response.attribute = -10;
       followStatus.value = response;
@@ -419,6 +432,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
 
   // 关注/取关up
   Future<void> actionRelationMod(BuildContext context) async {
+    final requestedBvid = bvid;
     if (!isLogin) {
       SmartDialog.showToast('账号未登录');
       return;
@@ -451,6 +465,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         isFollow: attr != 0,
         followStatus: followStatus.value,
         afterMod: (attribute) {
+          if (isClosed || requestedBvid != bvid) return;
           followStatus
             ..value.attribute = attribute
             ..refresh();
@@ -464,6 +479,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
   Future<bool> onChangeEpisode(
     BaseEpisodeItem episode, {
     bool isStein = false,
+    bool waitForPlayback = false,
   }) async {
     try {
       final String bvid = episode.bvid ?? this.bvid;
@@ -477,7 +493,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
           dimension = res.dimension;
         }
       }
-      if (cid == null) {
+      if (isClosed || cid == null) {
         return false;
       }
 
@@ -510,12 +526,18 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         ..onReset(isStein: isStein)
         ..bvid = bvid
         ..aid = aid
-        ..cid.value = cid
-        ..queryVideoUrl();
+        ..cid.value = cid;
+      final playback = videoDetailCtr.queryVideoUrl();
 
       if (this.bvid != bvid) {
         reload = true;
         aiConclusionResult = null;
+        hasLike.value = false;
+        hasDislike.value = false;
+        coinNum.value = 0;
+        hasFav.value = false;
+        favIds = null;
+        total.value = '1';
 
         if (cover != null && cover.isNotEmpty) {
           videoDetailCtr.cover.value = cover;
@@ -525,6 +547,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         if (videoDetailCtr.plPlayerController.showRelatedVideo) {
           try {
             Get.find<RelatedController>(tag: heroTag)
+              ..invalidateRequests()
               ..bvid = bvid
               ..queryData();
           } catch (_) {}
@@ -533,11 +556,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         // 重新请求评论
         if (videoDetailCtr.showReply) {
           try {
-            final replyCtr = Get.find<VideoReplyController>(tag: heroTag)
-              ..aid = aid;
-            if (replyCtr.loadingState.value is! Loading) {
-              replyCtr.onReload();
-            }
+            Get.find<VideoReplyController>(tag: heroTag).changeVideo(aid);
           } catch (_) {}
         }
 
@@ -559,7 +578,18 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
 
       this.cid.value = cid;
       queryOnlineTotal();
-      return true;
+      if (waitForPlayback) {
+        try {
+          await playback;
+        } catch (_) {
+          if (!isClosed && this.bvid == bvid) {
+            videoDetailCtr.autoPlay = false;
+            videoDetailCtr.videoState.value = false;
+            SmartDialog.showToast('视频暂时无法播放，可点按重试或上滑切换');
+          }
+        }
+      }
+      return !isClosed;
     } catch (e) {
       if (kDebugMode) debugPrint('ugc onChangeEpisode: $e');
       return false;

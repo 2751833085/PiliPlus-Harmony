@@ -2,6 +2,7 @@
 
 abstract final class SettingBoxKey {
   static const String biliPlayerControls = 'biliPlayerControls';
+  static const String shortVideoMode = 'shortVideoMode';
   static const String harmonyFoldOrientation = 'harmonyFoldOrientation';
   static const String harmonyUI = 'harmonyUI',
       harmonyKeepDock = 'harmonyKeepDock',

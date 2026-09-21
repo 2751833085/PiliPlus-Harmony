@@ -1,0 +1,491 @@
+import 'dart:math' as math;
+import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
+import 'package:PiliPlus/pages/video/controller.dart';
+import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
+import 'package:PiliPlus/utils/duration_utils.dart';
+import 'package:PiliPlus/utils/num_utils.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
+import 'session.dart';
+import 'pager.dart';
+import 'controls.dart';
+import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
+
+class ShortVideoFeed extends StatefulWidget {
+  const ShortVideoFeed({
+    super.key,
+    required this.session,
+    required this.video,
+    required this.intro,
+    required this.playerBuilder,
+    required this.onDetails,
+    required this.onComments,
+    required this.onEpisodes,
+    required this.onMore,
+    required this.fullscreen,
+    this.moreButton,
+  });
+  final ShortVideoSession session;
+  final VideoDetailController video;
+  final UgcIntroController intro;
+  final Widget Function(double width, double height) playerBuilder;
+  final VoidCallback onDetails, onComments, onEpisodes, onMore;
+  final bool fullscreen;
+  final Widget? moreButton;
+  @override
+  State<ShortVideoFeed> createState() => _ShortVideoFeedState();
+}
+
+class _ShortVideoFeedState extends State<ShortVideoFeed> {
+  ShortVideoSession get session => widget.session;
+  @override
+  void initState() {
+    super.initState();
+    session.addListener(_changed);
+    widget.video.plPlayerController.addStatusLister(_statusChanged);
+  }
+
+  void _changed() {
+    if (mounted) setState(() {});
+  }
+
+  void _statusChanged(PlayerStatus _) => _changed();
+  @override
+  void dispose() {
+    session.removeListener(_changed);
+    widget.video.plPlayerController.removeStatusLister(_statusChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Material(
+        color: Colors.black,
+        child: LayoutBuilder(
+          builder: (context, bounds) {
+            if (widget.fullscreen)
+              return widget.playerBuilder(bounds.maxWidth, bounds.maxHeight);
+            return SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: LayoutBuilder(
+                    builder: (context, pane) => ShortVideoPager(
+                      session: session,
+                      onError: (message) => SmartDialog.showToast(message),
+                      builder: (context, index, active) {
+                        if (active) return _currentPage(pane);
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            if (session.entries[index].cover case final cover?)
+                              NetworkImgLayer(
+                                src: cover,
+                                fit: BoxFit.contain,
+                                width: pane.maxWidth,
+                                height: pane.maxHeight,
+                              ),
+                            Center(
+                              child: Text(
+                                session.switching ? '正在打开视频' : '松手切换视频',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _action({
+    required IconData icon,
+    required String label,
+    required String action,
+    required VoidCallback? onTap,
+    bool selected = false,
+    VoidCallback? onLongPress,
+  }) => Semantics(
+    button: true,
+    label: '$action $label',
+    selected: selected,
+    child: InkWell(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: selected ? const Color(0xFFFB7299) : Colors.white,
+              size: 32,
+              shadows: const [Shadow(color: Colors.black54, blurRadius: 6)],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget _currentPage(BoxConstraints pane) {
+    final player = widget.video.plPlayerController;
+    final bottomHeight = ShortVideoControls.heightFor(
+      MediaQuery.textScalerOf(context),
+    );
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(bottom: bottomHeight),
+          child: widget.playerBuilder(
+            pane.maxWidth,
+            math.max(1, pane.maxHeight - bottomHeight),
+          ),
+        ),
+        if (player.playerStatus.isPaused && widget.video.autoPlay)
+          Positioned.fill(
+            bottom: bottomHeight,
+            child: IgnorePointer(
+              child: Center(
+                child: Icon(
+                  Icons.play_arrow_rounded,
+                  size: 80,
+                  color: Colors.white.withValues(alpha: .7),
+                  shadows: const [
+                    Shadow(color: Colors.black54, blurRadius: 16),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        const IgnorePointer(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black54,
+                  Colors.transparent,
+                  Colors.transparent,
+                  Colors.black87,
+                ],
+                stops: [0, .2, .6, 1],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          left: 4,
+          right: 4,
+          child: Row(
+            children: [
+              IconButton(
+                tooltip: '返回',
+                onPressed: Get.back,
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+              ),
+              Expanded(
+                child: Obx(
+                  () => Text(
+                    '${widget.intro.total.value} 人正在看',
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: '搜索',
+                onPressed: () => Get.toNamed('/search'),
+                icon: const Icon(Icons.search, color: Colors.white),
+              ),
+              widget.moreButton ??
+                  IconButton(
+                    tooltip: '更多',
+                    onPressed: widget.onMore,
+                    icon: const Icon(Icons.more_vert, color: Colors.white),
+                  ),
+            ],
+          ),
+        ),
+        if (!session.hasNext && (session.loading || session.error != null))
+          Positioned(
+            top: 52,
+            left: 16,
+            right: 16,
+            child: Center(
+              child: TextButton(
+                onPressed: session.loading ? null : session.loadMore,
+                child: Text(
+                  session.loading ? '正在获取更多视频' : session.error!,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ),
+            ),
+          ),
+        Positioned(
+          right: 6,
+          bottom: bottomHeight + 20,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: math.max(80, pane.maxHeight - bottomHeight - 80),
+            ),
+            child: SingleChildScrollView(
+              child: Obx(() {
+                final detail = widget.intro.videoDetail.value;
+                final ready =
+                    detail.bvid == session.current.bvid && !session.switching;
+                final stat = ready ? detail.stat : null;
+                String count(num? value, String fallback) =>
+                    value == null ? fallback : NumUtils.numFormat(value);
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _action(
+                      icon: Icons.thumb_up_rounded,
+                      action: '点赞',
+                      label: count(stat?.like, '点赞'),
+                      selected: ready && widget.intro.hasLike.value,
+                      onTap: ready
+                          ? () => session.interact(
+                              () => widget.intro.handleAction(
+                                widget.intro.actionLikeVideo,
+                              ),
+                            )
+                          : null,
+                      onLongPress: ready
+                          ? () => session.interact(
+                              () => widget.intro.handleAction(
+                                widget.intro.actionTriple,
+                              ),
+                            )
+                          : null,
+                    ),
+                    _action(
+                      icon: Icons.chat_bubble_rounded,
+                      action: '评论',
+                      label: count(stat?.reply, '评论'),
+                      onTap: ready ? widget.onComments : null,
+                    ),
+                    _action(
+                      icon: Icons.monetization_on_outlined,
+                      action: '投币',
+                      label: count(stat?.coin, '投币'),
+                      selected: ready && widget.intro.coinNum.value > 0,
+                      onTap: ready ? widget.intro.actionCoinVideo : null,
+                    ),
+                    _action(
+                      icon: Icons.star_rounded,
+                      action: '收藏',
+                      label: count(stat?.favorite, '收藏'),
+                      selected: ready && widget.intro.hasFav.value,
+                      onTap: ready
+                          ? () => session.interact(() async {
+                              if (widget.intro.enableQuickFav) {
+                                await widget.intro.actionFavVideo(
+                                  isQuick: true,
+                                );
+                              } else {
+                                widget.intro.showFavBottomSheet(context);
+                              }
+                            })
+                          : null,
+                      onLongPress: ready
+                          ? () => widget.intro.showFavBottomSheet(
+                              context,
+                              isLongPress: true,
+                            )
+                          : null,
+                    ),
+                    _action(
+                      icon: Icons.reply_rounded,
+                      action: '分享',
+                      label: count(stat?.share, '分享'),
+                      onTap: ready
+                          ? () => widget.intro.actionShareVideo(context)
+                          : null,
+                    ),
+                  ],
+                );
+              }),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 16,
+          right: 84,
+          bottom: bottomHeight + 12,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: math.max(60, pane.maxHeight * .36),
+            ),
+            child: SingleChildScrollView(
+              child: Obx(() {
+                final detail = widget.intro.videoDetail.value;
+                final ready =
+                    detail.bvid == session.current.bvid && !session.switching;
+                final owner = ready ? detail.owner : null;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        if (owner?.face case final face?)
+                          GestureDetector(
+                            onTap: () =>
+                                Get.toNamed('/member?mid=${owner!.mid}'),
+                            child: NetworkImgLayer(
+                              src: face,
+                              width: 40,
+                              height: 40,
+                              type: .avatar,
+                            ),
+                          ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            owner?.name ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (ready && owner != null)
+                          TextButton(
+                            onPressed: () =>
+                                widget.intro.actionRelationMod(context),
+                            child: Text(
+                              (widget.intro.followStatus.value.attribute ??
+                                          0) ==
+                                      0
+                                  ? '+ 关注'
+                                  : '已关注',
+                              style: const TextStyle(color: Color(0xFFFB7299)),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: widget.onDetails,
+                      child: Text(
+                        ready
+                            ? detail.title ?? ''
+                            : session.current.title ?? '',
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+                        ),
+                      ),
+                    ),
+                    if (ready)
+                      Text(
+                        '${NumUtils.numFormat(detail.stat?.view ?? 0)} 次播放',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    if (ready &&
+                        (detail.ugcSeason != null ||
+                            (detail.pages?.length ?? 0) > 1))
+                      TextButton.icon(
+                        onPressed: widget.onEpisodes,
+                        icon: const Icon(
+                          Icons.video_library_outlined,
+                          color: Colors.white70,
+                          size: 18,
+                        ),
+                        label: const Text(
+                          '合集 / 分 P',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                  ],
+                );
+              }),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 16,
+          right: 16,
+          bottom: 0,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Obx(
+                () => ProgressBar(
+                  progress: player.progress,
+                  buffered: player.buffered.value,
+                  total: player.duration.value,
+                  baseBarColor: Colors.white24,
+                  progressBarColor: const Color(0xFFFB7299),
+                  bufferedBarColor: Colors.white38,
+                  thumbColor: Colors.white,
+                  thumbGlowColor: Colors.white12,
+                  barHeight: 2,
+                  thumbRadius: 4,
+                  onDragStart: (value) => player.onSeekStart(value.seconds),
+                  onDragUpdate: (value) =>
+                      player.seekPosition.value = value.seconds,
+                  onSeek: (milliseconds) {
+                    player.position.value = milliseconds ~/ 1000;
+                    player.onSeekEnd();
+                    player.seekTo(
+                      Duration(milliseconds: milliseconds),
+                      isSeek: false,
+                    );
+                  },
+                ),
+              ),
+              Obx(
+                () => ShortVideoControls(
+                  position: DurationUtils.formatDuration(player.position.value),
+                  duration: DurationUtils.formatDuration(player.duration.value),
+                  danmaku: player.enableShowDanmaku.value,
+                  onSend: widget.video.showShootDanmakuSheet,
+                  onDanmaku: () => player.enableShowDanmaku.toggle(),
+                  onDetails: widget.onDetails,
+                  onFullscreen: () => player.triggerFullScreen(status: true),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -1,0 +1,330 @@
+import 'package:flutter/services.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'package:PiliPlus/models/model_owner.dart';
+import 'package:PiliPlus/models_new/relation/data.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:PiliPlus/pages/video/shorts/pager.dart';
+import 'package:PiliPlus/pages/video/shorts/session.dart';
+import 'package:PiliPlus/pages/video/shorts/controls.dart';
+import 'package:PiliPlus/pages/video/shorts/view.dart';
+import 'package:PiliPlus/pages/video/controller.dart';
+import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
+import 'package:PiliPlus/models_new/video/video_detail/data.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:hive_ce/hive.dart';
+
+void main() {
+  late Directory temp;
+  setUpAll(() async {
+    temp = await Directory.systemTemp.createTemp('piliplus-shorts-test-');
+    Hive.init(temp.path);
+    GStorage.setting = await Hive.openBox('setting');
+    const fontPath = String.fromEnvironment('SHORTS_PREVIEW_FONT');
+    if (fontPath.isNotEmpty) {
+      final font = FontLoader('shorts-preview')
+        ..addFont(
+          File(fontPath).readAsBytes().then((b) => ByteData.sublistView(b)),
+        );
+      await font.load();
+      const iconPath = String.fromEnvironment('SHORTS_PREVIEW_ICONS');
+      if (iconPath.isNotEmpty) {
+        await (FontLoader('MaterialIcons')..addFont(
+              File(iconPath).readAsBytes().then((b) => ByteData.sublistView(b)),
+            ))
+            .load();
+      }
+    }
+  });
+  tearDownAll(() async {
+    await Hive.close();
+    await temp.delete(recursive: true);
+  });
+  testWidgets(
+    'vertical swipes retain exactly one live player and can return to previous video',
+    (tester) async {
+      final playerKey = GlobalKey();
+      final changes = <String>[];
+      final session = ShortVideoSession(
+        initial: const ShortVideoEntry(bvid: 'a'),
+        loadRelated: (_) async => const [
+          ShortVideoEntry(bvid: 'b'),
+          ShortVideoEntry(bvid: 'c'),
+        ],
+        play: (entry) async {
+          changes.add(entry.bvid);
+          return true;
+        },
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ShortVideoPager(
+              session: session,
+              builder: (context, index, active) => active
+                  ? _PlayerFixture(key: playerKey)
+                  : const ColoredBox(color: Colors.black),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final initial = playerKey.currentState;
+      await tester.drag(find.byType(PageView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(session.index, 1);
+      expect(changes, ['b']);
+      expect(find.byType(_PlayerFixture), findsOneWidget);
+      expect(playerKey.currentState, same(initial));
+      await tester.drag(find.byType(PageView), const Offset(0, 500));
+      await tester.pumpAndSettle();
+      expect(session.index, 0);
+      expect(changes, ['b', 'a']);
+      expect(playerKey.currentState, same(initial));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      session.dispose();
+    },
+  );
+  testWidgets(
+    'slow stream loading retains the current player until the new source is ready',
+    (tester) async {
+      final key = GlobalKey();
+      final gate = Completer<bool>();
+      final session = ShortVideoSession(
+        initial: const ShortVideoEntry(bvid: 'a'),
+        loadRelated: (_) async => const [ShortVideoEntry(bvid: 'b')],
+        play: (_) => gate.future,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ShortVideoPager(
+              session: session,
+              builder: (_, index, active) => active
+                  ? _PlayerFixture(key: key)
+                  : const ColoredBox(color: Colors.black),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final state = key.currentState;
+      await tester.drag(find.byType(PageView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(session.switching, isTrue);
+      expect(key.currentState, same(state));
+      gate.complete(true);
+      await tester.pumpAndSettle();
+      expect(session.index, 1);
+      expect(key.currentState, same(state));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      session.dispose();
+    },
+  );
+  testWidgets(
+    'failed switch returns to current player and account interaction blocks swiping',
+    (tester) async {
+      final session = ShortVideoSession(
+        initial: const ShortVideoEntry(bvid: 'a'),
+        loadRelated: (_) async => const [ShortVideoEntry(bvid: 'b')],
+        play: (_) async => false,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ShortVideoPager(
+              session: session,
+              builder: (_, index, active) =>
+                  Center(child: Text('$index:$active')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.drag(find.byType(PageView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(session.index, 0);
+      expect(
+        tester.widget<PageView>(find.byType(PageView)).controller!.page,
+        0,
+      );
+      final operation = Completer<void>();
+      final interaction = session.interact(() => operation.future);
+      await tester.pump();
+      await tester.drag(find.byType(PageView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<PageView>(find.byType(PageView)).controller!.page,
+        0,
+      );
+      operation.complete();
+      await interaction;
+      await tester.pumpWidget(const SizedBox());
+      session.dispose();
+    },
+  );
+  testWidgets(
+    'actual feed fits phone, expanded fold and large text; fullscreen keeps the same player',
+    (tester) async {
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      for (final size in const [
+        Size(320, 640),
+        Size(840, 800),
+        Size(600, 320),
+      ]) {
+        tester.view.physicalSize = size;
+        final session = ShortVideoSession(
+          initial: const ShortVideoEntry(
+            bvid: 'a',
+            title: '很长的视频标题：从单屏展开到三屏时依然可以查看所有操作',
+          ),
+          loadRelated: (_) async => [],
+          play: (_) async => true,
+        );
+        final player = _FakePlayer();
+        final playerKey = GlobalKey();
+        final captureKey = GlobalKey();
+        Widget build(bool fullscreen) => MaterialApp(
+          theme: ThemeData(
+            fontFamily:
+                const String.fromEnvironment('SHORTS_PREVIEW_FONT').isEmpty
+                ? null
+                : 'shorts-preview',
+          ),
+          home: MediaQuery(
+            data: MediaQueryData(
+              size: size,
+              textScaler: const TextScaler.linear(1.8),
+            ),
+            child: RepaintBoundary(
+              key: captureKey,
+              child: ShortVideoFeed(
+                session: session,
+                video: _FakeVideo(player),
+                intro: _FakeIntro(),
+                playerBuilder: (_, __) => _PlayerFixture(key: playerKey),
+                onDetails: () {},
+                onComments: () {},
+                onEpisodes: () {},
+                onMore: () {},
+                fullscreen: fullscreen,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpWidget(build(false));
+        await tester.pumpAndSettle();
+        expect(find.byTooltip('普通详情'), findsOneWidget);
+        expect(find.byType(ShortVideoControls), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        const renderPath = String.fromEnvironment('SHORTS_RENDER_PATH');
+        if (renderPath.isNotEmpty) {
+          await tester.runAsync(() async {
+            final boundary =
+                captureKey.currentContext!.findRenderObject()
+                    as RenderRepaintBoundary;
+            final image = await boundary.toImage();
+            final bytes = await image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
+            await File(
+              '$renderPath-${size.width.toInt()}.png',
+            ).writeAsBytes(bytes!.buffer.asUint8List());
+            image.dispose();
+          });
+        }
+        final state = playerKey.currentState;
+        await tester.pumpWidget(build(true));
+        await tester.pumpAndSettle();
+        expect(playerKey.currentState, same(state));
+        expect(find.byType(ShortVideoControls), findsNothing);
+        await tester.pumpWidget(build(false));
+        await tester.pumpAndSettle();
+        expect(playerKey.currentState, same(state));
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+        expect(player.listeners, isEmpty);
+        session.dispose();
+      }
+    },
+  );
+}
+
+class _PlayerFixture extends StatefulWidget {
+  const _PlayerFixture({super.key});
+  @override
+  State<_PlayerFixture> createState() => _PlayerFixtureState();
+}
+
+class _PlayerFixtureState extends State<_PlayerFixture> {
+  @override
+  Widget build(BuildContext context) => const ColoredBox(
+    color: Colors.black,
+    child: Center(child: Text('player')),
+  );
+}
+
+class _FakePlayer implements PlPlayerController {
+  @override
+  final enableShowDanmaku = true.obs;
+  @override
+  final position = 35.obs;
+  @override
+  final duration = 1315.obs;
+  @override
+  final buffered = 60.obs;
+  @override
+  int get progress => position.value;
+  @override
+  PlayerStatus get playerStatus => PlayerStatus.paused;
+  final listeners = <dynamic>[];
+  @override
+  void addStatusLister(dynamic callback) => listeners.add(callback);
+  @override
+  void removeStatusLister(dynamic callback) => listeners.remove(callback);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeVideo implements VideoDetailController {
+  _FakeVideo(this.plPlayerController);
+  @override
+  final PlPlayerController plPlayerController;
+  @override
+  bool get autoPlay => true;
+  @override
+  Future<void> showShootDanmakuSheet() async {}
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeIntro implements UgcIntroController {
+  @override
+  final videoDetail = VideoDetailData(
+    bvid: 'a',
+    title: '很长的视频标题：从单屏展开到三屏时依然可以查看所有操作',
+    owner: Owner(mid: 1, name: '测试创作者的较长名字'),
+  ).obs;
+  @override
+  final followStatus = RelationData(attribute: 0).obs;
+  @override
+  final total = '11'.obs;
+  @override
+  final hasLike = false.obs;
+  @override
+  final hasFav = false.obs;
+  @override
+  final coinNum = RxNum(0);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}

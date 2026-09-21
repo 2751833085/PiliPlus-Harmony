@@ -17,6 +17,15 @@ class VideoReplyController extends ReplyController<MainListReply>
     required this.heroTag,
   });
   int aid;
+
+  void changeVideo(int nextAid) {
+    if (aid == nextAid) return;
+    aid = nextAid;
+    invalidateRequests();
+    count.value = -1;
+    onReload();
+  }
+
   final VideoType videoType;
   late final isPugv = videoType == VideoType.pugv;
 

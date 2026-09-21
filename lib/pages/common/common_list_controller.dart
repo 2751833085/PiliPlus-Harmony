@@ -6,6 +6,13 @@ abstract class CommonListController<R, T> extends CommonController<R, T> {
   int page = 1;
   bool isEnd = false;
   bool? hasFooter;
+  int _requestRevision = 0;
+
+  /// Source changes must discard the previous page response before reloading.
+  void invalidateRequests() {
+    _requestRevision++;
+    isLoading = false;
+  }
 
   @override
   Rx<LoadingState<List<T>?>> loadingState =
@@ -23,7 +30,9 @@ abstract class CommonListController<R, T> extends CommonController<R, T> {
   Future<void> queryData([bool isRefresh = true]) async {
     if (isLoading || (!isRefresh && isEnd)) return;
     isLoading = true;
+    final revision = ++_requestRevision;
     final LoadingState<R> res = await customGetData();
+    if (isClosed || revision != _requestRevision) return;
     if (res case Success(:final response)) {
       if (!customHandleResponse(isRefresh, res)) {
         final dataList = getDataList(response);

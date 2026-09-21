@@ -1,3 +1,7 @@
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
+import 'package:PiliPlus/pages/video/shorts/session.dart';
+import 'package:PiliPlus/pages/video/shorts/view.dart';
+import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/cover_hero.dart';
 import 'dart:async';
 import 'dart:io';
@@ -97,6 +101,157 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   late final VideoDetailController videoDetailController;
   late final VideoReplyController _videoReplyController;
   PlPlayerController? plPlayerController;
+
+  bool _shortMode = false;
+  ShortVideoSession? _shortSession;
+  bool _shortPreference = Pref.shortVideoMode;
+  Worker? _shortEpisodeWorker;
+  bool get _supportsShortMode =>
+      videoDetailController.isUgc &&
+      !videoDetailController.isFileSource &&
+      !videoDetailController.isPlayAll;
+
+  ShortVideoSession get _feed => _shortSession ??= ShortVideoSession(
+    initial: ShortVideoEntry(
+      bvid: videoDetailController.bvid,
+      aid: videoDetailController.aid,
+      cid: videoDetailController.cid.value,
+      cover: videoDetailController.cover.value,
+      title: ugcIntroController.videoDetail.value.title,
+    ),
+    loadRelated: (bvid) async {
+      final response = await VideoHttp.relatedVideoList(bvid: bvid);
+      if (!response.isSuccess) throw StateError('recommendations unavailable');
+      return [
+        for (final item in response.dataOrNull ?? [])
+          if (item.bvid != null && item.redirectUrl == null)
+            ShortVideoEntry(
+              bvid: item.bvid!,
+              aid: item.aid,
+              cid: item.cid,
+              cover: item.cover,
+              title: item.title,
+            ),
+      ];
+    },
+    play: (entry) async {
+      if (!mounted) return false;
+      return ugcIntroController.onChangeEpisode(
+        ugc.BaseEpisodeItem(
+          bvid: entry.bvid,
+          aid: entry.aid,
+          cid: entry.cid,
+          cover: entry.cover,
+          title: entry.title,
+        ),
+        waitForPlayback: true,
+      );
+    },
+  );
+
+  void _shortPreferenceChanged() {
+    if (!mounted || _shortPreference == Pref.shortVideoMode) return;
+    _shortPreference = Pref.shortVideoMode;
+    if (_shortPreference) {
+      _enterShortMode();
+    } else {
+      _leaveShortMode();
+    }
+  }
+
+  Future<void> _enterShortMode() async {
+    if (!_supportsShortMode || !Pref.shortVideoMode) return;
+    if (isFullScreen)
+      await videoDetailController.plPlayerController.triggerFullScreen(
+        status: false,
+      );
+    if (!mounted) return;
+    if (_shortSession case final session?) {
+      session.syncCurrent(
+        ShortVideoEntry(
+          bvid: videoDetailController.bvid,
+          aid: videoDetailController.aid,
+          cid: videoDetailController.cid.value,
+          cover: videoDetailController.cover.value,
+          title: ugcIntroController.videoDetail.value.title,
+        ),
+      );
+    }
+    videoDetailController.shortVideoMode = true;
+    setState(() => _shortMode = true);
+    _syncDecorDark();
+  }
+
+  void _leaveShortMode() {
+    videoDetailController.shortVideoMode = false;
+    setState(() => _shortMode = false);
+    _syncDecorDark();
+  }
+
+  void _shortComments() {
+    if (!videoDetailController.showReply) {
+      _leaveShortMode();
+      SmartDialog.showToast('评论已在设置中关闭');
+      return;
+    }
+    showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (context) => SizedBox(
+        height: MediaQuery.sizeOf(context).height * .72,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      '评论',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: '关闭评论',
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(child: videoReplyPanel()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _shortVideoPage() => Obx(
+    () => ShortVideoFeed(
+      session: _feed,
+      video: videoDetailController,
+      intro: ugcIntroController,
+      fullscreen: isFullScreen,
+      moreButton:
+          !videoDetailController.autoPlay ||
+              !videoDetailController.videoState.value
+          ? _moreBtn(Colors.white)
+          : null,
+      playerBuilder: (width, height) =>
+          videoPlayer(width: width, height: height),
+      onDetails: _leaveShortMode,
+      onComments: _shortComments,
+      onEpisodes: () => showEpisodes(),
+      onMore: () =>
+          (videoDetailController.headerCtrKey.currentState
+                  as HeaderControlState?)
+              ?.showSettingSheet(),
+    ),
+  );
 
   // intro ctr
   late final CommonIntroController introController =
@@ -219,7 +374,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// - 近方形布局：顶部整条都是播放器，恒为黑
   bool get _topBarIsDark {
     // 全屏：整窗都是播放器
-    if (isFullScreen) return true;
+    if (isFullScreen || _shortMode) return true;
     if (colorScheme.brightness == Brightness.dark) return true;
     if (_usesPortraitLayout) {
       return videoDetailController.scrollRatio.value < 0.5;
@@ -259,6 +414,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     // videoSourceInit 中执行），同步创建即可让 didChangeDependencies
     // 立即以正确状态生效。
     videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
+    _shortMode = Pref.shortVideoMode && _supportsShortMode;
+    videoDetailController.shortVideoMode = _shortMode;
+    HarmonyAppearance.revision.addListener(_shortPreferenceChanged);
     if (videoDetailController.removeSafeArea) {
       hideSystemBar();
     }
@@ -301,6 +459,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       localIntroController = Get.put(LocalIntroController(), tag: heroTag);
     } else if (videoDetailController.isUgc) {
       ugcIntroController = Get.put(UgcIntroController(), tag: heroTag);
+      _shortEpisodeWorker = ever(ugcIntroController.cid, (_) {
+        _shortSession?.syncCurrent(
+          ShortVideoEntry(
+            bvid: ugcIntroController.bvid,
+            aid: videoDetailController.aid,
+            cid: ugcIntroController.cid.value,
+            cover: videoDetailController.cover.value,
+            title: ugcIntroController.videoDetail.value.title,
+          ),
+        );
+      });
     } else {
       pgcIntroController = Get.put(PgcIntroController(), tag: heroTag);
     }
@@ -315,7 +484,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   // 获取视频资源，初始化播放器
   void videoSourceInit() {
-    videoDetailController.queryVideoUrl(autoFullScreenFlag: true);
+    videoDetailController.queryVideoUrl(autoFullScreenFlag: !_shortMode);
     if (videoDetailController.autoPlay) {
       plPlayerController = videoDetailController.plPlayerController;
       plPlayerController!
@@ -422,6 +591,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         }
       } catch (_) {}
 
+      if (_shortMode && !isFullScreen && !shutdownTimerService.isWaiting) {
+        plPlayerController!.play(repeat: true);
+        return;
+      }
       bool exitFlag = true;
 
       /// 顺序播放 列表循环
@@ -486,20 +659,23 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       ..addStatusLister(playerListener)
       ..addPositionListener(positionListener);
     if (plPlayerController.preInitPlayer) {
-      if (plPlayerController.autoEnterFullScreen) {
+      if (plPlayerController.autoEnterFullScreen && !_shortMode) {
         plPlayerController.triggerFullScreen();
       }
       return plPlayerController.play();
     } else {
       return videoDetailController.playerInit(
         autoplay: true,
-        autoFullScreenFlag: true,
+        autoFullScreenFlag: !_shortMode,
       );
     }
   }
 
   @override
   void dispose() {
+    HarmonyAppearance.revision.removeListener(_shortPreferenceChanged);
+    _shortEpisodeWorker?.dispose();
+    _shortSession?.dispose();
     _pipModeWorker?.dispose();
     _decorDarkWorker?.dispose();
     _decorFullScreenWorker?.dispose();
@@ -1507,6 +1683,23 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           : PLVideoPlayer(
               maxWidth: width,
               maxHeight: height,
+              shortMode: _shortMode && !isFullScreen,
+              onShortDoubleTap: () {
+                if (_shortMode &&
+                    _supportsShortMode &&
+                    ugcIntroController.videoDetail.value.bvid ==
+                        _feed.current.bvid &&
+                    !ugcIntroController.hasLike.value) {
+                  _feed.interact(
+                    () => ugcIntroController.handleAction(
+                      ugcIntroController.actionLikeVideo,
+                    ),
+                  );
+                }
+              },
+              onEnterShortMode: _supportsShortMode && Pref.shortVideoMode
+                  ? _enterShortMode
+                  : null,
               plPlayerController: plPlayerController!,
               videoDetailController: videoDetailController,
               introController: introController,
@@ -1577,6 +1770,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     Widget result;
     if (videoDetailController.plPlayerController.isPipMode) {
       child = plPlayer(width: maxWidth, height: maxHeight, isPipMode: true);
+    } else if (_shortMode) {
+      child = _shortVideoPage();
     } else if (_usesLandscapeLayout) {
       child = childWhenDisabledLandscape;
     } else if (_usesPortraitLayout) {
@@ -1782,6 +1977,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                     src: videoDetailController.cover.value,
                     width: width,
                     height: height,
+                    fit: _shortMode ? BoxFit.contain : BoxFit.cover,
                     cacheWidth: true,
                     getPlaceHolder: () => Center(
                       child: Image.asset(Assets.loading),
@@ -1793,7 +1989,24 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           }
           return const SizedBox.shrink();
         }),
-        manualPlayerWidget(height),
+        if (!_shortMode)
+          manualPlayerWidget(height)
+        else
+          Obx(
+            () => !videoDetailController.autoPlay
+                ? const Positioned.fill(
+                    child: IgnorePointer(
+                      child: Center(
+                        child: Icon(
+                          Icons.play_circle_fill_rounded,
+                          size: 72,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
 
         if (videoDetailController.plPlayerController.enableBlock ||
             videoDetailController.continuePlayingPart)
@@ -1911,7 +2124,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         ),
       ],
     );
-    if (!_enableHero || MediaQuery.disableAnimationsOf(context)) return player;
+    if (_shortMode || !_enableHero || MediaQuery.disableAnimationsOf(context))
+      return player;
     return Hero(
       tag: heroTag,
       createRectTween: CoverHero.rectTween,

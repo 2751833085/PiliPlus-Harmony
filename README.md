@@ -2,7 +2,7 @@
 
 基于 [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus) 的鸿蒙 HAP 项目，面向手机、平板和折叠屏，优先适配 Huawei Mate XTS。
 
-V1 保存功能移植基线；V2 在保留既有功能与信息布局的基础上，增加可选的鸿蒙界面风格、展开屏 Dock、系统智感握姿与稳定的封面过渡。
+V1 保存功能移植基线；V2 增加可选鸿蒙风格、原生 Dock/加载、系统智感握姿与折叠适配；V2.5 增加可手动开启的竖屏短视频信息流。所有版本保留原播放器与业务功能。
 
 ## 开始使用
 
@@ -20,7 +20,8 @@ bash tool/harmony.sh release
 | 版本 | 定位 | 入口 |
 | --- | --- | --- |
 | V1 | 功能移植与回退基线，标签 `harmony-v1.0.0` | [版本记录](releases/v1.0.0/README.md) |
-| V2 RC1 | 鸿蒙体验候选版，已签名并在 Mate XTS 覆盖安装 | [HAP 与版本记录](releases/v2.0.0-rc1/README.md) · [验证记录](docs/v2/VALIDATION.md) |
+| V2 RC2 | 统一界面、设置互斥、原生加载与播放器控制改进 | [HAP 与版本记录](releases/v2.0.0-rc2/README.md) · [验证记录](docs/v2/VALIDATION.md) |
+| V2.5 | 竖屏短视频信息流，其他设置手动启用 | [使用与实现](docs/v2.5/README.md) · [验证记录](docs/v2.5/VALIDATION.md) |
 
 [更新记录](CHANGELOG.md) · [开发约定](CONTRIBUTING.md) · [文档目录](docs/README.md) · [147 项功能核对](docs/harmony/feature-matrix.json)
 

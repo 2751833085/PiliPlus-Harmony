@@ -38,8 +38,11 @@ abstract class CommonIntroController extends GetxController
   Future<void> handleAction(FutureOr Function() action) async {
     if (!isProcessing) {
       isProcessing = true;
-      await action();
-      isProcessing = false;
+      try {
+        await action();
+      } finally {
+        isProcessing = false;
+      }
     }
   }
 
@@ -105,11 +108,13 @@ abstract class CommonIntroController extends GetxController
     if (!isShowOnlineTotal) {
       return;
     }
+    final source = (bvid, cid.value);
     final result = await VideoHttp.onlineTotal(
       aid: IdUtils.bv2av(bvid),
       bvid: bvid,
       cid: cid.value,
     );
+    if (isClosed || source != (bvid, cid.value)) return;
     if (result case Success(:final response)) {
       total.value = response;
     }
@@ -127,15 +132,17 @@ abstract class CommonIntroController extends GetxController
     if (stat == null) {
       return;
     }
+    final requestedBvid = bvid;
     final res = await VideoHttp.coinVideo(
-      bvid: bvid,
+      bvid: requestedBvid,
       multiply: coin,
       selectLike: coinWithLike ? 1 : 0,
     );
     if (res.isSuccess) {
       SmartDialog.showToast('投币成功');
-      coinNum.value += coin;
       GlobalData().afterCoin(coin);
+      if (isClosed || requestedBvid != bvid) return;
+      coinNum.value += coin;
       stat.coin += coin;
       if (coinWithLike && !hasLike.value) {
         stat.like++;
@@ -147,7 +154,9 @@ abstract class CommonIntroController extends GetxController
   }
 
   Future<void> queryVideoTags() async {
+    final source = (bvid, cid.value);
     final result = await UserHttp.videoTags(bvid: bvid, cid: cid.value);
+    if (isClosed || source != (bvid, cid.value)) return;
     videoTags.value = result.dataOrNull;
   }
 
@@ -175,6 +184,7 @@ mixin FavMixin on TripleMixin {
       rid: rid,
       type: type,
     );
+    if (isClosed || (rid, type) != getFavRidType) return res;
     if (res case Success(:final response)) {
       favFolderData.value = response;
       favIds = response.list
@@ -225,31 +235,39 @@ mixin FavMixin on TripleMixin {
   void updateFavCount(int count);
 
   Future<void> actionFavVideo({bool isQuick = false}) async {
+    if (!Accounts.main.isLogin) {
+      SmartDialog.showToast('账号未登录');
+      return;
+    }
     final (rid, type) = getFavRidType;
     // 收藏至默认文件夹
     if (isQuick) {
       SmartDialog.showLoading(msg: '请求中');
-      queryVideoInFolder().then((res) async {
-        if (res.isSuccess) {
-          final hasFav = this.hasFav.value;
-          final result = hasFav
-              ? await FavHttp.unfavAll(rid: rid, type: type)
-              : await FavHttp.favVideo(
-                  resources: '$rid:$type',
-                  addIds: favFolderId.toString(),
-                );
-          SmartDialog.dismiss();
-          if (result.isSuccess) {
-            updateFavCount(hasFav ? -1 : 1);
-            this.hasFav.toggle();
-            SmartDialog.showToast('${hasFav ? '取消' : ''}收藏成功');
-          } else {
-            res.toast();
-          }
+      final res = await queryVideoInFolder();
+      if (isClosed || (rid, type) != getFavRidType) {
+        SmartDialog.dismiss();
+        return;
+      }
+      if (res.isSuccess) {
+        final hasFav = this.hasFav.value;
+        final result = hasFav
+            ? await FavHttp.unfavAll(rid: rid, type: type)
+            : await FavHttp.favVideo(
+                resources: '$rid:$type',
+                addIds: favFolderId.toString(),
+              );
+        SmartDialog.dismiss();
+        if (isClosed || (rid, type) != getFavRidType) return;
+        if (result.isSuccess) {
+          updateFavCount(hasFav ? -1 : 1);
+          this.hasFav.toggle();
+          SmartDialog.showToast('${hasFav ? '取消' : ''}收藏成功');
         } else {
-          SmartDialog.dismiss();
+          res.toast();
         }
-      });
+      } else {
+        SmartDialog.dismiss();
+      }
       return;
     }
 
@@ -278,6 +296,7 @@ mixin FavMixin on TripleMixin {
       delIds: delMediaIdsNew.join(','),
     );
     SmartDialog.dismiss();
+    if (isClosed || (rid, type) != getFavRidType) return;
     if (result.isSuccess) {
       Get.back();
       final newVal =

@@ -1,6 +1,4 @@
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
-import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
 import 'dart:io' show Platform, Directory;
 import 'dart:math' show max;
 
@@ -66,15 +64,13 @@ List<SettingsModel> get extraSettings => [
     setKey: SettingBoxKey.biliPlayerControls,
     onChanged: (_) => HarmonyAppearance.changed(),
   ),
-  NormalModel(
+  SwitchModel(
     section: '播放器体验',
     title: '竖屏短视频模式',
-    subtitle: 'V3 计划，暂未开放',
+    subtitle: 'V2.5：普通视频以竖屏信息流打开，上下滑动连续观看；可随时返回普通详情。番剧、直播与批量播放列表保留原布局',
     leading: const Icon(Icons.stay_current_portrait_outlined),
-    disabledReason: () => '竖屏短视频模式计划在 V3 中评估和开发，当前版本尚未实现，因此暂时无法开启。',
-    getTrailing: (theme) => theme.extension<HarmonyStyle>() != null
-        ? const HarmonySwitch(value: false, onChanged: null)
-        : const Switch(value: false, onChanged: null),
+    setKey: SettingBoxKey.shortVideoMode,
+    onChanged: (_) => HarmonyAppearance.changed(),
   ),
   if (PlatformUtils.isDesktop) ...[
     SwitchModel(

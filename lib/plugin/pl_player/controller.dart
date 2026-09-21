@@ -1,3 +1,4 @@
+import 'package:PiliPlus/plugin/pl_player/models/playback_owner.dart';
 import 'package:PiliPlus/pages/setting/models/play_settings.dart'
     show kMaxVolume;
 import 'dart:async' show StreamSubscription, Timer, unawaited;
@@ -612,6 +613,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             !horizontalScreen)) {
       _cancelAutoExitFs();
       return; // The system knows the active panels; phone sensor axes do not.
+    }
+    if (sourceOwner case PortraitPlaybackOwner(
+      shortVideoMode: true,
+    ) when !this.isFullScreen.value) {
+      _cancelAutoExitFs();
+      return; // Portrait feed enters fullscreen only through its explicit control.
     }
     if (Platform.isIOS && !visible) return;
     final isFullScreen = this.isFullScreen.value;

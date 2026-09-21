@@ -1,3 +1,5 @@
+import 'package:PiliPlus/plugin/pl_player/models/playback_owner.dart';
+import 'package:PiliPlus/pages/video/shorts/request_queue.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' show min;
@@ -83,7 +85,8 @@ import 'package:media_kit/media_kit.dart';
 import 'package:path/path.dart' as path;
 
 class VideoDetailController extends GetxController
-    with GetTickerProviderStateMixin, BlockMixin {
+    with GetTickerProviderStateMixin, BlockMixin
+    implements PortraitPlaybackOwner {
   /// 路由传参
   late final Map args;
   late String bvid;
@@ -839,6 +842,7 @@ class VideoDetailController extends GetxController
     bool? autoplay,
     bool autoFullScreenFlag = false,
   }) async {
+    final source = (bvid, cid.value);
     plPlayerController.sourceOwner = this;
     Duration? seek = defaultST ?? playedTime;
     if (seek == .zero) seek = null;
@@ -869,6 +873,7 @@ class VideoDetailController extends GetxController
       pgcType: isUgc ? null : pgcType,
       videoType: videoType,
       onInit: () {
+        if (isClosed || source != (bvid, cid.value)) return;
         videoState.value = true;
         setSubtitle(vttSubtitlesIndex.value);
       },
@@ -878,7 +883,7 @@ class VideoDetailController extends GetxController
       autoFullScreenFlag: autoFullScreenFlag,
     );
 
-    if (isClosed) return;
+    if (isClosed || source != (bvid, cid.value)) return;
 
     if (!isFileSource) {
       if (plPlayerController.enableBlock) {
@@ -898,6 +903,9 @@ class VideoDetailController extends GetxController
   }
 
   bool isQuerying = false;
+  @override
+  bool shortVideoMode = false;
+  final _videoRequests = VideoRequestQueue();
 
   final languages = Rxn<List<LanguageItem>>();
   final currLang = Rxn<String>();
@@ -925,12 +933,14 @@ class VideoDetailController extends GetxController
     );
   }
 
-  Future<void> _supplementVideoQualities() async {
+  Future<void> _supplementVideoQualities(int ticket) async {
+    final target = data;
     final quality = data.missingVideoQualityBelowHighest;
     if (quality == -1) return;
     final result = await _getVideoUrl(quality);
+    if (!_videoRequests.isCurrent(ticket) || isClosed) return;
     if (result case Success(:final response)) {
-      data.dash!.video!.merge(response.dash?.video);
+      target.dash!.video!.merge(response.dash?.video);
     }
   }
 
@@ -941,32 +951,33 @@ class VideoDetailController extends GetxController
   Future<void> queryVideoUrl({
     bool fromReset = false,
     bool autoFullScreenFlag = false,
-  }) async {
-    if (isFileSource) {
-      return _initPlayerIfNeeded(autoFullScreenFlag);
-    }
-    if (isQuerying) {
-      return;
-    }
+  }) => _videoRequests.run((ticket) async {
+    if (isClosed) return;
     isQuerying = true;
     try {
-      await _queryVideoUrl(fromReset, autoFullScreenFlag);
+      if (isFileSource) {
+        await _initPlayerIfNeeded(autoFullScreenFlag);
+      } else {
+        await _queryVideoUrl(fromReset, autoFullScreenFlag, ticket);
+      }
     } finally {
       isQuerying = false;
-      // 取流期间链路发生过翻转：上面的选流可能已用旧档位跑完，这里补做一次
-      if (_pendingNetworkReselect) {
-        _applyNetworkScope();
-      }
+      if (!isClosed && _pendingNetworkReselect) _applyNetworkScope();
     }
-  }
+  });
 
   @pragma('vm:prefer-inline')
-  Future<void> _queryVideoUrl(bool fromReset, bool autoFullScreenFlag) async {
+  Future<void> _queryVideoUrl(
+    bool fromReset,
+    bool autoFullScreenFlag,
+    int ticket,
+  ) async {
     if (plPlayerController.enableSponsorBlock && isBlock && !fromReset) {
       querySponsorBlock(bvid: bvid, cid: cid.value);
     }
     if (plPlayerController.cacheVideoQa == null) {
       final isWiFi = await ConnectivityUtils.isWiFi;
+      if (!_videoRequests.isCurrent(ticket) || isClosed) return;
       plPlayerController
         ..cacheVideoQa = isWiFi
             ? Pref.defaultVideoQa
@@ -978,10 +989,12 @@ class VideoDetailController extends GetxController
     }
 
     final result = await _getVideoUrl(VideoQuality.hdrVivid.code);
+    if (!_videoRequests.isCurrent(ticket) || isClosed) return;
 
     if (result case Success(:final response)) {
       data = response;
-      if (data.dash != null) await _supplementVideoQualities();
+      if (data.dash != null) await _supplementVideoQualities(ticket);
+      if (!_videoRequests.isCurrent(ticket) || isClosed) return;
 
       languages.value = data.language?.items;
       currLang.value = data.curLanguage;
@@ -1240,6 +1253,7 @@ class VideoDetailController extends GetxController
   late bool continuePlayingPart = Pref.continuePlayingPart;
 
   Future<void> _queryPlayInfo() async {
+    final source = (bvid, cid.value);
     vttSubtitles.clear();
     vttSubtitlesIndex.value = 0;
     if (plPlayerController.showViewPoints) {
@@ -1251,6 +1265,7 @@ class VideoDetailController extends GetxController
       seasonId: seasonId,
       epId: epId,
     );
+    if (isClosed || source != (bvid, cid.value)) return;
     if (res case Success(:final response)) {
       // interactive video
       late final introCtr = Get.find<UgcIntroController>(tag: heroTag);
@@ -1301,6 +1316,7 @@ class VideoDetailController extends GetxController
         _setSubtitle(sub);
       } else if (!Accounts.main.isLogin) {
         final res = await DmGrpc.dmView(aid, cid.value);
+        if (isClosed || source != (bvid, cid.value)) return;
         if (res case Success(:final response)) {
           if (response.hasSubtitle() &&
               response.subtitle.subtitles.isNotEmpty) {
@@ -1381,6 +1397,7 @@ class VideoDetailController extends GetxController
 
   @override
   void onClose() {
+    _videoRequests.dispose();
     _networkScopeSub?.cancel();
     _networkScopeSub = null;
     if (identical(plPlayerController.sourceOwner, this)) {
@@ -1403,6 +1420,7 @@ class VideoDetailController extends GetxController
   }
 
   void onReset({bool isStein = false}) {
+    _videoRequests.invalidate();
     if (isFileSource) {
       cacheLocalProgress();
     }
