@@ -32,6 +32,7 @@ class ReplyPanelHeader extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
+              color: ColorScheme.of(context).onSurface,
               fontSize: onClose == null ? 13 : 16,
               height: onClose == null ? null : 1.25,
               letterSpacing: onClose == null ? null : 0,

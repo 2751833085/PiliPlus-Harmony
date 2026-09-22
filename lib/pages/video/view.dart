@@ -426,8 +426,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       backgroundColor: shortVideoPanelTheme(
         ThemeUtils.darkTheme,
       ).colorScheme.surface,
-      builder: (context) => Theme(
-        data: shortVideoPanelTheme(ThemeUtils.darkTheme),
+      builder: (context) => ShortVideoPanelSurface(
+        base: ThemeUtils.darkTheme,
         child: Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -455,8 +455,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       },
       child: ShortVideoFeed(
         commentsPanel: _shortCommentsVisible
-            ? Theme(
-                data: shortVideoPanelTheme(ThemeUtils.darkTheme),
+            ? ShortVideoPanelSurface(
+                base: ThemeUtils.darkTheme,
                 child: MiniScaffold(
                   body: videoReplyPanel(
                     onClose: () =>
