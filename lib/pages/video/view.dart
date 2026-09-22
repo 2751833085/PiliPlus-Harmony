@@ -202,6 +202,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     videoDetailController.shortVideoMode = true;
     setState(() => _shortMode = true);
     _syncDecorDark();
+    _attachPlayerListeners();
+    if (videoDetailController.isQuerying) return;
+    if (videoDetailController.videoState.value &&
+        identical(
+          videoDetailController.plPlayerController.sourceOwner,
+          videoDetailController,
+        )) {
+      await plPlayerController!.play();
+    } else if (videoDetailController.videoUrl != null) {
+      await videoDetailController.playerInit(autoplay: true);
+    } else {
+      await videoDetailController.queryVideoUrl();
+    }
   }
 
   void _leaveShortMode() {
@@ -281,6 +294,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         if (!videoDetailController.autoPlay ||
             !videoDetailController.videoState.value) {
           videoDetailController.autoPlay = true;
+          _attachPlayerListeners();
           if (videoDetailController.videoUrl == null) {
             videoDetailController.queryVideoUrl();
           } else {
@@ -532,11 +546,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   void videoSourceInit() {
     videoDetailController.queryVideoUrl(autoFullScreenFlag: !_shortMode);
     if (videoDetailController.autoPlay) {
-      plPlayerController = videoDetailController.plPlayerController;
-      plPlayerController!
-        ..addStatusLister(playerListener)
-        ..addPositionListener(positionListener);
+      _attachPlayerListeners();
     }
+  }
+
+  void _attachPlayerListeners() {
+    plPlayerController = videoDetailController.plPlayerController;
+    plPlayerController!
+      ..addStatusLister(playerListener)
+      ..addPositionListener(positionListener);
   }
 
   void positionListener(Duration position) {

@@ -116,11 +116,23 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                             children: [
                               if (session.entries[index].cover
                                   case final cover?)
-                                NetworkImgLayer(
-                                  src: cover,
-                                  fit: BoxFit.contain,
-                                  width: pane.maxWidth,
-                                  height: pane.maxHeight,
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: widget.fullscreen
+                                        ? 0
+                                        : ShortVideoControls.heightFor(
+                                            MediaQuery.textScalerOf(context),
+                                          ),
+                                  ),
+                                  child: LayoutBuilder(
+                                    builder: (_, media) => NetworkImgLayer(
+                                      src: cover,
+                                      fit: BoxFit.contain,
+                                      borderRadius: BorderRadius.zero,
+                                      width: media.maxWidth,
+                                      height: media.maxHeight,
+                                    ),
+                                  ),
                                 ),
                             ],
                           );

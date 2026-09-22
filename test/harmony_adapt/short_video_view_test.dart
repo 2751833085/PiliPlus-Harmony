@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models_new/member_card_info/data.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
@@ -95,6 +96,131 @@ void main() {
     },
   );
   testWidgets(
+    'crossing halfway then dragging back does not open another video',
+    (tester) async {
+      var plays = 0;
+      final key = GlobalKey();
+      final session = ShortVideoSession(
+        initial: const ShortVideoEntry(bvid: 'a'),
+        loadRelated: (_) async => const [ShortVideoEntry(bvid: 'b')],
+        play: (_) async {
+          plays++;
+          return true;
+        },
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ShortVideoPager(
+              session: session,
+              builder: (_, index, active) => active
+                  ? _PlayerFixture(key: key)
+                  : const ColoredBox(color: Colors.black),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final state = key.currentState;
+      final gesture = await tester.startGesture(const Offset(400, 520));
+      await gesture.moveBy(const Offset(0, -410));
+      await tester.pump(const Duration(milliseconds: 40));
+      final pages = tester.widget<PageView>(find.byType(PageView)).controller!;
+      expect(pages.page, greaterThan(.5));
+      expect(plays, 0);
+      expect(session.switching, isFalse);
+      expect(key.currentState, same(state));
+      await gesture.moveBy(const Offset(0, 360));
+      await tester.pump(const Duration(milliseconds: 400));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(pages.page, 0);
+      expect(plays, 0);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      session.dispose();
+    },
+  );
+
+  testWidgets(
+    'source opening starts after snap and slow opening never blocks subsequent swipes',
+    (tester) async {
+      final key = GlobalKey();
+      final first = Completer<bool>();
+      final second = Completer<bool>();
+      final plays = <String>[];
+      final session = ShortVideoSession(
+        initial: const ShortVideoEntry(bvid: 'a'),
+        loadRelated: (_) async => const [
+          ShortVideoEntry(bvid: 'b'),
+          ShortVideoEntry(bvid: 'c'),
+          ShortVideoEntry(bvid: 'd'),
+          ShortVideoEntry(bvid: 'e'),
+        ],
+        play: (entry) {
+          plays.add(entry.bvid);
+          return entry.bvid == 'b' ? first.future : second.future;
+        },
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ShortVideoPager(
+              session: session,
+              builder: (_, index, active) => active
+                  ? _PlayerFixture(key: key)
+                  : const ColoredBox(color: Colors.black),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final state = key.currentState;
+      final gesture = await tester.startGesture(const Offset(400, 520));
+      await gesture.moveBy(const Offset(0, -410));
+      await tester.pump();
+      final pages = tester.widget<PageView>(find.byType(PageView)).controller!;
+      expect(plays, isEmpty);
+      await gesture.up();
+      var last = pages.page!;
+      for (var i = 0; i < 80 && pages.position.isScrollingNotifier.value; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        final page = pages.page!;
+        expect(page, greaterThanOrEqualTo(last - .0001));
+        if (page < .999) expect(plays, isEmpty);
+        last = page;
+      }
+      await tester.pump();
+      expect(pages.page, 1);
+      expect(plays, ['b']);
+      expect(session.switching, isTrue);
+      await tester.drag(find.byType(PageView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(pages.page, 2);
+      await tester.drag(find.byType(PageView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      await tester.drag(find.byType(PageView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(pages.page, 4);
+      expect(plays, [
+        'b',
+      ]); // One native open at a time; latest settled page wins.
+      first.complete(true);
+      await tester.pumpAndSettle();
+      expect(pages.page, 4); // Never jump back to the intermediate page.
+      expect(plays, ['b', 'e']);
+      second.complete(true);
+      await tester.pumpAndSettle();
+      expect(session.index, 4);
+      expect(key.currentState, same(state));
+      expect(find.byType(_PlayerFixture), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      session.dispose();
+    },
+  );
+
+  testWidgets(
     'slow stream loading retains the current player until the new source is ready',
     (tester) async {
       final key = GlobalKey();
@@ -188,9 +314,12 @@ void main() {
         final session = ShortVideoSession(
           initial: const ShortVideoEntry(
             bvid: 'a',
+            cover: '',
             title: '很长的视频标题：从单屏展开到三屏时依然可以查看所有操作',
           ),
-          loadRelated: (_) async => const [ShortVideoEntry(bvid: 'next')],
+          loadRelated: (_) async => const [
+            ShortVideoEntry(bvid: 'next', cover: ''),
+          ],
           play: (_) async => true,
         );
         final player = _FakePlayer();
@@ -245,6 +374,20 @@ void main() {
             ).writeAsBytes(bytes!.buffer.asUint8List());
             image.dispose();
           });
+        }
+        // Adjacent covers are already built and use the same video rectangle,
+        // including footer reservation. No vertical jump at cover/live handoff.
+        final covers = find.byWidgetPredicate(
+          (w) => w is NetworkImgLayer && w.src == '',
+          skipOffstage: false,
+        );
+        expect(covers, findsNWidgets(2));
+        final mediaSize = tester.getSize(find.byType(_PlayerFixture));
+        for (final element in covers.evaluate()) {
+          expect(
+            tester.getSize(find.byWidget(element.widget, skipOffstage: false)),
+            mediaSize,
+          );
         }
         final state = playerKey.currentState;
         video.shortChromeVisible.value = false;

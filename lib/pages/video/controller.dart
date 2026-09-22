@@ -1228,7 +1228,15 @@ class VideoDetailController extends GetxController
 
   bool isQuerying = false;
   @override
-  bool shortVideoMode = false;
+  bool get shortVideoMode => _shortVideoMode;
+  bool _shortVideoMode = false;
+  set shortVideoMode(bool value) {
+    _shortVideoMode = value;
+    // Feed entry is an explicit playback action, independent of the ordinary
+    // detail page's autoplay preference. Never persist this override.
+    if (value) _autoPlay.value = true;
+  }
+
   final shortChromeVisible = true.obs;
   final _videoRequests = VideoRequestQueue();
 
@@ -1779,6 +1787,7 @@ class VideoDetailController extends GetxController
   }
 
   void onReset({bool isStein = false}) {
+    if (shortVideoMode) _autoPlay.value = true;
     _routeRetry?.cancel();
     _routeRetry = null;
     _routeRetries = 0;

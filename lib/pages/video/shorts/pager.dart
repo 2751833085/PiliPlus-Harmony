@@ -26,6 +26,10 @@ class _ShortVideoPagerState extends State<ShortVideoPager> {
   double _pull = 0;
   bool _armed = false;
   bool _startedAtFirst = false;
+  bool _scrolling = false;
+  bool _selecting = false;
+  late int _desiredIndex = session.index;
+  late int _playerIndex = session.index;
   ShortVideoSession get session => widget.session;
   @override
   void initState() {
@@ -37,7 +41,19 @@ class _ShortVideoPagerState extends State<ShortVideoPager> {
   }
 
   void _changed() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      _adoptSettledPlayer();
+      setState(() {});
+    }
+  }
+
+  void _adoptSettledPlayer() {
+    // A superseded target may already be outside PageView's built range.
+    // Keep the live GlobalKey in its retained page until the final visible
+    // target is ready, so rapid paging cannot dispose/recreate the player.
+    if (!_scrolling && !session.switching && session.index == _desiredIndex) {
+      _playerIndex = session.index;
+    }
   }
 
   @override
@@ -47,17 +63,47 @@ class _ShortVideoPagerState extends State<ShortVideoPager> {
     super.dispose();
   }
 
-  Future<void> _select(int index) async {
-    final accepted = await session.select(index);
-    if (!mounted) return;
-    if (!accepted && _pages.hasClients) _pages.jumpToPage(session.index);
-    if (session.error case final message?) widget.onError?.call(message);
-    if (session.entries.length - session.index <= 3) session.loadMore();
+  // PageView.onPageChanged fires halfway through a drag. Opening a new source
+  // there changes the old page's texture and interrupts the snap animation.
+  // Commit only settled pages, coalescing further swipes during a slow open.
+  Future<void> _selectSettled() async {
+    if (_selecting || _scrolling || !mounted) return;
+    _selecting = true;
+    try {
+      while (mounted &&
+          !_scrolling &&
+          !session.refreshing &&
+          !session.interacting &&
+          _desiredIndex != session.index) {
+        final index = _desiredIndex;
+        final accepted = await session.select(index);
+        if (!mounted) return;
+        if (!accepted && _desiredIndex == index && !_scrolling) {
+          _desiredIndex = session.index;
+          if (_pages.hasClients) {
+            await _pages.animateToPage(
+              session.index,
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+            );
+          }
+        }
+        if (session.error case final message?) widget.onError?.call(message);
+        if (session.entries.length - session.index <= 3) session.loadMore();
+      }
+    } finally {
+      _selecting = false;
+      if (mounted) {
+        _adoptSettledPlayer();
+        setState(() {});
+      }
+    }
   }
 
   bool _onScroll(ScrollNotification event) {
     if (event.depth != 0 || event.metrics.axis != Axis.vertical) return false;
     if (event is ScrollStartNotification) {
+      _scrolling = true;
       _pull = 0;
       _armed = false;
       _startedAtFirst = session.index == 0 && event.metrics.pixels <= 0;
@@ -75,11 +121,24 @@ class _ShortVideoPagerState extends State<ShortVideoPager> {
       _pull = (_pull - event.overscroll).clamp(0, 160);
       if (_pull >= 72 && session.loadFresh != null) _armed = true;
     }
-    if (event is ScrollEndNotification && _armed) {
+    if (event is ScrollEndNotification) {
+      _scrolling = false;
+      _desiredIndex = (event.metrics as PageMetrics).page!.round();
+      final refresh = _armed;
       _armed = false;
-      session.refresh().then((_) {
-        if (mounted && session.error != null)
-          widget.onError?.call(session.error!);
+      // Scroll notifications arrive during layout. Defer state changes until
+      // the frame has painted, without adding a delay to the gesture itself.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _scrolling) return;
+        if (refresh) {
+          session.refresh().then((_) {
+            if (mounted && session.error != null) {
+              widget.onError?.call(session.error!);
+            }
+          });
+        } else {
+          _selectSettled();
+        }
       });
     }
     return false;
@@ -91,21 +150,29 @@ class _ShortVideoPagerState extends State<ShortVideoPager> {
         onNotification: _onScroll,
         child: PageView.builder(
           controller: _pages,
+          // Decode adjacent covers before the user's drag; these pages never
+          // create extra video players.
+          allowImplicitScrolling: true,
           scrollDirection: Axis.vertical,
-          physics:
-              !widget.enabled ||
-                  session.switching ||
-                  session.refreshing ||
-                  session.interacting
+          physics: !widget.enabled || session.refreshing || session.interacting
               ? const NeverScrollableScrollPhysics()
               : const AlwaysScrollableScrollPhysics(
                   parent: ClampingScrollPhysics(),
                 ),
-          onPageChanged: _select,
           itemCount: session.entries.length,
           itemBuilder: (context, index) => _RetainedVideoPage(
-            active: index == session.index,
-            child: widget.builder(context, index, index == session.index),
+            active: index == _playerIndex,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                widget.builder(context, index, false),
+                if (index == _playerIndex)
+                  Offstage(
+                    offstage: session.switching || index != session.index,
+                    child: widget.builder(context, index, true),
+                  ),
+              ],
+            ),
           ),
         ),
       );
