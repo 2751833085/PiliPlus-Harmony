@@ -1,0 +1,41 @@
+{
+  "recorded_at": "2026-09-22T09:54:07.475310+00:00",
+  "version": "2.6.13+6100",
+  "base_commit": "7fc9bbd899917febd1b2854a64b9e5cf9ab77b66",
+  "artifact_sha256": "50fada2f54e5abf4105c497794fa8b063a44a545bbb93896510b6c17d63aebe7",
+  "checks": {
+    "flutter_tests_passed": 106,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "arkts_posture_events": "passed: actual SystemPosture service, one/two hands, unknown/not held, debounce cancellation, duplicate suppression, disabled queued callback, background cleanup, fold transitions, unsupported device",
+    "flutter_grip_bridge": "passed: center after releasing touch, return to either hand, simulated double/triple widths at DPR 2.875",
+    "native_hds_dock": "system adaptToHandedness retained; no extra manual placement",
+    "fullscreen_timeline": "existing full-width regression passed for all hand sides",
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed"
+  },
+  "device": {
+    "recorded_at": "2026-09-22T09:53:51.633977+00:00",
+    "previous_version": "2.6.12",
+    "previous_version_code": 6099,
+    "installed_version": "2.6.13",
+    "installed_version_code": 6100,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false,
+    "artifact_sha256": "50fada2f54e5abf4105c497794fa8b063a44a545bbb93896510b6c17d63aebe7",
+    "base_commit": "7fc9bbd899917febd1b2854a64b9e5cf9ab77b66",
+    "launch": "blocked_by_lock"
+  },
+  "remote_push": false,
+  "not_verified": [
+    "physical one/two-hand holding on final build",
+    "final build short-video white veil removal on device",
+    "physical rotation lock on final build"
+  ]
+}

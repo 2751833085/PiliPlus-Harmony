@@ -7,3 +7,5 @@
 系统握持枚举以本机 API 26 `@ohos.multimodalAwareness.motion.d.ts` 为准。华为[多设备适配指南](https://developer.huawei.com/consumer/cn/multidevice/adaptive-apps/)说明支持左手、右手、双手和未握持识别。回归使用实际 ArkTS 服务的模拟事件及 Flutter 桥接/控件；真实双手识别需要设备传感器验证。
 
 保留 V2.6.12 白色遮层、旋转锁定、全宽播放栏和统一菜单修复。未 push。
+
+[验证记录](VALIDATION.md) · [签名 HAP](../../releases/v2.6.13-rc1/README.md)。
