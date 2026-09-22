@@ -1,0 +1,78 @@
+{
+  "recorded_at": "2026-09-22T09:45:54.474557+00:00",
+  "version": "2.6.12+6099",
+  "base_commit": "77ca8652fddb3bf44f480010f11a506f9b541bca",
+  "artifact_sha256": "84a1c37efefc188c5d0223fe167558bdcc1af0816bd3ae73cc0dd23132265e24",
+  "checks": {
+    "flutter_tests_passed": 105,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "short_video_layout_scenarios": 72,
+    "normal_player_layout_scenarios": 42,
+    "menu_density_font_scenarios": 21,
+    "native_dimensions": [
+      [
+        1008,
+        2232
+      ],
+      [
+        2048,
+        2232
+      ],
+      [
+        3184,
+        2232
+      ]
+    ],
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "short_video_cover": "no ErrorWidget or blocked playback gestures across short/ordinary, autoplay/pause, and all three widths",
+    "menus": "bottom attachment, short/long content size, dark local theme capture, selection callbacks, disabled options, system back",
+    "fullwidth_timeline": "left/right/center handedness retains fullwidth timeline; expanded fullscreen title excludes single/double",
+    "sponsor_block": "automatic/once/manual/reset/listener cancellation with simulated events",
+    "previews": "direct native-pixel rendering with local device fonts; fixture data; single/double density scans are simulations"
+  },
+  "device": {
+    "recorded_at": "2026-09-22T09:39:03.745978+00:00",
+    "previous_version": "2.6.12",
+    "previous_version_code": 6098,
+    "installed_version": "2.6.12",
+    "installed_version_code": 6099,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false,
+    "artifact_sha256": "84a1c37efefc188c5d0223fe167558bdcc1af0816bd3ae73cc0dd23132265e24",
+    "base_commit": "77ca8652fddb3bf44f480010f11a506f9b541bca",
+    "launch": "blocked_by_lock"
+  },
+  "device_ui": {
+    "final_build": "2.6.12+6099",
+    "final_build_ui_status": "pending_device_unlock",
+    "native_triple_resolution": [
+      3184,
+      2232
+    ],
+    "prior_candidate": {
+      "version_code": 6098,
+      "grey_video_veil": "reproduced over the whole short video; remained with danmaku off",
+      "fullscreen_timeline": "observed spanning full width",
+      "fullscreen_title": "observed hidden on triple fullscreen",
+      "compact_my_actions": "observed on double panel",
+      "bottom_menu": "observed bottom attached with dark theme; excess empty height subsequently fixed in 6099"
+    },
+    "physical_rotation_with_system_lock": "not_verified",
+    "private_screenshots_in_repository": false,
+    "summary_zh": "6098 候选包已在 3184×2232 三屏真机上复现整幅视频的灰白遮层，并确认全屏时间轴铺满、滚动标题隐藏。6099 已修复触发遮层的 GetX 无订阅分支及旋转锁定逻辑，新增组件回归通过。最终包覆盖安装后设备锁屏，系统返回 10106102 拒绝启动；白层消失、真实手势及开启系统旋转锁后的物理转动仍待解锁验收，不能视为全部真机验证通过。"
+  },
+  "remote_push": false,
+  "not_verified": [
+    "single/double physical folding and rotation in final build",
+    "live SponsorBlock service availability",
+    "all videos/CDNs under arbitrary network conditions"
+  ]
+}
