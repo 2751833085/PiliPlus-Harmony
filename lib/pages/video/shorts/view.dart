@@ -226,6 +226,14 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
     }
   }
 
+  bool get _pausedPresentation {
+    final player = widget.video.plPlayerController;
+    return player.playerStatus.isPaused &&
+        !session.switching &&
+        player.duration.value > 0 &&
+        !player.isBuffering.value;
+  }
+
   Widget _currentPage(BoxConstraints pane, {bool compact = false}) {
     if (compact) return widget.playerBuilder(pane.maxWidth, pane.maxHeight);
     final player = widget.video.plPlayerController;
@@ -275,8 +283,9 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
           child: Obx(
             () => ShortVideoChrome(
               visible:
-                  widget.video.shortChromeVisible.value &&
-                  !player.isSeeking.value,
+                  !player.isSeeking.value &&
+                  (widget.video.shortChromeVisible.value ||
+                      _pausedPresentation),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -627,6 +636,24 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
             ),
           ),
         ),
+        Positioned.fill(
+          bottom: bottomHeight,
+          child: Obx(() {
+            if (player.isSeeking.value || !_pausedPresentation) {
+              return const SizedBox.shrink();
+            }
+            final compact = pane.maxHeight - bottomHeight < 360;
+            return Align(
+              alignment: Alignment(0, compact ? -.4 : 0),
+              child: ShortVideoPausedControls(
+                compact: compact,
+                time:
+                    '${DurationUtils.formatDuration(player.progress)} / ${DurationUtils.formatDuration(player.duration.value)}',
+                onResume: () => player.play(),
+              ),
+            );
+          }),
+        ),
         Positioned(
           left: 12,
           right: 12,
@@ -642,7 +669,9 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                 Obx(
                   () => ShortVideoMinimalControls(
                     playing: player.playerStatus.isPlaying,
-                    showPlayback: !widget.video.shortChromeVisible.value,
+                    showPlayback:
+                        !widget.video.shortChromeVisible.value &&
+                        !_pausedPresentation,
                     seeking: player.isSeeking.value,
                     time:
                         '${DurationUtils.formatDuration(player.progress)} / ${DurationUtils.formatDuration(player.duration.value)}',

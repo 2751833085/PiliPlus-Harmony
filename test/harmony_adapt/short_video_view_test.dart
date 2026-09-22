@@ -354,7 +354,7 @@ void main() {
     },
   );
   testWidgets(
-    'actual feed fits phone, expanded fold and large text; fullscreen keeps the same player',
+    'actual feed fits phone and fold; paused, seeking, comments and fullscreen retain the player',
     (tester) async {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -517,9 +517,26 @@ void main() {
         }
         await tester.pumpAndSettle();
         expect(
-          tester.getRect(find.byIcon(Icons.play_arrow_rounded)),
-          pauseRect,
+          tester
+              .widget<ShortVideoChrome>(find.byType(ShortVideoChrome).first)
+              .visible,
+          isTrue,
         );
+        expect(find.byType(ShortVideoPausedControls), findsOneWidget);
+        expect(find.byTooltip('继续播放').hitTestable(), findsOneWidget);
+        expect(
+          tester
+              .widget<ShortVideoMinimalControls>(
+                find.byType(ShortVideoMinimalControls),
+              )
+              .showPlayback,
+          isFalse,
+        );
+        final resumeRect = tester.getRect(find.byTooltip('继续播放'));
+        expect(playerRect.contains(resumeRect.topLeft), isTrue);
+        expect(playerRect.contains(resumeRect.bottomRight), isTrue);
+        expect(tester.getRect(progress), barRect);
+        expect(tester.getRect(find.byType(_PlayerFixture)), playerRect);
         expect(progress.hitTestable(), findsOneWidget);
         expect(playerKey.currentState, same(state));
         if (renderPath.isNotEmpty) {
@@ -532,16 +549,60 @@ void main() {
               format: ui.ImageByteFormat.png,
             );
             await File(
-              '$renderPath-minimal-${size.width.toInt()}.png',
+              '$renderPath-paused-${size.width.toInt()}.png',
             ).writeAsBytes(bytes!.buffer.asUint8List());
             image.dispose();
           });
+        }
+        // Paused scrubbing keeps a single timestamp and does not resume.
+        player.onSeekStart(80);
+        await tester.pumpAndSettle();
+        expect(find.byType(ShortVideoPausedControls), findsNothing);
+        expect(
+          tester
+              .widget<ShortVideoChrome>(find.byType(ShortVideoChrome).first)
+              .visible,
+          isFalse,
+        );
+        expect(player.playerStatus, PlayerStatus.paused);
+        expect(progress.hitTestable(), findsOneWidget);
+        player.onSeekEnd();
+        await tester.pumpAndSettle();
+        expect(find.byType(ShortVideoPausedControls), findsOneWidget);
+        // Loading or an uninitialized stream must not look like a user pause.
+        player.isBuffering.value = true;
+        await tester.pumpAndSettle();
+        expect(find.byType(ShortVideoPausedControls), findsNothing);
+        player.isBuffering.value = false;
+        player.duration.value = 0;
+        await tester.pumpAndSettle();
+        expect(find.byType(ShortVideoPausedControls), findsNothing);
+        player.duration.value = 1315;
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('继续播放'));
+        await tester.pumpAndSettle();
+        expect(player.playerStatus, PlayerStatus.playing);
+        expect(player.resumes, 1);
+        expect(player.toggles, 0);
+        expect(find.byType(ShortVideoPausedControls), findsNothing);
+        expect(video.shortChromeVisible.value, isFalse);
+        expect(
+          tester
+              .widget<ShortVideoChrome>(find.byType(ShortVideoChrome).first)
+              .visible,
+          isFalse,
+        );
+        expect(playerKey.currentState, same(state));
+        player.playerStatus = PlayerStatus.paused;
+        for (final listener in player.listeners.toList()) {
+          listener(PlayerStatus.paused);
         }
         commentsOpen = true;
         await tester.pumpWidget(build(false));
         await tester.pumpAndSettle();
         expect(playerKey.currentState, same(state));
         expect(find.byType(ShortVideoControls), findsNothing);
+        expect(find.byType(ShortVideoPausedControls), findsNothing);
         final commentBox = tester.getRect(find.text('评论内容（布局测试）'));
         expect(
           tester.getRect(find.byType(_PlayerFixture)).overlaps(commentBox),
@@ -572,6 +633,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(playerKey.currentState, same(state));
         expect(find.byType(ShortVideoControls), findsNothing);
+        expect(find.byType(ShortVideoPausedControls), findsNothing);
         expect(find.text('评论'), findsOneWidget);
         await tester.drag(find.byType(PageView), Offset(0, -size.height * .75));
         await tester.pumpAndSettle();
@@ -628,7 +690,29 @@ class _FakePlayer implements PlPlayerController {
   @override
   int get progress => isSeeking.value ? seekPosition.value : position.value;
   @override
-  PlayerStatus playerStatus = PlayerStatus.paused;
+  PlayerStatus playerStatus = PlayerStatus.playing;
+  int resumes = 0;
+  @override
+  Future<void> play({bool repeat = false, bool hideControls = true}) async {
+    resumes++;
+    playerStatus = PlayerStatus.playing;
+    for (final listener in listeners.toList()) {
+      listener(playerStatus);
+    }
+  }
+
+  int toggles = 0;
+  @override
+  Future<void> onDoubleTapCenter() async {
+    toggles++;
+    playerStatus = playerStatus.isPlaying
+        ? PlayerStatus.paused
+        : PlayerStatus.playing;
+    for (final listener in listeners.toList()) {
+      listener(playerStatus);
+    }
+  }
+
   @override
   final seekPosition = 0.obs;
   @override

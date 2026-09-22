@@ -28,6 +28,7 @@ bash tool/harmony.sh release
 | V2.6.3 RC1 | 简洁模式保留进度条、底部播放/暂停按钮 | [签名 HAP 与记录](releases/v2.6.3-rc1/README.md) · [验证记录](docs/v2.6.3/VALIDATION.md) |
 | V2.6.4 RC1 | 模式切换过渡、紧凑评论、缩小图标和不想看原因选择 | [签名 HAP 与记录](releases/v2.6.4-rc1/README.md) · [验证记录](docs/v2.6.4/VALIDATION.md) |
 | V2.6.5 RC1 | 按视频比例进入短视频、连续预加载、参考 iOS 的播控与评论布局 | [签名 HAP 与记录](releases/v2.6.5-rc1/README.md) · [验证记录](docs/v2.6.5/VALIDATION.md) |
+| V2.6.6 RC1 | 参考 iOS 的短视频暂停状态与中央继续播放入口 | [签名 HAP 与记录](releases/v2.6.6-rc1/README.md) · [验证记录](docs/v2.6.6/VALIDATION.md) |
 
 [更新记录](CHANGELOG.md) · [开发约定](CONTRIBUTING.md) · [文档目录](docs/README.md) · [147 项功能核对](docs/harmony/feature-matrix.json)
 
