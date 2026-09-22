@@ -1,0 +1,34 @@
+{
+  "recorded_at": "2026-09-22T05:38:24.448220+00:00",
+  "version": "2.6.8+6094",
+  "base_commit": "ca5b17f2db2f713b5f9495b54670c7d8efbdcc51",
+  "artifact_sha256": "b6e4259056ccce45c0f83ac4327bd2c16e4745758ce3b1bdff824ee209e313c7",
+  "checks": {
+    "flutter_tests_passed": 83,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "contextual_search": "title-matching tags, longest specific match, BGM exclusion, existing tag and full-title fallback, empty metadata; widget dispatches complete term",
+    "danmaku_footer": "independent send-panel and settings callbacks; show/hide toggle round trip; input width capped at 220dp and buttons do not overlap",
+    "widget_preview": "3:4, 9:16, 16:9; phone and expanded/low-height panes; simulated 32dp/24dp safe area; standard and 1.8 text scale",
+    "retained_behavior": "source ratio, action counts, author alignment, pause, seek, comments, fullscreen and player State regression"
+  },
+  "device": {
+    "connected_devices": 0,
+    "overwrite_install": "not_attempted",
+    "launch": "not_attempted",
+    "uninstalled_or_cleared_data": false,
+    "reason": "device_not_connected"
+  },
+  "not_verified": [
+    "real-device search navigation and danmaku panels on this HAP",
+    "real-device rendering and native playback on this HAP",
+    "live danmaku sending or other account write actions"
+  ],
+  "remote_push": false
+}
