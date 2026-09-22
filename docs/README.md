@@ -13,6 +13,7 @@
 - [V2.6.2 验证记录](v2.6.2/VALIDATION.md)：自动回归、签名构建和设备结果。
 - [V2.6.3 底部播放控制](v2.6.3/README.md)：常驻进度条及播放按钮；[验证记录](v2.6.3/VALIDATION.md)。
 - [V2.6.4 模式过渡与反馈](v2.6.4/README.md)：紧凑评论、缩小图标与本机不想看；[验证记录](v2.6.4/VALIDATION.md)。
+- [V2.6.5 入口、连续预加载与布局](v2.6.5/README.md)：预取机制、iOS 截图适配及[验证记录](v2.6.5/VALIDATION.md)。
 - [原生播放器](harmony/native-player.md)：依赖版本、构建脚本、音频滤镜与许可。
 - [功能核对](harmony/feature-matrix.json)：原上游 147 项功能的实现/验证状态。
 - [V1 验证记录](harmony/validation.json)：构建哈希、自动测试与尚待执行的项目。

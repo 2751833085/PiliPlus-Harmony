@@ -1,64 +1,116 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 
-/// One speculative item. A ready API result can be consumed even if byte
-/// preloading is unfinished; it never delays foreground playback to finish it.
+class _Prepared<T> {
+  _Prepared(this.retained);
+  final T? retained;
+  final cancel = CancelToken();
+  final ready = Completer<T?>();
+  final until = DateTime.now().add(const Duration(seconds: 45));
+  T? data;
+  Future<void>? task;
+}
+
+/// A bounded moving window. Foreground playback joins an in-flight API request
+/// and keeps its byte transfer alive instead of cancelling and downloading twice.
 class NextVideoPreloader<T> {
-  NextVideoPreloader({required this.load, required this.warm});
+  NextVideoPreloader({
+    required this.load,
+    required this.warm,
+    this.capacity = 4,
+  });
   final Future<T?> Function(String bvid, int cid, CancelToken cancel) load;
   final Future<void> Function(T data, CancelToken cancel) warm;
-  CancelToken? _cancel;
-  (String, int, Object)? _key;
-  T? _ready;
-  DateTime? _until;
+  final int capacity;
+  final _items = <(String, int, Object), _Prepared<T>>{};
   bool _disposed = false;
-  Future<void> prepare(String bvid, int cid, Object context) async {
+  Iterable<T> get values => _items.values.map((e) => e.data).whereType<T>();
+
+  Future<void> prepare(String bvid, int cid, Object context) {
+    if (_disposed) return Future.value();
     final key = (bvid, cid, context);
-    final valid = _key == key && _until?.isAfter(DateTime.now()) == true;
-    if (_disposed || (valid && _cancel?.isCancelled == false)) return;
-    final retained = valid ? _ready : null;
-    cancel();
-    final token = _cancel = CancelToken();
-    _key = key;
-    _until = DateTime.now().add(const Duration(seconds: 45));
-    final deadline = Timer(
-      const Duration(seconds: 8),
-      () => token.cancel('preload budget'),
-    );
+    final old = _items[key];
+    final valid = old?.until.isAfter(DateTime.now()) == true;
+    if (valid && !old!.cancel.isCancelled) return old.task ?? Future.value();
+    _remove(key);
+    while (_items.length >= capacity) {
+      _remove(_items.keys.first);
+    }
+    final item = _Prepared<T>(valid ? old?.data : null);
+    _items[key] = item;
+    return item.task = _run(key, item);
+  }
+
+  Future<void> _run((String, int, Object) key, _Prepared<T> item) async {
+    final deadline = Timer(const Duration(seconds: 8), () {
+      item.cancel.cancel('preload budget');
+      if (!item.ready.isCompleted) item.ready.complete(null);
+    });
     try {
-      final result = retained ?? await load(bvid, cid, token);
-      if (_disposed || token.isCancelled || result == null || _key != key)
+      final result = item.retained ?? await load(key.$1, key.$2, item.cancel);
+      if (_disposed ||
+          item.cancel.isCancelled ||
+          result == null ||
+          !identical(_items[key], item))
         return;
-      _ready = result;
-      await warm(result, token);
+      item.data = result;
+      item.ready.complete(result);
+      await warm(result, item.cancel);
     } catch (_) {
-      // Speculative failures are silent; normal playback requests can retry.
+      // Foreground requests retain their ordinary error handling and retry.
     } finally {
       deadline.cancel();
+      if (!item.ready.isCompleted) item.ready.complete(null);
+      if (item.data == null && identical(_items[key], item)) _remove(key);
     }
   }
 
-  T? take(String bvid, int cid, Object context) {
-    final valid =
-        _key == (bvid, cid, context) && _until?.isAfter(DateTime.now()) == true;
-    final result = valid ? _ready : null;
-    cancel();
-    return result;
+  Future<T?> take(String bvid, int cid, Object context) async {
+    final item = _items[(bvid, cid, context)];
+    if (item == null || !item.until.isAfter(DateTime.now())) return null;
+    final result = item.data ?? await item.ready.future;
+    return _disposed || !identical(_items[(bvid, cid, context)], item)
+        ? null
+        : result;
   }
 
-  int? cidFor(String bvid, Object context) =>
-      _key?.$1 == bvid &&
-          _key?.$3 == context &&
-          _until?.isAfter(DateTime.now()) == true
-      ? _key?.$2
-      : null;
-  void suspend() => _cancel?.cancel('foreground playback needs bandwidth');
+  int? cidFor(String bvid, Object context) => _items.keys
+      .where(
+        (key) =>
+            key.$1 == bvid &&
+            key.$3 == context &&
+            _items[key]!.until.isAfter(DateTime.now()),
+      )
+      .firstOrNull
+      ?.$2;
+
+  void retain(Set<String> bvids, Object context) {
+    for (final key in _items.keys.toList()) {
+      if (key.$3 != context ||
+          !bvids.contains(key.$1) ||
+          !_items[key]!.until.isAfter(DateTime.now()))
+        _remove(key);
+    }
+  }
+
+  void _remove((String, int, Object) key) {
+    final item = _items.remove(key);
+    if (item == null) return;
+    item.cancel.cancel('outside preload window');
+    if (!item.ready.isCompleted) item.ready.complete(null);
+  }
+
+  void suspend() {
+    for (final item in _items.values) {
+      item.cancel.cancel('background');
+      if (!item.ready.isCompleted) item.ready.complete(null);
+    }
+  }
+
   void cancel() {
-    _cancel?.cancel('preload superseded');
-    _cancel = null;
-    _key = null;
-    _ready = null;
-    _until = null;
+    for (final key in _items.keys.toList()) {
+      _remove(key);
+    }
   }
 
   void dispose() {

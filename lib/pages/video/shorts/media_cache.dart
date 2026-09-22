@@ -14,18 +14,28 @@ class _Prefix {
     this.token,
   );
   final String url, type, token;
-  final Uint8List bytes;
+  Uint8List bytes;
   final int total;
   final String? validator;
 }
 
-/// A bounded in-memory prefix cache, exposed to the native decoder through a
-/// loopback-only range server. Warmed bytes are actually reused, not downloaded
-/// for a speed test and thrown away. At most current+next video/audio are kept.
+class _PendingPrefix {
+  _PendingPrefix(this.token, this.cancel);
+  final String token;
+  final CancelToken cancel;
+  final ready = Completer<_Prefix?>();
+}
+
+/// Loopback-only, bounded current + three-neighbour media cache. A decoder can
+/// join an in-flight warmup as soon as its first validated bytes arrive.
 class ShortMediaCache {
   ShortMediaCache(this.client);
   final Dio client;
   final Map<String, _Prefix> _entries = {};
+  final Map<String, _PendingPrefix> _pending = {};
+  // Includes the outgoing decoder during a source handoff.
+  static const maxStreams = 10;
+  static const maxPrefixBytes = 1024 * 1024;
   final Set<CancelToken> _transfers = {};
   HttpServer? _server;
   Future<HttpServer>? _starting;
@@ -39,103 +49,158 @@ class ShortMediaCache {
   int get entriesHeld => _entries.length;
 
   Future<void> warm(String url, int limit, CancelToken cancel) async {
-    if (_closed || cancel.isCancelled || _entries.containsKey(url)) return;
-    // The caller preloads a single next item: never grow past four streams.
-    if (_entries.length >= 4 || limit <= 0) return;
+    if (_closed ||
+        cancel.isCancelled ||
+        _entries.containsKey(url) ||
+        _pending.containsKey(url))
+      return;
+    if ({..._entries.keys, ..._pending.keys}.length >= maxStreams || limit <= 0)
+      return;
+    limit = math.min(limit, maxPrefixBytes);
     final uri = Uri.tryParse(url);
     if (uri == null || !['http', 'https'].contains(uri.scheme)) return;
-    final result = await client.get<ResponseBody>(
-      url,
-      cancelToken: cancel,
-      options: Options(
-        responseType: ResponseType.stream,
-        headers: {'Range': 'bytes=0-${limit - 1}'},
-        validateStatus: (_) => true,
-      ),
-    );
-    final body = result.data;
-    if (body == null) return;
-    final type =
-        result.headers.value('content-type') ?? 'application/octet-stream';
-    final range = RegExp(
-      r'^bytes 0-(\d+)/(\d+)$',
-    ).firstMatch(result.headers.value('content-range') ?? '');
-    final total = range == null
-        ? int.tryParse(result.headers.value('content-length') ?? '')
-        : int.parse(range[2]!);
-    final validType =
-        type.startsWith('video/') ||
-        type.startsWith('audio/') ||
-        type.startsWith('application/octet-stream');
-    final validRange =
-        result.statusCode == 206 &&
-        range != null &&
-        int.parse(range[1]!) + 1 == math.min(total!, limit);
-    final completeSmallFile =
-        result.statusCode == 200 && total != null && total <= limit;
-    if (!validType ||
-        total == null ||
-        total <= 0 ||
-        !(validRange || completeSmallFile)) {
-      await body.stream.listen((_) {}).cancel();
-      return;
-    }
-    final expected = math.min(total, limit);
-    final bytes = BytesBuilder(copy: false);
-    await for (final chunk in body.stream) {
-      if (_closed || cancel.isCancelled) return;
-      final remaining = expected - bytes.length;
-      bytes.add(
-        chunk.length > remaining
-            ? Uint8List.sublistView(chunk, 0, remaining)
-            : chunk,
+    final pending = _PendingPrefix('$_secret/${_id++}', cancel);
+    _pending[url] = pending;
+    try {
+      await (_starting ??= HttpServer.bind(InternetAddress.loopbackIPv4, 0)
+          .then((server) {
+            if (_closed) {
+              server.close(force: true);
+              throw StateError('cache disposed');
+            }
+            _server = server;
+            server.listen(_serve, onError: (Object _) {});
+            return server;
+          }));
+      final result = await client.get<ResponseBody>(
+        url,
+        cancelToken: cancel,
+        options: Options(
+          responseType: ResponseType.stream,
+          headers: {'Range': 'bytes=0-${limit - 1}'},
+          validateStatus: (_) => true,
+        ),
       );
-      if (bytes.length == expected) break;
+      final body = result.data;
+      if (body == null) return;
+      final type =
+          result.headers.value('content-type') ?? 'application/octet-stream';
+      final range = RegExp(
+        r'^bytes 0-(\d+)/(\d+)$',
+      ).firstMatch(result.headers.value('content-range') ?? '');
+      final total = range == null
+          ? int.tryParse(result.headers.value('content-length') ?? '')
+          : int.parse(range[2]!);
+      final validType =
+          type.startsWith('video/') ||
+          type.startsWith('audio/') ||
+          type.startsWith('application/octet-stream');
+      final validRange =
+          result.statusCode == 206 &&
+          range != null &&
+          int.parse(range[1]!) + 1 == math.min(total!, limit);
+      final complete =
+          result.statusCode == 200 && total != null && total <= limit;
+      if (!validType ||
+          total == null ||
+          total <= 0 ||
+          !(validRange || complete)) {
+        await body.stream.listen((_) {}).cancel();
+        return;
+      }
+      final expected = math.min(total, limit);
+      final bytes = BytesBuilder(copy: false);
+      _Prefix? prefix;
+      await for (final chunk in body.stream) {
+        if (_closed || cancel.isCancelled || !identical(_pending[url], pending))
+          return;
+        final remaining = expected - bytes.length;
+        bytes.add(
+          chunk.length > remaining
+              ? Uint8List.sublistView(chunk, 0, remaining)
+              : chunk,
+        );
+        // Publish a trustworthy initial prefix early. The decoder may use it
+        // while the rest downloads; range stitching fetches only missing bytes.
+        if (prefix == null && bytes.length >= math.min(64 * 1024, expected)) {
+          prefix = _Prefix(
+            url,
+            bytes.toBytes(),
+            total,
+            type,
+            result.headers.value('etag') ??
+                result.headers.value('last-modified'),
+            pending.token,
+          );
+          _entries[url] = prefix;
+          pending.ready.complete(prefix);
+        }
+        if (bytes.length == expected) break;
+      }
+      if (!_closed &&
+          !cancel.isCancelled &&
+          identical(_pending[url], pending) &&
+          prefix != null) {
+        prefix.bytes = bytes.takeBytes();
+      }
+    } catch (_) {
+      // Failure falls back to the foreground URL; already validated prefixes
+      // remain usable even if their speculative tail was cancelled.
+    } finally {
+      if (!pending.ready.isCompleted) pending.ready.complete(null);
+      if (identical(_pending[url], pending)) _pending.remove(url);
     }
-    if (_closed || cancel.isCancelled || bytes.length != expected) return;
-    final server = await (_starting ??=
-        HttpServer.bind(InternetAddress.loopbackIPv4, 0).then((server) {
-          if (_closed) {
-            server.close(force: true);
-            throw StateError('cache disposed');
-          }
-          _server = server;
-          server.listen(_serve, onError: (Object _) {});
-          return server;
-        }));
-    if (_closed || cancel.isCancelled || _entries.length >= 4) return;
-    _entries[url] = _Prefix(
-      url,
-      bytes.takeBytes(),
-      total,
-      type,
-      result.headers.value('etag') ?? result.headers.value('last-modified'),
-      '$_secret/${_id++}',
-    );
-    assert(server.address.isLoopback);
+  }
+
+  Future<String> playbackSourceFor(String url) async {
+    try {
+      await _starting;
+    } catch (_) {}
+    return sourceFor(url);
   }
 
   String sourceFor(String url) {
-    final prefix = _entries[url];
-    return prefix == null || _server == null || _closed
+    final token = _entries[url]?.token ?? _pending[url]?.token;
+    return token == null || _server == null || _closed
         ? url
-        : 'http://127.0.0.1:${_server!.port}/${prefix.token}';
+        : 'http://127.0.0.1:${_server!.port}/$token';
   }
 
   bool contains(String? url) => url != null && _entries.containsKey(url);
-  void retain(Set<String> urls) =>
-      _entries.removeWhere((url, _) => !urls.contains(url));
+  void retain(Set<String> urls) {
+    _entries.removeWhere((url, _) => !urls.contains(url));
+    for (final url in _pending.keys.toList()) {
+      if (!urls.contains(url)) {
+        final pending = _pending.remove(url)!;
+        pending.cancel.cancel('outside media window');
+        if (!pending.ready.isCompleted) pending.ready.complete(null);
+      }
+    }
+  }
+
   void evict(String? url) {
-    if (url != null) _entries.remove(url);
+    if (url == null) return;
+    _entries.remove(url);
+    final pending = _pending.remove(url);
+    if (pending != null) {
+      pending.cancel.cancel('evicted media');
+      if (!pending.ready.isCompleted) pending.ready.complete(null);
+    }
   }
 
   Future<void> _serve(HttpRequest request) async {
     final response = request.response;
     CancelToken? cancel;
     try {
-      final prefix = _entries.values
+      final pending = _pending.values
           .where((p) => '/${p.token}' == request.uri.path)
           .firstOrNull;
+      final prefix =
+          _entries.values
+              .where((p) => '/${p.token}' == request.uri.path)
+              .firstOrNull ??
+          (pending == null ? null : await pending.ready.future);
+
       if (_closed || prefix == null) {
         response.statusCode = 404;
         await response.close();
@@ -186,6 +251,8 @@ class ShortMediaCache {
         final cachedEnd = math.min(prefix.bytes.length, end + 1);
         response.add(Uint8List.sublistView(prefix.bytes, start, cachedEnd));
         start = cachedEnd;
+        // Deliver cached startup bytes before awaiting a remote tail RTT.
+        await response.flush();
       }
       if (start <= end) {
         cancel = CancelToken();
@@ -234,7 +301,7 @@ class ShortMediaCache {
 
   Future<void> dispose() async {
     _closed = true;
-    _entries.clear();
+    retain({});
     for (final token in _transfers.toList()) {
       token.cancel('cache disposed');
     }

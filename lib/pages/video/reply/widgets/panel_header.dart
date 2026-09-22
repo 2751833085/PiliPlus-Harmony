@@ -27,7 +27,7 @@ class ReplyPanelHeader extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            onClose == null ? title : '评论',
+            title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -60,6 +60,46 @@ class ReplyPanelHeader extends StatelessWidget {
             icon: const Icon(Icons.close, size: 22),
           ),
       ],
+    ),
+  );
+}
+
+class ShortReplyComposer extends StatelessWidget {
+  const ShortReplyComposer({super.key, required this.onReply});
+  final VoidCallback onReply;
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    top: false,
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+      child: TextButton(
+        onPressed: onReply,
+        style: TextButton.styleFrom(
+          foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest,
+          minimumSize: const Size(double.infinity, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+        ),
+        child: Row(
+          children: [
+            const Expanded(
+              child: Text(
+                '发一条友善的评论',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.sentiment_satisfied_alt,
+              size: 22,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
     ),
   );
 }

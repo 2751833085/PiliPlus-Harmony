@@ -14,6 +14,7 @@ import 'package:material_ui/material_ui.dart';
 import 'session.dart';
 import 'pager.dart';
 import 'controls.dart';
+import 'comments_layout.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 
 class ShortVideoFeed extends StatefulWidget {
@@ -30,6 +31,7 @@ class ShortVideoFeed extends StatefulWidget {
     required this.fullscreen,
     this.moreButton,
     this.onPlay,
+    this.commentsPanel,
   });
   final ShortVideoSession session;
   final VideoDetailController video;
@@ -39,6 +41,7 @@ class ShortVideoFeed extends StatefulWidget {
   final bool fullscreen;
   final Widget? moreButton;
   final VoidCallback? onPlay;
+  final Widget? commentsPanel;
   @override
   State<ShortVideoFeed> createState() => _ShortVideoFeedState();
 }
@@ -47,15 +50,25 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
   ShortVideoSession get session => widget.session;
   Timer? _warmTimer;
   Worker? _bufferWatch;
+  int? _targetIndex;
   void _warmNext() {
     if (_warmTimer != null) return;
-    _warmTimer = Timer(const Duration(milliseconds: 450), () {
+    _warmTimer = Timer(const Duration(milliseconds: 80), () {
       _warmTimer = null;
-      if (!mounted || session.switching || session.refreshing) return;
-      widget.video.preloadShortNext(
-        session.hasNext ? session.entries[session.index + 1] : null,
-      );
+      if (!mounted || session.refreshing) return;
+      _warmWindow();
     });
+  }
+
+  void _warmWindow() {
+    final index = (_targetIndex ?? session.index).clamp(
+      0,
+      session.entries.length - 1,
+    );
+    widget.video.preloadShortWindow([
+      if (index != session.index) session.entries[index],
+      ...session.entries.skip(index + 1).take(3),
+    ]);
   }
 
   @override
@@ -71,6 +84,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
 
   void _changed() {
     if (mounted) {
+      if (!session.switching && _targetIndex == session.index)
+        _targetIndex = null;
       setState(() {});
       _warmNext();
     }
@@ -95,48 +110,61 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
         child: LayoutBuilder(
           builder: (context, bounds) {
             return SafeArea(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: bounds.maxWidth >= 720 || widget.fullscreen
-                        ? double.infinity
-                        : 600,
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, pane) => Obx(
-                      () => ShortVideoPager(
-                        session: session,
-                        enabled:
-                            !widget.video.plPlayerController.controlsLock.value,
-                        onError: (message) => SmartDialog.showToast(message),
-                        builder: (context, index, active) {
-                          if (active) return _currentPage(pane);
-                          return Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              if (session.entries[index].cover
-                                  case final cover?)
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: widget.fullscreen
-                                        ? 0
-                                        : ShortVideoControls.heightFor(
-                                            MediaQuery.textScalerOf(context),
-                                          ),
-                                  ),
-                                  child: LayoutBuilder(
-                                    builder: (_, media) => NetworkImgLayer(
-                                      src: cover,
-                                      fit: BoxFit.contain,
-                                      borderRadius: BorderRadius.zero,
-                                      width: media.maxWidth,
-                                      height: media.maxHeight,
+              child: ShortCommentsLayout(
+                panel: widget.commentsPanel,
+                builder: (context, compact) => Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: bounds.maxWidth >= 720 || widget.fullscreen
+                          ? double.infinity
+                          : 600,
+                    ),
+                    child: LayoutBuilder(
+                      builder: (context, pane) => Obx(
+                        () => ShortVideoPager(
+                          session: session,
+                          onTargetChanged: (index) {
+                            _targetIndex = index;
+                            _warmWindow();
+                          },
+                          enabled:
+                              !compact &&
+                              !widget
+                                  .video
+                                  .plPlayerController
+                                  .controlsLock
+                                  .value,
+                          onError: (message) => SmartDialog.showToast(message),
+                          builder: (context, index, active) {
+                            if (active)
+                              return _currentPage(pane, compact: compact);
+                            return Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                if (session.entries[index].cover
+                                    case final cover?)
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: widget.fullscreen
+                                          ? 0
+                                          : ShortVideoControls.heightFor(
+                                              MediaQuery.textScalerOf(context),
+                                            ),
+                                    ),
+                                    child: LayoutBuilder(
+                                      builder: (_, media) => NetworkImgLayer(
+                                        src: cover,
+                                        fit: BoxFit.contain,
+                                        borderRadius: BorderRadius.zero,
+                                        width: media.maxWidth,
+                                        height: media.maxHeight,
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          );
-                        },
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -198,7 +226,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
     }
   }
 
-  Widget _currentPage(BoxConstraints pane) {
+  Widget _currentPage(BoxConstraints pane, {bool compact = false}) {
+    if (compact) return widget.playerBuilder(pane.maxWidth, pane.maxHeight);
     final player = widget.video.plPlayerController;
     if (widget.fullscreen)
       return Stack(
@@ -245,7 +274,9 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
         Positioned.fill(
           child: Obx(
             () => ShortVideoChrome(
-              visible: widget.video.shortChromeVisible.value,
+              visible:
+                  widget.video.shortChromeVisible.value &&
+                  !player.isSeeking.value,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -435,8 +466,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                     ),
                   ),
                   Positioned(
-                    left: 16,
-                    right: 84,
+                    left: 12,
+                    right: 68,
                     bottom: bottomHeight + 12,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -511,6 +542,16 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                                   ),
                                   if (ready && owner != null)
                                     TextButton(
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: const Color(
+                                          0xFFDB4C7F,
+                                        ),
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                        minimumSize: const Size(0, 30),
+                                      ),
                                       onPressed: () => widget.intro
                                           .actionRelationMod(context),
                                       child: Text(
@@ -524,7 +565,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                                             ? '+ 关注'
                                             : '已关注',
                                         style: const TextStyle(
-                                          color: Color(0xFFFB7299),
+                                          color: Colors.white,
+                                          fontSize: 13,
                                         ),
                                       ),
                                     ),
@@ -537,11 +579,11 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                                   ready
                                       ? detail.title ?? ''
                                       : session.current.title ?? '',
-                                  maxLines: 3,
+                                  maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     shadows: [
                                       Shadow(
                                         color: Colors.black,
@@ -586,16 +628,22 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
           ),
         ),
         Positioned(
-          left: 16,
-          right: 16,
+          left: 12,
+          right: 12,
           bottom: 0,
           child: SizedBox(
-            height: bottomHeight,
+            height:
+                48 +
+                ShortVideoMinimalControls.heightFor(
+                  MediaQuery.textScalerOf(context),
+                ),
             child: Column(
               children: [
                 Obx(
                   () => ShortVideoMinimalControls(
                     playing: player.playerStatus.isPlaying,
+                    showPlayback: !widget.video.shortChromeVisible.value,
+                    seeking: player.isSeeking.value,
                     time:
                         '${DurationUtils.formatDuration(player.progress)} / ${DurationUtils.formatDuration(player.duration.value)}',
                     onToggle: _togglePlayback,
@@ -608,8 +656,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                       bufferedBarColor: Colors.white38,
                       thumbColor: Colors.white,
                       thumbGlowColor: Colors.white12,
-                      barHeight: 2,
-                      thumbRadius: 4,
+                      barHeight: player.isSeeking.value ? 4 : 2,
+                      thumbRadius: player.isSeeking.value ? 6 : 2,
                       onDragStart: (value) => player.onSeekStart(value.seconds),
                       onDragUpdate: (value) =>
                           player.seekPosition.value = value.seconds,
@@ -626,7 +674,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                 ),
                 Obx(
                   () => ShortVideoChrome(
-                    visible: widget.video.shortChromeVisible.value,
+                    visible: !player.isSeeking.value,
                     child: ShortVideoControls(
                       danmaku: player.enableShowDanmaku.value,
                       onSend: widget.video.showShootDanmakuSheet,

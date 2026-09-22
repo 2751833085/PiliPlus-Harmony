@@ -68,7 +68,7 @@ List<SettingsModel> get extraSettings => [
   SwitchModel(
     section: '播放器体验',
     title: '竖屏短视频模式',
-    subtitle: '双击播放/暂停，单击切换简洁界面；上下切视频，第一条下拉刷新，左右默认调进度。可随时返回普通详情',
+    subtitle: '竖屏视频默认进入，横屏视频默认普通详情；双击播放/暂停，单击切换简洁界面，上下切视频。可手动切换模式',
     leading: const Icon(Icons.stay_current_portrait_outlined),
     setKey: SettingBoxKey.shortVideoMode,
     onChanged: (_) => HarmonyAppearance.changed(),
@@ -89,8 +89,8 @@ List<SettingsModel> get extraSettings => [
     ),
   SwitchModel(
     section: '竖屏短视频',
-    title: '预加载下一条视频',
-    subtitle: '当前视频播放稳定后预取下一条的开头画面与音频，减少滑动等待；蜂窝网络也会消耗少量流量',
+    title: '连续视频预加载',
+    subtitle: '提前准备后面三条的播放地址和音视频开头，滑动时优先准备目标视频；蜂窝网络也会消耗流量',
     leading: const Icon(Icons.skip_next_outlined),
     setKey: SettingBoxKey.shortPreload,
     onChanged: (_) => HarmonyAppearance.changed(),

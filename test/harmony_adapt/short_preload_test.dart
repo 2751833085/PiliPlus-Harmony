@@ -23,13 +23,13 @@ void main() {
       final pending = preloader.prepare('a', 10, 'account1-quality80');
       await Future<void>.delayed(Duration.zero);
       expect(preloader.cidFor('a', 'account1-quality80'), 10);
-      expect(preloader.take('a', 10, 'account1-quality80'), 'a:10');
-      expect(token!.isCancelled, isTrue);
+      expect(await preloader.take('a', 10, 'account1-quality80'), 'a:10');
+      expect(token!.isCancelled, isFalse);
       bytes.complete();
       await pending;
       await preloader.prepare('a', 10, 'account1-quality80');
-      expect(preloader.take('a', 10, 'account2-quality120'), isNull);
-      expect(loads, 2);
+      expect(await preloader.take('a', 10, 'account2-quality120'), isNull);
+      expect(loads, 1);
       preloader.dispose();
     },
   );
@@ -46,11 +46,12 @@ void main() {
         warm: (_, _) async {},
       );
       final old = preloader.prepare('a', 1, 'context');
+      preloader.retain({'b'}, 'context');
       await preloader.prepare('b', 2, 'context');
       first.complete('old');
       await old;
       expect(tokens.first.isCancelled, isTrue);
-      expect(preloader.take('b', 2, 'context'), 'b');
+      expect(await preloader.take('b', 2, 'context'), 'b');
       preloader.dispose();
       await preloader.prepare('c', 3, 'context');
       expect(tokens.length, 2);
@@ -81,8 +82,109 @@ void main() {
       await preloader.prepare('next', 3, 'context');
       expect(loads, 1);
       expect(warms, 2);
-      expect(preloader.take('next', 3, 'context'), 'next');
+      expect(await preloader.take('next', 3, 'context'), 'next');
       preloader.dispose();
+    },
+  );
+
+  test(
+    'rapid target changes retain three prefetched items and join in-flight metadata once',
+    () async {
+      final api = Completer<String?>();
+      final media = Completer<void>();
+      final calls = <String>[];
+      final tokens = <String, CancelToken>{};
+      final preloader = NextVideoPreloader<String>(
+        load: (id, _, cancel) {
+          calls.add(id);
+          tokens[id] = cancel;
+          return id == 'b' ? api.future : Future.value(id);
+        },
+        warm: (_, _) => media.future,
+      );
+      final jobs = [
+        preloader.prepare('b', 2, 'ctx'),
+        preloader.prepare('c', 3, 'ctx'),
+        preloader.prepare('d', 4, 'ctx'),
+      ];
+      final foreground = preloader.take('b', 2, 'ctx');
+      api.complete('b');
+      expect(await foreground, 'b');
+      expect(await preloader.take('d', 4, 'ctx'), 'd');
+      expect(calls, ['b', 'c', 'd']);
+      expect(tokens.values.every((t) => !t.isCancelled), true);
+      preloader.retain({'c', 'd'}, 'ctx');
+      expect(tokens['b']!.isCancelled, true);
+      expect(tokens['c']!.isCancelled, false);
+      expect(await preloader.take('c', 3, 'different-account'), isNull);
+      media.complete();
+      await Future.wait(jobs);
+      preloader.dispose();
+    },
+  );
+  test(
+    'foreground waiter is released when its window is invalidated',
+    () async {
+      final delayed = Completer<String?>();
+      final preloader = NextVideoPreloader<String>(
+        load: (_, _, _) => delayed.future,
+        warm: (_, _) async {},
+      );
+      final job = preloader.prepare('a', 1, 'old');
+      final waiter = preloader.take('a', 1, 'old');
+      preloader.retain({'a'}, 'new');
+      expect(await waiter, isNull);
+      delayed.complete('expired');
+      await job;
+      expect(await preloader.take('a', 1, 'old'), isNull);
+      preloader.dispose();
+    },
+  );
+  test(
+    'decoder joins pending warmup before its tail finishes; cached bytes are flushed immediately',
+    () async {
+      final tail = Completer<void>();
+      final requested = Completer<void>();
+      final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final data = List.generate(256 * 1024, (i) => i % 251);
+      var calls = 0;
+      origin.listen((request) async {
+        calls++;
+        request.response.statusCode = 206;
+        request.response.headers.set('Content-Type', 'video/mp4');
+        request.response.headers.set('Content-Range', 'bytes 0-262143/262144');
+        request.response.contentLength = data.length;
+        request.response.add(data.sublist(0, 65536));
+        await request.response.flush();
+        requested.complete();
+        await tail.future;
+        request.response.add(data.sublist(65536));
+        try {
+          await request.response.close();
+        } catch (_) {}
+      });
+      final client = Dio();
+      final decoder = Dio(BaseOptions(responseType: ResponseType.bytes));
+      final cache = ShortMediaCache(client);
+      final url = 'http://127.0.0.1:${origin.port}/clip';
+      final warming = cache.warm(url, data.length, CancelToken());
+      final source = await cache.playbackSourceFor(url);
+      expect(source, isNot(url));
+      await requested.future;
+      final head = await decoder.get<List<int>>(
+        source,
+        options: Options(headers: {'Range': 'bytes=0-31'}),
+      );
+      expect(head.data, data.sublist(0, 32));
+      expect(tail.isCompleted, false);
+      expect(calls, 1);
+      tail.complete();
+      await warming;
+      expect(cache.bytesHeld, data.length);
+      await cache.dispose();
+      client.close(force: true);
+      decoder.close(force: true);
+      await origin.close(force: true);
     },
   );
 
@@ -157,6 +259,30 @@ void main() {
           options: Options(headers: {'Range': 'bytes=-16'}),
         );
         expect(tail.data, bytes.sublist(4080));
+      },
+    );
+    test(
+      'concurrent media warmups respect the stream cap and retain the current stream',
+      () async {
+        await Future.wait([
+          for (var i = 0; i < 12; i++)
+            cache.warm('$url?$i', 1024, CancelToken()),
+        ]);
+        expect(cache.entriesHeld, ShortMediaCache.maxStreams);
+        expect(
+          cache.bytesHeld,
+          lessThanOrEqualTo(
+            ShortMediaCache.maxStreams * ShortMediaCache.maxPrefixBytes,
+          ),
+        );
+        final current = cache.sourceFor('$url?0');
+        cache.retain({'$url?0', '$url?1'});
+        expect(cache.entriesHeld, 2);
+        final head = await decoder.get<List<int>>(
+          current,
+          options: Options(headers: {'Range': 'bytes=0-15'}),
+        );
+        expect(head.data, bytes.sublist(0, 16));
       },
     );
     test(

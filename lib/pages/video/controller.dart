@@ -185,6 +185,7 @@ class VideoDetailController extends GetxController
 
   late final scrollKey = GlobalKey<ExtendedNestedScrollViewState>();
   late final RxBool isVertical;
+  ValueChanged<bool>? onOrientationResolved;
   late final RxDouble scrollRatio = 0.0.obs;
 
   ScrollController? _scrollCtr;
@@ -270,7 +271,9 @@ class VideoDetailController extends GetxController
           return;
         }
       }
+      if (width <= 0 || height <= 0) return;
       final isVertical = height > width;
+      onOrientationResolved?.call(isVertical);
       // 尺寸解析后同步播放器方向标志与真实方向一致。
       plPlayerController.isVertical = isVertical;
       if (_scrollCtr?.hasClients != true) {
@@ -839,7 +842,8 @@ class VideoDetailController extends GetxController
                 ? true
                 : videoPlayerKey.currentState?.mounted == true)) {
       return playerInit(
-        autoFullScreenFlag: autoFullScreenFlag && _autoPlay.value,
+        autoFullScreenFlag:
+            autoFullScreenFlag && _autoPlay.value && !shortVideoMode,
       );
     }
     return null;
@@ -848,8 +852,9 @@ class VideoDetailController extends GetxController
   ShortMediaCache? _shortMediaCache;
   Dio? _preloadClient;
   int _preloadLookupRevision = 0;
-  (String, Object)? _preloadLookup;
-  DateTime? _preloadLookupUntil;
+  final _preloadLookup = <String, (Object, DateTime, CancelToken)>{};
+  Set<String> _preloadWindow = {};
+  Set<String> _pinnedShortSources = {};
   Object get _preloadContext => (
     Accounts.video.mid,
     plPlayerController.cacheVideoQa,
@@ -863,7 +868,7 @@ class VideoDetailController extends GetxController
     plPlayerController.enableAudioNormalization,
   );
 
-  (String, int, DateTime, VideoDetailData)? _preloadedIntro;
+  final _preloadedIntros = <String, (int, DateTime, VideoDetailData)>{};
   Future<void> _preloadIntro(String nextBvid, CancelToken cancel) async {
     final account = Accounts.video.mid;
     try {
@@ -875,28 +880,28 @@ class VideoDetailController extends GetxController
           !isClosed &&
           account == Accounts.video.mid &&
           result.dataOrNull != null) {
-        _preloadedIntro = (
-          nextBvid,
+        _preloadedIntros[nextBvid] = (
           account,
           DateTime.now(),
           result.dataOrNull!,
         );
+        while (_preloadedIntros.length > 4) {
+          _preloadedIntros.remove(_preloadedIntros.keys.first);
+        }
       }
     } catch (_) {}
   }
 
   VideoDetailData? takePreloadedIntro(String requestedBvid) {
-    final value = _preloadedIntro;
+    final value = _preloadedIntros.remove(requestedBvid);
     if (value == null ||
-        value.$1 != requestedBvid ||
-        value.$2 != Accounts.video.mid ||
-        DateTime.now().difference(value.$3) > const Duration(seconds: 45))
+        value.$1 != Accounts.video.mid ||
+        DateTime.now().difference(value.$2) > const Duration(seconds: 45))
       return null;
-    _preloadedIntro = null;
-    return value.$4;
+    return value.$3;
   }
 
-  late final _nextPreloader = NextVideoPreloader<PlayUrlModel>(
+  late final _nextPreloader = NextVideoPreloader<_PreparedShortVideo>(
     load: (nextBvid, nextCid, cancel) async {
       unawaited(_preloadIntro(nextBvid, cancel));
       final result = await VideoHttp.videoUrl(
@@ -929,16 +934,13 @@ class VideoDetailController extends GetxController
         if (cancel.isCancelled) return null;
         model.dash!.video!.merge(extra.dataOrNull?.dash?.video);
       }
-      return model;
-    },
-    warm: (model, cancel) async {
       final videoQa = model.findAvailableVideoQuality(
         plPlayerController.cacheVideoQa!,
       );
       final videos = model.dash!.video!
           .where((v) => v.quality.code == videoQa)
           .toList();
-      if (videos.isEmpty) return;
+      if (videos.isEmpty) return null;
       final codec = VideoUtils.selectCodec(
         videos.map((v) => v.codecs!),
         preferCodecs,
@@ -979,10 +981,16 @@ class VideoDetailController extends GetxController
         nextVideo = selected.first;
         if (selected.length > 1) nextAudio = selected[1];
       }
-      if (cancel.isCancelled || isClosed) return;
-      _warmUrls.clear();
-      _warmUrls[video.baseUrl!] = nextVideo;
-      if (audio != null) _warmUrls[audio.baseUrl!] = nextAudio;
+      if (cancel.isCancelled || isClosed) return null;
+      return _PreparedShortVideo(
+        model,
+        video.baseUrl!,
+        nextVideo,
+        audio?.baseUrl,
+        nextAudio,
+      );
+    },
+    warm: (prepared, cancel) async {
       final client = _preloadClient ??= Dio(
         BaseOptions(
           connectTimeout: const Duration(seconds: 5),
@@ -994,79 +1002,108 @@ class VideoDetailController extends GetxController
         ),
       );
       final cache = _shortMediaCache ??= ShortMediaCache(client);
-      cache.retain({
-        if (videoUrl != null) videoUrl!,
-        if (audioUrl != null) audioUrl!,
-        nextVideo,
-        nextAudio,
-      });
+      _retainShortMedia();
       await Future.wait([
-        cache.warm(nextVideo, 2 * 1024 * 1024, cancel),
-        if (nextAudio.isNotEmpty) cache.warm(nextAudio, 256 * 1024, cancel),
+        cache.warm(prepared.videoUrl, 768 * 1024, cancel),
+        if (prepared.audioUrl.isNotEmpty)
+          cache.warm(prepared.audioUrl, 128 * 1024, cancel),
       ]);
     },
   );
+  void _retainShortMedia() => _shortMediaCache?.retain({
+    ..._pinnedShortSources,
+    for (final value in _nextPreloader.values) ...[
+      value.videoUrl,
+      value.audioUrl,
+    ],
+  });
   final Map<String, String> _warmUrls = {};
   bool _usingWarmSelection = false;
+  bool _usingShortProxy = false;
   int? preloadedCid(String bvid) =>
       _nextPreloader.cidFor(bvid, _preloadContext);
 
-  Future<void> preloadShortNext(ShortVideoEntry? entry) async {
+  Future<void> preloadShortWindow(List<ShortVideoEntry> entries) async {
     if (isClosed ||
         !shortVideoMode ||
-        !videoState.value ||
         !Pref.shortPreload ||
-        entry == null ||
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused ||
-        !identical(plPlayerController.sourceOwner, this)) {
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
       cancelShortPreload();
       return;
     }
-    if (plPlayerController.isBuffering.value) {
-      _preloadLookupRevision++;
-      _preloadLookup = null;
-      _nextPreloader.suspend();
-      return;
-    }
     if (plPlayerController.cacheVideoQa == null ||
-        plPlayerController.buffered.value - plPlayerController.position.value <
-            3)
+        !identical(plPlayerController.sourceOwner, this))
       return;
     final context = _preloadContext;
-    final identity = (entry.bvid, context);
-    if (_preloadLookup == identity &&
-        _preloadLookupUntil?.isAfter(DateTime.now()) == true)
-      return;
-    _preloadLookup = identity;
-    _preloadLookupUntil = DateTime.now().add(const Duration(seconds: 40));
-    final revision = ++_preloadLookupRevision;
-    try {
-      final cid =
-          entry.cid ??
-          (await SearchHttp.ab2cWithDimension(bvid: entry.bvid))?.cid;
-      if (isClosed ||
-          revision != _preloadLookupRevision ||
-          cid == null ||
-          context != _preloadContext ||
-          plPlayerController.isBuffering.value ||
-          !identical(plPlayerController.sourceOwner, this)) {
-        if (revision == _preloadLookupRevision) _preloadLookup = null;
-        return;
-      }
-      await _nextPreloader.prepare(entry.bvid, cid, context);
-    } catch (_) {
-      // Preloading is opportunistic; foreground error handling remains intact.
-    }
+    final targets = entries.where((e) => e.bvid != bvid).take(3).toList();
+    _preloadWindow = {bvid, for (final entry in targets) entry.bvid};
+    _nextPreloader.retain(_preloadWindow, context);
+    _preloadLookup.removeWhere((key, value) {
+      final obsolete = !_preloadWindow.contains(key) || value.$1 != context;
+      if (obsolete) value.$3.cancel('outside lookup window');
+      return obsolete;
+    });
+    _retainShortMedia();
+    await Future.wait(
+      targets.map((entry) async {
+        final previous = _preloadLookup[entry.bvid];
+        if (previous?.$1 == context && previous!.$2.isAfter(DateTime.now()))
+          return;
+        final marker = CancelToken();
+        final deadline = Timer(
+          const Duration(seconds: 8),
+          () => marker.cancel('lookup budget'),
+        );
+        _preloadLookup[entry.bvid] = (
+          context,
+          DateTime.now().add(const Duration(seconds: 40)),
+          marker,
+        );
+        final revision = _preloadLookupRevision;
+        try {
+          final cid =
+              entry.cid ??
+              (await SearchHttp.ab2cWithDimension(
+                bvid: entry.bvid,
+                cancelToken: marker,
+                silent: true,
+              ))?.cid;
+          deadline.cancel();
+          if (isClosed ||
+              revision != _preloadLookupRevision ||
+              cid == null ||
+              context != _preloadContext ||
+              !_preloadWindow.contains(entry.bvid) ||
+              !identical(plPlayerController.sourceOwner, this))
+            return;
+          await _nextPreloader.prepare(entry.bvid, cid, context);
+        } catch (_) {
+          // Speculative requests do not replace foreground error handling.
+        } finally {
+          deadline.cancel();
+          if (_nextPreloader.cidFor(entry.bvid, context) == null &&
+              identical(_preloadLookup[entry.bvid]?.$3, marker))
+            _preloadLookup.remove(entry.bvid);
+        }
+      }),
+    );
   }
 
   void cancelShortPreload() {
     _preloadLookupRevision++;
-    _preloadLookup = null;
+    for (final value in _preloadLookup.values) {
+      value.$3.cancel('preload cancelled');
+    }
+    _preloadLookup.clear();
+    _preloadWindow.clear();
     _nextPreloader.cancel();
+    _preloadedIntros.clear();
+    _retainShortMedia();
   }
 
   @override
   bool get usesPreloadedMedia =>
+      _usingShortProxy ||
       (_shortMediaCache?.contains(videoUrl) ?? false) ||
       (_shortMediaCache?.contains(audioUrl) ?? false);
 
@@ -1166,6 +1203,22 @@ class VideoDetailController extends GetxController
       if (seek == .zero) seek = null;
       seek ??= getFirstSegment();
       var initialized = false;
+      _pinnedShortSources = {
+        if (videoUrl != null) videoUrl!,
+        if (audioUrl != null) audioUrl!,
+      };
+      final cache = _shortMediaCache;
+      final videoSource = !isFileSource && cache != null
+          ? await cache.playbackSourceFor(videoUrl!)
+          : videoUrl;
+      final audioSource = !isFileSource && cache != null && audioUrl != null
+          ? await cache.playbackSourceFor(audioUrl!)
+          : audioUrl;
+      _usingShortProxy = videoSource != videoUrl || audioSource != audioUrl;
+      if (isClosed ||
+          source != (bvid, cid.value) ||
+          !_playerRequests.isCurrent(ticket))
+        return;
       await plPlayerController.setDataSource(
         isFileSource
             ? FileSource(
@@ -1175,11 +1228,8 @@ class VideoDetailController extends GetxController
                 hasDashAudio: entry.hasDashAudio,
               )
             : NetworkSource(
-                videoSource:
-                    _shortMediaCache?.sourceFor(videoUrl!) ?? videoUrl!,
-                audioSource: audioUrl == null
-                    ? null
-                    : _shortMediaCache?.sourceFor(audioUrl!) ?? audioUrl,
+                videoSource: videoSource!,
+                audioSource: audioSource,
               ),
         seekTo: seek,
         duration: data.timeLength == null
@@ -1324,13 +1374,22 @@ class VideoDetailController extends GetxController
       preferCodecs = isWiFi ? Pref.preferCodecs : Pref.preferCodecsCellular;
     }
 
-    final prepared = shortVideoMode && Pref.shortPreload
-        ? _nextPreloader.take(bvid, cid.value, _preloadContext)
+    final preloadContext = _preloadContext;
+    var prepared = shortVideoMode && Pref.shortPreload
+        ? await _nextPreloader.take(bvid, cid.value, preloadContext)
         : null;
+    if (!_videoRequests.isCurrent(ticket) || isClosed) return;
+    if (preloadContext != _preloadContext) prepared = null;
     _usingWarmSelection = prepared != null;
+    _warmUrls.clear();
+    if (prepared != null) {
+      _warmUrls[prepared.videoBase] = prepared.videoUrl;
+      if (prepared.audioBase case final key?)
+        _warmUrls[key] = prepared.audioUrl;
+    }
     final result = prepared == null
         ? await _getVideoUrl(VideoQuality.hdrVivid.code)
-        : Success(prepared);
+        : Success(prepared.model);
     if (!_videoRequests.isCurrent(ticket) || isClosed) return;
 
     if (result case Success(:final response)) {
@@ -1757,8 +1816,8 @@ class VideoDetailController extends GetxController
 
   @override
   void onClose() {
+    cancelShortPreload();
     _nextPreloader.dispose();
-    _preloadLookupRevision++;
     unawaited(_shortMediaCache?.dispose());
     _preloadClient?.close(force: true);
     _routeRetry?.cancel();
@@ -1792,6 +1851,7 @@ class VideoDetailController extends GetxController
     _routeRetry = null;
     _routeRetries = 0;
     _usingWarmSelection = false;
+    _usingShortProxy = false;
     _manualRoute = false;
     _playerRequests.invalidate();
     _videoRequests.invalidate();
@@ -1815,7 +1875,7 @@ class VideoDetailController extends GetxController
     if (!isFileSource) {
       // language
       languages.value = null;
-      currLang.value = null;
+      if (!shortVideoMode) currLang.value = null;
 
       // dm trend
       if (plPlayerController.showDmChart) {
@@ -2146,4 +2206,17 @@ class VideoDetailController extends GetxController
       res.toast();
     }
   }
+}
+
+class _PreparedShortVideo {
+  const _PreparedShortVideo(
+    this.model,
+    this.videoBase,
+    this.videoUrl,
+    this.audioBase,
+    this.audioUrl,
+  );
+  final PlayUrlModel model;
+  final String videoBase, videoUrl, audioUrl;
+  final String? audioBase;
 }

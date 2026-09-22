@@ -77,52 +77,68 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
         onRefresh: _videoReplyController.onRefresh,
         isClampingScrollPhysics: widget.isNested,
         child: ScaffoldLayout(
-          body: CustomScrollView(
-            controller: widget.isNested
-                ? null
-                : _videoReplyController.scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            key: const PageStorageKey(_VideoReplyPanelState),
-            slivers: [
-              SliverFloatingHeaderWidget(
-                backgroundColor: colorScheme.surface,
-                child: Obx(() {
-                  final sortType = _videoReplyController.sortType.value;
-                  return ReplyPanelHeader(
-                    title: sortType.desc,
-                    sortLabel: sortType.descShort,
-                    onSort: _videoReplyController.queryBySort,
-                    onClose: widget.onClose,
-                  );
-                }),
+          body: Column(
+            children: [
+              Expanded(
+                child: CustomScrollView(
+                  controller: widget.isNested
+                      ? null
+                      : _videoReplyController.scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  key: const PageStorageKey(_VideoReplyPanelState),
+                  slivers: [
+                    SliverFloatingHeaderWidget(
+                      backgroundColor: colorScheme.surface,
+                      child: Obx(() {
+                        final sortType = _videoReplyController.sortType.value;
+                        return ReplyPanelHeader(
+                          title: widget.onClose == null
+                              ? sortType.desc
+                              : '评论 (${_videoReplyController.count.value})',
+                          sortLabel: sortType.descShort,
+                          onSort: _videoReplyController.queryBySort,
+                          onClose: widget.onClose,
+                        );
+                      }),
+                    ),
+                    Obx(
+                      () =>
+                          _buildBody(_videoReplyController.loadingState.value),
+                    ),
+                  ],
+                ),
               ),
-              Obx(() => _buildBody(_videoReplyController.loadingState.value)),
+              if (widget.onClose != null) ShortReplyComposer(onReply: _onReply),
             ],
           ),
-          fab: SlideTransition(
-            position: fabAnimation,
-            child: Padding(
-              padding: .only(
-                right: kFloatingActionButtonMargin,
-                bottom: kFloatingActionButtonMargin + bottom,
-              ),
-              child: FloatingActionButton(
-                heroTag: null,
-                onPressed: () {
-                  feedBack();
-                  _videoReplyController.onReply(
-                    null,
-                    oid: _videoReplyController.aid,
-                    replyType: _videoReplyController.videoType.replyType,
-                  );
-                },
-                tooltip: '发表评论',
-                child: const Icon(Icons.reply),
-              ),
-            ),
-          ),
+          fab: widget.onClose != null
+              ? null
+              : SlideTransition(
+                  position: fabAnimation,
+                  child: Padding(
+                    padding: .only(
+                      right: kFloatingActionButtonMargin,
+                      bottom: kFloatingActionButtonMargin + bottom,
+                    ),
+                    child: FloatingActionButton(
+                      heroTag: null,
+                      onPressed: _onReply,
+                      tooltip: '发表评论',
+                      child: const Icon(Icons.reply),
+                    ),
+                  ),
+                ),
         ),
       ),
+    );
+  }
+
+  void _onReply() {
+    feedBack();
+    _videoReplyController.onReply(
+      null,
+      oid: _videoReplyController.aid,
+      replyType: _videoReplyController.videoType.replyType,
     );
   }
 

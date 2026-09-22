@@ -9,11 +9,13 @@ class ShortVideoPager extends StatefulWidget {
     required this.session,
     required this.builder,
     this.onError,
+    this.onTargetChanged,
     this.enabled = true,
   });
   final ShortVideoSession session;
   final Widget Function(BuildContext context, int index, bool active) builder;
   final ValueChanged<String>? onError;
+  final ValueChanged<int>? onTargetChanged;
   final bool enabled;
   @override
   State<ShortVideoPager> createState() => _ShortVideoPagerState();
@@ -149,6 +151,9 @@ class _ShortVideoPagerState extends State<ShortVideoPager> {
       NotificationListener<ScrollNotification>(
         onNotification: _onScroll,
         child: PageView.builder(
+          // Begin network preparation while dragging, but never switch the
+          // live source until the page settles.
+          onPageChanged: widget.onTargetChanged,
           controller: _pages,
           // Decode adjacent covers before the user's drag; these pages never
           // create extra video players.

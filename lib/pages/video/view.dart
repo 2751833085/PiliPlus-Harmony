@@ -1,4 +1,5 @@
 import 'package:PiliPlus/pages/video/shorts/gestures.dart';
+import 'package:PiliPlus/pages/video/shorts/entry_policy.dart';
 import 'package:PiliPlus/pages/video/shorts/feedback.dart';
 import 'package:PiliPlus/pages/video/shorts/mode_transition.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
@@ -106,6 +107,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   PlPlayerController? plPlayerController;
 
   bool _shortMode = false;
+  bool _shortCommentsVisible = false;
+  late ShortVideoEntryPolicy _shortEntryPolicy;
   final _modeTransitionKey = GlobalKey<PlayerModeTransitionState>();
   late final _shortFeedback = ShortVideoFeedback(GStorage.setting);
   ShortVideoSession? _shortSession;
@@ -179,14 +182,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoDetailController.cancelShortPreload();
     if (!mounted || _shortPreference == Pref.shortVideoMode) return;
     _shortPreference = Pref.shortVideoMode;
-    if (_shortPreference) {
+    if (_shortPreference && videoDetailController.isVertical.value) {
       _enterShortMode();
-    } else {
+    } else if (!_shortPreference) {
       _leaveShortMode();
     }
   }
 
   Future<void> _enterShortMode() async {
+    _shortEntryPolicy.manualSelection();
     if (_shortMode || !_supportsShortMode || !Pref.shortVideoMode) return;
     if (isFullScreen)
       await videoDetailController.plPlayerController.triggerFullScreen(
@@ -222,6 +226,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   Future<bool> _changeShortMode(bool value) async {
     void updateLayout() {
+      if (!value) _shortCommentsVisible = false;
       if (!value) videoDetailController.cancelShortPreload();
       videoDetailController.shortVideoMode = value;
       setState(() => _shortMode = value);
@@ -237,6 +242,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   void _leaveShortMode() {
+    _shortEntryPolicy.manualSelection();
     if (_shortMode) _changeShortMode(false);
   }
 
@@ -294,6 +300,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       SmartDialog.showToast('评论已在设置中关闭');
       return;
     }
+    if (_shortMode && !isFullScreen) {
+      setState(() => _shortCommentsVisible = true);
+      return;
+    }
     showModalBottomSheet<void>(
       context: context,
       useSafeArea: true,
@@ -318,39 +328,57 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Widget _shortVideoPage() => Obx(
-    () => ShortVideoFeed(
-      session: _feed,
-      video: videoDetailController,
-      intro: ugcIntroController,
-      fullscreen: isFullScreen,
-      moreButton:
-          !videoDetailController.autoPlay ||
-              !videoDetailController.videoState.value
-          ? _moreBtn(Colors.white)
-          : null,
-      playerBuilder: (width, height) =>
-          videoPlayer(width: width, height: height),
-      onDetails: _leaveShortMode,
-      onPlay: () {
-        if (!videoDetailController.autoPlay ||
-            !videoDetailController.videoState.value) {
-          videoDetailController.autoPlay = true;
-          _attachPlayerListeners();
-          if (videoDetailController.videoUrl == null) {
-            videoDetailController.queryVideoUrl();
-          } else {
-            videoDetailController.playerInit(autoplay: true);
-          }
-        } else {
-          videoDetailController.plPlayerController.onDoubleTapCenter();
-        }
+    () => popScope(
+      canPop: !_shortCommentsVisible,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _shortCommentsVisible)
+          setState(() => _shortCommentsVisible = false);
       },
-      onComments: _shortComments,
-      onEpisodes: () => showEpisodes(),
-      onMore: () =>
-          (videoDetailController.headerCtrKey.currentState
-                  as HeaderControlState?)
-              ?.showSettingSheet(),
+      child: ShortVideoFeed(
+        commentsPanel: _shortCommentsVisible
+            ? Theme(
+                data: ThemeUtils.darkTheme,
+                child: MiniScaffold(
+                  body: videoReplyPanel(
+                    onClose: () =>
+                        setState(() => _shortCommentsVisible = false),
+                  ),
+                ),
+              )
+            : null,
+        session: _feed,
+        video: videoDetailController,
+        intro: ugcIntroController,
+        fullscreen: isFullScreen,
+        moreButton:
+            !videoDetailController.autoPlay ||
+                !videoDetailController.videoState.value
+            ? _moreBtn(Colors.white)
+            : null,
+        playerBuilder: (width, height) =>
+            videoPlayer(width: width, height: height),
+        onDetails: _leaveShortMode,
+        onPlay: () {
+          if (!videoDetailController.autoPlay ||
+              !videoDetailController.videoState.value) {
+            videoDetailController.autoPlay = true;
+            _attachPlayerListeners();
+            if (videoDetailController.videoUrl == null) {
+              videoDetailController.queryVideoUrl();
+            } else {
+              videoDetailController.playerInit(autoplay: true);
+            }
+          } else {
+            videoDetailController.plPlayerController.onDoubleTapCenter();
+          }
+        },
+        onComments: _shortComments,
+        onEpisodes: () => showEpisodes(),
+        onMore: () =>
+            (videoDetailController.headerCtrKey.currentState
+                    as HeaderControlState?)
+                ?.showSettingSheet(),
+      ),
     ),
   );
 
@@ -515,8 +543,25 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     // videoSourceInit 中执行），同步创建即可让 didChangeDependencies
     // 立即以正确状态生效。
     videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
-    _shortMode = Pref.shortVideoMode && _supportsShortMode;
+    _shortEntryPolicy = ShortVideoEntryPolicy(
+      enabled: Pref.shortVideoMode,
+      supported: _supportsShortMode,
+      portraitHint: videoDetailController.isVertical.value,
+    );
+    _shortMode = _shortEntryPolicy.initialMode;
     videoDetailController.shortVideoMode = _shortMode;
+    videoDetailController.onOrientationResolved = (portrait) {
+      final target = _shortEntryPolicy.resolve(portrait);
+      if (!mounted ||
+          target == null ||
+          target == _shortMode ||
+          !Pref.shortVideoMode)
+        return;
+      videoDetailController.shortVideoMode = target;
+      setState(() => _shortMode = target);
+      if (target) _attachPlayerListeners();
+      _syncDecorDark();
+    };
     HarmonyAppearance.revision.addListener(_shortPreferenceChanged);
     if (videoDetailController.removeSafeArea) {
       hideSystemBar();
@@ -779,6 +824,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void dispose() {
+    videoDetailController.onOrientationResolved = null;
     HarmonyAppearance.revision.removeListener(_shortPreferenceChanged);
     _shortEpisodeWorker?.dispose();
     _shortSession?.dispose();

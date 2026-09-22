@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/reply/widgets/panel_header.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models_new/member_card_info/data.dart';
@@ -359,6 +360,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetPhysicalSize);
       for (final size in const [
+        Size(390, 844),
         Size(320, 640),
         Size(840, 800),
         Size(600, 320),
@@ -379,6 +381,7 @@ void main() {
         final video = _FakeVideo(player);
         final playerKey = GlobalKey();
         final captureKey = GlobalKey();
+        var commentsOpen = false;
         Widget build(bool fullscreen) => MaterialApp(
           theme: ThemeData(
             fontFamily:
@@ -389,11 +392,41 @@ void main() {
           home: MediaQuery(
             data: MediaQueryData(
               size: size,
-              textScaler: const TextScaler.linear(1.8),
+              textScaler: TextScaler.linear(size.width == 390 ? 1 : 1.8),
             ),
             child: RepaintBoundary(
               key: captureKey,
               child: ShortVideoFeed(
+                commentsPanel: commentsOpen
+                    ? Theme(
+                        data: ThemeData(
+                          brightness: Brightness.dark,
+                          fontFamily: 'shorts-preview',
+                        ),
+                        child: Material(
+                          color: const Color(0xFF17181A),
+                          child: Column(
+                            children: [
+                              ReplyPanelHeader(
+                                title: '热门评论',
+                                sortLabel: '最热',
+                                onSort: () {},
+                                onClose: () {},
+                              ),
+                              const Expanded(
+                                child: Center(
+                                  child: Text(
+                                    '评论内容（布局测试）',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                ),
+                              ),
+                              ShortReplyComposer(onReply: () {}),
+                            ],
+                          ),
+                        ),
+                      )
+                    : null,
                 session: session,
                 video: video,
                 intro: _FakeIntro(),
@@ -464,8 +497,8 @@ void main() {
         expect(tester.getRect(find.byType(_PlayerFixture)), playerRect);
         final pauseRect = tester.getRect(find.byIcon(Icons.pause_rounded));
         expect(pauseRect.top, greaterThan(size.height - 130));
-        expect(pauseRect.right, lessThan(barRect.left));
-        expect((pauseRect.center.dy - barRect.center.dy).abs(), lessThan(24));
+        expect(pauseRect.left, greaterThanOrEqualTo(barRect.left));
+        expect(pauseRect.bottom, lessThanOrEqualTo(barRect.top + 2));
         await tester.drag(progress, const Offset(50, 0));
         await tester.pumpAndSettle();
         expect(player.seeks, isNotEmpty);
@@ -504,6 +537,36 @@ void main() {
             image.dispose();
           });
         }
+        commentsOpen = true;
+        await tester.pumpWidget(build(false));
+        await tester.pumpAndSettle();
+        expect(playerKey.currentState, same(state));
+        expect(find.byType(ShortVideoControls), findsNothing);
+        final commentBox = tester.getRect(find.text('评论内容（布局测试）'));
+        expect(
+          tester.getRect(find.byType(_PlayerFixture)).overlaps(commentBox),
+          false,
+        );
+        if (renderPath.isNotEmpty) {
+          await tester.runAsync(() async {
+            final image =
+                await (captureKey.currentContext!.findRenderObject()
+                        as RenderRepaintBoundary)
+                    .toImage();
+            final bytes = await image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
+            await File(
+              '$renderPath-comments-${size.width.toInt()}.png',
+            ).writeAsBytes(bytes!.buffer.asUint8List());
+            image.dispose();
+          });
+        }
+        commentsOpen = false;
+        await tester.pumpWidget(build(false));
+        await tester.pumpAndSettle();
+        expect(playerKey.currentState, same(state));
+        expect(tester.getRect(find.byType(_PlayerFixture)), playerRect);
         video.shortChromeVisible.value = true;
         await tester.pumpWidget(build(true));
         await tester.pumpAndSettle();
@@ -563,16 +626,25 @@ class _FakePlayer implements PlPlayerController {
   @override
   final buffered = 60.obs;
   @override
-  int get progress => position.value;
+  int get progress => isSeeking.value ? seekPosition.value : position.value;
   @override
   PlayerStatus playerStatus = PlayerStatus.paused;
   @override
   final seekPosition = 0.obs;
+  @override
+  final isSeeking = false.obs;
   final seeks = <Duration>[];
   @override
-  void onSeekStart([int? seconds]) {}
+  void onSeekStart([int? seconds]) {
+    seekPosition.value = seconds ?? position.value;
+    isSeeking.value = true;
+  }
+
   @override
-  void onSeekEnd() {}
+  void onSeekEnd() {
+    isSeeking.value = false;
+  }
+
   @override
   Future<void> seekTo(Duration duration, {bool isSeek = true}) async {
     seeks.add(duration);
@@ -591,7 +663,7 @@ class _FakeVideo implements VideoDetailController {
   @override
   final shortChromeVisible = true.obs;
   @override
-  Future<void> preloadShortNext(ShortVideoEntry? entry) async {}
+  Future<void> preloadShortWindow(List<ShortVideoEntry> entries) async {}
   _FakeVideo(this.plPlayerController);
   @override
   final PlPlayerController plPlayerController;

@@ -130,9 +130,12 @@ abstract final class SearchHttp {
     dynamic aid,
     dynamic bvid,
     int? part,
+    CancelToken? cancelToken,
+    bool silent = false,
   }) async {
     final res = await Request().get(
       Api.ab2c,
+      cancelToken: cancelToken,
       queryParameters: {'aid': ?aid, 'bvid': ?bvid},
     );
     if (res.data['code'] == 0) {
@@ -146,7 +149,7 @@ abstract final class SearchHttp {
       }
       return null;
     } else {
-      SmartDialog.showToast("ab2c error: ${res.data['message']}");
+      if (!silent) SmartDialog.showToast("ab2c error: ${res.data['message']}");
       return null;
     }
   }

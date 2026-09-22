@@ -1,4 +1,3 @@
-import 'package:PiliPlus/pages/video/shorts/chrome.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Secondary actions fade with the information layer. Reserve the same space
@@ -14,8 +13,7 @@ class ShortVideoControls extends StatelessWidget {
   });
   final bool danmaku;
   final VoidCallback onSend, onDanmaku, onDetails, onFullscreen;
-  static double heightFor(TextScaler scaler) =>
-      48 + ShortVideoMinimalControls.heightFor(scaler);
+  static double heightFor(TextScaler scaler) => 72;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -23,30 +21,42 @@ class ShortVideoControls extends StatelessWidget {
     child: Row(
       children: [
         Expanded(
-          child: TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.white12,
-              minimumSize: const Size(0, 44),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white12,
+              borderRadius: BorderRadius.circular(28),
             ),
-            onPressed: onSend,
-            child: const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '发弹幕',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.white70),
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                    ),
+                    onPressed: onSend,
+                    child: const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '发弹幕',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: Colors.white54),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(height: 20, width: 1, color: Colors.white12),
+                IconButton(
+                  tooltip: '弹幕开关',
+                  onPressed: onDanmaku,
+                  icon: Icon(
+                    danmaku ? Icons.subtitles : Icons.subtitles_off,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
-        IconButton(
-          tooltip: '弹幕开关',
-          onPressed: onDanmaku,
-          icon: Icon(
-            danmaku ? Icons.subtitles : Icons.subtitles_off,
-            color: Colors.white,
           ),
         ),
         IconButton(

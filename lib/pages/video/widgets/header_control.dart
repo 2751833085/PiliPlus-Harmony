@@ -383,24 +383,104 @@ class HeaderControlState extends State<HeaderControl>
               padding: const EdgeInsets.symmetric(vertical: 14),
               children: [
                 if (widget.onNotInterested case final onNotInterested?)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: LayoutBuilder(
+                      builder: (context, bounds) {
+                        final actions =
+                            <({String label, IconData icon, VoidCallback run})>[
+                              (
+                                label: '我不想看',
+                                icon: Icons.not_interested,
+                                run: onNotInterested,
+                              ),
+                              (
+                                label: '稍后再看',
+                                icon: Icons.watch_later_outlined,
+                                run: introController.viewLater,
+                              ),
+                              (
+                                label: '缓存',
+                                icon: MdiIcons.folderDownloadOutline,
+                                run: () =>
+                                    videoDetailCtr.onDownload(this.context),
+                              ),
+                              (
+                                label: '小窗播放',
+                                icon: Icons.picture_in_picture_alt,
+                                run: () async {
+                                  final result = await plPlayerController
+                                      .enterPip();
+                                  if (result == PiPStatus.unavailable)
+                                    SmartDialog.showToast('当前无法开启小窗播放');
+                                },
+                              ),
+                              (
+                                label: '投屏',
+                                icon: Icons.cast,
+                                run: videoDetailCtr.onCast,
+                              ),
+                            ];
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (final action in actions)
+                              Expanded(
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 2,
+                                      vertical: 8,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Get.back();
+                                    action.run();
+                                  },
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: theme
+                                              .colorScheme
+                                              .surfaceContainerHighest,
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                        ),
+                                        child: SizedBox.square(
+                                          dimension: 44,
+                                          child: Icon(action.icon, size: 24),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        action.label,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 11),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                if (widget.onNotInterested == null)
                   ListTile(
                     dense: true,
-                    leading: const Icon(Icons.not_interested, size: 20),
-                    title: const Text('我不想看', style: titleStyle),
                     onTap: () {
                       Get.back();
-                      onNotInterested();
+                      introController.viewLater();
                     },
+                    leading: const Icon(Icons.watch_later_outlined, size: 20),
+                    title: const Text('添加至「稍后再看」', style: titleStyle),
                   ),
-                ListTile(
-                  dense: true,
-                  onTap: () {
-                    Get.back();
-                    introController.viewLater();
-                  },
-                  leading: const Icon(Icons.watch_later_outlined, size: 20),
-                  title: const Text('添加至「稍后再看」', style: titleStyle),
-                ),
                 if (videoDetailCtr.epId == null)
                   ListTile(
                     dense: true,
@@ -411,7 +491,7 @@ class HeaderControlState extends State<HeaderControl>
                     leading: const Icon(Icons.note_alt_outlined, size: 20),
                     title: const Text('查看笔记', style: titleStyle),
                   ),
-                if (!isFileSource)
+                if (!isFileSource && widget.onNotInterested == null)
                   ListTile(
                     dense: true,
                     onTap: () {

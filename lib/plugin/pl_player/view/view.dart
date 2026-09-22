@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/shorts/loading_grace.dart';
 import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
@@ -1724,8 +1725,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             ),
           ),
 
-        /// 时间进度 toast
-        if (!isLive)
+        /// Short mode shows seeking time above its bottom scrubber.
+        if (!isLive && !widget.shortMode)
           IgnorePointer(
             ignoring: true,
             child: Align(
@@ -2238,7 +2239,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           if (plPlayerController.dataStatus.loading ||
               (plPlayerController.isBuffering.value &&
                   plPlayerController.playerStatus.isPlaying)) {
-            return Center(
+            final loading = Center(
               child: GestureDetector(
                 onTap: plPlayerController.refreshPlayer,
                 child: Container(
@@ -2290,6 +2291,15 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 ),
               ),
             );
+            return widget.shortMode
+                ? ShortLoadingGrace(
+                    key: ValueKey((
+                      widget.videoDetailController?.bvid,
+                      widget.videoDetailController?.cid.value,
+                    )),
+                    child: loading,
+                  )
+                : loading;
           } else {
             return const SizedBox.shrink();
           }
