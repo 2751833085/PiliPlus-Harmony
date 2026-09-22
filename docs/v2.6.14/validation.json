@@ -1,0 +1,39 @@
+{
+  "recorded_at": "2026-09-22T10:04:26.795279+00:00",
+  "version": "2.6.14+6101",
+  "base_commit": "371904b315541816ae521c8d52b39130184b988c",
+  "artifact_sha256": "21036a6d844806809266b32c84b3084a5c40122af0399430b45c15eb1bae7cbc",
+  "checks": {
+    "flutter_tests_passed": 109,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "controls_hit_testing": "actual AppBarAni: hidden, fade/slide midpoint, fully visible, hiding; taps pass to video except fully visible controls",
+    "short_entry": "initial portrait rule preserved; one-time dimension resolution blocked after interaction or when another layout owns playback",
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed"
+  },
+  "device": {
+    "recorded_at": "2026-09-22T10:04:10.859638+00:00",
+    "previous_version": "2.6.13",
+    "previous_version_code": 6100,
+    "installed_version": "2.6.14",
+    "installed_version_code": 6101,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false,
+    "artifact_sha256": "21036a6d844806809266b32c84b3084a5c40122af0399430b45c15eb1bae7cbc",
+    "base_commit": "371904b315541816ae521c8d52b39130184b988c",
+    "launch": "blocked_by_lock"
+  },
+  "remote_push": false,
+  "not_verified": [
+    "exact meaning and on-device reproduction of reported portable mode",
+    "final build UI due locked screen",
+    "previous physical grip and rotation checks remain pending"
+  ]
+}
