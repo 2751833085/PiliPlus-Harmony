@@ -1,0 +1,59 @@
+{
+  "hap": "PiliPlus-Harmony-V2.6.11-2.6.11-6097-signed.hap",
+  "sha256": "40086c3eed6d5916bdd11e3744a46eacde90c97ff5677dd43526926d3d927f90",
+  "bytes": 33075398,
+  "mode": "release",
+  "signed": true,
+  "base_commit": "4c28d52fe4ca8519d9a024379ab598457c50dfd7",
+  "source_tree_sha256": "85739f21a24cb0346db6f0e121cb71340c586cf331d1cd04940781849ae35777",
+  "toolchain": {
+    "flutter": {
+      "source": "https://gitcode.com/CPF-Flutter/flutter_flutter.git",
+      "tag": "3.44.9+ohos-0.0.1-canary1",
+      "commit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6"
+    },
+    "harmony_sdk": {
+      "release": "26.0.0.821",
+      "sdk_version": "26.0.0.105",
+      "api": 26,
+      "source": "https://github.com/ErBWs/ohos-sdk/releases/tag/26.0.0.821",
+      "archive_sha256": "d53802c52d3d0a6a0836333c9e8f2bb73d9f6753d1658185539e2659c46df1ad",
+      "provenance": "Same distribution and version as the community HarmonyOS branch CI."
+    }
+  },
+  "app": {
+    "iconId": 134217729,
+    "minPatchAPIVersion": 0,
+    "debug": false,
+    "targetPatchAPIVersion": 0,
+    "minMinorAPIVersion": 0,
+    "minAPIVersion": 60002022,
+    "icon": "$media:app_layered_image",
+    "buildMode": "release",
+    "label": "$string:app_name",
+    "bundleType": "app",
+    "versionName": "2.6.11",
+    "versionCode": 6097,
+    "multiAppMode": {
+      "multiAppModeType": "appClone",
+      "maxCount": 5
+    },
+    "appEnvironments": [],
+    "compileSdkType": "HarmonyOS",
+    "labelId": 134217728,
+    "compileSdkVersion": "26.0.0.105",
+    "targetAPIVersion": 260000026,
+    "vendor": "example",
+    "bundleName": "com.example.piliplus",
+    "apiReleaseType": "Release",
+    "appPreloadPhase": "abilityStageCreated",
+    "targetMinorAPIVersion": 0
+  },
+  "device_types": [
+    "phone",
+    "2in1",
+    "tablet"
+  ],
+  "libmpv_sha256": "38664cf7dc7af1b3093a731c94f6e48f9c1092c97a774656e6c2b59cfe0df99e",
+  "layout_diagnostics": true
+}
