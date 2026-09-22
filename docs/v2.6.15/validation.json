@@ -1,0 +1,110 @@
+{
+  "recorded_at": "2026-09-22T10:41:16.767655+00:00",
+  "version": "2.6.15+6102",
+  "base_commit": "747fe58270e2795f5893b6a7aec75ca00cf02669",
+  "artifact_sha256": "cec7a48e17fae720d0d8548649758b9b5723c50d750dc7b1b7ac6a5d75f70765",
+  "acceptance_status": "incomplete_device_locked",
+  "checks": {
+    "flutter_all_tests_passed": 119,
+    "harmony_tests_passed": 117,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "native_posture_regression": "passed",
+    "history": "opt-in; guest no fetch; bounded data; retry; stale account/disable/dispose responses; callbacks and 36 layout combinations",
+    "favorite_cards": "long title/count constrained at 100%, 130%, 200% text",
+    "cutout": "36 synthetic native-pixel/orientation/font/inset combinations; actual hit testing; progress/footer non-overlap",
+    "visual_review": "Harmony font component previews at 1008x2232, 2048x2232, 3184x2232; not app/device screenshots",
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed"
+  },
+  "display": {
+    "device_model": "HUAWEI Mate XTs",
+    "form": "triple",
+    "captured_at": "2026-09-22T10:30:13.970355+00:00",
+    "source": "connected device, HDC DisplayManagerService (current fields)",
+    "physical_size_px": [
+      3184,
+      2232
+    ],
+    "device_pixel_ratio": 2.875,
+    "logical_size_at_ui_scale_1": [
+      1107.4782608695652,
+      776.3478260869565
+    ],
+    "density_dpi": 460.0,
+    "physical_ppi": [
+      383.059,
+      383.287
+    ],
+    "rotation": 0,
+    "fold_status": "FOLD_STATE_EXPAND_WITH_SECOND_EXPAND",
+    "scope": "Display metrics only. App UI/text scale and safe-area insets are not inferred."
+  },
+  "guest_api_host_only": {
+    "scope": "Host-network anonymous API checks only; not device UI or media playback",
+    "cookies_sent": false,
+    "checks": [
+      {
+        "case": "guest_nav",
+        "http": 200,
+        "code": -101,
+        "seconds": 0.633,
+        "is_login": false
+      },
+      {
+        "case": "popular",
+        "http": 200,
+        "code": 0,
+        "seconds": 0.508,
+        "count": 2
+      },
+      {
+        "case": "video_detail",
+        "error_type": "CalledProcessError",
+        "seconds": 0.437,
+        "http": 412
+      },
+      {
+        "case": "history_guest_rejected",
+        "http": 200,
+        "code": -101,
+        "seconds": 0.474
+      }
+    ]
+  },
+  "guest_qa_build": {
+    "sha256": "12938d34ff6dbf2f392eb1972e55af29c31e66367f2faf03660df22a24731859",
+    "built": true,
+    "signature_verified": true,
+    "installed": false,
+    "isolation": "Hive/account/preferences, downloads, temporary files under qa-guest-v1; native WebView cookies and image cache not isolated"
+  },
+  "device": {
+    "recorded_at": "2026-09-22T10:38:23.272862+00:00",
+    "previous_version": "2.6.14",
+    "previous_version_code": 6101,
+    "installed_version": "2.6.15",
+    "installed_version_code": 6102,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false,
+    "artifact_sha256": "cec7a48e17fae720d0d8548649758b9b5723c50d750dc7b1b7ac6a5d75f70765",
+    "base_commit": "747fe58270e2795f5893b6a7aec75ca00cf02669",
+    "launch": "blocked_by_lock"
+  },
+  "remote_push": false,
+  "not_verified": [
+    "guest in-app feed/search/playback on final build",
+    "all routes and all original setting persistence",
+    "logged-in history preview and real resume",
+    "actual rapid-swiping frame continuity and performance",
+    "physical single/double folding, current-build rotation-lock and grip behavior",
+    "actual single/double DPR and cutout geometry",
+    "147-feature acceptance remains incomplete"
+  ]
+}
