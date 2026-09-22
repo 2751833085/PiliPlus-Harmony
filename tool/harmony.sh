@@ -90,6 +90,7 @@ data = {
     'pili.code': int(version.split('+')[1]),
     'pili.time': int(git('show', '-s', '--format=%ct', 'HEAD')),
     'ENABLE_FLEX_OVERFLOW': False,
+    'HARMONY_LAYOUT_DIAGNOSTICS': os.environ.get('HARMONY_LAYOUT_DIAGNOSTICS') == '1',
 }
 Path('build/harmony/env.json').write_text(json.dumps(data) + '\n')
 PY
@@ -133,6 +134,7 @@ for path in paths:
         'toolchain': json.loads((source / 'docs/harmony/toolchain.json').read_text()),
         'app': module['app'], 'device_types': module['module']['deviceTypes'],
         'libmpv_sha256': mpv_digest,
+        'layout_diagnostics': os.environ.get('HARMONY_LAYOUT_DIAGNOSTICS') == '1',
     }
     target.with_suffix('.build.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n')
     print(f'{target}\nSHA256 {digest}')

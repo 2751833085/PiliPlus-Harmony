@@ -1,0 +1,23 @@
+{
+  "device_model": "HUAWEI Mate XTs",
+  "form": "triple",
+  "captured_at": "2026-09-22T06:00:00.506855+00:00",
+  "source": "connected device, HDC DisplayManagerService (current fields)",
+  "physical_size_px": [
+    3184,
+    2232
+  ],
+  "device_pixel_ratio": 2.875,
+  "logical_size_at_ui_scale_1": [
+    1107.4782608695652,
+    776.3478260869565
+  ],
+  "density_dpi": 460.0,
+  "physical_ppi": [
+    383.059,
+    383.287
+  ],
+  "rotation": 0,
+  "fold_status": "FOLD_STATE_EXPAND_WITH_SECOND_EXPAND",
+  "scope": "Display metrics only. App UI/text scale and safe-area insets are not inferred."
+}

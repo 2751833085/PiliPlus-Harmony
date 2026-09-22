@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'chrome.dart';
 import 'metrics.dart';
 import 'dart:math' as math;
@@ -112,6 +113,33 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
     super.dispose();
   }
 
+  String? _lastViewportDiagnostic;
+
+  // Opt-in local diagnostics contain geometry only, never account/video data.
+  void _recordViewport(BuildContext context, BoxConstraints bounds) {
+    if (!const bool.fromEnvironment('HARMONY_LAYOUT_DIAGNOSTICS')) return;
+    final view = View.of(context);
+    final media = MediaQuery.of(context);
+    final record = jsonEncode({
+      'physical_size_px': [view.physicalSize.width, view.physicalSize.height],
+      'engine_dpr': view.devicePixelRatio,
+      'effective_dpr': media.devicePixelRatio,
+      'app_ui_scale': media.devicePixelRatio / view.devicePixelRatio,
+      'text_scale_at_14': media.textScaler.scale(14) / 14,
+      'logical_size': [media.size.width, media.size.height],
+      'layout_size': [bounds.maxWidth, bounds.maxHeight],
+      'safe_insets_logical': [
+        media.padding.left,
+        media.padding.top,
+        media.padding.right,
+        media.padding.bottom,
+      ],
+    });
+    if (record == _lastViewportDiagnostic) return;
+    _lastViewportDiagnostic = record;
+    debugPrint('PiliPlusDisplayMetrics $record');
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -120,6 +148,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
         color: Colors.black,
         child: LayoutBuilder(
           builder: (context, bounds) {
+            _recordViewport(context, bounds);
             return SafeArea(
               child: ShortCommentsLayout(
                 panel: widget.commentsPanel,

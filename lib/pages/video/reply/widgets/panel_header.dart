@@ -58,7 +58,8 @@ class ReplyPanelHeader extends StatelessWidget {
         ),
         if (onClose != null)
           IconButton(
-            style: ShortVideoMetrics.of(context).iconButtonStyle,
+            // Keep the modal close target at its existing accessible size.
+            style: IconButton.styleFrom(fixedSize: const Size.square(48)),
             tooltip: '关闭评论',
             onPressed: onClose,
             icon: Icon(Icons.close, size: ShortVideoMetrics.of(context).icon),

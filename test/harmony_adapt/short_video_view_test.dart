@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:PiliPlus/pages/video/shorts/metrics.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/models_new/video/video_tag/data.dart';
@@ -42,6 +43,14 @@ void main() {
           File(fontPath).readAsBytes().then((b) => ByteData.sublistView(b)),
         );
       await font.load();
+      const cjkPath = String.fromEnvironment('SHORTS_PREVIEW_CJK_FONT');
+      if (cjkPath.isNotEmpty) {
+        final cjk = FontLoader('shorts-preview-cjk')
+          ..addFont(
+            File(cjkPath).readAsBytes().then((b) => ByteData.sublistView(b)),
+          );
+        await cjk.load();
+      }
       await (FontLoader(
         'custom_icon',
       )..addFont(rootBundle.load('assets/fonts/custom_icon.ttf'))).load();
@@ -366,23 +375,132 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetPhysicalSize);
-      for (final scenario in const [
-        (size: Size(392, 2560 / 3), ratio: 3 / 4, label: '3x4', scale: 1.0),
-        (size: Size(840, 800), ratio: 9 / 16, label: '9x16', scale: 1.0),
-        (size: Size(390, 844), ratio: 9 / 16, label: '9x16', scale: 1.3),
-        (size: Size(390, 844), ratio: 9 / 16, label: '9x16', scale: 2.0),
-        (size: Size(390, 844), ratio: 9 / 16, label: '9x16', scale: 1.0),
-        (size: Size(390, 844), ratio: 16 / 9, label: '16x9', scale: 1.0),
-        (size: Size(320, 640), ratio: 9 / 16, label: '9x16', scale: 1.8),
-        (size: Size(840, 800), ratio: 9 / 16, label: '9x16', scale: 1.8),
-        (size: Size(600, 320), ratio: 9 / 16, label: '9x16', scale: 1.8),
-      ]) {
-        final size = scenario.size;
-        final previewSuffix =
-            '${size.width.toInt()}-${scenario.label}-${scenario.scale}';
+      final nativeProfiles =
+          Directory('test/harmony_adapt/fixtures/mate_xts_display')
+              .listSync()
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.json'))
+              .map(
+                (file) =>
+                    jsonDecode(file.readAsStringSync()) as Map<String, dynamic>,
+              )
+              .toList();
+      final scenarios = [
+        (
+          size: Size(392, 2560 / 3),
+          ratio: 3 / 4,
+          label: '3x4',
+          scale: 1.0,
+          dpr: 1.0,
+          uiScale: 1.0,
+          form: 'generic',
+        ),
+        (
+          size: Size(840, 800),
+          ratio: 9 / 16,
+          label: '9x16',
+          scale: 1.0,
+          dpr: 1.0,
+          uiScale: 1.0,
+          form: 'generic',
+        ),
+        (
+          size: Size(390, 844),
+          ratio: 9 / 16,
+          label: '9x16',
+          scale: 1.3,
+          dpr: 1.0,
+          uiScale: 1.0,
+          form: 'generic',
+        ),
+        (
+          size: Size(390, 844),
+          ratio: 9 / 16,
+          label: '9x16',
+          scale: 2.0,
+          dpr: 1.0,
+          uiScale: 1.0,
+          form: 'generic',
+        ),
+        (
+          size: Size(390, 844),
+          ratio: 9 / 16,
+          label: '9x16',
+          scale: 1.0,
+          dpr: 1.0,
+          uiScale: 1.0,
+          form: 'generic',
+        ),
+        (
+          size: Size(390, 844),
+          ratio: 16 / 9,
+          label: '16x9',
+          scale: 1.0,
+          dpr: 1.0,
+          uiScale: 1.0,
+          form: 'generic',
+        ),
+        (
+          size: Size(320, 640),
+          ratio: 9 / 16,
+          label: '9x16',
+          scale: 1.8,
+          dpr: 1.0,
+          uiScale: 1.0,
+          form: 'generic',
+        ),
+        (
+          size: Size(840, 800),
+          ratio: 9 / 16,
+          label: '9x16',
+          scale: 1.8,
+          dpr: 1.0,
+          uiScale: 1.0,
+          form: 'generic',
+        ),
+        (
+          size: Size(600, 320),
+          ratio: 9 / 16,
+          label: '9x16',
+          scale: 1.8,
+          dpr: 1.0,
+          uiScale: 1.0,
+          form: 'generic',
+        ),
+        for (final profile in nativeProfiles)
+          for (final source in const [
+            (ratio: 9 / 16, label: '9x16'),
+            (ratio: 3 / 4, label: '3x4'),
+            (ratio: 16 / 9, label: '16x9'),
+          ])
+            for (final scaling in const [
+              (text: 1.0, ui: 1.0),
+              (text: 1.3, ui: 1.0),
+              (text: 1.0, ui: 1.15),
+            ])
+              (
+                size: Size(
+                  (profile['physical_size_px'][0] as num).toDouble(),
+                  (profile['physical_size_px'][1] as num).toDouble(),
+                ),
+                ratio: source.ratio,
+                label: source.label,
+                scale: scaling.text,
+                dpr: (profile['device_pixel_ratio'] as num).toDouble(),
+                uiScale: scaling.ui,
+                form: profile['form'] as String,
+              ),
+      ];
+      for (final scenario in scenarios) {
+        final effectiveDpr = scenario.dpr * scenario.uiScale;
+        final size = scenario.size / effectiveDpr;
+        final previewSuffix = scenario.form == 'generic'
+            ? '${size.width.toInt()}-${scenario.label}-${scenario.scale}'
+            : 'native-${scenario.form}-${scenario.label}-text${scenario.scale}-ui${scenario.uiScale}';
         final metrics = ShortVideoMetrics(TextScaler.linear(scenario.scale));
         const insets = EdgeInsets.only(top: 32, bottom: 24);
-        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = effectiveDpr;
+        tester.view.physicalSize = scenario.size;
         final session = ShortVideoSession(
           initial: const ShortVideoEntry(
             bvid: 'a',
@@ -409,11 +527,11 @@ void main() {
                   const String.fromEnvironment('SHORTS_PREVIEW_FONT').isEmpty
                   ? null
                   : 'shorts-preview',
+              fontFamilyFallback: const ['shorts-preview-cjk'],
             ),
           ),
           home: MediaQuery(
-            data: MediaQueryData(
-              size: size,
+            data: MediaQueryData.fromView(tester.view).copyWith(
               textScaler: TextScaler.linear(scenario.scale),
               padding: insets,
               viewPadding: insets,
@@ -426,6 +544,7 @@ void main() {
                         data: ThemeData(
                           brightness: Brightness.dark,
                           fontFamily: 'shorts-preview',
+                          fontFamilyFallback: const ['shorts-preview-cjk'],
                         ),
                         child: Material(
                           color: const Color(0xFF17181A),
@@ -588,7 +707,9 @@ void main() {
             final boundary =
                 captureKey.currentContext!.findRenderObject()
                     as RenderRepaintBoundary;
-            final image = await boundary.toImage();
+            final image = await boundary.toImage(pixelRatio: effectiveDpr);
+            expect(image.width, scenario.size.width.ceil());
+            expect(image.height, scenario.size.height.ceil());
             final bytes = await image.toByteData(
               format: ui.ImageByteFormat.png,
             );
@@ -691,7 +812,9 @@ void main() {
             final boundary =
                 captureKey.currentContext!.findRenderObject()
                     as RenderRepaintBoundary;
-            final image = await boundary.toImage();
+            final image = await boundary.toImage(pixelRatio: effectiveDpr);
+            expect(image.width, scenario.size.width.ceil());
+            expect(image.height, scenario.size.height.ceil());
             final bytes = await image.toByteData(
               format: ui.ImageByteFormat.png,
             );
@@ -761,7 +884,9 @@ void main() {
             final image =
                 await (captureKey.currentContext!.findRenderObject()
                         as RenderRepaintBoundary)
-                    .toImage();
+                    .toImage(pixelRatio: effectiveDpr);
+            expect(image.width, scenario.size.width.ceil());
+            expect(image.height, scenario.size.height.ceil());
             final bytes = await image.toByteData(
               format: ui.ImageByteFormat.png,
             );
