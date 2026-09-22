@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:PiliPlus/pages/video/shorts/metrics.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -19,72 +20,66 @@ class ShortVideoControls extends StatelessWidget {
       onDanmakuSettings,
       onDetails,
       onFullscreen;
-  static double heightFor(TextScaler scaler) => 72;
+  static double heightFor(TextScaler scaler) =>
+      ShortVideoMetrics(scaler).footerHeight;
 
-  Widget _button(String tooltip, IconData icon, VoidCallback onPressed) =>
-      SizedBox.square(
-        dimension: 44,
-        child: IconButton(
-          tooltip: tooltip,
-          onPressed: onPressed,
-          icon: Icon(icon, size: 24, color: Colors.white),
-        ),
-      );
+  Widget _button(
+    ShortVideoMetrics metrics,
+    String tooltip,
+    IconData icon,
+    VoidCallback onPressed,
+  ) => IconButton(
+    style: metrics.iconButtonStyle,
+    tooltip: tooltip,
+    onPressed: onPressed,
+    icon: Icon(icon, size: metrics.icon, color: Colors.white),
+  );
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 48,
-    child: LayoutBuilder(
-      builder: (context, bounds) {
-        final inputWidth = math.min(
-          220.0,
-          math.max(0.0, bounds.maxWidth - 184),
-        );
-        return Row(
-          children: [
-            SizedBox(
-              key: const ValueKey('short-danmaku-input'),
-              width: inputWidth,
-              height: 44,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.white12,
-                  foregroundColor: Colors.white70,
-                  shape: const StadiumBorder(),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                ),
-                onPressed: onSend,
-                child: inputWidth < 88
-                    ? const Icon(
-                        Icons.edit_outlined,
-                        size: 20,
-                        semanticLabel: '发弹幕',
-                      )
-                    : const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '发弹幕',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+  Widget build(BuildContext context) {
+    final metrics = ShortVideoMetrics.of(context);
+    return SizedBox(
+      height: metrics.controlHeight,
+      child: LayoutBuilder(
+        builder: (context, bounds) {
+          final inputWidth = math.min(
+            ShortVideoMetrics.inputMaxWidth,
+            math.max(
+              0.0,
+              bounds.maxWidth -
+                  4 * ShortVideoMetrics.touchWidth -
+                  ShortVideoMetrics.gap,
+            ),
+          );
+          return Row(
+            children: [
+              SizedBox(
+                key: const ValueKey('short-danmaku-input'),
+                width: inputWidth,
+                child: ShortVideoPillButton(label: '发弹幕', onPressed: onSend),
               ),
-            ),
-            const SizedBox(width: 8),
-            _button(
-              danmaku ? '关闭弹幕' : '开启弹幕',
-              danmaku ? CustomIcons.dm_on : CustomIcons.dm_off,
-              onDanmaku,
-            ),
-            _button('弹幕设置', CustomIcons.dm_settings, onDanmakuSettings),
-            const Spacer(),
-            _button('普通详情', Icons.fullscreen_exit, onDetails),
-            _button('全屏', Icons.fullscreen, onFullscreen),
-          ],
-        );
-      },
-    ),
-  );
+              const SizedBox(width: ShortVideoMetrics.gap),
+              _button(
+                metrics,
+                danmaku ? '关闭弹幕' : '开启弹幕',
+                danmaku ? CustomIcons.dm_on : CustomIcons.dm_off,
+                onDanmaku,
+              ),
+              _button(
+                metrics,
+                '弹幕设置',
+                CustomIcons.dm_settings,
+                onDanmakuSettings,
+              ),
+              const Spacer(),
+              _button(metrics, '普通详情', Icons.fullscreen_exit, onDetails),
+              _button(metrics, '全屏', Icons.fullscreen, onFullscreen),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
 
 /// Contextual search and collection rows share spacing and touch targets.
@@ -107,9 +102,11 @@ class ShortVideoContextLink extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 40),
+        constraints: BoxConstraints(
+          minHeight: ShortVideoMetrics.of(context).controlHeight,
+        ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             children: [
               Icon(icon, size: 18, color: Colors.white70),
@@ -119,7 +116,9 @@ class ShortVideoContextLink extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  style: ShortVideoMetrics.control.copyWith(
+                    color: Colors.white,
+                  ),
                 ),
               ),
               const SizedBox(width: 4),

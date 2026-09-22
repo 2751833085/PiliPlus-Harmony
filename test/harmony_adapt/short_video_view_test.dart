@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/video/shorts/metrics.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/models_new/video/video_tag/data.dart';
 import 'package:PiliPlus/models_new/video/video_detail/stat.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/panel_header.dart';
@@ -366,6 +368,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       for (final scenario in const [
         (size: Size(392, 2560 / 3), ratio: 3 / 4, label: '3x4', scale: 1.0),
+        (size: Size(840, 800), ratio: 9 / 16, label: '9x16', scale: 1.0),
+        (size: Size(390, 844), ratio: 9 / 16, label: '9x16', scale: 1.3),
+        (size: Size(390, 844), ratio: 9 / 16, label: '9x16', scale: 2.0),
         (size: Size(390, 844), ratio: 9 / 16, label: '9x16', scale: 1.0),
         (size: Size(390, 844), ratio: 16 / 9, label: '16x9', scale: 1.0),
         (size: Size(320, 640), ratio: 9 / 16, label: '9x16', scale: 1.8),
@@ -373,7 +378,9 @@ void main() {
         (size: Size(600, 320), ratio: 9 / 16, label: '9x16', scale: 1.8),
       ]) {
         final size = scenario.size;
-        final previewSuffix = '${size.width.toInt()}-${scenario.label}';
+        final previewSuffix =
+            '${size.width.toInt()}-${scenario.label}-${scenario.scale}';
+        final metrics = ShortVideoMetrics(TextScaler.linear(scenario.scale));
         const insets = EdgeInsets.only(top: 32, bottom: 24);
         tester.view.physicalSize = size;
         final session = ShortVideoSession(
@@ -396,11 +403,13 @@ void main() {
         var danmakuSettings = 0;
         final searchedTerms = <String>[];
         Widget build(bool fullscreen) => MaterialApp(
-          theme: ThemeData(
-            fontFamily:
-                const String.fromEnvironment('SHORTS_PREVIEW_FONT').isEmpty
-                ? null
-                : 'shorts-preview',
+          theme: HarmonyTheme.apply(
+            ThemeData(
+              fontFamily:
+                  const String.fromEnvironment('SHORTS_PREVIEW_FONT').isEmpty
+                  ? null
+                  : 'shorts-preview',
+            ),
           ),
           home: MediaQuery(
             data: MediaQueryData(
@@ -473,7 +482,7 @@ void main() {
         final input = find.byKey(const ValueKey('short-danmaku-input'));
         final dmToggle = find.byTooltip('关闭弹幕');
         final dmSettings = find.byTooltip('弹幕设置');
-        expect(tester.getSize(input).width, lessThanOrEqualTo(220));
+        expect(tester.getSize(input).width, lessThanOrEqualTo(200));
         expect(
           tester.getRect(input).right,
           lessThan(tester.getRect(dmToggle).left),
@@ -520,9 +529,9 @@ void main() {
         final avatar = find.byKey(const ValueKey('short-author-avatar'));
         final authorRect = tester.getRect(author);
         final followRect = tester.getRect(follow);
-        expect(followRect.left - authorRect.right, closeTo(10, .1));
+        expect(followRect.left - authorRect.right, closeTo(8, .1));
         expect(followRect.center.dy, closeTo(authorRect.center.dy, .1));
-        expect(tester.getSize(avatar), const Size(36, 36));
+        expect(tester.getSize(avatar), Size.square(metrics.avatar));
         final videoFrame = find.byKey(const ValueKey('fixture-video-frame'));
         final frameRect = tester.getRect(videoFrame);
         expect(
@@ -532,7 +541,7 @@ void main() {
         expect(frameRect.top, greaterThanOrEqualTo(insets.top));
         expect(
           frameRect.bottom,
-          lessThanOrEqualTo(size.height - insets.bottom - 72),
+          lessThanOrEqualTo(size.height - insets.bottom - metrics.footerHeight),
         );
         // Missing counts keep the icon and row geometry, without fake zeros or names.
         final likeRect = tester.getRect(find.byIcon(Icons.thumb_up_rounded));
@@ -562,11 +571,11 @@ void main() {
         expect(find.text('已关注'), findsOneWidget);
         expect(
           tester.getRect(follow).left - tester.getRect(author).right,
-          closeTo(10, .1),
+          closeTo(8, .1),
         );
         expect(
           tester.getRect(follow).right,
-          lessThanOrEqualTo(size.width - 68),
+          lessThanOrEqualTo(size.width - ShortVideoMetrics.informationRight),
         );
         expect(tester.takeException(), isNull);
         intro.videoDetail.value.owner = originalOwner;
@@ -606,6 +615,7 @@ void main() {
         final state = playerKey.currentState;
         final progress = find.byType(ProgressBar);
         final barRect = tester.getRect(progress);
+        expect(barRect.height, 28);
         final playerRect = tester.getRect(find.byType(_PlayerFixture));
         player.playerStatus = PlayerStatus.playing;
         for (final listener in player.listeners.toList()) {
@@ -624,7 +634,15 @@ void main() {
         expect(tester.getRect(progress), barRect);
         expect(tester.getRect(find.byType(_PlayerFixture)), playerRect);
         final pauseRect = tester.getRect(find.byIcon(Icons.pause_rounded));
-        expect(pauseRect.top, greaterThan(size.height - insets.bottom - 130));
+        expect(
+          pauseRect.top,
+          greaterThanOrEqualTo(
+            size.height -
+                insets.bottom -
+                metrics.controlHeight -
+                metrics.playbackHeight,
+          ),
+        );
         expect(pauseRect.left, greaterThanOrEqualTo(barRect.left));
         expect(pauseRect.bottom, lessThanOrEqualTo(barRect.top + 2));
         await tester.drag(progress, const Offset(50, 0));
@@ -632,7 +650,8 @@ void main() {
         expect(player.seeks, isNotEmpty);
         final seekCount = player.seeks.length;
         await tester.tapAt(
-          Offset(barRect.left + barRect.width * .3, barRect.center.dy),
+          // A tap ten logical pixels away from the thin painted line still seeks.
+          Offset(barRect.left + barRect.width * .3, barRect.center.dy + 10),
         );
         await tester.pumpAndSettle();
         expect(player.seeks.length, seekCount + 1);
@@ -686,6 +705,7 @@ void main() {
         player.onSeekStart(80);
         await tester.pumpAndSettle();
         expect(find.byType(ShortVideoPausedControls), findsNothing);
+        expect(tester.getRect(progress), barRect);
         expect(
           tester
               .widget<ShortVideoChrome>(find.byType(ShortVideoChrome).first)

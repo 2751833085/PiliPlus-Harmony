@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/shorts/metrics.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -31,7 +32,9 @@ class ReplyPanelHeader extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: onClose == null ? 13 : 17,
+              fontSize: onClose == null ? 13 : 16,
+              height: onClose == null ? null : 1.25,
+              letterSpacing: onClose == null ? null : 0,
               fontWeight: onClose == null ? null : FontWeight.w600,
             ),
           ),
@@ -47,17 +50,18 @@ class ReplyPanelHeader extends StatelessWidget {
           label: Text(
             sortLabel,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: onClose == null ? 13 : 12,
+              height: onClose == null ? null : 1.25,
               color: ColorScheme.of(context).secondary,
             ),
           ),
         ),
         if (onClose != null)
           IconButton(
-            style: IconButton.styleFrom(fixedSize: const Size.square(48)),
+            style: ShortVideoMetrics.of(context).iconButtonStyle,
             tooltip: '关闭评论',
             onPressed: onClose,
-            icon: const Icon(Icons.close, size: 22),
+            icon: Icon(Icons.close, size: ShortVideoMetrics.of(context).icon),
           ),
       ],
     ),
@@ -71,33 +75,16 @@ class ShortReplyComposer extends StatelessWidget {
   Widget build(BuildContext context) => SafeArea(
     top: false,
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-      child: TextButton(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+      child: ShortVideoPillButton(
         onPressed: onReply,
-        style: TextButton.styleFrom(
-          foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
-          backgroundColor: Theme.of(
-            context,
-          ).colorScheme.surfaceContainerHighest,
-          minimumSize: const Size(double.infinity, 44),
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-        ),
-        child: Row(
-          children: [
-            const Expanded(
-              child: Text(
-                '发一条友善的评论',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.sentiment_satisfied_alt,
-              size: 22,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ],
+        label: '发一条友善的评论',
+        foreground: Theme.of(context).colorScheme.onSurfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        trailing: Icon(
+          Icons.sentiment_satisfied_alt,
+          size: ShortVideoMetrics.of(context).icon,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     ),

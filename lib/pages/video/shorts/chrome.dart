@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+import 'package:PiliPlus/pages/video/shorts/metrics.dart';
 import 'package:flutter/material.dart';
 
 /// Fades only the controls; video geometry and its decoder stay untouched.
@@ -39,6 +39,7 @@ class ShortVideoPausedControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final metrics = ShortVideoMetrics.of(context);
     final button = Semantics(
       button: true,
       label: '继续播放',
@@ -47,8 +48,8 @@ class ShortVideoPausedControls extends StatelessWidget {
         child: GestureDetector(
           onTap: onResume,
           child: Container(
-            width: compact ? 48 : 64,
-            height: compact ? 48 : 64,
+            width: compact ? metrics.controlHeight : metrics.pauseButton,
+            height: compact ? metrics.controlHeight : metrics.pauseButton,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: .24),
               borderRadius: BorderRadius.circular(compact ? 14 : 18),
@@ -56,7 +57,7 @@ class ShortVideoPausedControls extends StatelessWidget {
             child: Icon(
               Icons.play_arrow_rounded,
               color: Colors.white.withValues(alpha: .75),
-              size: compact ? 36 : 48,
+              size: compact ? metrics.icon : metrics.icon + 12,
             ),
           ),
         ),
@@ -68,16 +69,13 @@ class ShortVideoPausedControls extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: compact ? 14 : 16,
-          fontWeight: FontWeight.w600,
-          shadows: const [Shadow(color: Colors.black87, blurRadius: 6)],
-        ),
+        style: ShortVideoMetrics.time,
       ),
     );
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 68),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ShortVideoMetrics.informationRight,
+      ),
       child: compact
           ? Row(
               mainAxisSize: MainAxisSize.min,
@@ -89,7 +87,7 @@ class ShortVideoPausedControls extends StatelessWidget {
             )
           : Column(
               mainAxisSize: MainAxisSize.min,
-              children: [button, const SizedBox(height: 16), timestamp],
+              children: [button, const SizedBox(height: 12), timestamp],
             ),
     );
   }
@@ -112,7 +110,7 @@ class ShortVideoMinimalControls extends StatelessWidget {
   final Widget progress;
   final VoidCallback onToggle;
   static double heightFor(TextScaler scaler) =>
-      24 + math.max(48, scaler.scale(14) * 1.3);
+      ShortVideoMetrics(scaler).playbackHeight;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -126,7 +124,7 @@ class ShortVideoMinimalControls extends StatelessWidget {
                 ? Center(
                     child: Text(
                       time,
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      style: ShortVideoMetrics.time,
                     ),
                   )
                 : Row(
@@ -141,12 +139,12 @@ class ShortVideoMinimalControls extends StatelessWidget {
                             onTap: onToggle,
                             onDoubleTap: onToggle,
                             child: SizedBox.square(
-                              dimension: 48,
+                              dimension: ShortVideoMetrics.touchWidth,
                               child: Icon(
                                 playing
                                     ? Icons.pause_rounded
                                     : Icons.play_arrow_rounded,
-                                size: 28,
+                                size: ShortVideoMetrics.of(context).icon,
                                 color: Colors.white,
                               ),
                             ),
@@ -158,20 +156,14 @@ class ShortVideoMinimalControls extends StatelessWidget {
                           time,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white70,
-                            shadows: [
-                              Shadow(color: Colors.black, blurRadius: 6),
-                            ],
-                          ),
+                          style: ShortVideoMetrics.time,
                         ),
                       ),
                     ],
                   ),
           ),
         ),
-        SizedBox(height: 24, child: Center(child: progress)),
+        SizedBox(height: ShortVideoMetrics.seekTarget, child: progress),
       ],
     ),
   );

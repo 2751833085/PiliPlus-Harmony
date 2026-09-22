@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'chrome.dart';
+import 'metrics.dart';
 import 'dart:math' as math;
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
@@ -207,7 +208,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
       onLongPress: onLongPress,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 64,
+        width: ShortVideoMetrics.actionWidth,
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -215,22 +216,23 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
             Icon(
               icon,
               color: selected ? const Color(0xFFFB7299) : Colors.white,
-              size: 32,
+              size: ShortVideoMetrics.of(context).actionIcon,
               shadows: const [Shadow(color: Colors.black54, blurRadius: 6)],
             ),
             const SizedBox(height: 4),
             SizedBox(
               width: double.infinity,
-              height: MediaQuery.textScalerOf(context).scale(12) * 1.35,
+              height: ShortVideoMetrics.of(context).captionHeight,
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
                   label,
                   maxLines: 1,
-                  style: const TextStyle(
+                  style: ShortVideoMetrics.caption.copyWith(
                     color: Colors.white,
-                    fontSize: 12,
-                    shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
+                    shadows: const [
+                      Shadow(color: Colors.black87, blurRadius: 4),
+                    ],
                   ),
                 ),
               ),
@@ -289,9 +291,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
             ),
         ],
       );
-    final bottomHeight = ShortVideoControls.heightFor(
-      MediaQuery.textScalerOf(context),
-    );
+    final metrics = ShortVideoMetrics.of(context);
+    final bottomHeight = metrics.footerHeight;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -336,10 +337,12 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                     child: Row(
                       children: [
                         IconButton(
+                          style: metrics.iconButtonStyle,
                           tooltip: '返回',
                           onPressed: Get.back,
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.arrow_back,
+                            size: metrics.icon,
                             color: Colors.white,
                           ),
                         ),
@@ -347,24 +350,28 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                           child: Obx(
                             () => Text(
                               '${widget.intro.total.value} 人正在看',
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
+                              style: ShortVideoMetrics.caption,
                             ),
                           ),
                         ),
                         IconButton(
+                          style: metrics.iconButtonStyle,
                           tooltip: '搜索',
                           onPressed: () => Get.toNamed('/search'),
-                          icon: const Icon(Icons.search, color: Colors.white),
+                          icon: Icon(
+                            Icons.search,
+                            size: metrics.icon,
+                            color: Colors.white,
+                          ),
                         ),
                         widget.moreButton ??
                             IconButton(
+                              style: metrics.iconButtonStyle,
                               tooltip: '更多',
                               onPressed: widget.onMore,
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.more_vert,
+                                size: metrics.icon,
                                 color: Colors.white,
                               ),
                             ),
@@ -389,16 +396,13 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                 : session.loading
                                 ? '正在获取更多视频'
                                 : session.error!,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
+                            style: ShortVideoMetrics.caption,
                           ),
                         ),
                       ),
                     ),
                   Positioned(
-                    right: 6,
+                    right: 4,
                     bottom: bottomHeight + 20,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -496,8 +500,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                     ),
                   ),
                   Positioned(
-                    left: 12,
-                    right: 68,
+                    left: ShortVideoMetrics.gutter,
+                    right: ShortVideoMetrics.informationRight,
                     bottom: bottomHeight + 12,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -533,8 +537,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                           'short-author-avatar',
                                         ),
                                         src: owner.face,
-                                        width: 36,
-                                        height: 36,
+                                        width: metrics.avatar,
+                                        height: metrics.avatar,
                                         type: .avatar,
                                       ),
                                     ),
@@ -556,11 +560,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                             owner?.name ?? '',
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                            style: ShortVideoMetrics.author,
                                           ),
                                           if (ready &&
                                               widget
@@ -573,47 +573,33 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                               '${NumUtils.numFormat(widget.intro.userStat.value.follower!)} 粉丝',
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 11,
-                                              ),
+                                              style: ShortVideoMetrics.caption,
                                             ),
                                         ],
                                       ),
                                     ),
                                   ),
                                   if (ready && owner != null) ...[
-                                    const SizedBox(width: 10),
-                                    TextButton(
+                                    const SizedBox(
+                                      width: ShortVideoMetrics.gap,
+                                    ),
+                                    ShortVideoPillButton(
                                       key: const ValueKey('short-follow'),
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: const Color(
-                                          0xFFDB4C7F,
-                                        ),
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                        minimumSize: const Size(0, 32),
-                                        shape: const StadiumBorder(),
-                                      ),
+                                      color: const Color(0xFFDB4C7F),
+                                      foreground: Colors.white,
+                                      centered: true,
                                       onPressed: () => widget.intro
                                           .actionRelationMod(context),
-                                      child: Text(
-                                        (widget
-                                                        .intro
-                                                        .followStatus
-                                                        .value
-                                                        .attribute ??
-                                                    0) ==
-                                                0
-                                            ? '+ 关注'
-                                            : '已关注',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 13,
-                                        ),
-                                      ),
+                                      label:
+                                          (widget
+                                                      .intro
+                                                      .followStatus
+                                                      .value
+                                                      .attribute ??
+                                                  0) ==
+                                              0
+                                          ? '+ 关注'
+                                          : '已关注',
                                     ),
                                   ],
                                 ],
@@ -627,10 +613,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                       : session.current.title ?? '',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    shadows: [
+                                  style: ShortVideoMetrics.body.copyWith(
+                                    shadows: const [
                                       Shadow(
                                         color: Colors.black,
                                         blurRadius: 4,
@@ -642,10 +626,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                               if (ready)
                                 Text(
                                   '${NumUtils.numFormat(detail.stat?.view ?? 0)} 次播放',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
+                                  style: ShortVideoMetrics.caption,
                                 ),
                               if (searchTerm != null) ...[
                                 const SizedBox(height: 10),
@@ -707,12 +688,12 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
           }),
         ),
         Positioned(
-          left: 12,
-          right: 12,
+          left: ShortVideoMetrics.gutter,
+          right: ShortVideoMetrics.gutter,
           bottom: 0,
           child: SizedBox(
             height:
-                48 +
+                metrics.controlHeight +
                 ShortVideoMinimalControls.heightFor(
                   MediaQuery.textScalerOf(context),
                 ),
@@ -737,8 +718,13 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                       bufferedBarColor: Colors.white38,
                       thumbColor: Colors.white,
                       thumbGlowColor: Colors.white12,
-                      barHeight: player.isSeeking.value ? 4 : 2,
-                      thumbRadius: player.isSeeking.value ? 6 : 2,
+                      barHeight: player.isSeeking.value
+                          ? ShortVideoMetrics.activeTrack
+                          : ShortVideoMetrics.track,
+                      thumbRadius: player.isSeeking.value
+                          ? ShortVideoMetrics.activeThumb
+                          : ShortVideoMetrics.thumb,
+                      thumbGlowRadius: ShortVideoMetrics.thumbGlow,
                       onDragStart: (value) => player.onSeekStart(value.seconds),
                       onDragUpdate: (value) =>
                           player.seekPosition.value = value.seconds,

@@ -687,9 +687,9 @@ class RenderProgressBar extends RenderBox implements MouseTrackerAnnotation {
   /// | -------O---------------- |
   ///
   void _drawProgressBarWithoutLabels(Canvas canvas) {
-    final barWidth = size.width;
-    final barHeight = _heightWhenNoLabels();
-    _drawProgressBar(canvas, Offset.zero, Size(barWidth, barHeight));
+    // The parent may reserve a larger touch target than the painted thumb.
+    // Keep the track centered when the thumb grows during scrubbing.
+    _drawProgressBar(canvas, Offset.zero, size);
   }
 
   void _drawProgressBar(Canvas canvas, Offset offset, Size localSize) {
