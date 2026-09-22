@@ -1,3 +1,4 @@
+import 'package:PiliPlus/models_new/video/video_tag/data.dart';
 import 'package:PiliPlus/models_new/video/video_detail/stat.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/panel_header.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
@@ -39,6 +40,9 @@ void main() {
           File(fontPath).readAsBytes().then((b) => ByteData.sublistView(b)),
         );
       await font.load();
+      await (FontLoader(
+        'custom_icon',
+      )..addFont(rootBundle.load('assets/fonts/custom_icon.ttf'))).load();
       const iconPath = String.fromEnvironment('SHORTS_PREVIEW_ICONS');
       if (iconPath.isNotEmpty) {
         await (FontLoader('MaterialIcons')..addFont(
@@ -389,6 +393,8 @@ void main() {
         final playerKey = GlobalKey();
         final captureKey = GlobalKey();
         var commentsOpen = false;
+        var danmakuSettings = 0;
+        final searchedTerms = <String>[];
         Widget build(bool fullscreen) => MaterialApp(
           theme: ThemeData(
             fontFamily:
@@ -448,6 +454,8 @@ void main() {
                 onComments: () {},
                 onEpisodes: () {},
                 onMore: () {},
+                onDanmakuSettings: () => danmakuSettings++,
+                onSearch: searchedTerms.add,
                 fullscreen: fullscreen,
               ),
             ),
@@ -462,6 +470,51 @@ void main() {
           expect(find.text(label), findsNothing);
         }
         expect(find.text('133'), findsOneWidget);
+        final input = find.byKey(const ValueKey('short-danmaku-input'));
+        final dmToggle = find.byTooltip('关闭弹幕');
+        final dmSettings = find.byTooltip('弹幕设置');
+        expect(tester.getSize(input).width, lessThanOrEqualTo(220));
+        expect(
+          tester.getRect(input).right,
+          lessThan(tester.getRect(dmToggle).left),
+        );
+        expect(
+          tester.getRect(dmToggle).right,
+          lessThanOrEqualTo(tester.getRect(dmSettings).left),
+        );
+        await tester.tap(input);
+        await tester.pumpAndSettle();
+        expect(video.sendPanelOpens, 1);
+        await tester.tap(dmSettings);
+        await tester.pumpAndSettle();
+        expect(danmakuSettings, 1);
+        await tester.tap(dmToggle);
+        await tester.pumpAndSettle();
+        expect(player.enableShowDanmaku.value, isFalse);
+        await tester.tap(find.byTooltip('开启弹幕'));
+        await tester.pumpAndSettle();
+        expect(player.enableShowDanmaku.value, isTrue);
+        final search = find.byKey(const ValueKey('short-related-search'));
+        expect(find.text('搜索 · 折叠屏体验'), findsOneWidget);
+        // Very short windows scroll their information area; the search link
+        // remains reachable without moving the live player.
+        if (!search.hitTestable().evaluate().isNotEmpty) {
+          await tester.ensureVisible(search);
+          await tester.pumpAndSettle();
+        }
+        await tester.tap(search);
+        await tester.pumpAndSettle();
+        expect(searchedTerms, ['折叠屏体验']);
+        final infoScroll = find
+            .ancestor(of: search, matching: find.byType(SingleChildScrollView))
+            .first;
+        final scrollState = tester.state<ScrollableState>(
+          find
+              .descendant(of: infoScroll, matching: find.byType(Scrollable))
+              .first,
+        );
+        scrollState.position.jumpTo(0);
+        await tester.pumpAndSettle();
         final author = find.byKey(const ValueKey('short-author-info'));
         final follow = find.byKey(const ValueKey('short-follow'));
         final avatar = find.byKey(const ValueKey('short-author-avatar'));
@@ -861,13 +914,21 @@ class _FakeVideo implements VideoDetailController {
   final PlPlayerController plPlayerController;
   @override
   bool get autoPlay => true;
+  int sendPanelOpens = 0;
   @override
-  Future<void> showShootDanmakuSheet() async {}
+  Future<void> showShootDanmakuSheet() async {
+    sendPanelOpens++;
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class _FakeIntro implements UgcIntroController {
+  @override
+  final Rx<List<VideoTagItem>?> videoTags = Rx<List<VideoTagItem>?>([
+    VideoTagItem(tagName: '折叠屏体验'),
+  ]);
   @override
   final videoDetail = VideoDetailData(
     bvid: 'a',

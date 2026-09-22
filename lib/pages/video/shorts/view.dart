@@ -5,6 +5,9 @@ import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
+import 'package:PiliPlus/pages/video/widgets/header_mixin.dart';
+import 'package:PiliPlus/plugin/pl_player/controller.dart';
+import 'package:PiliPlus/pages/video/shorts/search_suggestion.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +35,8 @@ class ShortVideoFeed extends StatefulWidget {
     this.moreButton,
     this.onPlay,
     this.commentsPanel,
+    this.onDanmakuSettings,
+    this.onSearch,
   });
   final ShortVideoSession session;
   final VideoDetailController video;
@@ -42,11 +47,16 @@ class ShortVideoFeed extends StatefulWidget {
   final Widget? moreButton;
   final VoidCallback? onPlay;
   final Widget? commentsPanel;
+  final VoidCallback? onDanmakuSettings;
+  final ValueChanged<String>? onSearch;
   @override
   State<ShortVideoFeed> createState() => _ShortVideoFeedState();
 }
 
-class _ShortVideoFeedState extends State<ShortVideoFeed> {
+class _ShortVideoFeedState extends State<ShortVideoFeed>
+    with HeaderMixin<ShortVideoFeed> {
+  @override
+  PlPlayerController get plPlayerController => widget.video.plPlayerController;
   ShortVideoSession get session => widget.session;
   Timer? _warmTimer;
   Worker? _bufferWatch;
@@ -491,7 +501,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                     bottom: bottomHeight + 12,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxHeight: math.max(60, pane.maxHeight * .36),
+                        maxHeight: math.max(60, pane.maxHeight * .42),
                       ),
                       child: SingleChildScrollView(
                         child: Obx(() {
@@ -500,6 +510,12 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                               detail.bvid == session.current.bvid &&
                               !session.switching;
                           final owner = ready ? detail.owner : null;
+                          final searchTerm = ready
+                              ? shortVideoSearchTerm(
+                                  tags: widget.intro.videoTags.value,
+                                  title: detail.title,
+                                )
+                              : null;
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
@@ -631,21 +647,36 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                                     fontSize: 12,
                                   ),
                                 ),
+                              if (searchTerm != null) ...[
+                                const SizedBox(height: 10),
+                                ShortVideoContextLink(
+                                  key: const ValueKey('short-related-search'),
+                                  icon: Icons.search,
+                                  label: '搜索 · $searchTerm',
+                                  onTap: () {
+                                    if (widget.onSearch case final onSearch?) {
+                                      onSearch(searchTerm);
+                                    } else {
+                                      Get.toNamed(
+                                        '/searchResult',
+                                        parameters: {
+                                          'keyword': searchTerm,
+                                        },
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
                               if (ready &&
                                   (detail.ugcSeason != null ||
-                                      (detail.pages?.length ?? 0) > 1))
-                                TextButton.icon(
-                                  onPressed: widget.onEpisodes,
-                                  icon: const Icon(
-                                    Icons.video_library_outlined,
-                                    color: Colors.white70,
-                                    size: 18,
-                                  ),
-                                  label: const Text(
-                                    '合集 / 分 P',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                                      (detail.pages?.length ?? 0) > 1)) ...[
+                                const SizedBox(height: 8),
+                                ShortVideoContextLink(
+                                  icon: Icons.video_library_outlined,
+                                  label: '合集 / 分 P',
+                                  onTap: widget.onEpisodes,
                                 ),
+                              ],
                             ],
                           );
                         }),
@@ -729,6 +760,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                       danmaku: player.enableShowDanmaku.value,
                       onSend: widget.video.showShootDanmakuSheet,
                       onDanmaku: () => player.enableShowDanmaku.toggle(),
+                      onDanmakuSettings:
+                          widget.onDanmakuSettings ?? showSetDanmaku,
                       onDetails: widget.onDetails,
                       onFullscreen: () =>
                           player.triggerFullScreen(status: true),

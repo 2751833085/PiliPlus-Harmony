@@ -155,6 +155,7 @@ abstract class CommonIntroController extends GetxController
 
   Future<void> queryVideoTags() async {
     final source = (bvid, cid.value);
+    videoTags.value = null;
     final result = await UserHttp.videoTags(bvid: bvid, cid: cid.value);
     if (isClosed || source != (bvid, cid.value)) return;
     videoTags.value = result.dataOrNull;
