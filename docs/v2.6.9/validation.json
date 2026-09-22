@@ -1,0 +1,71 @@
+{
+  "recorded_at": "2026-09-22T06:26:30.963820+00:00",
+  "version": "2.6.9+6095",
+  "base_commit": "4db1c02172fc4df4cb4485e9d16b3ce46915c618",
+  "artifact_sha256": "82f7c8f1c26e94d99e80461c9ac7687eebe255325a7ceea4afa68f9756bd66de",
+  "layout_diagnostics": true,
+  "checks": {
+    "flutter_tests_passed": 85,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "layout_scenarios": 72,
+    "density_reference_values": [
+      2.5,
+      2.875,
+      3.25
+    ],
+    "native_pixels": [
+      [
+        1008,
+        2232
+      ],
+      [
+        2048,
+        2232
+      ],
+      [
+        3184,
+        2232
+      ]
+    ],
+    "viewport_fixes": "600..720dp window no longer capped at 600dp; compact icon instead of ellipsized input; consistent seek paint/hit geometry",
+    "retained_behavior": "single player State, source ratio, pause/seek/comments/fullscreen; send/settings/search callbacks",
+    "preview_font": "device HarmonyOS Sans and Sans SC copied locally for tests only",
+    "preview_export": "direct scene rasterization to integer native pixel canvas; no image resizing"
+  },
+  "measured_display_forms": [
+    "triple"
+  ],
+  "simulated_reference_forms": [
+    "single",
+    "double"
+  ],
+  "device": {
+    "recorded_at": "2026-09-22T06:23:44.016893+00:00",
+    "previous_version": "2.6.9",
+    "installed_version": "2.6.9",
+    "installed_version_code": 6095,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false,
+    "artifact_sha256": "82f7c8f1c26e94d99e80461c9ac7687eebe255325a7ceea4afa68f9756bd66de",
+    "base_commit": "4db1c02172fc4df4cb4485e9d16b3ce46915c618",
+    "launch": "blocked_by_lock",
+    "initial_version_this_session": "2.6.4",
+    "preserved_from_initial_install": true
+  },
+  "not_verified": [
+    "single/double actual display density",
+    "app runtime DPR, user UI/text scale and safe insets",
+    "unlocked real-device UI and playback in all three forms"
+  ],
+  "runtime_geometry_records": 0,
+  "remote_push": false
+}
