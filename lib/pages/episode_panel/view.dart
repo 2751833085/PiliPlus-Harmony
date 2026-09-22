@@ -226,9 +226,10 @@ class EpisodePanelState extends State<EpisodePanel>
 
   @override
   Widget buildPage(ThemeData theme) {
-    return Material(
-      color: showTitle ? theme.colorScheme.surface : null,
-      type: showTitle ? MaterialType.canvas : MaterialType.transparency,
+    return ImmersiveSurface(
+      borderRadius: showTitle
+          ? const BorderRadius.vertical(top: Radius.circular(24))
+          : BorderRadius.zero,
       child: Column(
         children: [
           _buildToolbar(theme),

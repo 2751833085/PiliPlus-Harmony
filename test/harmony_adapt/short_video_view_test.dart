@@ -565,7 +565,9 @@ void main() {
                           ),
                         ),
                         child: Material(
-                          color: const Color(0xFF191A1D),
+                          color: shortVideoPanelTheme(
+                            ThemeData.dark(),
+                          ).colorScheme.surface,
                           child: Column(
                             children: [
                               ReplyPanelHeader(
@@ -769,7 +771,7 @@ void main() {
             image.dispose();
           });
         }
-        // Adjacent covers are already built and use the same video rectangle,
+        // Adjacent first-frame placeholders use the same video rectangle,
         // including footer reservation. No vertical jump at cover/live handoff.
         final covers = find.byWidgetPredicate(
           (w) => w is NetworkImgLayer && w.src == '' && w.type != .avatar,
@@ -1162,6 +1164,10 @@ class _FakePlayer implements PlPlayerController {
 }
 
 class _FakeVideo implements VideoDetailController {
+  @override
+  String? preloadedFirstFrame(String bvid, {int? cid}) => '';
+  @override
+  final shortPreviewRevision = 0.obs;
   @override
   final shortChromeVisible = true.obs;
   @override

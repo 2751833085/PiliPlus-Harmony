@@ -868,6 +868,8 @@ class VideoDetailController extends GetxController
     plPlayerController.enableAudioNormalization,
   );
 
+  final shortPreviewRevision = 0.obs;
+  final _shortFirstFrames = <String, (int, Map<int, String>)>{};
   final _preloadedIntros = <String, (int, DateTime, VideoDetailData)>{};
   Future<void> _preloadIntro(String nextBvid, CancelToken cancel) async {
     final account = Accounts.video.mid;
@@ -885,11 +887,29 @@ class VideoDetailController extends GetxController
           DateTime.now(),
           result.dataOrNull!,
         );
+        final frames = <int, String>{
+          for (final page in result.dataOrNull!.pages ?? [])
+            if (page.cid != null && page.firstFrame?.isNotEmpty == true)
+              page.cid!: page.firstFrame!,
+        };
+        if (frames.isNotEmpty) {
+          _shortFirstFrames[nextBvid] = (account, frames);
+          while (_shortFirstFrames.length > 5) {
+            _shortFirstFrames.remove(_shortFirstFrames.keys.first);
+          }
+          shortPreviewRevision.value++;
+        }
         while (_preloadedIntros.length > 4) {
           _preloadedIntros.remove(_preloadedIntros.keys.first);
         }
       }
     } catch (_) {}
+  }
+
+  String? preloadedFirstFrame(String bvid, {int? cid}) {
+    final frame = _shortFirstFrames[bvid];
+    if (frame?.$1 != Accounts.video.mid) return null;
+    return cid == null ? frame?.$2.values.firstOrNull : frame?.$2[cid];
   }
 
   VideoDetailData? takePreloadedIntro(String requestedBvid) {
@@ -1098,6 +1118,7 @@ class VideoDetailController extends GetxController
     _preloadWindow.clear();
     _nextPreloader.cancel();
     _preloadedIntros.clear();
+    _shortFirstFrames.clear();
     _retainShortMedia();
   }
 

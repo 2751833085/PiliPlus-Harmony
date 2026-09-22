@@ -109,7 +109,7 @@ void main() {
       );
       await tester.tap(find.byType(ui.PopupMenuButton<int>));
       await tester.pumpAndSettle();
-      expect(find.byType(BackdropFilter), findsNWidgets(2));
+      expect(find.byType(BackdropFilter), findsOneWidget);
       await tester.tap(find.text('不可用选项'));
       await tester.pumpAndSettle();
       expect(selected, isNull);

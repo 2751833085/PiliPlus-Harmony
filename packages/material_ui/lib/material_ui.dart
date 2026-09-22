@@ -7,4 +7,6 @@ library;
 export 'package:flutter/material.dart'
     hide TranslateAnimationSource, PopupMenuButton, showMenu;
 export 'src/popup_surface.dart'
-    show PopupMenuButton, showMenu, PopupSurfaceStyle;
+    show PopupMenuButton, showMenu, PopupSurfaceStyle, PopupSheetStyle;
+
+export 'src/immersive_surface.dart' show ImmersiveSurface;

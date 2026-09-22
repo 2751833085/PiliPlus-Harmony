@@ -66,7 +66,7 @@ List<SettingsModel> get experimentalSettings => [
     SwitchModel(
       section: '鸿蒙界面风格',
       title: '沉浸光感',
-      subtitle: '为悬浮 Dock 与首页顶栏启用系统光感材质；关闭后使用普通背景。仅在系统支持时生效',
+      subtitle: '为 Dock、顶栏、菜单、播放面板与账户卡片启用光感材质；关闭后使用实色背景',
       leading: const Icon(Icons.water_drop_outlined),
       setKey: SettingBoxKey.harmonyImmersive,
       defaultVal: true,
@@ -76,7 +76,7 @@ List<SettingsModel> get experimentalSettings => [
   SwitchModel(
     section: '折叠屏与握持',
     title: '智感握姿',
-    subtitle: '接入系统握持识别，让悬浮 Dock 和展开屏幕的全屏播放按钮靠近握持侧；不支持的设备保持居中',
+    subtitle: '接入系统握持识别，让悬浮 Dock 靠近握持侧；全屏进度条保持全宽，不支持的设备保持居中',
     leading: const Icon(Icons.back_hand_outlined),
     setKey: SettingBoxKey.harmonyHandedness,
     onChanged: _refreshHarmony,

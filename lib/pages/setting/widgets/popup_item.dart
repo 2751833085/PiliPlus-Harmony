@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/dialog/bottom_panel.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:PiliPlus/models/common/enum_with_label.dart';
@@ -63,13 +64,21 @@ class _PopupListTileState<T> extends State<PopupListTile<T>> {
       final titleOffset = titleBox.localToGlobal(.zero, ancestor: thisBox);
       dx = thisOffset.dx + titleOffset.dx;
     }
-    showMenu<T>(
-      context: context,
-      position: RelativeRect.fromLTRB(dx, thisOffset.dy + 5, dx, 0),
-      items: widget.itemBuilder(context),
-      initialValue: value,
-      requestFocus: false,
-    ).then<void>((newValue) {
+    final selection = HarmonyStyle.enabled(context)
+        ? showSelectionSheet<T>(
+            context: context,
+            title: widget.title,
+            items: widget.itemBuilder(context),
+            selected: value,
+          )
+        : showMenu<T>(
+            context: context,
+            position: RelativeRect.fromLTRB(dx, thisOffset.dy + 5, dx, 0),
+            items: widget.itemBuilder(context),
+            initialValue: value,
+            requestFocus: false,
+          );
+    selection.then<void>((newValue) {
       if (!mounted) return;
       if (newValue == null || newValue == value) return;
       widget.onSelected(newValue, _refresh);

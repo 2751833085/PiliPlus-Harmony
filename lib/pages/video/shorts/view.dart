@@ -63,6 +63,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
   ShortVideoSession get session => widget.session;
   Timer? _warmTimer;
   Worker? _bufferWatch;
+  Worker? _previewWatch;
   int? _targetIndex;
   void _warmNext() {
     if (_warmTimer != null) return;
@@ -78,10 +79,14 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
       0,
       session.entries.length - 1,
     );
-    widget.video.preloadShortWindow([
-      if (index != session.index) session.entries[index],
-      ...session.entries.skip(index + 1).take(3),
-    ]);
+    widget.video
+        .preloadShortWindow([
+          if (index != session.index) session.entries[index],
+          ...session.entries.skip(index + 1).take(3),
+        ])
+        .whenComplete(() {
+          if (mounted) setState(() {});
+        });
   }
 
   @override
@@ -89,6 +94,9 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
     super.initState();
     session.addListener(_changed);
     widget.video.plPlayerController.addStatusLister(_statusChanged);
+    _previewWatch = ever(widget.video.shortPreviewRevision, (_) {
+      if (mounted) setState(() {});
+    });
     _bufferWatch = everAll([
       widget.video.plPlayerController.isBuffering,
       widget.video.plPlayerController.buffered,
@@ -109,6 +117,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
   void dispose() {
     _warmTimer?.cancel();
     _bufferWatch?.dispose();
+    _previewWatch?.dispose();
     session.removeListener(_changed);
     widget.video.plPlayerController.removeStatusLister(_statusChanged);
     super.dispose();
@@ -170,7 +179,11 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                         return Stack(
                           fit: StackFit.expand,
                           children: [
-                            if (session.entries[index].cover case final cover?)
+                            if (widget.video.preloadedFirstFrame(
+                                  session.entries[index].bvid,
+                                  cid: session.entries[index].cid,
+                                )
+                                case final cover?)
                               Padding(
                                 padding: EdgeInsets.only(
                                   bottom: widget.fullscreen
@@ -182,6 +195,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                 child: LayoutBuilder(
                                   builder: (_, media) => NetworkImgLayer(
                                     src: cover,
+                                    getPlaceHolder: () =>
+                                        const SizedBox.expand(),
                                     fit: BoxFit.contain,
                                     borderRadius: BorderRadius.zero,
                                     width: media.maxWidth,
@@ -601,7 +616,16 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                     ),
                                     ShortVideoPillButton(
                                       key: const ValueKey('short-follow'),
-                                      color: const Color(0xFFDB4C7F),
+                                      color:
+                                          (widget
+                                                      .intro
+                                                      .followStatus
+                                                      .value
+                                                      .attribute ??
+                                                  0) ==
+                                              0
+                                          ? const Color(0xFFDB4C7F)
+                                          : const Color(0xFF303135),
                                       foreground: Colors.white,
                                       centered: true,
                                       onPressed: () => widget.intro

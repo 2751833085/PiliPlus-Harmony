@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'harmony_about.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -93,229 +95,260 @@ class _AboutPageState extends State<AboutPage> {
     final subTitleStyle = TextStyle(fontSize: 13, color: outline);
     final showAppBar = widget.showAppBar;
     final padding = MediaQuery.viewPaddingOf(context);
-    return SimpleScaffold(
-      appBar: showAppBar ? AppBar(title: const Text('关于')) : null,
-      body: ListView(
-        padding: EdgeInsets.only(
-          left: showAppBar ? padding.left : 0,
-          right: showAppBar ? padding.right : 0,
-          bottom: padding.bottom + 100,
+    final items = <Widget>[
+      GestureDetector(
+        onTap: () {
+          if (++_pressCount == 5) {
+            _pressCount = 0;
+            _showDialog();
+          }
+        },
+        onSecondaryTap: PlatformUtils.isDesktop ? _showDialog : null,
+        child: Image.asset(
+          width: 150,
+          height: 150,
+          excludeFromSemantics: true,
+          cacheWidth: 150.cacheSize(context),
+          Assets.logo,
         ),
-        children: [
-          GestureDetector(
-            onTap: () {
-              if (++_pressCount == 5) {
-                _pressCount = 0;
-                _showDialog();
-              }
-            },
-            onSecondaryTap: PlatformUtils.isDesktop ? _showDialog : null,
-            child: Image.asset(
-              width: 150,
-              height: 150,
-              excludeFromSemantics: true,
-              cacheWidth: 150.cacheSize(context),
-              Assets.logo,
+      ),
+      ListTile(
+        title: Text(
+          '${Constants.appName}${OS.isHarmony ? '(鸿蒙版)' : ''}',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleMedium!.copyWith(height: 2),
+        ),
+        subtitle: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '使用Flutter开发的B站第三方客户端',
+              style: TextStyle(color: outline),
+              semanticsLabel: '与你一起，发现不一样的世界',
             ),
-          ),
-          ListTile(
-            title: Text(
-              '${Constants.appName}${OS.isHarmony ? '(鸿蒙版)' : ''}',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium!.copyWith(height: 2),
+            const Icon(
+              Icons.accessibility_new,
+              semanticLabel: "无障碍适配",
+              size: 18,
             ),
-            subtitle: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '使用Flutter开发的B站第三方客户端',
-                  style: TextStyle(color: outline),
-                  semanticsLabel: '与你一起，发现不一样的世界',
-                ),
-                const Icon(
-                  Icons.accessibility_new,
-                  semanticLabel: "无障碍适配",
-                  size: 18,
-                ),
-              ],
-            ),
-          ),
-          ListTile(
-            onTap: () => Update.checkUpdate(false),
-            onLongPress: () => Utils.copyText(versionTag),
-            onSecondaryTap: PlatformUtils.isMobile
-                ? null
-                : () => Utils.copyText(versionTag),
-            title: const Text('当前版本'),
-            leading: const Icon(Icons.commit_outlined),
-            trailing: Text(
-              versionTag,
-              style: subTitleStyle,
-            ),
-          ),
-          ListTile(
-            title: Text(
-              '''
+          ],
+        ),
+      ),
+      ListTile(
+        onTap: () => Update.checkUpdate(false),
+        onLongPress: () => Utils.copyText(versionTag),
+        onSecondaryTap: PlatformUtils.isMobile
+            ? null
+            : () => Utils.copyText(versionTag),
+        title: const Text('当前版本'),
+        leading: const Icon(Icons.commit_outlined),
+        trailing: Text(
+          versionTag,
+          style: subTitleStyle,
+        ),
+      ),
+      ListTile(
+        title: Text(
+          '''
 Build Time: ${DateFormatUtils.format(BuildConfig.buildTime, format: DateFormatUtils.longFormatDs)}
 Commit Hash: ${BuildConfig.commitHash}''',
-              style: const TextStyle(fontSize: 14),
-            ),
-            leading: const Icon(Icons.info_outline),
-            onTap: () => PageUtils.launchURL(
-              '${Constants.sourceCodeUrl}/commit/${BuildConfig.commitHash == 'N/A' ? 'HEAD' : BuildConfig.commitHash}',
-            ),
-            onLongPress: () => Utils.copyText(BuildConfig.commitHash),
-            onSecondaryTap: PlatformUtils.isMobile
-                ? null
-                : () => Utils.copyText(BuildConfig.commitHash),
-          ),
-          Divider(
-            thickness: 1,
-            height: 30,
-            color: theme.colorScheme.outlineVariant,
-          ),
-          ListTile(
-            onTap: () => PageUtils.launchURL(
-              'https://github.com/bggRGjQaUbCoE/PiliPlus',
-            ),
-            leading: const Icon(Icons.code),
-            title: const Text('上游Source Code'),
-            subtitle: Text(
-              'https://github.com/bggRGjQaUbCoE/PiliPlus',
-              style: subTitleStyle,
-            ),
-          ),
-          ListTile(
-            onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),
-            leading: const Icon(Icons.code),
-            title: const Text('Source Code'),
-            subtitle: Text(Constants.sourceCodeUrl, style: subTitleStyle),
-          ),
-          if (Platform.isAndroid)
-            ListTile(
-              onTap: PiliAndroidHelper.openLinkVerifySettings,
-              leading: const Icon(MdiIcons.linkBoxOutline),
-              title: const Text('打开受支持的链接'),
-              trailing: Icon(Icons.arrow_forward, size: 16, color: outline),
-            ),
-          ListTile(
-            onTap: () =>
-                PageUtils.launchURL('${Constants.sourceCodeUrl}/issues'),
-            leading: const Icon(Icons.feedback_outlined),
-            title: const Text('问题反馈'),
-            trailing: Icon(Icons.arrow_forward, size: 16, color: outline),
-          ),
-          ListTile(
-            onTap: () => Get.toNamed('/logs'),
-            onLongPress: LoggerUtils.clearLogs,
-            onSecondaryTap: PlatformUtils.isMobile
-                ? null
-                : LoggerUtils.clearLogs,
-            leading: const Icon(Icons.bug_report_outlined),
-            title: const Text('错误日志'),
-            subtitle: Text('长按清除日志', style: subTitleStyle),
-            trailing: Icon(Icons.arrow_forward, size: 16, color: outline),
-          ),
-          ListTile(
-            onTap: () {
-              if (cacheSize.value.isNotEmpty) {
-                showConfirmDialog(
-                  context: context,
-                  title: const Text('提示'),
-                  content: const Text('该操作将清除图片及网络请求缓存数据，确认清除？'),
-                  onConfirm: () async {
-                    SmartDialog.showLoading(msg: '正在清除...');
-                    try {
-                      await CacheManager.clearLibraryCache();
-                      SmartDialog.showToast('清除成功');
-                    } catch (err) {
-                      SmartDialog.showToast(err.toString());
-                    } finally {
-                      SmartDialog.dismiss();
-                    }
-                    getCacheSize();
-                  },
-                );
-              }
-            },
-            leading: const Icon(Icons.delete_outline),
-            title: const Text('清除缓存'),
-            subtitle: Obx(
-              () => Text(
-                '图片及网络缓存 ${cacheSize.value}',
-                style: subTitleStyle,
-              ),
-            ),
-          ),
-          ListTile(
-            title: const Text('导入/导出登录信息'),
-            leading: const Icon(Icons.import_export_outlined),
-            onTap: () => showImportExportDialog<Map>(
-              context,
-              title: '登录信息',
-              localFileName: () => 'account',
-              onExport: () =>
-                  Utils.jsonEncoder.convert(Accounts.account.toMap()),
-              onImport: (json) async {
-                final res = json.map(
-                  (key, value) => MapEntry(key, LoginAccount.fromJson(value)),
-                );
-                await Accounts.account.putAll(res);
-                await Accounts.refresh();
-                MineController.anonymity.value = !Accounts.heartbeat.isLogin;
-                if (Accounts.main.isLogin) {
-                  await LoginUtils.onLoginMain();
-                }
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text('导入/导出设置'),
-            dense: false,
-            leading: const Icon(Icons.import_export_outlined),
-            onTap: () => showImportExportDialog<Map<String, dynamic>>(
-              context,
-              title: '设置',
-              localFileName: () => 'setting_${DeviceUtils.platformName}',
-              onExport: GStorage.exportAllSettings,
-              onImport: GStorage.importAllJsonSettings,
-            ),
-          ),
-          ListTile(
-            title: const Text('重置所有设置'),
-            leading: const Icon(Icons.settings_backup_restore_outlined),
-            onTap: () => showDialog(
+          style: const TextStyle(fontSize: 14),
+        ),
+        leading: const Icon(Icons.info_outline),
+        onTap: () => PageUtils.launchURL(
+          '${Constants.sourceCodeUrl}/commit/${BuildConfig.commitHash == 'N/A' ? 'HEAD' : BuildConfig.commitHash}',
+        ),
+        onLongPress: () => Utils.copyText(BuildConfig.commitHash),
+        onSecondaryTap: PlatformUtils.isMobile
+            ? null
+            : () => Utils.copyText(BuildConfig.commitHash),
+      ),
+      Divider(
+        thickness: 1,
+        height: 30,
+        color: theme.colorScheme.outlineVariant,
+      ),
+      ListTile(
+        onTap: () => PageUtils.launchURL(
+          'https://github.com/bggRGjQaUbCoE/PiliPlus',
+        ),
+        leading: const Icon(Icons.code),
+        title: const Text('上游Source Code'),
+        subtitle: Text(
+          'https://github.com/bggRGjQaUbCoE/PiliPlus',
+          style: subTitleStyle,
+        ),
+      ),
+      ListTile(
+        onTap: () => PageUtils.launchURL(Constants.sourceCodeUrl),
+        leading: const Icon(Icons.code),
+        title: const Text('Source Code'),
+        subtitle: Text(Constants.sourceCodeUrl, style: subTitleStyle),
+      ),
+      if (Platform.isAndroid)
+        ListTile(
+          onTap: PiliAndroidHelper.openLinkVerifySettings,
+          leading: const Icon(MdiIcons.linkBoxOutline),
+          title: const Text('打开受支持的链接'),
+          trailing: Icon(Icons.arrow_forward, size: 16, color: outline),
+        ),
+      ListTile(
+        onTap: () => PageUtils.launchURL('${Constants.sourceCodeUrl}/issues'),
+        leading: const Icon(Icons.feedback_outlined),
+        title: const Text('问题反馈'),
+        trailing: Icon(Icons.arrow_forward, size: 16, color: outline),
+      ),
+      ListTile(
+        onTap: () => Get.toNamed('/logs'),
+        onLongPress: LoggerUtils.clearLogs,
+        onSecondaryTap: PlatformUtils.isMobile ? null : LoggerUtils.clearLogs,
+        leading: const Icon(Icons.bug_report_outlined),
+        title: const Text('错误日志'),
+        subtitle: Text('长按清除日志', style: subTitleStyle),
+        trailing: Icon(Icons.arrow_forward, size: 16, color: outline),
+      ),
+      ListTile(
+        onTap: () {
+          if (cacheSize.value.isNotEmpty) {
+            showConfirmDialog(
               context: context,
-              builder: (context) {
-                return SimpleDialog(
-                  clipBehavior: Clip.hardEdge,
-                  title: const Text('是否重置所有设置？'),
-                  children: [
-                    DialogOption(
-                      onPressed: () async {
-                        Get.back();
-                        await Future.wait([
-                          GStorage.setting.clear(),
-                          GStorage.video.clear(),
-                        ]);
-                        SmartDialog.showToast('重置成功');
-                      },
-                      child: const Text('重置可导出的设置', style: style),
-                    ),
-                    DialogOption(
-                      onPressed: () async {
-                        Get.back();
-                        await GStorage.clear();
-                        SmartDialog.showToast('重置成功');
-                      },
-                      child: const Text('重置所有数据（含登录信息）', style: style),
-                    ),
-                  ],
-                );
+              title: const Text('提示'),
+              content: const Text('该操作将清除图片及网络请求缓存数据，确认清除？'),
+              onConfirm: () async {
+                SmartDialog.showLoading(msg: '正在清除...');
+                try {
+                  await CacheManager.clearLibraryCache();
+                  SmartDialog.showToast('清除成功');
+                } catch (err) {
+                  SmartDialog.showToast(err.toString());
+                } finally {
+                  SmartDialog.dismiss();
+                }
+                getCacheSize();
               },
-            ),
+            );
+          }
+        },
+        leading: const Icon(Icons.delete_outline),
+        title: const Text('清除缓存'),
+        subtitle: Obx(
+          () => Text(
+            '图片及网络缓存 ${cacheSize.value}',
+            style: subTitleStyle,
           ),
-        ],
+        ),
+      ),
+      ListTile(
+        title: const Text('导入/导出登录信息'),
+        leading: const Icon(Icons.import_export_outlined),
+        onTap: () => showImportExportDialog<Map>(
+          context,
+          title: '登录信息',
+          localFileName: () => 'account',
+          onExport: () => Utils.jsonEncoder.convert(Accounts.account.toMap()),
+          onImport: (json) async {
+            final res = json.map(
+              (key, value) => MapEntry(key, LoginAccount.fromJson(value)),
+            );
+            await Accounts.account.putAll(res);
+            await Accounts.refresh();
+            MineController.anonymity.value = !Accounts.heartbeat.isLogin;
+            if (Accounts.main.isLogin) {
+              await LoginUtils.onLoginMain();
+            }
+          },
+        ),
+      ),
+      ListTile(
+        title: const Text('导入/导出设置'),
+        dense: false,
+        leading: const Icon(Icons.import_export_outlined),
+        onTap: () => showImportExportDialog<Map<String, dynamic>>(
+          context,
+          title: '设置',
+          localFileName: () => 'setting_${DeviceUtils.platformName}',
+          onExport: GStorage.exportAllSettings,
+          onImport: GStorage.importAllJsonSettings,
+        ),
+      ),
+      ListTile(
+        title: const Text('重置所有设置'),
+        leading: const Icon(Icons.settings_backup_restore_outlined),
+        onTap: () => showDialog(
+          context: context,
+          builder: (context) {
+            return SimpleDialog(
+              clipBehavior: Clip.hardEdge,
+              title: const Text('是否重置所有设置？'),
+              children: [
+                DialogOption(
+                  onPressed: () async {
+                    Get.back();
+                    await Future.wait([
+                      GStorage.setting.clear(),
+                      GStorage.video.clear(),
+                    ]);
+                    SmartDialog.showToast('重置成功');
+                  },
+                  child: const Text('重置可导出的设置', style: style),
+                ),
+                DialogOption(
+                  onPressed: () async {
+                    Get.back();
+                    await GStorage.clear();
+                    SmartDialog.showToast('重置成功');
+                  },
+                  child: const Text('重置所有数据（含登录信息）', style: style),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    ];
+    final harmony = HarmonyStyle.enabled(context);
+    return SimpleScaffold(
+      appBar: showAppBar ? AppBar(title: const Text('关于')) : null,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: harmony ? 760 : double.infinity,
+          ),
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(
+              (showAppBar ? padding.left : 0) + (harmony ? 16 : 0),
+              0,
+              (showAppBar ? padding.right : 0) + (harmony ? 16 : 0),
+              padding.bottom + 100,
+            ),
+            children: harmony
+                ? [
+                    HarmonyAboutHeader(
+                      version: currentVersion,
+                      onLogoTap: () {
+                        if (++_pressCount == 5) {
+                          _pressCount = 0;
+                          _showDialog();
+                        }
+                      },
+                      onLogoSecondaryTap: PlatformUtils.isDesktop
+                          ? _showDialog
+                          : null,
+                    ),
+                    HarmonyAboutGroup(
+                      title: '版本与开源',
+                      children: [items[2], items[3], items[5], items[6]],
+                    ),
+                    const HarmonyDevelopmentJourney(),
+                    HarmonyAboutGroup(
+                      title: '支持与数据管理',
+                      children: items.skip(7).toList(),
+                    ),
+                  ]
+                : items,
+          ),
+        ),
       ),
     );
   }

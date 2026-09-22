@@ -14,8 +14,10 @@ void main() {
     WidgetTester tester,
     GlobalKey capture,
     Rect rect,
-    double dpr,
-  ) async {
+    double dpr, {
+    bool topOnly = false,
+    Offset? contentPoint,
+  }) async {
     final boundary =
         capture.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     final image = (await tester.runAsync(
@@ -37,8 +39,8 @@ void main() {
     for (final p in [
       rect.topLeft + const Offset(1, 1),
       rect.topRight + const Offset(-1, 1),
-      rect.bottomLeft + const Offset(1, -1),
-      rect.bottomRight - const Offset(1, 1),
+      if (!topOnly) rect.bottomLeft + const Offset(1, -1),
+      if (!topOnly) rect.bottomRight - const Offset(1, 1),
     ]) {
       final c = pixel(p);
       // Background/barrier is black. A colored child must not square off a corner.
@@ -49,7 +51,7 @@ void main() {
       );
     }
     expect(
-      pixel(rect.center).g,
+      pixel(contentPoint ?? rect.center).g,
       greaterThan(.3),
       reason:
           'center $rect boundary ${boundary.size} offset ${boundary.localToGlobal(Offset.zero)}',
@@ -190,8 +192,14 @@ void main() {
         await corners(
           tester,
           capture,
-          tester.getRect(find.byKey(const ValueKey('menu'))),
+          tester.getRect(
+            find.byType(m.ImmersiveSurface).evaluate().isNotEmpty
+                ? find.byType(m.ImmersiveSurface)
+                : find.byKey(const ValueKey('menu')),
+          ),
           2.875,
+          topOnly: theme.extension<m.PopupSheetStyle>() != null,
+          contentPoint: tester.getCenter(find.byKey(const ValueKey('menu'))),
         );
         await tester.tap(find.byKey(const ValueKey('menu')));
         await tester.pumpAndSettle();

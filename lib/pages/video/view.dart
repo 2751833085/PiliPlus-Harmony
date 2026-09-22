@@ -1,3 +1,5 @@
+import 'package:PiliPlus/common/widgets/dialog/bottom_panel.dart';
+import 'package:PiliPlus/pages/video/widgets/player_menu.dart';
 import 'package:PiliPlus/pages/video/shorts/episodes.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/back_scope.dart';
 import 'package:PiliPlus/pages/video/shorts/panel_theme.dart';
@@ -167,6 +169,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     },
     play: (entry) async {
       if (!mounted) return false;
+      _shortEntryPolicy.manualSelection();
       return ugcIntroController.onChangeEpisode(
         ugc.BaseEpisodeItem(
           bvid: entry.bvid,
@@ -331,6 +334,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             initialTabIndex: season ? sources.sectionFor(cid) : 0,
             onClose: () => Navigator.of(sheetContext).pop(),
             onChangeEpisode: (episode) {
+              _shortEntryPolicy.manualSelection();
               return selection = ugcIntroController.onChangeEpisode(
                 prepareShortEpisode(
                   episode,
@@ -1114,6 +1118,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         ? ThemeUtils.darkTheme
         : Theme.of(context);
 
+    if (theme.brightness == Brightness.dark)
+      theme = shortVideoPanelTheme(theme);
+
     // 顶栏底色还取决于方向与主题，二者变化都只经由本方法生效
     _syncDecorDark();
   }
@@ -1861,56 +1868,128 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     return const SizedBox.shrink();
   });
 
-  Widget _moreBtn(Color color, {List<Shadow>? shadows}) => PopupMenuButton(
+  Widget _moreBtn(Color color, {List<Shadow>? shadows}) => IconButton(
+    tooltip: '更多设置',
     icon: Icon(
+      Icons.more_vert_rounded,
       size: 22,
-      Icons.more_vert,
       color: color,
       shadows: shadows,
     ),
-    itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-      if (_shortMode)
-        PopupMenuItem(
-          onTap: _shortNotInterested,
-          child: const Text('我不想看'),
+    onPressed: () {
+      final header =
+          videoDetailController.headerCtrKey.currentState
+              as HeaderControlState?;
+      if (header != null) {
+        header.showSettingSheet();
+        return;
+      }
+      PageUtils.showVideoBottomSheet(
+        context,
+        maxWidth: 640,
+        child: Theme(
+          data: theme,
+          child: Builder(
+            builder: (context) {
+              PlayerMenuAction action(
+                String label,
+                IconData icon,
+                VoidCallback run,
+              ) => PlayerMenuAction(label, icon, () {
+                Navigator.pop(context);
+                run();
+              });
+              return BottomPanel(
+                title: '视频',
+                child: PlayerMenu(
+                  actions: [
+                    if (_shortMode)
+                      action('我不想看', Icons.not_interested, _shortNotInterested),
+                    action(
+                      '稍后再看',
+                      Icons.watch_later_outlined,
+                      introController.viewLater,
+                    ),
+                    if (videoDetailController.epId == null)
+                      action(
+                        '笔记',
+                        Icons.note_alt_outlined,
+                        () => videoDetailController.showNoteList(this.context),
+                      ),
+                    if (!videoDetailController.isFileSource)
+                      action(
+                        '离线缓存',
+                        Icons.download_outlined,
+                        () => videoDetailController.onDownload(this.context),
+                      ),
+                    if (videoDetailController.cover.value.isNotEmpty)
+                      action(
+                        '保存封面',
+                        Icons.image_outlined,
+                        () => ImageUtils.downloadImg([
+                          videoDetailController.cover.value,
+                        ]),
+                      ),
+                    if (!videoDetailController.isFileSource &&
+                        videoDetailController.isUgc)
+                      action(
+                        '听音频',
+                        Icons.headphones_outlined,
+                        videoDetailController.toAudioPage,
+                      ),
+                    action('举报', Icons.flag_outlined, () {
+                      if (!Accounts.main.isLogin) {
+                        SmartDialog.showToast('账号未登录');
+                      } else {
+                        PageUtils.reportVideo(videoDetailController.aid);
+                      }
+                    }),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
-      PopupMenuItem(
-        onTap: introController.viewLater,
-        child: const Text('稍后再看'),
-      ),
-      if (videoDetailController.epId == null)
-        PopupMenuItem(
-          onTap: () => videoDetailController.showNoteList(context),
-          child: const Text('查看笔记'),
-        ),
-      if (!videoDetailController.isFileSource)
-        PopupMenuItem(
-          onTap: () => videoDetailController.onDownload(this.context),
-          child: const Text('缓存视频'),
-        ),
-      if (videoDetailController.cover.value.isNotEmpty)
-        PopupMenuItem(
-          onTap: () =>
-              ImageUtils.downloadImg([videoDetailController.cover.value]),
-          child: const Text('保存封面'),
-        ),
-      if (!videoDetailController.isFileSource && videoDetailController.isUgc)
-        PopupMenuItem(
-          onTap: videoDetailController.toAudioPage,
-          child: const Text('听音频'),
-        ),
-      PopupMenuItem(
-        onTap: () {
-          if (!Accounts.main.isLogin) {
-            SmartDialog.showToast('账号未登录');
-          } else {
-            PageUtils.reportVideo(videoDetailController.aid);
-          }
-        },
-        child: const Text('举报'),
-      ),
-    ],
+      );
+    },
   );
+
+  bool get _hasPlayerEpisodes {
+    final detail = introController.videoDetail.value;
+    return !videoDetailController.isFileSource &&
+        (detail.ugcSeason != null ||
+            (detail.pages?.length ?? 0) > 1 ||
+            !videoDetailController.isUgc ||
+            videoDetailController.isPlayAll);
+  }
+
+  void _playerEpisodes() {
+    if (_shortMode) {
+      _shortEpisodes();
+      return;
+    }
+    final detail = introController.videoDetail.value;
+    if (videoDetailController.isPlayAll && (detail.pages?.length ?? 0) <= 1) {
+      showEpisodes();
+      return;
+    }
+    final season = detail.ugcSeason;
+    final cid = season != null
+        ? videoDetailController.seasonCid ?? videoDetailController.cid.value
+        : videoDetailController.cid.value;
+    showEpisodes(
+      videoDetailController.seasonIndex.value,
+      season,
+      season != null
+          ? null
+          : videoDetailController.isUgc
+          ? detail.pages
+          : pgcIntroController.pgcItem.episodes,
+      videoDetailController.bvid,
+      videoDetailController.aid,
+      cid,
+    );
+  }
 
   Widget plPlayer({
     required double width,
@@ -1962,6 +2041,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               introController: introController,
               headerControl: HeaderControl(
                 onNotInterested: _shortMode ? _shortNotInterested : null,
+                onEpisodes: _hasPlayerEpisodes ? _playerEpisodes : null,
+                onViewPoints: showViewPoints,
                 key: videoDetailController.headerCtrKey,
                 isPortrait: isPortrait,
                 controller: videoDetailController.plPlayerController,
@@ -2053,9 +2134,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         child: child,
       );
     }
-    result = videoDetailController.plPlayerController.darkVideoPage
-        ? Theme(data: theme, child: child)
-        : child;
+    result = Theme(data: theme, child: child);
     return PlayerModeTransition(key: _modeTransitionKey, child: result);
   }
 
@@ -2222,7 +2301,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         plPlayer(width: width, height: height),
 
         Obx(() {
-          if (!videoDetailController.autoPlay) {
+          if (!_shortMode && !videoDetailController.autoPlay) {
             return Positioned.fill(
               bottom: -1,
               child: GestureDetector(
@@ -2382,7 +2461,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         ),
       ],
     );
-    if (_shortMode || !_enableHero || MediaQuery.disableAnimationsOf(context))
+    if (_shortMode ||
+        videoDetailController.isVertical.value ||
+        !_enableHero ||
+        MediaQuery.disableAnimationsOf(context))
       return player;
     return Hero(
       tag: heroTag,

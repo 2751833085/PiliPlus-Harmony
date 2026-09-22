@@ -1,4 +1,5 @@
-import 'package:material_ui/material_ui.dart' show PopupSurfaceStyle;
+import 'package:material_ui/material_ui.dart'
+    show PopupSurfaceStyle, PopupSheetStyle;
 import 'package:flutter/material.dart';
 
 /// A theme marker keeps the alternative appearance independent of persisted
@@ -76,8 +77,14 @@ abstract final class HarmonyTheme {
     );
     return base.copyWith(
       extensions: [
-        ...base.extensions.values,
+        ...base.extensions.values.where(
+          (extension) =>
+              extension is! HarmonyStyle &&
+              extension is! PopupSurfaceStyle &&
+              extension is! PopupSheetStyle,
+        ),
         const HarmonyStyle(),
+        const PopupSheetStyle(),
         if (immersive) const PopupSurfaceStyle(),
       ],
       colorScheme: scheme,

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_quick_actions.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:async';
 
@@ -131,60 +132,27 @@ class _MediaPageState extends CommonPageState<MinePage>
                       Widget panel(
                         Widget child, {
                         EdgeInsets padding = const EdgeInsets.symmetric(
-                          vertical: 16,
+                          vertical: 10,
                         ),
-                      }) => Material(
-                        color: theme.colorScheme.surface,
+                      }) => ImmersiveSurface(
                         borderRadius: HarmonyTheme.cardRadius,
-                        clipBehavior: Clip.antiAlias,
                         child: Padding(padding: padding, child: child),
                       );
                       final account = panel(_buildUserInfo(theme, accent));
                       final actions = panel(
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final columns = constraints.maxWidth >= 480 ? 4 : 2;
-                            return Wrap(
-                              children: [
-                                for (final action in controller.list)
-                                  SizedBox(
-                                    width: constraints.maxWidth / columns,
-                                    child: InkWell(
-                                      onTap: action.onTap,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Column(
-                                          spacing: 10,
-                                          children: [
-                                            Container(
-                                              width: 44,
-                                              height: 44,
-                                              decoration: BoxDecoration(
-                                                color: accent.withValues(
-                                                  alpha: .1,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(14),
-                                              ),
-                                              child: Icon(
-                                                action.icon,
-                                                color: accent,
-                                                size: 24,
-                                              ),
-                                            ),
-                                            Text(
-                                              action.title,
-                                              textAlign: TextAlign.center,
-                                              style: theme.textTheme.bodyMedium,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            );
-                          },
+                        HarmonyQuickActions(
+                          actions: [
+                            for (final action in controller.list)
+                              HarmonyQuickAction(
+                                action.title,
+                                action.icon,
+                                action.onTap,
+                              ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 6,
                         ),
                       );
                       final favorites = Obx(
@@ -196,7 +164,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                               ),
                       );
                       return ListView(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
                           Text(
@@ -205,7 +173,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
                           if (split)
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,20 +183,20 @@ class _MediaPageState extends CommonPageState<MinePage>
                                   child: Column(
                                     children: [
                                       account,
-                                      const SizedBox(height: 16),
+                                      const SizedBox(height: 10),
                                       actions,
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 20),
+                                const SizedBox(width: 14),
                                 Expanded(child: favorites),
                               ],
                             )
                           else ...[
                             account,
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 10),
                             actions,
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 10),
                             favorites,
                           ],
                         ],

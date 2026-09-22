@@ -9,8 +9,12 @@ class HarmonyHandDock extends StatefulWidget {
     required this.enabled,
     required this.width,
     required this.builder,
+    this.preserveWidth = false,
   });
   final bool enabled;
+
+  /// A seek timeline must retain the full playback viewport on either hand.
+  final bool preserveWidth;
   final double width;
   final Widget Function(double width) builder;
   @override
@@ -44,7 +48,8 @@ class _HarmonyHandDockState extends State<HarmonyHandDock> {
 
   @override
   Widget build(BuildContext context) {
-    final active = widget.enabled && widget.width >= 600;
+    final active =
+        widget.enabled && !widget.preserveWidth && widget.width >= 600;
     final width = active
         ? math.min(
             widget.width,

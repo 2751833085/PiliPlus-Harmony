@@ -1,3 +1,7 @@
+import 'package:PiliPlus/harmony_adapt/window_layout.dart';
+import 'package:PiliPlus/pages/video/widgets/player_menu.dart';
+import 'package:PiliPlus/plugin/pl_player/models/video_fit_type.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'dart:async' show Timer;
 import 'dart:convert' show jsonDecode, utf8;
 import 'dart:io' show Platform, File;
@@ -187,6 +191,8 @@ class HeaderControl extends StatefulWidget {
     required this.videoDetailCtr,
     required this.heroTag,
     this.onNotInterested,
+    this.onEpisodes,
+    this.onViewPoints,
     super.key,
   });
 
@@ -195,6 +201,8 @@ class HeaderControl extends StatefulWidget {
   final VideoDetailController videoDetailCtr;
   final String heroTag;
   final VoidCallback? onNotInterested;
+  final VoidCallback? onEpisodes;
+  final VoidCallback? onViewPoints;
 
   @override
   State<HeaderControl> createState() => HeaderControlState();
@@ -334,7 +342,7 @@ class HeaderControlState extends State<HeaderControl>
   @override
   late final PlPlayerController plPlayerController = widget.controller;
   late final VideoDetailController videoDetailCtr = widget.videoDetailCtr;
-  late final PlayUrlModel videoInfo = videoDetailCtr.data;
+  PlayUrlModel get videoInfo => videoDetailCtr.data;
   static const TextStyle subTitleStyle = TextStyle(fontSize: 12);
   static const TextStyle titleStyle = TextStyle(fontSize: 14);
 
@@ -367,9 +375,191 @@ class HeaderControlState extends State<HeaderControl>
     }
   }
 
-  /// 设置面板
-  void showSettingSheet() {
+  void _openMenuAction(VoidCallback action) {
+    Get.back();
+    action();
+  }
+
+  void _showChoices<T>(
+    String title,
+    T selected,
+    List<({T value, String label})> choices,
+    ValueChanged<T> onSelected,
+  ) {
     showBottomSheet(
+      title: title,
+      (context, setState) => ListView(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+        children: [
+          for (final choice in choices)
+            ListTile(
+              title: Text(choice.label),
+              trailing: choice.value == selected
+                  ? const Icon(Icons.check_rounded)
+                  : null,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              selected: choice.value == selected,
+              selectedColor: Theme.of(context).colorScheme.onSurface,
+              selectedTileColor: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: .07),
+              onTap: () => _openMenuAction(() => onSelected(choice.value)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void showSettingSheet() {
+    plPlayerController.controls = true;
+    showBottomSheet(title: '视频与播放', (context, setState) {
+      PlayerMenuAction action(String label, IconData icon, VoidCallback run) =>
+          PlayerMenuAction(label, icon, () => _openMenuAction(run));
+      PlayerMenuRow row(
+        String title,
+        IconData icon,
+        VoidCallback run, [
+        String? value,
+      ]) => PlayerMenuRow(
+        title: title,
+        icon: icon,
+        value: value,
+        onTap: () => _openMenuAction(run),
+      );
+      final video = videoDetailCtr;
+      final player = plPlayerController;
+      return PlayerMenu(
+        actions: [
+          if (widget.onNotInterested case final hide?)
+            action('我不想看', Icons.not_interested, hide),
+          if (!isFileSource)
+            action(
+              '稍后再看',
+              Icons.watch_later_outlined,
+              introController.viewLater,
+            ),
+          if (!isFileSource)
+            action(
+              '离线缓存',
+              MdiIcons.folderDownloadOutline,
+              () => video.onDownload(this.context),
+            ),
+          if (!isFileSource && video.epId == null)
+            action(
+              '笔记',
+              Icons.note_alt_outlined,
+              () => video.showNoteList(this.context),
+            ),
+          action('小窗播放', Icons.picture_in_picture_alt_outlined, () async {
+            if (PlatformUtils.isDesktop) {
+              player.toggleDesktopPip();
+              return;
+            }
+            if (await player.enterPip() == PiPStatus.unavailable)
+              SmartDialog.showToast('当前无法开启小窗播放');
+          }),
+          if (!isFileSource) action('投屏', Icons.cast, video.onCast),
+          if (video.cover.value.isNotEmpty)
+            action(
+              '保存封面',
+              Icons.image_outlined,
+              () => ImageUtils.downloadImg([video.cover.value]),
+            ),
+        ],
+        children: [
+          row(
+            '倍速',
+            Icons.speed,
+            () => _showChoices('倍速', player.playbackSpeed, [
+              for (final speed in player.speedList)
+                (value: speed, label: '$speed 倍'),
+            ], player.setPlaybackSpeed),
+            '${player.playbackSpeed} 倍',
+          ),
+          if (widget.onEpisodes case final episodes?)
+            row('选集 / 分 P', Icons.playlist_play, episodes),
+          if (video.viewPointList.isNotEmpty && widget.onViewPoints != null)
+            row('章节', Icons.segment_rounded, widget.onViewPoints!),
+          if (video.subtitles.isNotEmpty)
+            row(
+              '字幕',
+              Icons.closed_caption_outlined,
+              () => _showChoices('字幕', video.vttSubtitlesIndex.value, [
+                (value: 0, label: '关闭字幕'),
+                for (var i = 0; i < video.subtitles.length; i++)
+                  (
+                    value: i + 1,
+                    label: video.subtitles[i].lanDoc ?? video.subtitles[i].lan,
+                  ),
+              ], video.setSubtitle),
+            ),
+          if (video.languages.value?.isNotEmpty == true)
+            row(
+              '字幕翻译',
+              Icons.translate,
+              () => _showChoices('字幕翻译', video.currLang.value ?? '', [
+                (value: '', label: '关闭翻译'),
+                for (final lang in video.languages.value!)
+                  (value: lang.lang!, label: lang.title ?? lang.lang!),
+              ], video.setLanguage),
+            ),
+          if (!isFileSource)
+            row(
+              '画质',
+              Icons.high_quality_outlined,
+              showSetVideoQa,
+              video.currentVideoQa.value?.desc,
+            ),
+          row(
+            '画面比例',
+            Icons.aspect_ratio,
+            () => _showChoices('画面比例', player.videoFit.value, [
+              for (final fit in VideoFitType.values)
+                (value: fit, label: fit.desc),
+            ], player.toggleVideoFit),
+            player.videoFit.value.desc,
+          ),
+          if (video.dmTrend.value?.dataOrNull?.isNotEmpty == true)
+            SwitchListTile(
+              title: const Text('高能进度条'),
+              value: video.showDmTrendChart.value,
+              onChanged: (value) =>
+                  setState(() => video.showDmTrendChart.value = value),
+            ),
+          if (video.viewPointList.isNotEmpty)
+            SwitchListTile(
+              title: const Text('进度条显示章节'),
+              value: video.showVP.value,
+              onChanged: (value) => setState(() => video.showVP.value = value),
+            ),
+          if (!isFileSource)
+            row('弹幕设置', CustomIcons.dm_settings, showSetDanmaku),
+          if (widget.onEpisodes != null) ...[
+            row('上一集', Icons.skip_previous_rounded, () {
+              if (!introController.prevPlay()) SmartDialog.showToast('已经是第一集了');
+            }),
+            row('下一集', Icons.skip_next_rounded, () {
+              if (!introController.nextPlay())
+                SmartDialog.showToast('已经是最后一集了');
+            }),
+          ],
+          row(
+            '更多播放设置',
+            Icons.tune_rounded,
+            _showAdvancedSettings,
+            '音质、解码、播放顺序、定时关闭等',
+          ),
+        ],
+      );
+    })?.whenComplete(() => plPlayerController.controls = true);
+  }
+
+  /// Less frequent settings retain their original callbacks and validation.
+  void _showAdvancedSettings() {
+    showBottomSheet(
+      title: '更多播放设置',
       (context, setState) {
         final theme = Theme.of(context);
 
@@ -377,145 +567,11 @@ class HeaderControlState extends State<HeaderControl>
           padding: const EdgeInsets.all(12),
           child: Material(
             clipBehavior: Clip.hardEdge,
-            color: theme.colorScheme.surface,
+            color: Colors.transparent,
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 14),
               children: [
-                if (widget.onNotInterested case final onNotInterested?)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: LayoutBuilder(
-                      builder: (context, bounds) {
-                        final actions =
-                            <({String label, IconData icon, VoidCallback run})>[
-                              (
-                                label: '我不想看',
-                                icon: Icons.not_interested,
-                                run: onNotInterested,
-                              ),
-                              (
-                                label: '稍后再看',
-                                icon: Icons.watch_later_outlined,
-                                run: introController.viewLater,
-                              ),
-                              (
-                                label: '缓存',
-                                icon: MdiIcons.folderDownloadOutline,
-                                run: () =>
-                                    videoDetailCtr.onDownload(this.context),
-                              ),
-                              (
-                                label: '小窗播放',
-                                icon: Icons.picture_in_picture_alt,
-                                run: () async {
-                                  final result = await plPlayerController
-                                      .enterPip();
-                                  if (result == PiPStatus.unavailable)
-                                    SmartDialog.showToast('当前无法开启小窗播放');
-                                },
-                              ),
-                              (
-                                label: '投屏',
-                                icon: Icons.cast,
-                                run: videoDetailCtr.onCast,
-                              ),
-                            ];
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (final action in actions)
-                              Expanded(
-                                child: TextButton(
-                                  style: TextButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 2,
-                                      vertical: 8,
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Get.back();
-                                    action.run();
-                                  },
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      DecoratedBox(
-                                        decoration: BoxDecoration(
-                                          color: theme
-                                              .colorScheme
-                                              .surfaceContainerHighest,
-                                          borderRadius: BorderRadius.circular(
-                                            14,
-                                          ),
-                                        ),
-                                        child: SizedBox.square(
-                                          dimension: 44,
-                                          child: Icon(action.icon, size: 24),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        action.label,
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 11),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                if (widget.onNotInterested == null)
-                  ListTile(
-                    dense: true,
-                    onTap: () {
-                      Get.back();
-                      introController.viewLater();
-                    },
-                    leading: const Icon(Icons.watch_later_outlined, size: 20),
-                    title: const Text('添加至「稍后再看」', style: titleStyle),
-                  ),
-                if (videoDetailCtr.epId == null)
-                  ListTile(
-                    dense: true,
-                    onTap: () {
-                      Get.back();
-                      videoDetailCtr.showNoteList(context);
-                    },
-                    leading: const Icon(Icons.note_alt_outlined, size: 20),
-                    title: const Text('查看笔记', style: titleStyle),
-                  ),
-                if (!isFileSource && widget.onNotInterested == null)
-                  ListTile(
-                    dense: true,
-                    onTap: () {
-                      Get.back();
-                      videoDetailCtr.onDownload(this.context);
-                    },
-                    leading: const Icon(
-                      MdiIcons.folderDownloadOutline,
-                      size: 20,
-                    ),
-                    title: const Text('离线缓存', style: titleStyle),
-                  ),
-                if (widget.videoDetailCtr.cover.value.isNotEmpty)
-                  ListTile(
-                    dense: true,
-                    onTap: () {
-                      Get.back();
-                      ImageUtils.downloadImg([
-                        widget.videoDetailCtr.cover.value,
-                      ]);
-                    },
-                    leading: const Icon(Icons.image_outlined, size: 20),
-                    title: const Text('保存封面', style: titleStyle),
-                  ),
                 ListTile(
                   dense: true,
                   onTap: () {
@@ -710,7 +766,7 @@ class HeaderControlState extends State<HeaderControl>
                       showSetVideoQa();
                     },
                     leading: const Icon(Icons.play_circle_outline, size: 20),
-                    title: const Text('选择画质', style: titleStyle),
+                    title: const Text('画质与会员说明', style: subTitleStyle),
                     subtitle: Text(
                       '当前画质 ${videoDetailCtr.currentVideoQa.value?.desc}',
                       style: subTitleStyle,
@@ -1004,13 +1060,14 @@ class HeaderControlState extends State<HeaderControl>
     final availableQa = videoInfo.dash!.video!.availableVideoQualities;
 
     showBottomSheet(
+      title: '画质',
       (context, setState) {
         final theme = Theme.of(context);
         return Padding(
           padding: const EdgeInsets.all(12),
           child: Material(
             clipBehavior: Clip.hardEdge,
-            color: theme.colorScheme.surface,
+            color: Colors.transparent,
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             child: CustomScrollView(
               slivers: [
@@ -1025,7 +1082,7 @@ class HeaderControlState extends State<HeaderControl>
                         spacing: 8,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('选择画质', style: titleStyle),
+                          const Text('画质与会员说明', style: subTitleStyle),
                           Icon(
                             Icons.info_outline,
                             size: 16,
@@ -1098,24 +1155,17 @@ class HeaderControlState extends State<HeaderControl>
     final AudioQuality currentAudioQa = videoDetailCtr.currentAudioQa!;
     final List<AudioItem> audio = videoInfo.dash!.audio!;
     showBottomSheet(
+      title: '音质',
       (context, setState) {
         final theme = Theme.of(context);
         return Padding(
           padding: const EdgeInsets.all(12),
           child: Material(
             clipBehavior: Clip.hardEdge,
-            color: theme.colorScheme.surface,
+            color: Colors.transparent,
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             child: CustomScrollView(
               slivers: [
-                const SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 45,
-                    child: Center(
-                      child: Text('选择音质', style: titleStyle),
-                    ),
-                  ),
-                ),
                 SliverList.builder(
                   itemCount: audio.length,
                   itemBuilder: (context, index) {
@@ -1187,22 +1237,17 @@ class HeaderControlState extends State<HeaderControl>
     // 当前选中的解码格式
     final curCodecs = videoDetailCtr.currentDecodeFormats.codes;
     showBottomSheet(
+      title: '解码格式',
       (context, setState) {
         final colorScheme = ColorScheme.of(context);
         return Padding(
           padding: const EdgeInsets.all(12),
           child: Material(
             clipBehavior: Clip.hardEdge,
-            color: colorScheme.surface,
+            color: Colors.transparent,
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             child: Column(
               children: [
-                const SizedBox(
-                  height: 45,
-                  child: Center(
-                    child: Text('选择解码格式', style: titleStyle),
-                  ),
-                ),
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
@@ -1380,6 +1425,7 @@ class HeaderControlState extends State<HeaderControl>
   /// 字幕设置
   void showSetSubtitle() {
     showBottomSheet(
+      title: '字幕设置',
       padding: () => isFullScreen ? const .only(bottom: 70) : .zero,
       (context, setState) {
         final theme = Theme.of(context);
@@ -1446,7 +1492,7 @@ class HeaderControlState extends State<HeaderControl>
           padding: const EdgeInsets.all(12),
           child: Material(
             clipBehavior: Clip.hardEdge,
-            color: theme.colorScheme.surface,
+            color: Colors.transparent,
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -1661,7 +1707,7 @@ class HeaderControlState extends State<HeaderControl>
       return Container(
         margin: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: Colors.transparent,
           borderRadius: const BorderRadius.all(Radius.circular(12)),
         ),
         clipBehavior: Clip.antiAlias,
@@ -1800,7 +1846,16 @@ class HeaderControlState extends State<HeaderControl>
         !isFileSource && plPlayerController.showFSActionItem && isFSOrPip;
     showCurrTimeIfNeeded(isFullScreen);
     Widget title;
-    if (introController.videoDetail.value.title != null &&
+    final screen = MediaQuery.sizeOf(context);
+    final hideExpandedTitle = HarmonyWindowLayout.hideExpandedFullscreenTitle(
+      harmony: OS.isHarmony,
+      fullscreen: isFullScreen,
+      expanded: HarmonyChannel.foldExpanded.value,
+      longestPhysicalSide:
+          screen.longestSide * MediaQuery.devicePixelRatioOf(context),
+    );
+    if (!hideExpandedTitle &&
+        introController.videoDetail.value.title != null &&
         (isFullScreen ||
             ((!horizontalScreen || plPlayerController.isDesktopPip) &&
                 !isPortrait))) {

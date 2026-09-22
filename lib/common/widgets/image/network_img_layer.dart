@@ -62,7 +62,7 @@ class NetworkImgLayer extends StatelessWidget {
   Widget _buildImage(
     BuildContext context, {
     required bool isEmote,
-    required bool isAvatar
+    required bool isAvatar,
   }) {
     int? memCacheWidth, memCacheHeight;
     if (cacheWidth ?? (width <= height)) {
@@ -93,6 +93,7 @@ class NetworkImgLayer extends StatelessWidget {
           getPlaceHolder?.call() ??
           _placeholder(context, isEmote: isEmote, isAvatar: isAvatar),
       errorBuilder: (_, _, _) =>
+          getPlaceHolder?.call() ??
           _placeholder(context, isEmote: isEmote, isAvatar: isAvatar),
       colorBlendMode: reduce ? BlendMode.modulate : null,
       color: reduce ? reduceLuxColor : null,

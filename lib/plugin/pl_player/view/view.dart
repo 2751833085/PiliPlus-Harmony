@@ -992,27 +992,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       if (!plPlayerController.isDesktopPip) .fullscreen,
     ];
     if (Pref.biliPlayerControls && progress != null) {
-      final controls = [...userSpecifyItemLeft, ...userSpecifyItemRight]
-          .where(
-            (e) =>
-                e != BottomControlType.playOrPause &&
-                e != BottomControlType.time &&
-                e != BottomControlType.fullscreen,
-          )
-          .toSet();
-      const labels = <BottomControlType, String>{
-        BottomControlType.pre: '上一集',
-        BottomControlType.next: '下一集',
-        BottomControlType.episode: '选集',
-        BottomControlType.fit: '画面比例',
-        BottomControlType.subtitle: '字幕',
-        BottomControlType.speed: '倍速',
-        BottomControlType.viewPoints: '章节',
-        BottomControlType.superResolution: '超分辨率',
-        BottomControlType.dmChart: '弹幕趋势',
-        BottomControlType.qa: '画质',
-        BottomControlType.aiTranslate: '字幕翻译',
-      };
       return CompactPlayerControlBar(
         play: progressWidget(BottomControlType.playOrPause),
         progress: progress,
@@ -1030,56 +1009,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 size: 20,
               ),
             ),
-          IconButton(
-            tooltip: '更多播放控制',
-            iconSize: 20,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 40),
-            padding: const EdgeInsets.all(6),
-            icon: const Icon(Icons.more_horiz, color: Colors.white),
-            onPressed: () {
-              plPlayerController.controls = true;
-              showModalBottomSheet<void>(
-                context: context,
-                useSafeArea: true,
-                isScrollControlled: true,
-                backgroundColor: const Color(0xFF242428),
-                builder: (context) => SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      16,
-                      20,
-                      16,
-                      MediaQuery.viewPaddingOf(context).bottom + 20,
-                    ),
-                    child: Wrap(
-                      spacing: 12,
-                      runSpacing: 20,
-                      children: [
-                        for (final control in controls)
-                          SizedBox(
-                            width: 100,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                progressWidget(control),
-                                const SizedBox(height: 6),
-                                Text(
-                                  labels[control] ?? '',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ).whenComplete(() => plPlayerController.controls = true);
-            },
-          ),
           if (!plPlayerController.isDesktopPip)
             progressWidget(BottomControlType.fullscreen),
         ],
@@ -1956,6 +1885,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       isFullScreen: isFullScreen,
                       removeSafeArea: plPlayerController.removeSafeArea,
                       child: HarmonyHandDock(
+                        preserveWidth: true,
                         enabled:
                             OS.isHarmony &&
                             Pref.harmonyHandedness &&

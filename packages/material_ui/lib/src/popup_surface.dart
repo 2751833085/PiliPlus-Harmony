@@ -1,4 +1,6 @@
+import 'dart:ui' show SemanticsRole;
 import 'dart:ui' show ImageFilter;
+import 'immersive_surface.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:flutter/material.dart' hide PopupMenuButton, showMenu;
 
@@ -13,11 +15,98 @@ class PopupSurfaceStyle extends ThemeExtension<PopupSurfaceStyle> {
   PopupSurfaceStyle lerp(covariant PopupSurfaceStyle? other, double t) => this;
 }
 
+/// Harmony menus use an edge-attached sheet even when translucency is off.
+@immutable
+class PopupSheetStyle extends ThemeExtension<PopupSheetStyle> {
+  const PopupSheetStyle();
+  @override
+  PopupSheetStyle copyWith() => this;
+  @override
+  PopupSheetStyle lerp(covariant PopupSheetStyle? other, double t) => this;
+}
+
+Future<T?> _showMenuSheet<T>({
+  required BuildContext context,
+  required List<PopupMenuEntry<T>> items,
+  T? selected,
+  Color? color,
+  String? title,
+  bool useRootNavigator = false,
+  RouteSettings? routeSettings,
+  bool? requestFocus,
+}) => m.showModalBottomSheet<T>(
+  context: context,
+  useRootNavigator: useRootNavigator,
+  useSafeArea: true,
+  isScrollControlled: true,
+  showDragHandle: false,
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  constraints: const BoxConstraints(maxWidth: 640),
+  routeSettings: routeSettings,
+  requestFocus: requestFocus,
+  builder: (context) => ConstrainedBox(
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.sizeOf(context).height * .78,
+    ),
+    child: ImmersiveSurface(
+      color: color,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 8, 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title ?? '选择',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: '关闭',
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close_rounded, size: 22),
+                    ),
+                  ],
+                ),
+              ),
+              for (final item in items)
+                ColoredBox(
+                  color: selected != null && item.represents(selected)
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: .08)
+                      : Colors.transparent,
+                  child: Semantics(
+                    container: true,
+                    explicitChildNodes: true,
+                    role: SemanticsRole.menu,
+                    child: item,
+                  ),
+                ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    ),
+  ),
+);
+
 List<PopupMenuEntry<T>> _surfaceItems<T>(
   BuildContext context,
   List<PopupMenuEntry<T>> items,
 ) {
-  if (Theme.of(context).extension<PopupSurfaceStyle>() == null) return items;
+  if (Theme.of(context).extension<PopupSurfaceStyle>() == null ||
+      Theme.of(context).extension<PopupSheetStyle>() != null)
+    return items;
   return [for (final entry in items) _SurfaceEntry<T>(entry)];
 }
 
@@ -96,6 +185,42 @@ class PopupMenuButton<T> extends m.PopupMenuButton<T> {
   }) : super(
          itemBuilder: (context) => _surfaceItems(context, itemBuilder(context)),
        );
+  @override
+  m.PopupMenuButtonState<T> createState() => _SheetMenuButtonState<T>();
+}
+
+class _SheetMenuButtonState<T> extends m.PopupMenuButtonState<T> {
+  bool _showingSheet = false;
+  @override
+  void showButtonMenu() {
+    if (Theme.of(context).extension<PopupSheetStyle>() == null) {
+      super.showButtonMenu();
+      return;
+    }
+    if (_showingSheet || !widget.enabled) return;
+    final items = widget.itemBuilder(context);
+    if (items.isEmpty) return;
+    _showingSheet = true;
+    widget.onOpened?.call();
+    _showMenuSheet<T>(
+      context: context,
+      items: items,
+      selected: widget.initialValue,
+      color: widget.color,
+      title: widget.tooltip,
+      useRootNavigator: widget.useRootNavigator,
+      routeSettings: widget.routeSettings,
+      requestFocus: widget.requestFocus,
+    ).then((value) {
+      _showingSheet = false;
+      if (!mounted) return;
+      if (value == null) {
+        widget.onCanceled?.call();
+      } else {
+        widget.onSelected?.call(value);
+      }
+    });
+  }
 }
 
 Future<T?> showMenu<T>({
@@ -117,23 +242,34 @@ Future<T?> showMenu<T>({
   RouteSettings? routeSettings,
   AnimationStyle? popUpAnimationStyle,
   bool? requestFocus,
-}) => m.showMenu<T>(
-  context: context,
-  position: position,
-  positionBuilder: positionBuilder,
-  items: _surfaceItems(context, items),
-  initialValue: initialValue,
-  elevation: elevation,
-  shadowColor: shadowColor,
-  surfaceTintColor: surfaceTintColor,
-  semanticLabel: semanticLabel,
-  shape: shape,
-  menuPadding: menuPadding,
-  color: color,
-  useRootNavigator: useRootNavigator,
-  constraints: constraints,
-  clipBehavior: clipBehavior,
-  routeSettings: routeSettings,
-  popUpAnimationStyle: popUpAnimationStyle,
-  requestFocus: requestFocus,
-);
+}) => Theme.of(context).extension<PopupSheetStyle>() != null
+    ? _showMenuSheet<T>(
+        context: context,
+        items: items,
+        selected: initialValue,
+        color: color,
+        title: semanticLabel,
+        useRootNavigator: useRootNavigator,
+        routeSettings: routeSettings,
+        requestFocus: requestFocus,
+      )
+    : m.showMenu<T>(
+        context: context,
+        position: position,
+        positionBuilder: positionBuilder,
+        items: _surfaceItems(context, items),
+        initialValue: initialValue,
+        elevation: elevation,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        semanticLabel: semanticLabel,
+        shape: shape,
+        menuPadding: menuPadding,
+        color: color,
+        useRootNavigator: useRootNavigator,
+        constraints: constraints,
+        clipBehavior: clipBehavior,
+        routeSettings: routeSettings,
+        popUpAnimationStyle: popUpAnimationStyle,
+        requestFocus: requestFocus,
+      );

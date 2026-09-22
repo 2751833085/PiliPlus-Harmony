@@ -24,3 +24,5 @@
 - [功能核对](harmony/feature-matrix.json)：原上游 147 项功能的实现/验证状态。
 - [V1 验证记录](harmony/validation.json)：构建哈希、自动测试与尚待执行的项目。
 - [来源说明](upstream/README.md)：保留的上游及鸿蒙社区 README。
+
+- [V2.6.12 统一贴底菜单](v2.6.12/README.md)：沉浸光感、暗色表面、三折全宽播放栏、我的与关于页。

@@ -1,4 +1,6 @@
-﻿import 'package:PiliPlus/common/widgets/button/icon_button.dart';
+import 'package:PiliPlus/pages/video/shorts/panel_theme.dart';
+import 'package:PiliPlus/common/widgets/dialog/bottom_panel.dart';
+import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/widgets/menu_row.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/danmaku_options.dart';
@@ -15,7 +17,7 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
 
   ThemeData? get theme {
     if (plPlayerController.darkVideoPage) {
-      return ThemeUtils.darkTheme;
+      return shortVideoPanelTheme(ThemeUtils.darkTheme);
     }
     return null;
   }
@@ -23,22 +25,31 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
   Future<void>? showBottomSheet(
     StatefulWidgetBuilder builder, {
     ValueGetter<EdgeInsets>? padding,
+    String title = '播放设置',
   }) {
     return PageUtils.showVideoBottomSheet(
       context,
-      maxWidth: 512,
+      maxWidth: 640,
       padding: padding,
-      child: StatefulBuilder(
-        builder: (context, setState) {
-          final theme = this.theme;
-          if (theme != null) {
-            return Theme(
-              data: theme,
-              child: builder(this.context, setState),
-            );
-          }
-          return builder(context, setState);
-        },
+      child: Theme(
+        data: theme ?? Theme.of(context),
+        child: BottomPanel(
+          title: title,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              final theme = this.theme;
+              if (theme != null) {
+                return Theme(
+                  data: theme,
+                  child: Builder(
+                    builder: (innerContext) => builder(innerContext, setState),
+                  ),
+                );
+              }
+              return builder(context, setState);
+            },
+          ),
+        ),
       ),
     );
   }
@@ -70,6 +81,7 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
     final isFullScreen = this.isFullScreen;
 
     showBottomSheet(
+      title: '弹幕设置',
       (context, setState) {
         final theme = Theme.of(context);
 
@@ -166,19 +178,13 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
           padding: const EdgeInsets.all(12),
           child: Material(
             clipBehavior: Clip.antiAlias,
-            color: theme.colorScheme.surface,
+            color: Colors.transparent,
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  const SizedBox(
-                    height: 45,
-                    child: Center(
-                      child: Text('弹幕设置', style: TextStyle(fontSize: 14)),
-                    ),
-                  ),
                   const SizedBox(height: 10),
                   if (!isLive) ...[
                     Row(

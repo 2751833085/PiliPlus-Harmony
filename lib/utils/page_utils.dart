@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:PiliPlus/common/widgets/fractionally_sized_box.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/gallery_viewer.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/hero_dialog_route.dart';
 import 'package:PiliPlus/grpc/im.dart';
@@ -484,39 +483,40 @@ abstract final class PageUtils {
     if (!context.mounted) {
       return null;
     }
-    return Get.key.currentState!.push(
+    final navigator = Get.key.currentState!;
+    final themes = InheritedTheme.capture(from: context, to: navigator.context);
+    return navigator.push(
       PublishRoute(
-        pageBuilder: (context, animation, secondaryAnimation) {
-          // 显式调用扩展，避免与 GetX 的同名 BuildContext 扩展产生歧义
-          final isPortrait = ContextExtensions(context).isPortrait;
-          return SafeArea(
-            child: CustomFractionallySizedBox(
-              maxWidth: maxWidth,
-              widthFactor: isPortrait ? 1.0 : 0.5,
-              heightFactor: isPortrait ? 0.7 : 1.0,
-              alignment: isPortrait ? .bottomCenter : .centerRight,
-              child: Padding(
-                padding: isPortrait ? padding?.call() ?? .zero : .zero,
-                child: child,
+        pageBuilder: (routeContext, animation, secondaryAnimation) =>
+            themes.wrap(
+              Builder(
+                builder: (context) => SafeArea(
+                  bottom: false,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: MediaQuery.sizeOf(context).height * .78,
+                        child: child,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 350),
-        transitionBuilder: (context, animation, secondaryAnimation, child) {
-          final begin = ContextExtensions(context).isPortrait
-              ? const Offset(0.0, 1.0)
-              : const Offset(1.0, 0.0);
-          return SlideTransition(
-            position: animation.drive(
-              Tween<Offset>(
-                begin: begin,
-                end: Offset.zero,
-              ).chain(CurveTween(curve: Curves.easeInOut)),
+        transitionDuration: const Duration(milliseconds: 280),
+        transitionBuilder: (context, animation, secondaryAnimation, child) =>
+            SlideTransition(
+              position: animation.drive(
+                Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutCubic)),
+              ),
+              child: child,
             ),
-            child: child,
-          );
-        },
         settings: RouteSettings(arguments: Get.arguments),
       ),
     );

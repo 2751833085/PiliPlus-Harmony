@@ -1,14 +1,11 @@
-import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
-import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
+import 'package:PiliPlus/common/widgets/dialog/bottom_panel.dart';
 import 'package:PiliPlus/common/style.dart';
-import 'package:PiliPlus/common/widgets/button/icon_button.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/segment_progress_bar.dart';
 import 'package:PiliPlus/pages/common/slide/common_slide_page.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/utils/duration_utils.dart';
-import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 
@@ -37,49 +34,20 @@ class _ViewPointsPageState extends State<ViewPointsPage>
 
   @override
   Widget buildPage(ThemeData theme) {
-    return SimpleScaffold(
-      appBar: AppBar(
-        primary: false,
-        automaticallyImplyLeading: false,
-        titleSpacing: 16,
-        title: const Text('分段信息'),
-        toolbarHeight: 45,
-        actions: [
-          const Text(
-            '分段进度条 ',
-            style: TextStyle(fontSize: 16),
-          ),
+    return BottomPanel(
+      title: '章节',
+      child: Column(
+        children: [
           Obx(
-            () => Transform.scale(
-              alignment: Alignment.centerLeft,
-              scale: HarmonyStyle.enabled(context) ? 1 : 0.8,
-              child: HarmonyStyle.enabled(context)
-                  ? HarmonySwitch(
-                      value: videoDetailController.showVP.value,
-                      onChanged: videoDetailController.showVP.call,
-                    )
-                  : Switch(
-                      value: videoDetailController.showVP.value,
-                      onChanged: videoDetailController.showVP.call,
-                    ),
+            () => SwitchListTile.adaptive(
+              title: const Text('在进度条显示章节'),
+              value: videoDetailController.showVP.value,
+              onChanged: videoDetailController.showVP.call,
             ),
           ),
-          iconButton(
-            context: context,
-            size: 30,
-            icon: const Icon(Icons.clear),
-            tooltip: '关闭',
-            onPressed: Get.back,
-          ),
-          const SizedBox(width: 16),
+          Expanded(child: enableSlide ? slideList(theme) : buildList(theme)),
         ],
-        shape: Border(
-          bottom: BorderSide(
-            color: theme.colorScheme.outline.withValues(alpha: 0.1),
-          ),
-        ),
       ),
-      body: enableSlide ? slideList(theme) : buildList(theme),
     );
   }
 
