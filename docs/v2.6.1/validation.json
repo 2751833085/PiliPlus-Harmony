@@ -18,9 +18,17 @@
   },
   "device": {
     "target": "HUAWEI Mate XTS",
-    "connected_targets": 0,
-    "overwrite_install": "not_attempted_no_device",
-    "launch": "not_attempted_no_device",
+    "recorded_at": "2026-09-22T00:36:54.615508+00:00",
+    "connected_targets": 1,
+    "overwrite_install": "passed",
+    "installed_version": "2.6.1",
+    "installed_version_code": 6087,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "app_id_preserved": true,
+    "app_identifier_preserved": true,
+    "launch": "blocked_screen_locked",
+    "launch_error_code": 10106102,
     "uninstalled_or_cleared_data": false
   },
   "not_verified": [

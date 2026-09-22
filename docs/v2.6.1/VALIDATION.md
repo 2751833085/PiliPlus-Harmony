@@ -16,7 +16,9 @@
 
 ## 设备结果与限制
 
-本轮 HDC 检查为 **0 台连接设备**，因此没有执行 V2.6.1 覆盖安装或启动。没有卸载、清除应用数据，也没有改变设备安全设置。此前版本的安装结果不视为本版真机验收。
+用户重新连接手机后，V2.6.1 已通过 `install -r` 覆盖安装成功。系统包版本确认为 **2.6.1 / 6087**，UID、首次安装时间、appId 与 appIdentifier 均与 V2.6.0 相同；未卸载或清除应用数据。
+
+正常启动被系统以 **10106102** 拒绝：设备屏幕锁定，开发模式不允许自动解锁。未绕过锁屏或更改设备安全设置，需解锁后打开应用。安装成功不代表媒体播放验收通过。
 
 媒体缓存的本地 HTTP 字节复用已经验证，但鸿蒙原生播放器实际读取缓存、失败换源、连续快速滑动的首帧与流畅度仍需实机运行；海外网络性能、功耗、整体内存及物理折叠同样未实测。保留候选版标记，不声称在任意网络零加载或完整复刻当前各平台原版。
 
@@ -29,6 +31,6 @@ node tool/test_harmony_posture.cjs
 HARMONY_CODESIGN=1 bash tool/harmony.sh release
 ```
 
-本机日志：`/tmp/piliplus-v261-test.log`、`/tmp/piliplus-v261-analyze.log`、`/tmp/piliplus-v261-posture.log`、`/tmp/piliplus-v261-build.log`、`/tmp/piliplus-v261-signature.log`、`/tmp/piliplus-v261-layout.log`。组件预览为 `/tmp/piliplus-v261-layout-320.png`、`-840.png`、`-600.png` 及对应 `-minimal-` 版本。
+本机日志：`/tmp/piliplus-v261-test.log`、`/tmp/piliplus-v261-analyze.log`、`/tmp/piliplus-v261-posture.log`、`/tmp/piliplus-v261-build.log`、`/tmp/piliplus-v261-signature.log`、`/tmp/piliplus-v261-layout.log`、`/tmp/piliplus-v261-install.log`、`/tmp/piliplus-v261-launch.log`。组件预览为 `/tmp/piliplus-v261-layout-320.png`、`-840.png`、`-600.png` 及对应 `-minimal-` 版本。
 
 [可入库验证摘要](validation.json) · [构建元数据](../../releases/v2.6.1-rc1/PiliPlus-Harmony-V2.6.1-2.6.1-6087-signed.build.json)。临时日志可能被系统清理；签名私钥、配置、设备身份不入库。本地归档，未 push。
