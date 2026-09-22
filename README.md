@@ -30,6 +30,7 @@ bash tool/harmony.sh release
 | V2.6.5 RC1 | 按视频比例进入短视频、连续预加载、参考 iOS 的播控与评论布局 | [签名 HAP 与记录](releases/v2.6.5-rc1/README.md) · [验证记录](docs/v2.6.5/VALIDATION.md) |
 | V2.6.6 RC1 | 参考 iOS 的短视频暂停状态与中央继续播放入口 | [签名 HAP 与记录](releases/v2.6.6-rc1/README.md) · [验证记录](docs/v2.6.6/VALIDATION.md) |
 | V2.6.7 RC1 | 图标与数量、紧凑作者关注行、按视频比例验证布局 | [签名 HAP 与记录](releases/v2.6.7-rc1/README.md) · [验证记录](docs/v2.6.7/VALIDATION.md) |
+| V2.6.17 RC1 | 原生显隐异步保护、预加载失败回退和队列快照复用 | [签名 HAP 与记录](releases/v2.6.17-rc1/README.md) · [验证记录](docs/v2.6.17/VALIDATION.md) |
 | V2.6.16 RC1 | DevEco 运行回归、预取重建优化、沙箱缓存与评论对比度修复 | [签名 HAP 与记录](releases/v2.6.16-rc1/README.md) · [验证记录](docs/v2.6.16/VALIDATION.md) |
 | V2.6.15 RC1 | 可选历史卡片、账号请求保护与挖孔/手势区避让；真机验收待解锁 | [签名 HAP 与记录](releases/v2.6.15-rc1/README.md) · [验证记录](docs/v2.6.15/VALIDATION.md) |
 | V2.6.14 RC1 | 播放栏动画防误触与迟到尺寸信息切换保护 | [签名 HAP 与记录](releases/v2.6.14-rc1/README.md) · [说明](docs/v2.6.14/README.md) |

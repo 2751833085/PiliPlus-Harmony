@@ -1,0 +1,58 @@
+{
+  "version": "2.6.17+6104",
+  "source_commit": "6ba89a4755c1783a26f2f001a7e2d26d6bd3b120",
+  "source_tree_sha256": "d86427768db47347f70e4ab4f1744c59606f2f3246e9bd47fcff5948ffddde3c",
+  "artifact_sha256": "d054bfbd3fcaa47024a2f199413a6cb769a87d500ec64ccbdad9fca6271c3503",
+  "flutter_tests": {
+    "passed": 132,
+    "failed": 0
+  },
+  "harmony_build_tests": 130,
+  "targeted_final_tests": 16,
+  "static_analysis": {
+    "errors": 0,
+    "warnings": 6,
+    "info": 172,
+    "directory": "ASCII staging mirror"
+  },
+  "native_posture_tests": "passed",
+  "official_signature_verification": "passed",
+  "emulator": {
+    "release_install_start": "passed",
+    "guest": true,
+    "form": "double",
+    "physical_size_px": [
+      2048,
+      2232
+    ],
+    "dpr": 2.875,
+    "card_popup_and_back": "Dock hidden then restored; home content position retained",
+    "search_entry": "native home bars hidden; keyboard and input visible",
+    "video_output": "unsupported by fixed media_kit_video emulator guard",
+    "ui_log": {
+      "lines": 272,
+      "RenderFlex": 0,
+      "Unhandled Exception": 0,
+      "MissingPluginException": 0,
+      "ErrorWidget": 0,
+      "scope": "startup and home card menu round trip only"
+    },
+    "search_back": "keyboard closed; native home bars and Dock restored"
+  },
+  "physical_device_validation": "not performed in this iteration",
+  "physical_device_updated": false,
+  "pushed": false,
+  "evidence": {
+    "flutter_log": "/tmp/piliplus-v2617-all-tests.log",
+    "targeted_log": "/tmp/piliplus-v2617-targeted-final.log",
+    "analysis_log": "/tmp/piliplus-v2617-final-analyze.log",
+    "posture_log": "/tmp/piliplus-v2617-posture.log",
+    "signature_log": "/tmp/piliplus-v2617-signature.log",
+    "ui_log": "/tmp/piliplus-v2617-release-ui-hilog.txt",
+    "emulator_start": "/tmp/ppqa-v2617-start.png",
+    "card_menu": "/tmp/ppqa-v2617-card-menu.png",
+    "card_menu_back": "/tmp/ppqa-v2617-menu-back.png",
+    "search": "/tmp/ppqa-v2617-search.png",
+    "search_back": "/tmp/ppqa-v2617-search-back.png"
+  }
+}
