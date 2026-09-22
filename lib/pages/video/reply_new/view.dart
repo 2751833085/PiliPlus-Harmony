@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/style.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' show max;
@@ -88,9 +89,10 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
         child: Container(
           constraints: const BoxConstraints(maxWidth: 640),
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            borderRadius: Style.bottomSheetRadius,
             color: theme.colorScheme.surface,
           ),
+          clipBehavior: Clip.antiAlias,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

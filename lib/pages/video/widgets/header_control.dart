@@ -1250,7 +1250,7 @@ class HeaderControlState extends State<HeaderControl>
         final subtitles = videoDetailCtr.subtitles;
         final secondary = ColorScheme.of(context).secondary;
         return SimpleDialog(
-          clipBehavior: .hardEdge,
+          clipBehavior: .antiAlias,
           contentPadding: const .only(bottom: 12),
           titlePadding: const .fromLTRB(20, 20, 20, 12),
           title: Row(
@@ -1664,6 +1664,7 @@ class HeaderControlState extends State<HeaderControl>
           color: theme.colorScheme.surface,
           borderRadius: const BorderRadius.all(Radius.circular(12)),
         ),
+        clipBehavior: Clip.antiAlias,
         child: Column(
           children: [
             Container(
@@ -1690,7 +1691,7 @@ class HeaderControlState extends State<HeaderControl>
             Expanded(
               child: Material(
                 type: .transparency,
-                clipBehavior: .hardEdge,
+                clipBehavior: .antiAlias,
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(12),
                 ),

@@ -104,6 +104,7 @@ class ShortVideoContextLink extends StatelessWidget {
   Widget build(BuildContext context) => Material(
     color: Colors.white.withValues(alpha: .10),
     borderRadius: BorderRadius.circular(8),
+    clipBehavior: Clip.antiAlias,
     child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),

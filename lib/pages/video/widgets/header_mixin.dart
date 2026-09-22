@@ -165,7 +165,7 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
         return Padding(
           padding: const EdgeInsets.all(12),
           child: Material(
-            clipBehavior: Clip.hardEdge,
+            clipBehavior: Clip.antiAlias,
             color: theme.colorScheme.surface,
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             child: Padding(

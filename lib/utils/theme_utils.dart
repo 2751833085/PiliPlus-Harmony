@@ -190,6 +190,7 @@ abstract final class ThemeUtils {
         constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
       ),
       bottomSheetTheme: BottomSheetThemeData(
+        clipBehavior: Clip.antiAlias,
         backgroundColor: colorScheme.surface,
         shape: const RoundedRectangleBorder(
           borderRadius: Style.bottomSheetRadius,
@@ -238,7 +239,8 @@ abstract final class ThemeUtils {
         },
       ),
     );
-    if (OS.isHarmony && Pref.harmonyUI) theme = HarmonyTheme.apply(theme, immersive: Pref.harmonyImmersive);
+    if (OS.isHarmony && Pref.harmonyUI)
+      theme = HarmonyTheme.apply(theme, immersive: Pref.harmonyImmersive);
     if (isDark && Pref.isPureBlackTheme && !Pref.harmonyNativeColors) {
       return darkenTheme(theme);
     }

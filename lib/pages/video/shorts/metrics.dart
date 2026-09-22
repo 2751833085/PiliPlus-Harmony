@@ -120,32 +120,38 @@ class ShortVideoPillButton extends StatelessWidget {
     final metrics = ShortVideoMetrics.of(context);
     return Semantics(
       button: true,
-      child: SizedBox(
-        height: metrics.controlHeight,
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(metrics.controlHeight / 2),
-            child: Center(
-              widthFactor: 1,
-              child: Container(
-                height: metrics.fieldHeight,
-                alignment: centered ? Alignment.center : Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(metrics.fieldHeight / 2),
+      label: label,
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: true,
+        onTap: onPressed,
+        child: SizedBox(
+          height: metrics.controlHeight,
+          child: Center(
+            widthFactor: 1,
+            child: Material(
+              color: color,
+              shape: const StadiumBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                customBorder: const StadiumBorder(),
+                onTap: onPressed,
+                child: Container(
+                  height: metrics.fieldHeight,
+                  alignment: centered ? Alignment.center : Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: trailing == null
+                      ? _label(context)
+                      : Row(
+                          children: [
+                            Expanded(child: _label(context)),
+                            const SizedBox(width: 8),
+                            trailing!,
+                          ],
+                        ),
                 ),
-                child: trailing == null
-                    ? _label(context)
-                    : Row(
-                        children: [
-                          Expanded(child: _label(context)),
-                          const SizedBox(width: 8),
-                          trailing!,
-                        ],
-                      ),
               ),
             ),
           ),

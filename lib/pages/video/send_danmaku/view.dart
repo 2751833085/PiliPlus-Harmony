@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/style.dart';
 import 'dart:async';
 
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
@@ -142,9 +143,10 @@ class _SendDanmakuPanelState extends CommonTextPubPageState<SendDanmakuPanel> {
         child: Container(
           constraints: const BoxConstraints(maxWidth: 450),
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            borderRadius: Style.bottomSheetRadius,
             color: theme.colorScheme.surface,
           ),
+          clipBehavior: Clip.antiAlias,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

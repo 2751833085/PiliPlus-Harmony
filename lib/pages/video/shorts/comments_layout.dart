@@ -77,9 +77,7 @@ class _ShortCommentsLayoutState extends State<ShortCommentsLayout>
                 width: side ? extent : null,
                 height: side ? null : extent,
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(20)),
                   child: _panel!,
                 ),
               ),

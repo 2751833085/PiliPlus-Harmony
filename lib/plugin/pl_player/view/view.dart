@@ -1,3 +1,4 @@
+import 'package:PiliPlus/plugin/pl_player/widgets/control_bar.dart';
 import 'package:PiliPlus/pages/video/shorts/loading_grace.dart';
 import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
@@ -80,8 +81,7 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart'
-    show RenderProxyBox, SemanticsConfiguration;
+import 'package:flutter/rendering.dart' show RenderProxyBox;
 import 'package:flutter/services.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
@@ -527,7 +527,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
       /// 时间进度
       BottomControlType.time => Obx(
-        () => _VideoTime(
+        () => PlayerControlTime(
           position: DurationUtils.formatDuration(
             plPlayerController.position.value,
           ),
@@ -1005,16 +1005,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         BottomControlType.qa: '画质',
         BottomControlType.aiTranslate: '字幕翻译',
       };
-      return Row(
-        children: [
-          progressWidget(BottomControlType.playOrPause),
-          Expanded(child: progress),
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: progressWidget(BottomControlType.time),
-            ),
-          ),
+      return CompactPlayerControlBar(
+        play: progressWidget(BottomControlType.playOrPause),
+        progress: progress,
+        time: progressWidget(BottomControlType.time),
+        actions: [
           if (widget.onEnterShortMode != null)
             IconButton(
               tooltip: '竖屏短视频',

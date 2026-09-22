@@ -98,7 +98,7 @@ class HarmonySettingsSearch extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Material(
         color: theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(24),
+        shape: const StadiumBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,

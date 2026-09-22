@@ -131,6 +131,7 @@ abstract final class HarmonyTheme {
           fontWeight: FontWeight.w600,
         ),
         contentTextStyle: body,
+        clipBehavior: Clip.antiAlias,
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       ),
       bottomSheetTheme: base.bottomSheetTheme.copyWith(
@@ -138,8 +139,9 @@ abstract final class HarmonyTheme {
         backgroundColor: panel,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: BorderRadius.all(Radius.circular(28)),
         ),
+        clipBehavior: Clip.antiAlias,
         dragHandleColor: scheme.outlineVariant,
       ),
       popupMenuTheme: base.popupMenuTheme.copyWith(
