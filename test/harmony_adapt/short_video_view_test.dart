@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models_new/member_card_info/data.dart';
 import 'package:flutter/services.dart';
@@ -390,15 +391,51 @@ void main() {
           );
         }
         final state = playerKey.currentState;
+        final progress = find.byType(ProgressBar);
+        final barRect = tester.getRect(progress);
+        final playerRect = tester.getRect(find.byType(_PlayerFixture));
+        player.playerStatus = PlayerStatus.playing;
+        for (final listener in player.listeners.toList()) {
+          listener(PlayerStatus.playing);
+        }
         video.shortChromeVisible.value = false;
         await tester.pumpAndSettle();
         expect(
           tester
-              .widget<ShortVideoChrome>(find.byType(ShortVideoChrome))
+              .widget<ShortVideoChrome>(find.byType(ShortVideoChrome).first)
               .visible,
           isFalse,
         );
-        expect(find.byType(ShortVideoMinimalControls), findsWidgets);
+        expect(find.byType(ShortVideoMinimalControls), findsOneWidget);
+        expect(progress.hitTestable(), findsOneWidget);
+        expect(tester.getRect(progress), barRect);
+        expect(tester.getRect(find.byType(_PlayerFixture)), playerRect);
+        final pauseRect = tester.getRect(find.byIcon(Icons.pause_rounded));
+        expect(pauseRect.top, greaterThan(size.height - 130));
+        expect(pauseRect.right, lessThan(barRect.left));
+        expect((pauseRect.center.dy - barRect.center.dy).abs(), lessThan(24));
+        await tester.drag(progress, const Offset(50, 0));
+        await tester.pumpAndSettle();
+        expect(player.seeks, isNotEmpty);
+        final seekCount = player.seeks.length;
+        await tester.tapAt(
+          Offset(barRect.left + barRect.width * .3, barRect.center.dy),
+        );
+        await tester.pumpAndSettle();
+        expect(player.seeks.length, seekCount + 1);
+        expect(progress.hitTestable(), findsOneWidget);
+        expect(video.shortChromeVisible.value, isFalse);
+        expect(playerKey.currentState, same(state));
+        player.playerStatus = PlayerStatus.paused;
+        for (final listener in player.listeners.toList()) {
+          listener(PlayerStatus.paused);
+        }
+        await tester.pumpAndSettle();
+        expect(
+          tester.getRect(find.byIcon(Icons.play_arrow_rounded)),
+          pauseRect,
+        );
+        expect(progress.hitTestable(), findsOneWidget);
         expect(playerKey.currentState, same(state));
         if (renderPath.isNotEmpty) {
           await tester.runAsync(() async {
@@ -476,7 +513,19 @@ class _FakePlayer implements PlPlayerController {
   @override
   int get progress => position.value;
   @override
-  PlayerStatus get playerStatus => PlayerStatus.paused;
+  PlayerStatus playerStatus = PlayerStatus.paused;
+  @override
+  final seekPosition = 0.obs;
+  final seeks = <Duration>[];
+  @override
+  void onSeekStart([int? seconds]) {}
+  @override
+  void onSeekEnd() {}
+  @override
+  Future<void> seekTo(Duration duration, {bool isSeek = true}) async {
+    seeks.add(duration);
+  }
+
   final listeners = <dynamic>[];
   @override
   void addStatusLister(dynamic callback) => listeners.add(callback);

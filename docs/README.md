@@ -11,6 +11,7 @@
 - [V2.6.1 验证记录](v2.6.1/VALIDATION.md)：交互、网络缓存回归、签名构建与设备结果。
 - [V2.6.2 分页与自动播放](v2.6.2/README.md)：手势吸附、连续滑动保留播放器及短视频独立自动播放。
 - [V2.6.2 验证记录](v2.6.2/VALIDATION.md)：自动回归、签名构建和设备结果。
+- [V2.6.3 底部播放控制](v2.6.3/README.md)：常驻进度条及播放按钮；[验证记录](v2.6.3/VALIDATION.md)。
 - [原生播放器](harmony/native-player.md)：依赖版本、构建脚本、音频滤镜与许可。
 - [功能核对](harmony/feature-matrix.json)：原上游 147 项功能的实现/验证状态。
 - [V1 验证记录](harmony/validation.json)：构建哈希、自动测试与尚待执行的项目。

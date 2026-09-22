@@ -249,15 +249,6 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (player.playerStatus.isPaused || !widget.video.autoPlay)
-                    Positioned.fill(
-                      bottom: bottomHeight,
-                      child: ShortVideoMinimalControls(
-                        playing: false,
-                        time: '',
-                        onToggle: _togglePlayback,
-                      ),
-                    ),
                   const IgnorePointer(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -589,74 +580,65 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                       ),
                     ),
                   ),
-                  Positioned(
-                    left: 16,
-                    right: 16,
-                    bottom: 0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Obx(
-                          () => ProgressBar(
-                            progress: player.progress,
-                            buffered: player.buffered.value,
-                            total: player.duration.value,
-                            baseBarColor: Colors.white24,
-                            progressBarColor: const Color(0xFFFB7299),
-                            bufferedBarColor: Colors.white38,
-                            thumbColor: Colors.white,
-                            thumbGlowColor: Colors.white12,
-                            barHeight: 2,
-                            thumbRadius: 4,
-                            onDragStart: (value) =>
-                                player.onSeekStart(value.seconds),
-                            onDragUpdate: (value) =>
-                                player.seekPosition.value = value.seconds,
-                            onSeek: (milliseconds) {
-                              player.position.value = milliseconds ~/ 1000;
-                              player.onSeekEnd();
-                              player.seekTo(
-                                Duration(milliseconds: milliseconds),
-                                isSeek: false,
-                              );
-                            },
-                          ),
-                        ),
-                        Obx(
-                          () => ShortVideoControls(
-                            position: DurationUtils.formatDuration(
-                              player.position.value,
-                            ),
-                            duration: DurationUtils.formatDuration(
-                              player.duration.value,
-                            ),
-                            danmaku: player.enableShowDanmaku.value,
-                            onSend: widget.video.showShootDanmakuSheet,
-                            onDanmaku: () => player.enableShowDanmaku.toggle(),
-                            onDetails: widget.onDetails,
-                            onFullscreen: () =>
-                                player.triggerFullScreen(status: true),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
         ),
-        Positioned.fill(
-          bottom: bottomHeight,
-          child: Obx(
-            () => widget.video.shortChromeVisible.value
-                ? const SizedBox.shrink()
-                : ShortVideoMinimalControls(
+        Positioned(
+          left: 16,
+          right: 16,
+          bottom: 0,
+          child: SizedBox(
+            height: bottomHeight,
+            child: Column(
+              children: [
+                Obx(
+                  () => ShortVideoMinimalControls(
                     playing: player.playerStatus.isPlaying,
                     time:
-                        '${DurationUtils.formatDuration(player.position.value)} / ${DurationUtils.formatDuration(player.duration.value)}',
+                        '${DurationUtils.formatDuration(player.progress)} / ${DurationUtils.formatDuration(player.duration.value)}',
                     onToggle: _togglePlayback,
+                    progress: ProgressBar(
+                      progress: player.progress,
+                      buffered: player.buffered.value,
+                      total: player.duration.value,
+                      baseBarColor: Colors.white24,
+                      progressBarColor: const Color(0xFFFB7299),
+                      bufferedBarColor: Colors.white38,
+                      thumbColor: Colors.white,
+                      thumbGlowColor: Colors.white12,
+                      barHeight: 2,
+                      thumbRadius: 4,
+                      onDragStart: (value) => player.onSeekStart(value.seconds),
+                      onDragUpdate: (value) =>
+                          player.seekPosition.value = value.seconds,
+                      onSeek: (milliseconds) {
+                        player.position.value = milliseconds ~/ 1000;
+                        player.onSeekEnd();
+                        player.seekTo(
+                          Duration(milliseconds: milliseconds),
+                          isSeek: false,
+                        );
+                      },
+                    ),
                   ),
+                ),
+                Obx(
+                  () => ShortVideoChrome(
+                    visible: widget.video.shortChromeVisible.value,
+                    child: ShortVideoControls(
+                      danmaku: player.enableShowDanmaku.value,
+                      onSend: widget.video.showShootDanmakuSheet,
+                      onDanmaku: () => player.enableShowDanmaku.toggle(),
+                      onDetails: widget.onDetails,
+                      onFullscreen: () =>
+                          player.triggerFullScreen(status: true),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],

@@ -72,6 +72,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Stack(
+              fit: StackFit.expand,
               children: [
                 ShortVideoChrome(
                   visible: false,
@@ -80,10 +81,16 @@ void main() {
                     child: const Text('作者简介'),
                   ),
                 ),
-                ShortVideoMinimalControls(
-                  playing: false,
-                  time: '00:10 / 02:30',
-                  onToggle: () => play++,
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 0,
+                  child: ShortVideoMinimalControls(
+                    playing: false,
+                    time: '00:10 / 02:30',
+                    progress: const SizedBox(height: 8),
+                    onToggle: () => play++,
+                  ),
                 ),
               ],
             ),

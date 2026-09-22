@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /// Fades only the controls; video geometry and its decoder stay untouched.
@@ -23,55 +24,70 @@ class ShortVideoChrome extends StatelessWidget {
   );
 }
 
+/// Persistent playback row. The information layer can fade independently.
 class ShortVideoMinimalControls extends StatelessWidget {
   const ShortVideoMinimalControls({
     super.key,
     required this.playing,
     required this.time,
+    required this.progress,
     required this.onToggle,
   });
   final bool playing;
   final String time;
+  final Widget progress;
   final VoidCallback onToggle;
+  static double heightFor(TextScaler scaler) =>
+      math.max(48, 24 + scaler.scale(12) * 1.3);
+
   @override
-  Widget build(BuildContext context) => Center(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
+  Widget build(BuildContext context) => SizedBox(
+    height: heightFor(MediaQuery.textScalerOf(context)),
+    child: Row(
       children: [
-        Semantics(
-          button: true,
-          label: playing ? '暂停' : '播放',
-          child: GestureDetector(
-            onTap: onToggle,
-            onDoubleTap: onToggle,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.black38,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
+        Tooltip(
+          message: playing ? '暂停' : '播放',
+          child: Semantics(
+            button: true,
+            label: playing ? '暂停' : '播放',
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onToggle,
+              onDoubleTap: onToggle,
+              child: SizedBox.square(
+                dimension: 48,
                 child: Icon(
                   playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  size: 48,
+                  size: 28,
                   color: Colors.white,
                 ),
               ),
             ),
           ),
         ),
-        if (time.isNotEmpty) const SizedBox(height: 12),
-        if (time.isNotEmpty)
-          IgnorePointer(
-            child: Text(
-              time,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-                shadows: [Shadow(color: Colors.black, blurRadius: 6)],
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 24, child: Center(child: progress)),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  time,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    height: 1.3,
+                    color: Colors.white70,
+                    shadows: [Shadow(color: Colors.black, blurRadius: 6)],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
+        ),
       ],
     ),
   );
