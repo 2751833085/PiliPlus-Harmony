@@ -1,0 +1,73 @@
+{
+  "version": "2.6.16+6103",
+  "source_commit": "fadef1cda3bb4e858b6798683c18064cac14b6e7",
+  "source_tree_sha256": "31740c2a5b10d181f62d72dd4dca24959ad6f28dd659b66c331191aef2717125",
+  "artifact_sha256": "8dbe857ed94bacd77e3d57c33839a0669797e3f9946627f83f7a7b21deac2ce4",
+  "flutter_tests": {
+    "passed": 125,
+    "failed": 0
+  },
+  "static_analysis": {
+    "errors": 0,
+    "warnings": 6,
+    "info": 177,
+    "directory": "ASCII staging mirror"
+  },
+  "native_posture_tests": "passed",
+  "official_signature_verification": "passed",
+  "emulator": {
+    "system": "HarmonyOS 7.0.0.106",
+    "api": 26,
+    "profile": "TripleFold",
+    "density_dpi": 460,
+    "dpr": 2.875,
+    "guest": true,
+    "video_output": "unsupported by media_kit_video emulator guard",
+    "release_install_start": "passed",
+    "guest_history_login_entry": "passed",
+    "fold_fullscreen_to_inline": "passed UI/state only",
+    "rotation_lock_comparison": "pending",
+    "release_double_mine_themes": "light and dark checked",
+    "release_ui_log": {
+      "app_lines": 495,
+      "RenderFlex": 0,
+      "Unhandled Exception": 0,
+      "ErrorWidget": 0,
+      "scope": "guest mine, history login entry and theme switching only"
+    },
+    "release_search": "Chinese suggestions, comprehensive results, covers, public user results and back preserving query checked",
+    "release_offline_entry": "guest empty state and back navigation checked; offline decoding not tested"
+  },
+  "physical_device_validation": "upgrade succeeded; runtime not completed because screen is locked (10106102)",
+  "pushed": false,
+  "evidence": {
+    "comment_before": "/tmp/ppqa-short-comments-open.png",
+    "comment_after": "/tmp/ppqa-final-comments.png",
+    "chrome_hidden": "/tmp/ppqa-shorts-hidden.png",
+    "chrome_hidden_paused": "/tmp/ppqa-shorts-hidden-paused.png",
+    "triple_fullscreen_controls": "/tmp/ppqa-fullscreen-wide-controls.png",
+    "flutter_log": "/tmp/piliplus-v2616-all-tests.log",
+    "analysis_log": "/tmp/piliplus-v2616-final-analyze-ascii.log",
+    "posture_log": "/tmp/piliplus-v2616-posture.log",
+    "signature_log": "/tmp/piliplus-v2616-signature.log",
+    "guest_history": "/tmp/ppqa-release-mine.png",
+    "guest_history_login": "/tmp/ppqa-guest-history-login.png",
+    "fold_to_inline": "/tmp/ppqa-fullscreen-fold-to-single.png",
+    "guest_history_double": "/tmp/ppqa-release-mine-double.png",
+    "guest_history_double_dark": "/tmp/ppqa-release-dark-mine.png",
+    "release_ui_log": "/tmp/piliplus-v2616-release-ui-hilog.txt",
+    "search_results": "/tmp/ppqa-search-results-settled.png",
+    "search_users": "/tmp/ppqa-search-user-tab.png",
+    "offline_entry": "/tmp/ppqa-release-offline.png",
+    "search_back": "/tmp/ppqa-search-back.png"
+  },
+  "physical_device_install": {
+    "version_name": "2.6.16",
+    "version_code": 6103,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "data_cleared": false,
+    "qa_guest_installed": false,
+    "launch_error": "10106102 screen locked"
+  }
+}
