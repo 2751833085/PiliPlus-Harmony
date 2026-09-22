@@ -118,7 +118,7 @@ void main() {
                                           for (final icon in [
                                             Icons.stay_current_portrait,
                                             Icons.more_horiz,
-                                            Icons.fullscreen,
+                                            Icons.open_in_full_rounded,
                                           ])
                                             SizedBox(
                                               width: 36,
@@ -171,8 +171,16 @@ void main() {
                 expect(segment.width, track.width);
                 expect(segment.center.dy, closeTo(track.center.dy, .001));
                 expect(segment.height, compact ? 2 : 3.5);
-                expect(track.height, 28);
-                expect(track.width, greaterThan(60));
+                expect(track.height, closeTo(28, .001));
+                expect(track.width, greaterThan(40));
+                if (compact) {
+                  // A single row: even all overlays fit in 63dp; without
+                  // overlays this drops to the 40dp controls plus 8dp inset.
+                  expect(
+                    tester.getSize(find.byType(BottomControl)).height,
+                    lessThanOrEqualTo(63),
+                  );
+                }
                 if (physical.width == 3184 && compact) {
                   expect(
                     track.width,
@@ -228,10 +236,18 @@ void main() {
                 await tester.pump();
                 expect(player.seeks.last, const Duration(seconds: 2400));
                 const output = String.fromEnvironment('SHORTS_RENDER_PATH');
-                if (output.isNotEmpty &&
-                    physical.width == 3184 &&
-                    scale == 1 &&
-                    compact) {
+                Future<void> captureFrame(String suffix) async {
+                  if (output.isEmpty ||
+                      density != 2.875 ||
+                      scale != 1 ||
+                      !compact) {
+                    return;
+                  }
+                  final form = physical.width == 1008
+                      ? 'single'
+                      : physical.width == 2048
+                      ? 'double'
+                      : 'triple';
                   final boundary =
                       capture.currentContext!.findRenderObject()!
                           as RenderRepaintBoundary;
@@ -255,10 +271,12 @@ void main() {
                     );
                     image.dispose();
                     await File(
-                      '$output-normal-triple.png',
+                      '$output-normal-$form$suffix.png',
                     ).writeAsBytes(bytes!.buffer.asUint8List());
                   });
                 }
+
+                await captureFrame('-overlays');
                 // Toggle chapters/trend/segments without stale alignment or a new controller.
                 video.showVP.value = false;
                 video.showDmTrendChart.value = false;
@@ -267,6 +285,10 @@ void main() {
                 expect(find.byType(SegmentProgressBar), findsNothing);
                 expect(find.byType(ViewPointSegmentProgressBar), findsNothing);
                 expect(find.byType(ProgressBar), findsOneWidget);
+                if (compact) {
+                  expect(tester.getSize(find.byType(BottomControl)).height, 48);
+                }
+                await captureFrame('');
                 expect(tester.takeException(), isNull);
                 semantics.dispose();
                 await tester.pumpWidget(const SizedBox());

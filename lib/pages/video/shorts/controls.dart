@@ -78,8 +78,13 @@ class ShortVideoControls extends StatelessWidget {
                 onDanmakuSettings,
               ),
               const Spacer(),
-              _button(metrics, '普通详情', Icons.fullscreen_exit, onDetails),
-              _button(metrics, '全屏', Icons.fullscreen, onFullscreen),
+              _button(
+                metrics,
+                '普通详情',
+                Icons.close_fullscreen_rounded,
+                onDetails,
+              ),
+              _button(metrics, '全屏', Icons.open_in_full_rounded, onFullscreen),
             ],
           );
         },
@@ -95,7 +100,9 @@ class ShortVideoContextLink extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.compact = false,
   });
+  final bool compact;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -113,11 +120,14 @@ class ShortVideoContextLink extends StatelessWidget {
           minHeight: ShortVideoMetrics.of(context).controlHeight,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 8 : 12,
+            vertical: 8,
+          ),
           child: Row(
             children: [
               Icon(icon, size: 18, color: Colors.white70),
-              const SizedBox(width: 8),
+              SizedBox(width: compact ? 6 : 8),
               Expanded(
                 child: Text(
                   label,
@@ -129,11 +139,29 @@ class ShortVideoContextLink extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              const Icon(Icons.chevron_right, size: 18, color: Colors.white54),
+              Icon(
+                Icons.chevron_right,
+                size: compact ? 14 : 18,
+                color: Colors.white54,
+              ),
             ],
           ),
         ),
       ),
     ),
+  );
+}
+
+/// One contextual row, without making either individual entry shorter.
+class ShortVideoContextRow extends StatelessWidget {
+  const ShortVideoContextRow({super.key, this.search, this.episodes});
+  final Widget? search, episodes;
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      if (search != null) Expanded(child: search!),
+      if (search != null && episodes != null) const SizedBox(width: 8),
+      if (episodes != null) Expanded(child: episodes!),
+    ],
   );
 }

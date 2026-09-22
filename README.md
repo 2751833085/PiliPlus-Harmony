@@ -30,6 +30,7 @@ bash tool/harmony.sh release
 | V2.6.5 RC1 | 按视频比例进入短视频、连续预加载、参考 iOS 的播控与评论布局 | [签名 HAP 与记录](releases/v2.6.5-rc1/README.md) · [验证记录](docs/v2.6.5/VALIDATION.md) |
 | V2.6.6 RC1 | 参考 iOS 的短视频暂停状态与中央继续播放入口 | [签名 HAP 与记录](releases/v2.6.6-rc1/README.md) · [验证记录](docs/v2.6.6/VALIDATION.md) |
 | V2.6.7 RC1 | 图标与数量、紧凑作者关注行、按视频比例验证布局 | [签名 HAP 与记录](releases/v2.6.7-rc1/README.md) · [验证记录](docs/v2.6.7/VALIDATION.md) |
+| V2.6.11 RC1 | 选集可用、弹层优先返回、显隐与暂停独立、单行普通播控 | [签名 HAP 与记录](releases/v2.6.11-rc1/README.md) · [说明](docs/v2.6.11/README.md) |
 | V2.6.10 RC1 | 圆角裁切、普通播放器单行时间、进度条与空降标记对齐 | [签名 HAP 与记录](releases/v2.6.10-rc1/README.md) · [说明](docs/v2.6.10/README.md) |
 | V2.6.9 RC1 | 短视频字号与控件比例统一、进度条点击和绘制位置修正 | [签名 HAP 与记录](releases/v2.6.9-rc1/README.md) · [验证记录](docs/v2.6.9/VALIDATION.md) |
 | V2.6.8 RC1 | 底部关联搜索、短弹幕输入入口与独立弹幕设置 | [签名 HAP 与记录](releases/v2.6.8-rc1/README.md) · [验证记录](docs/v2.6.8/VALIDATION.md) |

@@ -48,26 +48,21 @@ class CompactPlayerControlBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, bounds) {
-      // A narrow player puts the full-width track below its controls, as on
-      // the phone reference. Expanded windows keep a spacious inline track.
-      final inline = bounds.maxWidth >= 600;
-      final controls = Row(
+      // Reserve a usable track even on a folded phone. Long time strings
+      // scale within their own budget, without creating a second control row.
+      return Row(
         children: [
           play,
-          if (inline) Expanded(child: progress) else const Spacer(),
+          Expanded(child: progress),
           ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: bounds.maxWidth * .38),
+            constraints: BoxConstraints(
+              maxWidth: bounds.maxWidth * (bounds.maxWidth < 400 ? .24 : .32),
+            ),
             child: FittedBox(fit: BoxFit.scaleDown, child: time),
           ),
           ...actions,
         ],
       );
-      return inline
-          ? controls
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [controls, progress],
-            );
     },
   );
 }

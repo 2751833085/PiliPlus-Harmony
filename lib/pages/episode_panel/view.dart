@@ -287,7 +287,7 @@ class EpisodePanelState extends State<EpisodePanel>
   }
 
   double _calcItemHeight(ugc.BaseEpisodeItem episode) {
-    if (episode is ugc.EpisodeItem && episode.pages!.length > 1) {
+    if (episode is ugc.EpisodeItem && (episode.pages?.length ?? 0) > 1) {
       return 167; // 110 + 2 + 10 + 45
     }
     return 112;
@@ -338,7 +338,7 @@ class EpisodePanelState extends State<EpisodePanel>
                         isCurrentIndex: isCurrItem,
                       );
                       if (episode is ugc.EpisodeItem &&
-                          episode.pages!.length > 1) {
+                          (episode.pages?.length ?? 0) > 1) {
                         return Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,

@@ -260,18 +260,9 @@ class MyApp extends StatelessWidget {
       return;
     }
 
-    final route = Get.routing.route;
-    if (route is GetPageRoute) {
-      if (route.popDisposition == .doNotPop) {
-        route.onPopInvokedWithResult(false, null);
-        return;
-      }
-    }
-
-    final navigator = Get.key.currentState;
-    if (navigator?.canPop() ?? false) {
-      navigator!.pop();
-    }
+    // Let the Navigator inspect its actual top route, including PopupRoute
+    // and local history, instead of a cached GetPageRoute underneath a sheet.
+    Get.key.currentState?.maybePop();
   }
 
   static (ThemeData, ThemeData) getAllTheme() {

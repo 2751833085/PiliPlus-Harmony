@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/shorts/episodes.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'chrome.dart';
@@ -322,8 +323,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
             () => ShortVideoChrome(
               visible:
                   !player.isSeeking.value &&
-                  (widget.video.shortChromeVisible.value ||
-                      _pausedPresentation),
+                  widget.video.shortChromeVisible.value,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -534,6 +534,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                   title: detail.title,
                                 )
                               : null;
+                          final hasEpisodes =
+                              ready && !ShortVideoEpisodes(detail).isEmpty;
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
@@ -642,34 +644,45 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                   '${NumUtils.numFormat(detail.stat?.view ?? 0)} 次播放',
                                   style: ShortVideoMetrics.caption,
                                 ),
-                              if (searchTerm != null) ...[
+                              if (searchTerm != null || hasEpisodes) ...[
                                 const SizedBox(height: 10),
-                                ShortVideoContextLink(
-                                  key: const ValueKey('short-related-search'),
-                                  icon: Icons.search,
-                                  label: '搜索 · $searchTerm',
-                                  onTap: () {
-                                    if (widget.onSearch case final onSearch?) {
-                                      onSearch(searchTerm);
-                                    } else {
-                                      Get.toNamed(
-                                        '/searchResult',
-                                        parameters: {
-                                          'keyword': searchTerm,
-                                        },
-                                      );
-                                    }
-                                  },
-                                ),
-                              ],
-                              if (ready &&
-                                  (detail.ugcSeason != null ||
-                                      (detail.pages?.length ?? 0) > 1)) ...[
-                                const SizedBox(height: 8),
-                                ShortVideoContextLink(
-                                  icon: Icons.video_library_outlined,
-                                  label: '合集 / 分 P',
-                                  onTap: widget.onEpisodes,
+                                ShortVideoContextRow(
+                                  search: searchTerm == null
+                                      ? null
+                                      : ShortVideoContextLink(
+                                          key: const ValueKey(
+                                            'short-related-search',
+                                          ),
+                                          icon: Icons.search,
+                                          compact: hasEpisodes,
+                                          label: hasEpisodes
+                                              ? searchTerm
+                                              : '搜索 · $searchTerm',
+                                          onTap: () {
+                                            if (widget.onSearch
+                                                case final onSearch?) {
+                                              onSearch(searchTerm);
+                                            } else {
+                                              Get.toNamed(
+                                                '/searchResult',
+                                                parameters: {
+                                                  'keyword': searchTerm,
+                                                },
+                                              );
+                                            }
+                                          },
+                                        ),
+                                  episodes: !hasEpisodes
+                                      ? null
+                                      : ShortVideoContextLink(
+                                          key: const ValueKey('short-episodes'),
+                                          icon: Icons.video_library_outlined,
+                                          compact: searchTerm != null,
+                                          label: searchTerm != null
+                                              ? '合集/分P'
+                                              : '合集 / 分 P',
+                                          onTap: widget.onEpisodes,
+                                        ),
                                 ),
                               ],
                             ],
@@ -686,7 +699,9 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
         Positioned.fill(
           bottom: bottomHeight,
           child: Obx(() {
-            if (player.isSeeking.value || !_pausedPresentation) {
+            if (player.isSeeking.value ||
+                !widget.video.shortChromeVisible.value ||
+                !_pausedPresentation) {
               return const SizedBox.shrink();
             }
             final compact = pane.maxHeight - bottomHeight < 360;
@@ -716,9 +731,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                 Obx(
                   () => ShortVideoMinimalControls(
                     playing: player.playerStatus.isPlaying,
-                    showPlayback:
-                        !widget.video.shortChromeVisible.value &&
-                        !_pausedPresentation,
+                    showPlayback: !widget.video.shortChromeVisible.value,
                     seeking: player.isSeeking.value,
                     time:
                         '${DurationUtils.formatDuration(player.progress)} / ${DurationUtils.formatDuration(player.duration.value)}',

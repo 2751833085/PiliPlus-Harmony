@@ -1,3 +1,6 @@
+import 'package:PiliPlus/pages/video/shorts/episodes.dart';
+import 'package:PiliPlus/plugin/pl_player/widgets/back_scope.dart';
+import 'package:PiliPlus/pages/video/shorts/panel_theme.dart';
 import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 import 'package:PiliPlus/pages/video/shorts/entry_policy.dart';
 import 'package:PiliPlus/pages/video/shorts/feedback.dart';
@@ -294,6 +297,89 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
   }
 
+  Future<void> _shortEpisodes() async {
+    if (!mounted || !_shortMode || _feed.switching || _feed.interacting) return;
+    final detail = ugcIntroController.videoDetail.value;
+    final sources = ShortVideoEpisodes(detail);
+    if (sources.isEmpty) return;
+    final bvid = ugcIntroController.bvid;
+    final aid = videoDetailController.aid;
+    final cid = ugcIntroController.cid.value;
+    Future<bool>? selection;
+    await _feed.interact(() async {
+      await showModalBottomSheet<void>(
+        context: context,
+        useSafeArea: true,
+        isScrollControlled: true,
+        showDragHandle: false,
+        constraints: const BoxConstraints(maxWidth: 600),
+        backgroundColor: shortVideoPanelTheme(
+          ThemeUtils.darkTheme,
+        ).colorScheme.surface,
+        builder: (sheetContext) {
+          Widget panel({required bool season}) => EpisodePanel(
+            heroTag: heroTag,
+            ugcIntroController: ugcIntroController,
+            type: season ? EpisodeType.season : EpisodeType.part,
+            aid: aid,
+            bvid: bvid,
+            cid: cid,
+            cover: detail.pic,
+            enableSlide: false,
+            list: season ? sources.sections : [sources.parts],
+            seasonId: season ? detail.ugcSeason?.id : null,
+            initialTabIndex: season ? sources.sectionFor(cid) : 0,
+            onClose: () => Navigator.of(sheetContext).pop(),
+            onChangeEpisode: (episode) {
+              return selection = ugcIntroController.onChangeEpisode(
+                prepareShortEpisode(
+                  episode,
+                  bvid: bvid,
+                  aid: aid,
+                  cover: detail.pic,
+                ),
+                waitForPlayback: true,
+              );
+            },
+          );
+          final both = sources.sections.isNotEmpty && sources.parts.isNotEmpty;
+          return Theme(
+            data: shortVideoPanelTheme(ThemeUtils.darkTheme),
+            child: SizedBox(
+              height: MediaQuery.sizeOf(sheetContext).height * .72,
+              child: both
+                  ? DefaultTabController(
+                      length: 2,
+                      child: Column(
+                        children: [
+                          const TabBar(
+                            tabs: [
+                              Tab(text: '合集'),
+                              Tab(text: '分 P'),
+                            ],
+                          ),
+                          Expanded(
+                            child: TabBarView(
+                              children: [
+                                panel(season: true),
+                                panel(season: false),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : panel(season: sources.sections.isNotEmpty),
+            ),
+          );
+        },
+      );
+      // Keep paging locked until the selected source is actually ready.
+      final pending = selection;
+      if (pending != null) await pending;
+    });
+  }
+
   void _shortComments() {
     if (!videoDetailController.showReply) {
       _leaveShortMode();
@@ -310,17 +396,23 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       isScrollControlled: true,
       constraints: const BoxConstraints(maxWidth: 720),
       showDragHandle: false,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: SizedBox(
-          height:
-              (MediaQuery.sizeOf(context).height -
-                  MediaQuery.viewInsetsOf(context).bottom) *
-              .78,
-          child: MiniScaffold(
-            body: videoReplyPanel(onClose: () => Navigator.pop(context)),
+      backgroundColor: shortVideoPanelTheme(
+        ThemeUtils.darkTheme,
+      ).colorScheme.surface,
+      builder: (context) => Theme(
+        data: shortVideoPanelTheme(ThemeUtils.darkTheme),
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: SizedBox(
+            height:
+                (MediaQuery.sizeOf(context).height -
+                    MediaQuery.viewInsetsOf(context).bottom) *
+                .78,
+            child: MiniScaffold(
+              body: videoReplyPanel(onClose: () => Navigator.pop(context)),
+            ),
           ),
         ),
       ),
@@ -337,7 +429,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       child: ShortVideoFeed(
         commentsPanel: _shortCommentsVisible
             ? Theme(
-                data: ThemeUtils.darkTheme,
+                data: shortVideoPanelTheme(ThemeUtils.darkTheme),
                 child: MiniScaffold(
                   body: videoReplyPanel(
                     onClose: () =>
@@ -373,7 +465,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           }
         },
         onComments: _shortComments,
-        onEpisodes: () => showEpisodes(),
+        onEpisodes: _shortEpisodes,
         onMore: () =>
             (videoDetailController.headerCtrKey.currentState
                     as HeaderControlState?)
@@ -1824,7 +1916,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     required double width,
     required double height,
     bool isPipMode = false,
-  }) => popScope(
+  }) => PlayerBackScope(
+    suspended: _shortMode && _shortCommentsVisible,
     key: videoDetailController.videoPlayerKey,
     canPop:
         !isFullScreen &&

@@ -57,7 +57,7 @@ class BottomControl extends StatelessWidget {
     final compact = Pref.biliPlayerControls;
     final barHeight = compact ? 2.0 : 3.5;
     final progress = Padding(
-      padding: compact
+      padding: compact || !isFullScreen
           ? const EdgeInsets.symmetric(horizontal: 10)
           : const EdgeInsets.fromLTRB(10, 0, 10, 7),
       child: Obx(
@@ -110,7 +110,7 @@ class BottomControl extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 8 : 10,
-        vertical: compact ? 4 : 12,
+        vertical: compact || !isFullScreen ? 4 : 12,
       ),
       child: compact
           ? buildBottomControl(progress)

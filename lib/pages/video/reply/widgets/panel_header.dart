@@ -45,14 +45,18 @@ class ReplyPanelHeader extends StatelessWidget {
           icon: Icon(
             Icons.sort,
             size: 16,
-            color: ColorScheme.of(context).secondary,
+            color: onClose == null
+                ? ColorScheme.of(context).secondary
+                : ColorScheme.of(context).onSurfaceVariant,
           ),
           label: Text(
             sortLabel,
             style: TextStyle(
               fontSize: onClose == null ? 13 : 12,
               height: onClose == null ? null : 1.25,
-              color: ColorScheme.of(context).secondary,
+              color: onClose == null
+                  ? ColorScheme.of(context).secondary
+                  : ColorScheme.of(context).onSurfaceVariant,
             ),
           ),
         ),

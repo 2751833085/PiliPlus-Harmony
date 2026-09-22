@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/video/shorts/panel_theme.dart';
+import 'package:PiliPlus/models_new/video/video_detail/page.dart';
 import 'dart:convert';
 import 'package:PiliPlus/pages/video/shorts/metrics.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
@@ -532,6 +534,7 @@ void main() {
         final captureKey = GlobalKey();
         var commentsOpen = false;
         var danmakuSettings = 0;
+        var episodeOpens = 0;
         final searchedTerms = <String>[];
         Widget build(bool fullscreen) => MaterialApp(
           theme: HarmonyTheme.apply(
@@ -554,13 +557,15 @@ void main() {
               child: ShortVideoFeed(
                 commentsPanel: commentsOpen
                     ? Theme(
-                        data: ThemeData(
-                          brightness: Brightness.dark,
-                          fontFamily: 'shorts-preview',
-                          fontFamilyFallback: const ['shorts-preview-cjk'],
+                        data: shortVideoPanelTheme(
+                          ThemeData(
+                            brightness: Brightness.dark,
+                            fontFamily: 'shorts-preview',
+                            fontFamilyFallback: const ['shorts-preview-cjk'],
+                          ),
                         ),
                         child: Material(
-                          color: const Color(0xFF17181A),
+                          color: const Color(0xFF191A1D),
                           child: Column(
                             children: [
                               ReplyPanelHeader(
@@ -593,7 +598,7 @@ void main() {
                 ),
                 onDetails: () {},
                 onComments: () {},
-                onEpisodes: () {},
+                onEpisodes: () => episodeOpens++,
                 onMore: () {},
                 onDanmakuSettings: () => danmakuSettings++,
                 onSearch: searchedTerms.add,
@@ -654,7 +659,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(player.enableShowDanmaku.value, isTrue);
         final search = find.byKey(const ValueKey('short-related-search'));
-        expect(find.text('搜索 · 折叠屏体验'), findsOneWidget);
+        expect(find.text('折叠屏体验'), findsOneWidget);
         // Very short windows scroll their information area; the search link
         // remains reachable without moving the live player.
         if (!search.hitTestable().evaluate().isNotEmpty) {
@@ -664,6 +669,16 @@ void main() {
         await tester.tap(search);
         await tester.pumpAndSettle();
         expect(searchedTerms, ['折叠屏体验']);
+        final episodes = find.byKey(const ValueKey('short-episodes'));
+        expect(tester.getRect(episodes).top, tester.getRect(search).top);
+        expect(tester.getRect(episodes).height, tester.getRect(search).height);
+        expect(
+          tester.getRect(episodes).left,
+          greaterThan(tester.getRect(search).right),
+        );
+        await tester.tap(episodes);
+        await tester.pumpAndSettle();
+        expect(episodeOpens, 1);
         final infoScroll = find
             .ancestor(of: search, matching: find.byType(SingleChildScrollView))
             .first;
@@ -825,6 +840,36 @@ void main() {
           listener(PlayerStatus.paused);
         }
         await tester.pumpAndSettle();
+        expect(video.shortChromeVisible.value, isFalse);
+        expect(
+          tester
+              .widget<ShortVideoChrome>(find.byType(ShortVideoChrome).first)
+              .visible,
+          isFalse,
+        );
+        expect(find.byType(ShortVideoPausedControls), findsNothing);
+        expect(
+          tester
+              .widget<ShortVideoMinimalControls>(
+                find.byType(ShortVideoMinimalControls),
+              )
+              .showPlayback,
+          isTrue,
+        );
+        expect(tester.getRect(progress), barRect);
+        // Toggling playback never overrides the visibility chosen by a tap.
+        await tester.tap(find.byTooltip('播放'));
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.pumpAndSettle();
+        expect(player.playerStatus, PlayerStatus.playing);
+        expect(video.shortChromeVisible.value, isFalse);
+        expect(player.toggles, 1);
+        video.shortChromeVisible.value = true;
+        player.playerStatus = PlayerStatus.paused;
+        for (final listener in player.listeners.toList()) {
+          listener(PlayerStatus.paused);
+        }
+        await tester.pumpAndSettle();
         expect(
           tester
               .widget<ShortVideoChrome>(find.byType(ShortVideoChrome).first)
@@ -899,14 +944,14 @@ void main() {
         await tester.pumpAndSettle();
         expect(player.playerStatus, PlayerStatus.playing);
         expect(player.resumes, 1);
-        expect(player.toggles, 0);
+        expect(player.toggles, 1);
         expect(find.byType(ShortVideoPausedControls), findsNothing);
-        expect(video.shortChromeVisible.value, isFalse);
+        expect(video.shortChromeVisible.value, isTrue);
         expect(
           tester
               .widget<ShortVideoChrome>(find.byType(ShortVideoChrome).first)
               .visible,
-          isFalse,
+          isTrue,
         );
         expect(playerKey.currentState, same(state));
         player.playerStatus = PlayerStatus.paused;
@@ -1144,6 +1189,10 @@ class _FakeIntro implements UgcIntroController {
   @override
   final videoDetail = VideoDetailData(
     bvid: 'a',
+    pages: [
+      Part(cid: 1, part: '第一节'),
+      Part(cid: 2, part: '第二节'),
+    ],
     title: '很长的视频标题：从单屏展开到三屏时依然可以查看所有操作',
     owner: Owner(mid: 1, name: '测试创作者', face: ''),
     stat: VideoStat.fromJson({
