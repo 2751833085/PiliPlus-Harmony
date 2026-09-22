@@ -26,7 +26,7 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
     off: (event, cb) => { assert.equal(displayListeners.get(event), cb); displayListeners.delete(event); },
   };
   const motion = {
-    HoldingHandStatus: { LEFT_HAND_HELD: 1, RIGHT_HAND_HELD: 2 },
+    HoldingHandStatus: { NOT_HELD: 0, LEFT_HAND_HELD: 1, RIGHT_HAND_HELD: 2, BOTH_HANDS_HELD: 3, UNKNOWN_STATUS: 16 },
     on: (event, cb) => { if (unsupported) throw new Error('801'); motionListeners.set(event, cb); },
     off: (event, cb) => { assert.equal(motionListeners.get(event), cb); motionListeners.delete(event); },
   };
@@ -64,6 +64,22 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
   assert.equal(f.messages.at(-1).side, 'left', 'unknown sample must not move controls');
   f.hand(2); f.flush();
   assert.equal(f.messages.at(-1).side, 'right');
+  f.hand(3);
+  assert.equal(f.messages.at(-1).side, 'right', 'two-hand changes must debounce before moving');
+  f.flush();
+  assert.equal(f.messages.at(-1).side, 'center', 'stable two-hand holding must recenter');
+  assert.equal(f.messages.at(-1).available, true, 'two-hand holding is a supported state');
+  const centeredCount = f.messages.length;
+  f.hand(3); f.flush();
+  assert.equal(f.messages.length, centeredCount, 'duplicate two-hand events must not rebuild controls');
+  f.hand(1); f.flush();
+  assert.equal(f.messages.at(-1).side, 'left', 'single-hand holding resumes after two hands');
+  for (const uncertain of [0, 16]) {
+    f.hand(3); f.hand(uncertain); f.flush();
+    assert.equal(f.messages.at(-1).side, 'left', 'uncertain/no-hand samples must cancel a pending center');
+  }
+  f.hand(3); f.hand(2); f.flush();
+  assert.equal(f.messages.at(-1).side, 'right', 'latest stable grip wins over a pending center');
   f.fold(11);
   assert.equal(f.messages.at(-1).expanded, true, 'tri-fold must clear phone orientation before viewport changes');
   f.flush();
@@ -75,9 +91,15 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
   assert.equal(f.motionListeners.size + f.displayListeners.size + f.timers.size, 0, 'backgrounding removes callbacks and timers');
   f.service.start();
   assert.equal(f.motionListeners.size, 1);
+  f.hand(3);
+  const staleListener = f.motionListeners.get('holdingHandChanged');
   f.service.setHandEnabled(false);
   assert.equal(f.messages.at(-1).side, 'center');
+  assert.equal(f.messages.at(-1).available, false);
   assert.equal(f.motionListeners.size, 0);
+  const disabledCount = f.messages.length;
+  staleListener(1); f.flush();
+  assert.equal(f.messages.length, disabledCount, 'disabled grip must not process queued callbacks');
   f.service.stop();
 }
 {
@@ -96,4 +118,4 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
   assert.equal(f.service.isExpanded(), false);
   f.service.stop();
 }
-console.log('SystemPosture: grip opt-in, debounce, fold transitions, lifecycle and unsupported-device checks passed.');
+console.log('SystemPosture: one/two-hand placement, debounce, unknown samples, opt-in, fold transitions, lifecycle and unsupported-device checks passed.');

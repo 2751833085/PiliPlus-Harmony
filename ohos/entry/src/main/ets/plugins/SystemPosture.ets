@@ -19,14 +19,19 @@ export class SystemPosture {
   constructor(channel: MethodChannel) { this.channel = channel; }
 
   private holdingChanged = (status: motion.HoldingHandStatus): void => {
-    // Uncertain and two-handed samples keep the last stable placement.
+    if (!this.active || !this.handEnabled) return;
+    // Only explicit two-handed holding recenters the controls. Unknown/no-hand
+    // samples cancel a pending move and retain the last stable placement.
     if (this.handTimer >= 0) clearTimeout(this.handTimer);
     this.handTimer = -1;
-    if (status !== motion.HoldingHandStatus.LEFT_HAND_HELD &&
-      status !== motion.HoldingHandStatus.RIGHT_HAND_HELD) return;
-    const side = status === motion.HoldingHandStatus.LEFT_HAND_HELD ? 'left' : 'right';
+    let side: string;
+    switch (status) {
+      case motion.HoldingHandStatus.LEFT_HAND_HELD: side = 'left'; break;
+      case motion.HoldingHandStatus.RIGHT_HAND_HELD: side = 'right'; break;
+      case motion.HoldingHandStatus.BOTH_HANDS_HELD: side = 'center'; break;
+      default: return;
+    }
     if (side === this.side) return;
-    if (this.handTimer >= 0) clearTimeout(this.handTimer);
     this.handTimer = setTimeout(() => {
       this.handTimer = -1;
       this.side = side;

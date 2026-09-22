@@ -76,7 +76,7 @@ List<SettingsModel> get experimentalSettings => [
   SwitchModel(
     section: '折叠屏与握持',
     title: '智感握姿',
-    subtitle: '接入系统握持识别，让悬浮 Dock 靠近握持侧；全屏进度条保持全宽，不支持的设备保持居中',
+    subtitle: '接入系统握持识别：单手时 Dock 靠近握持侧，双手时居中；全屏进度条保持全宽，不支持的设备保持居中',
     leading: const Icon(Icons.back_hand_outlined),
     setKey: SettingBoxKey.harmonyHandedness,
     onChanged: _refreshHarmony,
