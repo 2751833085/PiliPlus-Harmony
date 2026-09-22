@@ -186,13 +186,18 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
     VoidCallback? onLongPress,
   }) => Semantics(
     button: true,
-    label: '$action $label',
+    label: label.isEmpty ? action : '$action $label',
+    excludeSemantics: true,
+    enabled: onTap != null,
+    onTap: onTap,
+    onLongPress: onLongPress,
     selected: selected,
     child: InkWell(
       onTap: onTap,
       onLongPress: onLongPress,
       borderRadius: BorderRadius.circular(20),
-      child: Padding(
+      child: Container(
+        width: 64,
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -204,12 +209,20 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
               shadows: const [Shadow(color: Colors.black54, blurRadius: 6)],
             ),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
+            SizedBox(
+              width: double.infinity,
+              height: MediaQuery.textScalerOf(context).scale(12) * 1.35,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
+                  ),
+                ),
               ),
             ),
           ],
@@ -391,17 +404,15 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                               detail.bvid == session.current.bvid &&
                               !session.switching;
                           final stat = ready ? detail.stat : null;
-                          String count(num? value, String fallback) =>
-                              value == null
-                              ? fallback
-                              : NumUtils.numFormat(value);
+                          String count(num? value) =>
+                              value == null ? '' : NumUtils.numFormat(value);
                           return Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               _action(
                                 icon: Icons.thumb_up_rounded,
                                 action: '点赞',
-                                label: count(stat?.like, '点赞'),
+                                label: count(stat?.like),
                                 selected: ready && widget.intro.hasLike.value,
                                 onTap: ready
                                     ? () => session.interact(
@@ -421,13 +432,13 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                               _action(
                                 icon: Icons.chat_bubble_rounded,
                                 action: '评论',
-                                label: count(stat?.reply, '评论'),
+                                label: count(stat?.reply),
                                 onTap: ready ? widget.onComments : null,
                               ),
                               _action(
                                 icon: Icons.monetization_on_outlined,
                                 action: '投币',
-                                label: count(stat?.coin, '投币'),
+                                label: count(stat?.coin),
                                 selected:
                                     ready && widget.intro.coinNum.value > 0,
                                 onTap: ready
@@ -437,7 +448,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                               _action(
                                 icon: Icons.star_rounded,
                                 action: '收藏',
-                                label: count(stat?.favorite, '收藏'),
+                                label: count(stat?.favorite),
                                 selected: ready && widget.intro.hasFav.value,
                                 onTap: ready
                                     ? () => session.interact(() async {
@@ -462,7 +473,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                               _action(
                                 icon: Icons.reply_rounded,
                                 action: '分享',
-                                label: count(stat?.share, '分享'),
+                                label: count(stat?.share),
                                 onTap: ready
                                     ? () =>
                                           widget.intro.actionShareVideo(context)
@@ -494,22 +505,27 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  if (owner?.face case final face?)
+                                  if (owner != null)
                                     GestureDetector(
                                       onTap: () => Get.toNamed(
-                                        '/member?mid=${owner!.mid}',
+                                        '/member?mid=${owner.mid}',
                                       ),
                                       child: NetworkImgLayer(
-                                        src: face,
-                                        width: 40,
-                                        height: 40,
+                                        key: const ValueKey(
+                                          'short-author-avatar',
+                                        ),
+                                        src: owner.face,
+                                        width: 36,
+                                        height: 36,
                                         type: .avatar,
                                       ),
                                     ),
                                   const SizedBox(width: 8),
-                                  Expanded(
+                                  Flexible(
                                     child: InkWell(
+                                      key: const ValueKey('short-author-info'),
                                       onTap: owner?.mid == null
                                           ? null
                                           : () => Get.toNamed(
@@ -518,6 +534,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
                                             owner?.name ?? '',
@@ -525,7 +542,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
                                               color: Colors.white,
-                                              fontSize: 16,
+                                              fontSize: 14,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -542,15 +559,17 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
                                                 color: Colors.white70,
-                                                fontSize: 12,
+                                                fontSize: 11,
                                               ),
                                             ),
                                         ],
                                       ),
                                     ),
                                   ),
-                                  if (ready && owner != null)
+                                  if (ready && owner != null) ...[
+                                    const SizedBox(width: 10),
                                     TextButton(
+                                      key: const ValueKey('short-follow'),
                                       style: TextButton.styleFrom(
                                         backgroundColor: const Color(
                                           0xFFDB4C7F,
@@ -559,7 +578,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12,
                                         ),
-                                        minimumSize: const Size(0, 30),
+                                        minimumSize: const Size(0, 32),
+                                        shape: const StadiumBorder(),
                                       ),
                                       onPressed: () => widget.intro
                                           .actionRelationMod(context),
@@ -579,9 +599,10 @@ class _ShortVideoFeedState extends State<ShortVideoFeed> {
                                         ),
                                       ),
                                     ),
+                                  ],
                                 ],
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: widget.onDetails,
                                 child: Text(

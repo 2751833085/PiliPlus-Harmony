@@ -1,3 +1,4 @@
+import 'package:PiliPlus/models_new/video/video_detail/stat.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/panel_header.dart';
 import 'package:PiliPlus/common/widgets/progress_bar/audio_video_progress_bar.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -359,12 +360,17 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetPhysicalSize);
-      for (final size in const [
-        Size(390, 844),
-        Size(320, 640),
-        Size(840, 800),
-        Size(600, 320),
+      for (final scenario in const [
+        (size: Size(392, 2560 / 3), ratio: 3 / 4, label: '3x4', scale: 1.0),
+        (size: Size(390, 844), ratio: 9 / 16, label: '9x16', scale: 1.0),
+        (size: Size(390, 844), ratio: 16 / 9, label: '16x9', scale: 1.0),
+        (size: Size(320, 640), ratio: 9 / 16, label: '9x16', scale: 1.8),
+        (size: Size(840, 800), ratio: 9 / 16, label: '9x16', scale: 1.8),
+        (size: Size(600, 320), ratio: 9 / 16, label: '9x16', scale: 1.8),
       ]) {
+        final size = scenario.size;
+        final previewSuffix = '${size.width.toInt()}-${scenario.label}';
+        const insets = EdgeInsets.only(top: 32, bottom: 24);
         tester.view.physicalSize = size;
         final session = ShortVideoSession(
           initial: const ShortVideoEntry(
@@ -379,6 +385,7 @@ void main() {
         );
         final player = _FakePlayer();
         final video = _FakeVideo(player);
+        final intro = _FakeIntro();
         final playerKey = GlobalKey();
         final captureKey = GlobalKey();
         var commentsOpen = false;
@@ -392,7 +399,9 @@ void main() {
           home: MediaQuery(
             data: MediaQueryData(
               size: size,
-              textScaler: TextScaler.linear(size.width == 390 ? 1 : 1.8),
+              textScaler: TextScaler.linear(scenario.scale),
+              padding: insets,
+              viewPadding: insets,
             ),
             child: RepaintBoundary(
               key: captureKey,
@@ -429,8 +438,12 @@ void main() {
                     : null,
                 session: session,
                 video: video,
-                intro: _FakeIntro(),
-                playerBuilder: (_, __) => _PlayerFixture(key: playerKey),
+                intro: intro,
+                playerBuilder: (_, __) => _PlayerFixture(
+                  key: playerKey,
+                  aspectRatio: scenario.ratio,
+                  ratioLabel: scenario.label,
+                ),
                 onDetails: () {},
                 onComments: () {},
                 onEpisodes: () {},
@@ -445,6 +458,68 @@ void main() {
         expect(find.byTooltip('普通详情'), findsOneWidget);
         expect(find.byType(ShortVideoControls), findsOneWidget);
         expect(tester.takeException(), isNull);
+        for (final label in ['点赞', '评论', '投币', '收藏', '分享']) {
+          expect(find.text(label), findsNothing);
+        }
+        expect(find.text('133'), findsOneWidget);
+        final author = find.byKey(const ValueKey('short-author-info'));
+        final follow = find.byKey(const ValueKey('short-follow'));
+        final avatar = find.byKey(const ValueKey('short-author-avatar'));
+        final authorRect = tester.getRect(author);
+        final followRect = tester.getRect(follow);
+        expect(followRect.left - authorRect.right, closeTo(10, .1));
+        expect(followRect.center.dy, closeTo(authorRect.center.dy, .1));
+        expect(tester.getSize(avatar), const Size(36, 36));
+        final videoFrame = find.byKey(const ValueKey('fixture-video-frame'));
+        final frameRect = tester.getRect(videoFrame);
+        expect(
+          frameRect.width / frameRect.height,
+          closeTo(scenario.ratio, .001),
+        );
+        expect(frameRect.top, greaterThanOrEqualTo(insets.top));
+        expect(
+          frameRect.bottom,
+          lessThanOrEqualTo(size.height - insets.bottom - 72),
+        );
+        // Missing counts keep the icon and row geometry, without fake zeros or names.
+        final likeRect = tester.getRect(find.byIcon(Icons.thumb_up_rounded));
+        final originalStats = intro.videoDetail.value.stat;
+        intro.videoDetail.value.stat = null;
+        intro.videoDetail.refresh();
+        await tester.pumpAndSettle();
+        for (final label in ['点赞', '评论', '投币', '收藏', '分享']) {
+          expect(find.text(label), findsNothing);
+        }
+        expect(find.text('133'), findsNothing);
+        expect(tester.getRect(find.byIcon(Icons.thumb_up_rounded)), likeRect);
+        intro.videoDetail.value.stat = originalStats;
+        intro.videoDetail.refresh();
+        await tester.pumpAndSettle();
+        // Long names and the followed state must not push this control away
+        // from the author or overlap the action column.
+        final originalOwner = intro.videoDetail.value.owner;
+        intro.videoDetail.value.owner = Owner(
+          mid: 1,
+          name: '测试创作者的特别长的名字用于窄屏与大字号检查',
+          face: '',
+        );
+        intro.videoDetail.refresh();
+        intro.followStatus.value = RelationData(attribute: 2);
+        await tester.pumpAndSettle();
+        expect(find.text('已关注'), findsOneWidget);
+        expect(
+          tester.getRect(follow).left - tester.getRect(author).right,
+          closeTo(10, .1),
+        );
+        expect(
+          tester.getRect(follow).right,
+          lessThanOrEqualTo(size.width - 68),
+        );
+        expect(tester.takeException(), isNull);
+        intro.videoDetail.value.owner = originalOwner;
+        intro.videoDetail.refresh();
+        intro.followStatus.value = RelationData(attribute: 0);
+        await tester.pumpAndSettle();
         const renderPath = String.fromEnvironment('SHORTS_RENDER_PATH');
         if (renderPath.isNotEmpty) {
           await tester.runAsync(() async {
@@ -456,7 +531,7 @@ void main() {
               format: ui.ImageByteFormat.png,
             );
             await File(
-              '$renderPath-${size.width.toInt()}.png',
+              '$renderPath-$previewSuffix.png',
             ).writeAsBytes(bytes!.buffer.asUint8List());
             image.dispose();
           });
@@ -464,7 +539,7 @@ void main() {
         // Adjacent covers are already built and use the same video rectangle,
         // including footer reservation. No vertical jump at cover/live handoff.
         final covers = find.byWidgetPredicate(
-          (w) => w is NetworkImgLayer && w.src == '',
+          (w) => w is NetworkImgLayer && w.src == '' && w.type != .avatar,
           skipOffstage: false,
         );
         expect(covers, findsNWidgets(2));
@@ -496,7 +571,7 @@ void main() {
         expect(tester.getRect(progress), barRect);
         expect(tester.getRect(find.byType(_PlayerFixture)), playerRect);
         final pauseRect = tester.getRect(find.byIcon(Icons.pause_rounded));
-        expect(pauseRect.top, greaterThan(size.height - 130));
+        expect(pauseRect.top, greaterThan(size.height - insets.bottom - 130));
         expect(pauseRect.left, greaterThanOrEqualTo(barRect.left));
         expect(pauseRect.bottom, lessThanOrEqualTo(barRect.top + 2));
         await tester.drag(progress, const Offset(50, 0));
@@ -549,7 +624,7 @@ void main() {
               format: ui.ImageByteFormat.png,
             );
             await File(
-              '$renderPath-paused-${size.width.toInt()}.png',
+              '$renderPath-paused-$previewSuffix.png',
             ).writeAsBytes(bytes!.buffer.asUint8List());
             image.dispose();
           });
@@ -618,7 +693,7 @@ void main() {
               format: ui.ImageByteFormat.png,
             );
             await File(
-              '$renderPath-comments-${size.width.toInt()}.png',
+              '$renderPath-comments-$previewSuffix.png',
             ).writeAsBytes(bytes!.buffer.asUint8List());
             image.dispose();
           });
@@ -659,16 +734,49 @@ void main() {
 }
 
 class _PlayerFixture extends StatefulWidget {
-  const _PlayerFixture({super.key});
+  const _PlayerFixture({
+    super.key,
+    this.aspectRatio = 9 / 16,
+    this.ratioLabel = '9x16',
+  });
+  final double aspectRatio;
+  final String ratioLabel;
   @override
   State<_PlayerFixture> createState() => _PlayerFixtureState();
 }
 
 class _PlayerFixtureState extends State<_PlayerFixture> {
   @override
-  Widget build(BuildContext context) => const ColoredBox(
+  Widget build(BuildContext context) => ColoredBox(
     color: Colors.black,
-    child: Center(child: Text('player')),
+    child: Center(
+      child: AspectRatio(
+        aspectRatio: widget.aspectRatio,
+        child: DecoratedBox(
+          key: const ValueKey('fixture-video-frame'),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF53756D), Color(0xFF294354), Color(0xFF705F43)],
+            ),
+            border: Border.all(color: Colors.white24),
+          ),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 60, 12, 12),
+              child: Text(
+                '${widget.ratioLabel} · 测试画面',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }
 
@@ -764,7 +872,15 @@ class _FakeIntro implements UgcIntroController {
   final videoDetail = VideoDetailData(
     bvid: 'a',
     title: '很长的视频标题：从单屏展开到三屏时依然可以查看所有操作',
-    owner: Owner(mid: 1, name: '测试创作者的较长名字'),
+    owner: Owner(mid: 1, name: '测试创作者', face: ''),
+    stat: VideoStat.fromJson({
+      'view': 77000,
+      'like': 14000,
+      'reply': 133,
+      'coin': 584,
+      'favorite': 8312,
+      'share': 297,
+    }),
   ).obs;
   @override
   final followStatus = RelationData(attribute: 0).obs;
