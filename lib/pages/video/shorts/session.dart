@@ -47,7 +47,11 @@ class ShortVideoSession extends ChangeNotifier {
   bool interacting = false;
   bool loading = false;
   String? error;
-  List<ShortVideoEntry> get entries => List.unmodifiable(_entries);
+  // Buffering, gestures and playback notify often without editing the queue.
+  // Reuse its immutable snapshot until an entry actually changes.
+  List<ShortVideoEntry>? _entriesSnapshot;
+  List<ShortVideoEntry> get entries =>
+      _entriesSnapshot ??= List.unmodifiable(_entries);
   int get index => _index;
   ShortVideoEntry get current => _entries[_index];
   bool get hasNext => _index + 1 < _entries.length;
@@ -67,7 +71,10 @@ class ShortVideoSession extends ChangeNotifier {
       if (_disposed || generation != _generation) return;
       final seen = _entries.map((e) => e.bvid).toSet();
       for (final entry in incoming) {
-        if (_allows(entry) && seen.add(entry.bvid)) _entries.add(entry);
+        if (_allows(entry) && seen.add(entry.bvid)) {
+          _entries.add(entry);
+          _entriesSnapshot = null;
+        }
       }
       _fetched.add(seed.bvid);
     } catch (_) {
@@ -142,6 +149,7 @@ class ShortVideoSession extends ChangeNotifier {
       _entries
         ..clear()
         ..addAll(fresh);
+      _entriesSnapshot = null;
       _fetched.clear();
       _index = 0;
       return true;
@@ -186,6 +194,7 @@ class ShortVideoSession extends ChangeNotifier {
       if (_disposed || generation != _generation) return false;
       _hidden.add(rejected);
       _entries.replaceRange(_index, _entries.length, candidates);
+      _entriesSnapshot = null;
       return true;
     } catch (_) {
       if (!_disposed) error = '暂时无法切换视频，本次未隐藏，请稍后重试';
@@ -224,6 +233,7 @@ class ShortVideoSession extends ChangeNotifier {
   void syncCurrent(ShortVideoEntry entry) {
     if (_disposed || switching || refreshing) return;
     _entries[_index] = entry;
+    _entriesSnapshot = null;
     notifyListeners();
   }
 

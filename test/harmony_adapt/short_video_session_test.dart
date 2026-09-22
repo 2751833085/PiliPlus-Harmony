@@ -156,6 +156,42 @@ void main() {
       session.dispose();
     },
   );
+  test(
+    'entry snapshots are reused for state changes and replaced after queue edits',
+    () async {
+      final session = ShortVideoSession(
+        initial: a,
+        loadRelated: (_) async => [b],
+        loadFresh: () async => const [ShortVideoEntry(bvid: 'fresh')],
+        play: (_) async => true,
+      );
+      addTearDown(session.dispose);
+      final initial = session.entries;
+      expect(session.entries, same(initial));
+      expect(() => initial.add(b), throwsUnsupportedError);
+      await session.loadMore();
+      final loaded = session.entries;
+      expect(loaded, isNot(same(initial)));
+      expect(initial.map((e) => e.bvid), ['a']);
+      expect(loaded.map((e) => e.bvid), ['a', 'b']);
+      await session.select(1);
+      await session.interact(() {});
+      expect(session.entries, same(loaded));
+      session.syncCurrent(const ShortVideoEntry(bvid: 'episode', cid: 42));
+      final synced = session.entries;
+      expect(synced.map((e) => e.bvid), ['a', 'episode']);
+      expect(loaded.map((e) => e.bvid), ['a', 'b']);
+      await session.select(0);
+      expect(await session.dismissCurrent(), isTrue);
+      expect(session.entries.map((e) => e.bvid), ['episode']);
+      expect(synced.map((e) => e.bvid), ['a', 'episode']);
+      final dismissed = session.entries;
+      expect(await session.refresh(), isTrue);
+      expect(session.entries.map((e) => e.bvid), ['fresh']);
+      expect(dismissed.map((e) => e.bvid), ['episode']);
+    },
+  );
+
   test('failed account interaction releases the gesture lock', () async {
     final session = ShortVideoSession(
       initial: a,

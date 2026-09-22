@@ -33,6 +33,9 @@ class ShortMediaCache {
   final Dio client;
   final Map<String, _Prefix> _entries = {};
   final Map<String, _PendingPrefix> _pending = {};
+  // Keep issued addresses valid until their source leaves the moving window.
+  // A failed warmup may already have handed its loopback URL to the decoder.
+  final Map<String, String> _tokens = {};
   // Includes the outgoing decoder during a source handoff.
   static const maxStreams = 10;
   static const maxPrefixBytes = 1024 * 1024;
@@ -54,12 +57,16 @@ class ShortMediaCache {
         _entries.containsKey(url) ||
         _pending.containsKey(url))
       return;
-    if ({..._entries.keys, ..._pending.keys}.length >= maxStreams || limit <= 0)
+    if ((!_tokens.containsKey(url) && _tokens.length >= maxStreams) ||
+        limit <= 0)
       return;
     limit = math.min(limit, maxPrefixBytes);
     final uri = Uri.tryParse(url);
     if (uri == null || !['http', 'https'].contains(uri.scheme)) return;
-    final pending = _PendingPrefix('$_secret/${_id++}', cancel);
+    final pending = _PendingPrefix(
+      _tokens.putIfAbsent(url, () => '$_secret/${_id++}'),
+      cancel,
+    );
     _pending[url] = pending;
     try {
       await (_starting ??= HttpServer.bind(InternetAddress.loopbackIPv4, 0)
@@ -168,6 +175,7 @@ class ShortMediaCache {
 
   bool contains(String? url) => url != null && _entries.containsKey(url);
   void retain(Set<String> urls) {
+    _tokens.removeWhere((url, _) => !urls.contains(url));
     _entries.removeWhere((url, _) => !urls.contains(url));
     for (final url in _pending.keys.toList()) {
       if (!urls.contains(url)) {
@@ -180,6 +188,7 @@ class ShortMediaCache {
 
   void evict(String? url) {
     if (url == null) return;
+    _tokens.remove(url);
     _entries.remove(url);
     final pending = _pending.remove(url);
     if (pending != null) {
@@ -192,6 +201,11 @@ class ShortMediaCache {
     final response = request.response;
     CancelToken? cancel;
     try {
+      if (request.method != 'GET' && request.method != 'HEAD') {
+        response.statusCode = 405;
+        await response.close();
+        return;
+      }
       final pending = _pending.values
           .where((p) => '/${p.token}' == request.uri.path)
           .firstOrNull;
@@ -201,13 +215,22 @@ class ShortMediaCache {
               .firstOrNull ??
           (pending == null ? null : await pending.ready.future);
 
-      if (_closed || prefix == null) {
+      final origin = _tokens.entries
+          .where((entry) => '/${entry.value}' == request.uri.path)
+          .firstOrNull
+          ?.key;
+      if (_closed || origin == null) {
         response.statusCode = 404;
         await response.close();
         return;
       }
-      if (request.method != 'GET' && request.method != 'HEAD') {
-        response.statusCode = 405;
+      if (prefix == null) {
+        // Speculation is optional: preserve the decoder's request method and
+        // Range header by redirecting to the original source, without waiting
+        // for the player's slower error/reinitialization fallback.
+        response.statusCode = HttpStatus.temporaryRedirect;
+        response.headers.set(HttpHeaders.locationHeader, origin);
+        response.headers.set(HttpHeaders.cacheControlHeader, 'no-store');
         await response.close();
         return;
       }

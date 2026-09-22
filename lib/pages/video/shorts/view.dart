@@ -75,16 +75,17 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
   }
 
   void _warmWindow() {
+    final entries = session.entries;
     final index = (_targetIndex ?? session.index).clamp(
       0,
-      session.entries.length - 1,
+      entries.length - 1,
     );
     // Buffered-byte updates only warm the next sources. Preview changes have
     // their own revision listener; rebuilding here also rebuilds the live page.
     unawaited(
       widget.video.preloadShortWindow([
-        if (index != session.index) session.entries[index],
-        ...session.entries.skip(index + 1).take(3),
+        if (index != session.index) entries[index],
+        ...entries.skip(index + 1).take(3),
       ]),
     );
   }

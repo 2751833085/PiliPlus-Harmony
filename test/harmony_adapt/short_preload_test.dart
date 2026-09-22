@@ -188,6 +188,80 @@ void main() {
     },
   );
 
+  test(
+    'a decoder already joining a failed warmup falls back to the origin',
+    () async {
+      final requested = Completer<void>();
+      final release = Completer<void>();
+      final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final bytes = List.generate(1024, (i) => i % 251);
+      var calls = 0;
+      origin.listen((request) async {
+        if (++calls == 1) {
+          requested.complete();
+          await release.future;
+          request.response.statusCode = 503;
+        } else {
+          request.response.headers.set('Content-Type', 'video/mp4');
+          final range = request.headers.value('range');
+          final data = range == 'bytes=100-127'
+              ? bytes.sublist(100, 128)
+              : bytes;
+          if (range == 'bytes=100-127') {
+            request.response.statusCode = 206;
+            request.response.headers.set('Content-Range', 'bytes 100-127/1024');
+          }
+          request.response.contentLength = data.length;
+          request.response.add(data);
+        }
+        await request.response.close();
+      });
+      final client = Dio();
+      final decoder = Dio(BaseOptions(responseType: ResponseType.bytes));
+      final cache = ShortMediaCache(client);
+      addTearDown(() async {
+        await cache.dispose();
+        client.close(force: true);
+        decoder.close(force: true);
+        await origin.close(force: true);
+      });
+      final url = 'http://127.0.0.1:${origin.port}/clip';
+      final warming = cache.warm(url, bytes.length, CancelToken());
+      final local = await cache.playbackSourceFor(url);
+      expect(local, isNot(url));
+      await requested.future;
+      release.complete();
+      await warming;
+      final redirect = await decoder.head(
+        local,
+        options: Options(followRedirects: false, validateStatus: (_) => true),
+      );
+      expect(redirect.statusCode, 307);
+      expect(redirect.headers.value('location'), url);
+      expect(redirect.headers.value('cache-control'), 'no-store');
+      final result = await decoder.get<List<int>>(local);
+      expect(result.data, bytes);
+      expect(calls, 2);
+      final ranged = await decoder.get<List<int>>(
+        local,
+        options: Options(headers: {'Range': 'bytes=100-127'}),
+      );
+      expect(ranged.statusCode, 206);
+      expect(ranged.data, bytes.sublist(100, 128));
+      expect(cache.sourceFor(url), url);
+      // Retrying the same source keeps the address already held by the decoder.
+      await cache.warm(url, bytes.length, CancelToken());
+      expect(cache.sourceFor(url), local);
+      expect(cache.bytesHeld, bytes.length);
+      cache.retain({});
+      final evicted = await decoder.get(
+        local,
+        options: Options(validateStatus: (_) => true),
+      );
+      expect(evicted.statusCode, 404);
+    },
+  );
+
   group('real HTTP prefix reuse', () {
     late HttpServer origin;
     late Dio originClient, decoder;

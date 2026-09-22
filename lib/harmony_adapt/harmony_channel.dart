@@ -146,7 +146,9 @@ abstract class HarmonyChannel {
     if (!OS.isHarmony) return;
     try {
       await _channel.invokeMethod(method, args);
-    } on PlatformException catch (_) {}
+    } on PlatformException catch (_) {
+      // Optional shell integration must not interrupt Flutter navigation.
+    } on MissingPluginException catch (_) {}
   }
 
   /// 向原生发送 shell 配置（Flutter 侧计算后通知 ArkTS）
@@ -175,6 +177,7 @@ abstract class HarmonyChannel {
 
   /// HDS 底栏当前是否为显示状态
   static bool _hiddenByPage = false;
+  static int _shellVisibilityRevision = 0;
   static bool get hdsBarVisible => !_hiddenByPage;
 
   /// 控制原生 HDS 底栏/顶栏的显隐（弹窗、全屏页等场景）
@@ -185,16 +188,20 @@ abstract class HarmonyChannel {
   }) async {
     if (!OS.isHarmony) return;
     _hiddenByPage = hidden;
+    final revision = ++_shellVisibilityRevision;
     final int total = retry ? 8 : 1;
     for (int i = 0; i < total; i++) {
+      if (revision != _shellVisibilityRevision) return;
       try {
-        _channel.invokeMethod('setShellBarsHidden', {
+        await _channel.invokeMethod('setShellBarsHidden', {
           'hidden': hidden,
           'force': force,
         });
         return;
+      } on MissingPluginException catch (_) {
+        return;
       } catch (_) {
-        if (i == total - 1) return;
+        if (i == total - 1 || revision != _shellVisibilityRevision) return;
         await Future<void>.delayed(const Duration(milliseconds: 120));
       }
     }
@@ -251,23 +258,19 @@ abstract class HarmonyChannel {
   static Future<void> setTopBarHidden(bool hidden) async {
     if (!OS.isHarmony) return;
     _topBarHiddenByRoute = hidden;
-    try {
-      _channel.invokeMethod('setTopBarHidden', {
-        'hidden': _topBarHiddenByRoute || _topBarHiddenByTab,
-      });
-    } on PlatformException catch (_) {}
+    await _syncTopBarHidden();
   }
 
   /// 非首页页签（动态/我的）时隐藏顶栏（仅首页显示）
   static Future<void> setTopBarTabHidden(bool hidden) async {
     if (!OS.isHarmony) return;
     _topBarHiddenByTab = hidden;
-    try {
-      _channel.invokeMethod('setTopBarHidden', {
-        'hidden': _topBarHiddenByRoute || _topBarHiddenByTab,
-      });
-    } on PlatformException catch (_) {}
+    await _syncTopBarHidden();
   }
+
+  static Future<void> _syncTopBarHidden() => _invoke('setTopBarHidden', {
+    'hidden': _topBarHiddenByRoute || _topBarHiddenByTab,
+  });
 
   /// 同步 Flutter 页签切换到 ArkTS HdsTabs
   static Future<void> changeTabIndex(int index) =>
@@ -324,7 +327,7 @@ abstract class HarmonyChannel {
   }
 
   static void _setContinuationActive(bool active) {
-    _channel.invokeMethod('setContinuationActive', {'active': active});
+    _invoke('setContinuationActive', {'active': active});
   }
 
   /// 测试用，ai生成信息请忽略这部分更改
@@ -416,7 +419,7 @@ abstract class HarmonyChannel {
   }
 
   static void _setMiniWindowLandscape(bool landscape) {
-    _channel.invokeMethod('setMiniWindowLandscape', {'landscape': landscape});
+    _invoke('setMiniWindowLandscape', {'landscape': landscape});
   }
 
   /// 启动时（runApp 之前）拉取窗口初始状态（是否自由多窗 / 受限窗口模式），
