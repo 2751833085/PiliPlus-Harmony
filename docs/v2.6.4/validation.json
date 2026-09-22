@@ -1,0 +1,38 @@
+{
+  "recorded_at": "2026-09-22T02:15:25.233237+00:00",
+  "version": "2.6.4+6090",
+  "base_commit": "0dcded5a9336121a07630b7b7c826ff53d497db5",
+  "artifact_sha256": "ef0d03ffee158c72f5c32e2f44cb1d05dda359e777d0581167a248f81637aa22",
+  "checks": {
+    "flutter_tests_passed": 72,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "widget_preview": "320x640, 840x800, 600x320; 1.8 text scale; fixture media, reason sheet and compact header",
+    "mode_transition": "one player State; reentry guard; reduced motion; cancellation on disposal",
+    "local_feedback": "reason selection/cancellation/restore; persistence; middle/last dismissal; failed replacement; stale callback isolation; retained pager/player"
+  },
+  "device": {
+    "target": "HUAWEI Mate XTS",
+    "overwrite_install": "passed",
+    "installed_version": "2.6.4",
+    "installed_version_code": 6090,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "app_id_preserved": true,
+    "app_identifier_preserved": true,
+    "launch": "blocked_screen_locked",
+    "launch_error_code": 10106102,
+    "uninstalled_or_cleared_data": false
+  },
+  "not_verified": [
+    "real-device mode transitions, comments and nested replies, and local feedback on this HAP",
+    "native playback and frame timing on this exact HAP"
+  ],
+  "remote_push": false
+}
