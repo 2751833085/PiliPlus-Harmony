@@ -1,0 +1,40 @@
+{
+  "recorded_at": "2026-09-22T00:50:41.595747+00:00",
+  "version": "2.6.2+6088",
+  "base_commit": "c19d9ad79c9a29212937ca799b273ea54263b3ff",
+  "artifact_sha256": "ac3fa4a4dc6ee084a07764a96acc0cfa4b983540b15adb32612445fc794f686f",
+  "checks": {
+    "flutter_tests_passed": 63,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "paging": "no source open before snap; reverse past half; serial latest target across four pages; same player state retained",
+    "layout": "cover/player size equality at 320x640, 840x800, 600x320 with 1.8 text scale",
+    "autoplay": "real VideoDetailController with ordinary autoplay disabled; feed entry and reset enable autoplay without preference writes"
+  },
+  "device": {
+    "target": "HUAWEI Mate XTS",
+    "overwrite_install": "passed",
+    "installed_version": "2.6.2",
+    "installed_version_code": 6088,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "app_id_preserved": true,
+    "app_identifier_preserved": true,
+    "launch": "blocked_screen_locked",
+    "launch_error_code": 10106102,
+    "uninstalled_or_cleared_data": false
+  },
+  "not_verified": [
+    "real-device scrolling frame times and subjective continuity",
+    "native first frame, preload consumption and sustained playback",
+    "physical fold transitions on this exact HAP",
+    "all upstream features and real account write actions"
+  ],
+  "remote_push": false
+}
