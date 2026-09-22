@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-09-22T00:33:39.519110+00:00",
+  "version": "2.6.1+6087",
+  "base_commit": "09da7f1f08254255b34a00ca8e0f2aeacf8eb04d",
+  "artifact_sha256": "24530514c25e68116a121b5c73a383ddc3fa33fb2c8de09bcfda2ecbe9db63df",
+  "checks": {
+    "flutter_tests_passed": 60,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "native_posture_isolated_tests": "passed",
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "widget_layout_preview": "320x640, 840x800, 600x320 at 1.8 text scale; normal and minimal chrome, fixture media"
+  },
+  "device": {
+    "target": "HUAWEI Mate XTS",
+    "connected_targets": 0,
+    "overwrite_install": "not_attempted_no_device",
+    "launch": "not_attempted_no_device",
+    "uninstalled_or_cleared_data": false
+  },
+  "not_verified": [
+    "V2.6.1 real-device playback, native prefix cache consumption and fallback",
+    "first-frame latency, rapid paging and sustained overseas bandwidth",
+    "physical fold and grip behavior on this exact HAP",
+    "power, frame time, total memory and long playback sessions",
+    "real account write actions",
+    "all 147 upstream feature matrix entries"
+  ],
+  "remote_push": false
+}
