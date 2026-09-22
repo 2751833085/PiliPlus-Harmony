@@ -58,16 +58,21 @@ class AppBarAni extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final isPortrait = size.height >= size.width;
     var top = portraitFullscreenTopInset(
       isFullScreen: isFullScreen,
-      isPortrait:
-          MediaQuery.sizeOf(context).height >= MediaQuery.sizeOf(context).width,
+      isPortrait: isPortrait,
       removeSafeArea: removeSafeArea,
       topInset: topInset,
     );
     // 鸿蒙自由多窗全屏：顶部沉浸后系统三键仍悬浮在窗口右上角，顶栏得避开，
     // 否则右上角图标点不到。见 [harmonyDecorTopInset]。
     if (isTop && isFullScreen && !removeSafeArea) {
+      // Unfolded displays can retain a top cutout in a landscape viewport.
+      // Do not assume landscape only needs left/right avoidance.
+      final safeTop = MediaQuery.viewPaddingOf(context).top;
+      if (!isPortrait && safeTop > (top ?? 0)) top = safeTop;
       final decorTop = harmonyDecorTopInset(context);
       if (decorTop != null && decorTop > (top ?? 0)) {
         top = decorTop;
@@ -78,6 +83,7 @@ class AppBarAni extends StatelessWidget {
       result = ViewSafeArea(
         left: isFullScreen,
         right: isFullScreen,
+        bottom: isFullScreen && !isTop,
         child: result,
       );
       // 与弹幕共用同一套顶部避让（TopInsetPadding），

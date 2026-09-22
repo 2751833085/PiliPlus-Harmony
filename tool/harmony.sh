@@ -91,6 +91,7 @@ data = {
     'pili.time': int(git('show', '-s', '--format=%ct', 'HEAD')),
     'ENABLE_FLEX_OVERFLOW': False,
     'HARMONY_LAYOUT_DIAGNOSTICS': os.environ.get('HARMONY_LAYOUT_DIAGNOSTICS') == '1',
+    'HARMONY_QA_GUEST': os.environ.get('HARMONY_QA_GUEST') == '1',
 }
 Path('build/harmony/env.json').write_text(json.dumps(data) + '\n')
 PY
@@ -104,7 +105,8 @@ suffix = '*-signed.hap' if os.environ['HARMONY_SIGNED'] == '1' else '*-unsigned.
 paths = list(Path('ohos/entry/build').rglob(suffix))
 if not paths:
     raise SystemExit('Build returned without producing a HAP.')
-output = Path(os.environ['HARMONY_SOURCE_ROOT']) / 'build/harmony' / os.environ['HARMONY_BUILD_MODE']
+output_name = os.environ['HARMONY_BUILD_MODE'] + ('-guest-qa' if os.environ.get('HARMONY_QA_GUEST') == '1' else '')
+output = Path(os.environ['HARMONY_SOURCE_ROOT']) / 'build/harmony' / output_name
 output.mkdir(parents=True, exist_ok=True)
 for path in paths:
     with zipfile.ZipFile(path) as archive:
@@ -135,6 +137,7 @@ for path in paths:
         'app': module['app'], 'device_types': module['module']['deviceTypes'],
         'libmpv_sha256': mpv_digest,
         'layout_diagnostics': os.environ.get('HARMONY_LAYOUT_DIAGNOSTICS') == '1',
+        'qa_guest_isolated': os.environ.get('HARMONY_QA_GUEST') == '1',
     }
     target.with_suffix('.build.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n')
     print(f'{target}\nSHA256 {digest}')

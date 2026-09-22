@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/mine/widgets/recent_history.dart';
+import 'package:PiliPlus/pages/history/open_item.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_quick_actions.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:async';
@@ -93,6 +95,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                     children: [
                       _buildUserInfo(theme, secondary),
                       _buildActions(secondary),
+                      _buildRecentHistory(),
                       Obx(
                         () => controller.loadingState.value is Loading
                             ? const SizedBox.shrink()
@@ -189,7 +192,14 @@ class _MediaPageState extends CommonPageState<MinePage>
                                   ),
                                 ),
                                 const SizedBox(width: 14),
-                                Expanded(child: favorites),
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      _buildRecentHistory(harmony: true),
+                                      favorites,
+                                    ],
+                                  ),
+                                ),
                               ],
                             )
                           else ...[
@@ -197,6 +207,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                             const SizedBox(height: 10),
                             actions,
                             const SizedBox(height: 10),
+                            _buildRecentHistory(harmony: true),
                             favorites,
                           ],
                         ],
@@ -210,6 +221,33 @@ class _MediaPageState extends CommonPageState<MinePage>
         ),
       ),
     ),
+  );
+
+  Widget _buildRecentHistory({bool harmony = false}) => ListenableBuilder(
+    listenable: controller.recentHistory,
+    builder: (context, _) {
+      if (!controller.recentHistory.enabled) return const SizedBox.shrink();
+      final child = MineHistoryPreview(
+        history: controller.recentHistory,
+        onOpen: (item) async {
+          await openHistoryItem(item);
+          if (mounted) controller.recentHistory.refresh();
+        },
+        onViewAll: () => Get.toNamed('/history')?.whenComplete(() {
+          if (mounted) controller.recentHistory.refresh();
+        }),
+        onLogin: () => Get.toNamed('/loginPage'),
+      );
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: harmony
+            ? ImmersiveSurface(
+                borderRadius: HarmonyTheme.cardRadius,
+                child: child,
+              )
+            : child,
+      );
+    },
   );
 
   Widget _buildActions(Color primary) {
@@ -624,7 +662,16 @@ class _MediaPageState extends CommonPageState<MinePage>
           }
           bool flag = (controller.favFolderCount ?? 0) > favFolderList.length;
           return SizedBox(
-            height: 200,
+            height:
+                148 +
+                MediaQuery.textScalerOf(
+                      context,
+                    ).scale(theme.textTheme.bodyMedium?.fontSize ?? 14) *
+                    1.5 +
+                MediaQuery.textScalerOf(
+                      context,
+                    ).scale(theme.textTheme.labelSmall?.fontSize ?? 11) *
+                    1.5,
             child: ListView.separated(
               controller: controller.scrollController,
               padding: const .only(left: 20, top: 10, right: 20),

@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 abstract final class SettingBoxKey {
+  static const String showMineHistory = 'showMineHistory';
   static const String biliPlayerControls = 'biliPlayerControls';
   static const String overseasMode = 'overseasMode';
   static const String shortSwipeLeft = 'shortSwipeLeft';

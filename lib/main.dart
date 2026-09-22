@@ -8,6 +8,7 @@ import 'package:PiliPlus/common/widgets/route_aware_mixin.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/scroll_behavior.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
+import 'package:PiliPlus/harmony_adapt/qa_profile.dart';
 import 'package:PiliPlus/harmony_adapt/shell_bars_observer.dart';
 import 'package:PiliPlus/http/init.dart';
 import 'package:PiliPlus/models/common/theme/theme_color_type.dart';
@@ -58,6 +59,11 @@ WebViewEnvironment? webViewEnvironment;
 EdgeInsets? tmpPadding;
 
 Future<void> _initDownPath() async {
+  if (QaProfile.guest) {
+    downloadPath = defDownloadPath;
+    await Directory(downloadPath).create(recursive: true);
+    return;
+  }
   if (PlatformUtils.isDesktop) {
     final customDownPath = Pref.downloadPath;
     if (customDownPath != null && customDownPath.isNotEmpty) {
@@ -90,11 +96,14 @@ Future<void> _initDownPath() async {
 }
 
 Future<void> _initTmpPath() async {
-  tmpDirPath = (await getTemporaryDirectory()).path;
+  tmpDirPath = QaProfile.directory((await getTemporaryDirectory()).path);
+  if (QaProfile.guest) await Directory(tmpDirPath).create(recursive: true);
 }
 
 Future<void> _initAppPath() async {
-  appSupportDirPath = (await getApplicationSupportDirectory()).path;
+  appSupportDirPath = QaProfile.directory(
+    (await getApplicationSupportDirectory()).path,
+  );
 }
 
 void main() async {
@@ -380,14 +389,24 @@ class MyApp extends StatelessWidget {
         viewPadding: HarmonyChannel.mergeCutout(mediaQuery.viewPadding, dpr),
       );
     }
+    // The image viewer preserves system-bar spacing while hiding the bars.
+    // Its saved padding must still include the current cutout after rotation.
+    final overridePadding = tmpPadding == null
+        ? null
+        : OS.isHarmony
+        ? HarmonyChannel.mergeCutout(
+            tmpPadding!,
+            mediaQuery.devicePixelRatio * uiScale,
+          )
+        : tmpPadding;
     if (uiScale != 1.0) {
       child = MediaQuery(
         data: mediaQuery.copyWith(
           textScaler: textScaler,
           size: mediaQuery.size / uiScale,
-          padding: tmpPadding ?? mediaQuery.padding / uiScale,
+          padding: overridePadding ?? mediaQuery.padding / uiScale,
           viewInsets: mediaQuery.viewInsets / uiScale,
-          viewPadding: tmpPadding ?? mediaQuery.viewPadding / uiScale,
+          viewPadding: overridePadding ?? mediaQuery.viewPadding / uiScale,
           devicePixelRatio: mediaQuery.devicePixelRatio * uiScale,
         ),
         child: child!,
@@ -396,8 +415,8 @@ class MyApp extends StatelessWidget {
       child = MediaQuery(
         data: mediaQuery.copyWith(
           textScaler: textScaler,
-          padding: tmpPadding,
-          viewPadding: tmpPadding,
+          padding: overridePadding,
+          viewPadding: overridePadding,
         ),
         child: child!,
       );

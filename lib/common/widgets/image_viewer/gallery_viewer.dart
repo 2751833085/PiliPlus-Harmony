@@ -356,7 +356,9 @@ class _GalleryViewerState extends State<GalleryViewer>
     right: 0,
     child: IgnorePointer(
       child: Container(
-        padding: _padding! + const EdgeInsets.fromLTRB(12, 8, 20, 8),
+        padding:
+            (OS.isHarmony ? MediaQuery.viewPaddingOf(context) : _padding!) +
+            const EdgeInsets.fromLTRB(12, 8, 20, 8),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,

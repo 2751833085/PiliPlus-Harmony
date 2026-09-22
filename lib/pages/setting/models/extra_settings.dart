@@ -57,6 +57,14 @@ import 'package:os_type/os_type.dart';
 import 'package:material_ui/material_ui.dart' hide RefreshIndicator;
 
 List<SettingsModel> get extraSettings => [
+  const SwitchModel(
+    section: '我的页面',
+    title: '在我的页面展示观看历史',
+    subtitle: '像收藏一样展示最近观看的内容，点击继续观看；关闭后仍可从观看记录入口进入',
+    leading: Icon(Icons.history),
+    setKey: SettingBoxKey.showMineHistory,
+    defaultVal: false,
+  ),
   SwitchModel(
     section: '播放器体验',
     title: '哔哩哔哩式播放器控制栏',

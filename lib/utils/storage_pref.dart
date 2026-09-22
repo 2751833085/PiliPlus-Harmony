@@ -786,6 +786,9 @@ abstract final class Pref {
   static ShortSwipeAction get shortSwipeRight =>
       _shortSwipe(SettingBoxKey.shortSwipeRight);
 
+  static bool get showMineHistory =>
+      _setting.get(SettingBoxKey.showMineHistory, defaultValue: false);
+
   static bool get shortVideoMode =>
       _setting.get(SettingBoxKey.shortVideoMode, defaultValue: false);
 

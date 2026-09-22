@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:PiliPlus/pages/mine/recent_history.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/http/fav.dart';
@@ -28,6 +30,19 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
   AccountService accountService = Get.find<AccountService>();
 
   int? favFolderCount;
+  int _favoritesGeneration = 0;
+  final recentHistory = RecentHistory();
+  StreamSubscription? _historyAccountChanges;
+  StreamSubscription? _historySettingChanges;
+
+  void syncHistoryPreview() {
+    final account = Accounts.history;
+    recentHistory.configure(
+      enabled: Pref.showMineHistory,
+      account: account.isLogin ? account : null,
+      load: () => UserHttp.historyList(type: 'all', account: account),
+    );
+  }
 
   // 用户信息 头像、昵称、lv
   final Rx<UserInfoData> userInfo = UserInfoData().obs;
@@ -80,6 +95,13 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
   @override
   void onInit() {
     super.onInit();
+    syncHistoryPreview();
+    _historyAccountChanges = Accounts.account.watch().listen(
+      (_) => syncHistoryPreview(),
+    );
+    _historySettingChanges = GStorage.setting
+        .watch(key: SettingBoxKey.showMineHistory)
+        .listen((_) => syncHistoryPreview());
     UserInfoData? userInfoCache = Pref.userInfoCache;
     if (userInfoCache != null) {
       userInfo.value = userInfoCache;
@@ -90,14 +112,16 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
 
   bool get isLogin {
     if (!accountService.isLogin.value) {
-      // SmartDialog.showToast('账号未登录');
+      SmartDialog.showToast('请先登录');
       return false;
     }
     return true;
   }
 
   Future<void> queryUserInfo() async {
+    final account = Accounts.main;
     final res = await UserHttp.userInfo();
+    if (isClosed || !identical(account, Accounts.main)) return;
     if (res case Success(:final response)) {
       if (response.isLogin == true) {
         userInfo.value = response;
@@ -125,9 +149,38 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
   void _onLogoutMain() => Accounts.deleteAll({Accounts.main});
 
   Future<void> queryUserStatOwner() async {
+    final account = Accounts.main;
     final res = await UserHttp.userStatOwner();
+    if (isClosed || !identical(account, Accounts.main)) return;
     if (res case Success(:final response)) {
       userStat.value = response;
+    }
+  }
+
+  @override
+  Future<void> queryData([bool isRefresh = true]) async {
+    if (isLoading || isClosed || !Accounts.main.isLogin) return;
+    final generation = ++_favoritesGeneration;
+    final account = Accounts.main;
+    isLoading = true;
+    try {
+      final response = await customGetData();
+      if (isClosed ||
+          generation != _favoritesGeneration ||
+          !identical(account, Accounts.main)) {
+        return;
+      }
+      if (response case Success<FavFolderData>()) {
+        customHandleResponse(isRefresh, response);
+      } else {
+        loadingState.value = response;
+      }
+    } catch (_) {
+      if (!isClosed && generation == _favoritesGeneration) {
+        loadingState.value = const Error('收藏暂时无法加载，请重试');
+      }
+    } finally {
+      if (generation == _favoritesGeneration) isLoading = false;
     }
   }
 
@@ -139,12 +192,17 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
   }
 
   @override
-  Future<LoadingState<FavFolderData>> customGetData() {
-    return FavHttp.userfavFolder(
+  Future<LoadingState<FavFolderData>> customGetData() async {
+    final account = Accounts.main;
+    final response = await FavHttp.userfavFolder(
       pn: 1,
       ps: 20,
-      mid: Accounts.main.mid,
+      mid: account.mid,
     );
+    if (isClosed || !identical(account, Accounts.main)) {
+      return const Error(null);
+    }
+    return response;
   }
 
   static void onChangeAnonymity() {
@@ -299,7 +357,11 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
       return Future.value(null);
     }
     queryUserInfo();
-    return super.onRefresh().whenComplete(() {
+    syncHistoryPreview();
+    return Future.wait([
+      super.onRefresh(),
+      recentHistory.refresh(),
+    ]).then((_) {}).whenComplete(() {
       if (isManual) {
         scrollController.jumpToTop();
       }
@@ -308,12 +370,26 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
 
   @override
   void onChangeAccount(bool isLogin) {
+    _favoritesGeneration++;
+    isLoading = false;
+    favFolderCount = null;
+    loadingState.value = LoadingState.loading();
+    syncHistoryPreview();
     if (isLogin) {
       onRefresh();
     } else {
+      favFolderCount = null;
       userInfo.value = UserInfoData();
       userStat.value = const UserStat();
       loadingState.value = LoadingState.loading();
     }
+  }
+
+  @override
+  void onClose() {
+    _historyAccountChanges?.cancel();
+    _historySettingChanges?.cancel();
+    recentHistory.dispose();
+    super.onClose();
   }
 }
