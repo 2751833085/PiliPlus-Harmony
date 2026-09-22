@@ -1,0 +1,36 @@
+{
+  "recorded_at": "2026-09-22T05:05:21.928201+00:00",
+  "version": "2.6.5+6091",
+  "base_commit": "fa54171aa759b091aae7970f45cb90aa55d2c92b",
+  "artifact_sha256": "5f8a3bda85cdc1ca3899f36324176916958e12ec9a3b122503bf146e0a2a162f",
+  "checks": {
+    "flutter_tests_passed": 80,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "entry_policy": "portrait, landscape, unknown dimensions; disabled/unsupported; manual choice wins over late metadata",
+    "prefetch": "three upcoming items; joins in-flight metadata; context isolation and cancellation; bounded real media prefix cache",
+    "http_cache": "real local HTTP tests: decoder reads validated prefix before prefetch completion; head/tail ranges; no repeated prefix request; disconnect and failure paths",
+    "widget_preview": "390x844 standard font; 320x640, 840x800, 600x320 at 1.8 text scale; fixture data and placeholder player",
+    "comments": "phone bottom / wide-screen side layout; one retained player State through open/close and reversed animation",
+    "loading_grace": "transient handoff below 300 ms; longer stalls retain loading and retry control"
+  },
+  "device": {
+    "connected_devices": 0,
+    "overwrite_install": "not_attempted",
+    "launch": "not_attempted",
+    "uninstalled_or_cleared_data": false,
+    "reason": "device_not_connected"
+  },
+  "not_verified": [
+    "real-device first-frame latency and rapid swiping on this HAP",
+    "native playback, mode transition and comments on this HAP",
+    "live account write actions"
+  ],
+  "remote_push": false
+}
