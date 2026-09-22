@@ -51,12 +51,18 @@ class ShortVideoControls extends StatelessWidget {
                   ShortVideoMetrics.gap,
             ),
           );
+          final compactInput = inputWidth < metrics.scaler.scale(14) * 3 + 24;
           return Row(
             children: [
               SizedBox(
                 key: const ValueKey('short-danmaku-input'),
                 width: inputWidth,
-                child: ShortVideoPillButton(label: '发弹幕', onPressed: onSend),
+                child: ShortVideoPillButton(
+                  label: '发弹幕',
+                  onPressed: onSend,
+                  centered: compactInput,
+                  compactIcon: compactInput ? Icons.edit_outlined : null,
+                ),
               ),
               const SizedBox(width: ShortVideoMetrics.gap),
               _button(

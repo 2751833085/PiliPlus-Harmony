@@ -152,60 +152,45 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
             return SafeArea(
               child: ShortCommentsLayout(
                 panel: widget.commentsPanel,
-                builder: (context, compact) => Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: bounds.maxWidth >= 720 || widget.fullscreen
-                          ? double.infinity
-                          : 600,
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, pane) => Obx(
-                        () => ShortVideoPager(
-                          session: session,
-                          onTargetChanged: (index) {
-                            _targetIndex = index;
-                            _warmWindow();
-                          },
-                          enabled:
-                              !compact &&
-                              !widget
-                                  .video
-                                  .plPlayerController
-                                  .controlsLock
-                                  .value,
-                          onError: (message) => SmartDialog.showToast(message),
-                          builder: (context, index, active) {
-                            if (active)
-                              return _currentPage(pane, compact: compact);
-                            return Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                if (session.entries[index].cover
-                                    case final cover?)
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      bottom: widget.fullscreen
-                                          ? 0
-                                          : ShortVideoControls.heightFor(
-                                              MediaQuery.textScalerOf(context),
-                                            ),
-                                    ),
-                                    child: LayoutBuilder(
-                                      builder: (_, media) => NetworkImgLayer(
-                                        src: cover,
-                                        fit: BoxFit.contain,
-                                        borderRadius: BorderRadius.zero,
-                                        width: media.maxWidth,
-                                        height: media.maxHeight,
-                                      ),
-                                    ),
+                builder: (context, compact) => LayoutBuilder(
+                  builder: (context, pane) => Obx(
+                    () => ShortVideoPager(
+                      session: session,
+                      onTargetChanged: (index) {
+                        _targetIndex = index;
+                        _warmWindow();
+                      },
+                      enabled:
+                          !compact &&
+                          !widget.video.plPlayerController.controlsLock.value,
+                      onError: (message) => SmartDialog.showToast(message),
+                      builder: (context, index, active) {
+                        if (active) return _currentPage(pane, compact: compact);
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            if (session.entries[index].cover case final cover?)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: widget.fullscreen
+                                      ? 0
+                                      : ShortVideoControls.heightFor(
+                                          MediaQuery.textScalerOf(context),
+                                        ),
+                                ),
+                                child: LayoutBuilder(
+                                  builder: (_, media) => NetworkImgLayer(
+                                    src: cover,
+                                    fit: BoxFit.contain,
+                                    borderRadius: BorderRadius.zero,
+                                    width: media.maxWidth,
+                                    height: media.maxHeight,
                                   ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),

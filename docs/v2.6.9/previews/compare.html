@@ -1,0 +1,11 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mate XTs 原生像素比例核对</title>
+<style>body{margin:24px;background:#111214;color:#eee;font:15px/1.5 system-ui}h1{font-size:22px}p{max-width:1050px;color:#bbb}label{display:flex;align-items:center;gap:12px;margin:20px 0}main{display:flex;align-items:flex-start;gap:24px;width:max-content}figure{margin:0}figcaption{font-size:13px;min-height:76px;max-width:260px}img{display:block;width:calc(var(--w)*var(--z)*1px);height:calc(2232*var(--z)*1px);border:1px solid #555}a{color:#ff85ac}:root{--z:.17}</style>
+<h1>Mate XTs · 同一像素比例下比较</h1>
+<p>三张测试图片均直接按原生像素渲染，所有图片使用同一个显示倍率。三屏 DPR 2.875 来自设备实测；单屏和双屏在此图采用 2.875 作为模拟输入，实际密度仍待采集。使用设备 HarmonyOS Sans / Sans SC 字体，安全区为测试值；画面与账户数据都是测试素材，不能替代三个形态的实机验收。</p>
+<label>查看倍率 <input type="range" min="0.12" max="1" step="0.01" value="0.17" oninput="document.documentElement.style.setProperty('--z',this.value);document.querySelector('output').textContent=Math.round(this.value*100)+'%'"> <output>17%</output></label>
+<p>100% 表示一张图像像素对应一个浏览器 CSS 像素，并非设备实际毫米大小。原图没有分别缩到相同宽度。</p>
+<main>
+<figure><figcaption>单屏 · 1008×2232<br>模拟 DPR 2.875 · UI 缩放 1.0</figcaption><a href="reference-single.png"><img src="reference-single.png" style="--w:1008" alt="单屏原生像素模拟"></a></figure>
+<figure><figcaption>双屏 · 2048×2232<br>模拟 DPR 2.875 · UI 缩放 1.0</figcaption><a href="reference-double.png"><img src="reference-double.png" style="--w:2048" alt="双屏原生像素模拟"></a></figure>
+<figure><figcaption>三屏 · 3184×2232<br>实测 DPR 2.875 · UI 缩放测试值 1.0</figcaption><a href="native-triple.png"><img src="native-triple.png" style="--w:3184" alt="三屏实测密度的组件预览"></a></figure>
+</main></html>

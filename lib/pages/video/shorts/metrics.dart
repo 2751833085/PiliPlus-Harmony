@@ -92,19 +92,28 @@ class ShortVideoPillButton extends StatelessWidget {
     this.foreground = Colors.white70,
     this.centered = false,
     this.trailing,
+    this.compactIcon,
   });
   final String label;
   final VoidCallback onPressed;
   final Color color, foreground;
   final bool centered;
   final Widget? trailing;
+  final IconData? compactIcon;
 
-  Widget _label() => Text(
-    label,
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    style: ShortVideoMetrics.control.copyWith(color: foreground),
-  );
+  Widget _label(BuildContext context) => compactIcon != null
+      ? Icon(
+          compactIcon,
+          size: ShortVideoMetrics.of(context).icon,
+          color: foreground,
+          semanticLabel: label,
+        )
+      : Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: ShortVideoMetrics.control.copyWith(color: foreground),
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -129,10 +138,10 @@ class ShortVideoPillButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(metrics.fieldHeight / 2),
                 ),
                 child: trailing == null
-                    ? _label()
+                    ? _label(context)
                     : Row(
                         children: [
-                          Expanded(child: _label()),
+                          Expanded(child: _label(context)),
                           const SizedBox(width: 8),
                           trailing!,
                         ],

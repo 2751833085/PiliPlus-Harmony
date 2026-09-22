@@ -385,6 +385,19 @@ void main() {
                     jsonDecode(file.readAsStringSync()) as Map<String, dynamic>,
               )
               .toList();
+      // Official panel pixels are known even before a physical form is sampled.
+      // These density sweeps are explicitly reference cases, NOT device measurements.
+      // https://consumer.huawei.com/cn/phones/mate-xts-ultimate-design/specs/
+      for (final width in [1008, 2048]) {
+        for (final density in [2.5, 2.875, 3.25]) {
+          nativeProfiles.add({
+            'physical_size_px': [width, 2232],
+            'device_pixel_ratio': density,
+            'form':
+                'reference-${width == 1008 ? "single" : "double"}-dpr$density',
+          });
+        }
+      }
       final scenarios = [
         (
           size: Size(392, 2560 / 3),
@@ -602,6 +615,24 @@ void main() {
         final dmToggle = find.byTooltip('关闭弹幕');
         final dmSettings = find.byTooltip('弹幕设置');
         expect(tester.getSize(input).width, lessThanOrEqualTo(200));
+        final inputText = find.descendant(
+          of: input,
+          matching: find.text('发弹幕'),
+        );
+        if (inputText.evaluate().isNotEmpty) {
+          final paragraph = tester.renderObject<RenderParagraph>(
+            find.descendant(of: inputText, matching: find.byType(RichText)),
+          );
+          expect(paragraph.didExceedMaxLines, false);
+        } else {
+          expect(
+            find.descendant(
+              of: input,
+              matching: find.byIcon(Icons.edit_outlined),
+            ),
+            findsOneWidget,
+          );
+        }
         expect(
           tester.getRect(input).right,
           lessThan(tester.getRect(dmToggle).left),
@@ -707,7 +738,11 @@ void main() {
             final boundary =
                 captureKey.currentContext!.findRenderObject()
                     as RenderRepaintBoundary;
-            final image = await boundary.toImage(pixelRatio: effectiveDpr);
+            final image = await _captureAtNativeSize(
+              boundary,
+              effectiveDpr,
+              scenario.size,
+            );
             expect(image.width, scenario.size.width.ceil());
             expect(image.height, scenario.size.height.ceil());
             final bytes = await image.toByteData(
@@ -737,6 +772,12 @@ void main() {
         final progress = find.byType(ProgressBar);
         final barRect = tester.getRect(progress);
         expect(barRect.height, 28);
+        // No 600dp cap in the 600..720dp interval (Mate XTs double fold).
+        expect(barRect.left, closeTo(ShortVideoMetrics.gutter, .01));
+        expect(
+          barRect.right,
+          closeTo(size.width - ShortVideoMetrics.gutter, .01),
+        );
         final playerRect = tester.getRect(find.byType(_PlayerFixture));
         player.playerStatus = PlayerStatus.playing;
         for (final listener in player.listeners.toList()) {
@@ -812,7 +853,11 @@ void main() {
             final boundary =
                 captureKey.currentContext!.findRenderObject()
                     as RenderRepaintBoundary;
-            final image = await boundary.toImage(pixelRatio: effectiveDpr);
+            final image = await _captureAtNativeSize(
+              boundary,
+              effectiveDpr,
+              scenario.size,
+            );
             expect(image.width, scenario.size.width.ceil());
             expect(image.height, scenario.size.height.ceil());
             final bytes = await image.toByteData(
@@ -881,10 +926,12 @@ void main() {
         );
         if (renderPath.isNotEmpty) {
           await tester.runAsync(() async {
-            final image =
-                await (captureKey.currentContext!.findRenderObject()
-                        as RenderRepaintBoundary)
-                    .toImage(pixelRatio: effectiveDpr);
+            final image = await _captureAtNativeSize(
+              captureKey.currentContext!.findRenderObject()
+                  as RenderRepaintBoundary,
+              effectiveDpr,
+              scenario.size,
+            );
             expect(image.width, scenario.size.width.ceil());
             expect(image.height, scenario.size.height.ceil());
             final bytes = await image.toByteData(
@@ -929,6 +976,26 @@ void main() {
       }
     },
   );
+}
+
+// Rasterize the scene directly into the integer device framebuffer. Using
+// ceil(logicalWidth * DPR) can add a spurious pixel (1008.0000000001 -> 1009)
+// for fractional densities; the device's physical framebuffer is authoritative.
+Future<ui.Image> _captureAtNativeSize(
+  RenderRepaintBoundary boundary,
+  double dpr,
+  Size pixels,
+) async {
+  final layer = boundary.debugLayer! as OffsetLayer;
+  final transform = Matrix4.diagonal3Values(dpr, dpr, 1)
+    ..translateByDouble(-layer.offset.dx, -layer.offset.dy, 0, 1);
+  final builder = ui.SceneBuilder()..pushTransform(transform.storage);
+  final scene = layer.buildScene(builder);
+  try {
+    return await scene.toImage(pixels.width.ceil(), pixels.height.ceil());
+  } finally {
+    scene.dispose();
+  }
 }
 
 class _PlayerFixture extends StatefulWidget {
