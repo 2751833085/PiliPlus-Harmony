@@ -461,6 +461,18 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   }
 
   // 动态构建底部控制条
+  bool get _canSwitchModeFromControls =>
+      mounted &&
+      _animationController.isCompleted &&
+      plPlayerController.showControls.value &&
+      !plPlayerController.controlsLock.value &&
+      !plPlayerController.isSeeking.value &&
+      !plPlayerController.longPressStatus.value;
+
+  void _enterShortModeFromControls() {
+    if (_canSwitchModeFromControls) widget.onEnterShortMode?.call();
+  }
+
   void _refreshControlAppearance() {
     if (!mounted) return;
     _animationController.duration = Duration(
@@ -960,12 +972,17 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 size: 24,
                 color: Colors.white,
               ),
-        onTap: () =>
-            plPlayerController.triggerFullScreen(status: !isFullScreen),
-        onSecondaryTap: () => plPlayerController.triggerFullScreen(
-          status: !isFullScreen,
-          inAppFullScreen: true,
-        ),
+        onTap: () {
+          if (_canSwitchModeFromControls)
+            plPlayerController.triggerFullScreen(status: !isFullScreen);
+        },
+        onSecondaryTap: () {
+          if (_canSwitchModeFromControls)
+            plPlayerController.triggerFullScreen(
+              status: !isFullScreen,
+              inAppFullScreen: true,
+            );
+        },
       ),
     };
 
@@ -1002,7 +1019,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               tooltip: '竖屏短视频',
               constraints: const BoxConstraints(minWidth: 36, minHeight: 40),
               padding: const EdgeInsets.all(6),
-              onPressed: widget.onEnterShortMode,
+              onPressed: _enterShortModeFromControls,
               icon: const Icon(
                 Icons.stay_current_portrait_outlined,
                 color: Colors.white,
@@ -1026,7 +1043,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             if (widget.onEnterShortMode != null)
               IconButton(
                 tooltip: '竖屏短视频',
-                onPressed: widget.onEnterShortMode,
+                onPressed: _enterShortModeFromControls,
                 icon: const Icon(
                   Icons.stay_current_portrait_outlined,
                   color: Colors.white,

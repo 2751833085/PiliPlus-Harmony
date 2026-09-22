@@ -8,9 +8,12 @@ class ShortVideoEntryPolicy {
   }) : initialMode = enabled && supported && portraitHint;
   final bool enabled, supported, initialMode;
   bool _resolved = false;
-  bool? resolve(bool portrait) {
+  bool? resolve(bool portrait, {bool allowAutomaticEntry = true}) {
     if (_resolved) return null;
     _resolved = true;
+    // A late metadata response must not replace an active fullscreen, PiP or
+    // windowed playback layout. The visible entry button remains available.
+    if (!allowAutomaticEntry) return null;
     return enabled && supported && portrait;
   }
 

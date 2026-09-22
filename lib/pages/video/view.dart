@@ -113,6 +113,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   PlPlayerController? plPlayerController;
 
   bool _shortMode = false;
+  bool _enteringShortMode = false;
   bool _shortCommentsVisible = false;
   late ShortVideoEntryPolicy _shortEntryPolicy;
   final _modeTransitionKey = GlobalKey<PlayerModeTransitionState>();
@@ -197,37 +198,58 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Future<void> _enterShortMode() async {
+    if (!mounted ||
+        !isShowing ||
+        _enteringShortMode ||
+        _shortMode ||
+        !_supportsShortMode ||
+        !Pref.shortVideoMode ||
+        _lifecycleState != AppLifecycleState.resumed ||
+        videoDetailController.plPlayerController.controlsLock.value)
+      return;
     _shortEntryPolicy.manualSelection();
-    if (_shortMode || !_supportsShortMode || !Pref.shortVideoMode) return;
-    if (isFullScreen)
-      await videoDetailController.plPlayerController.triggerFullScreen(
-        status: false,
-      );
-    if (!mounted) return;
-    if (_shortSession case final session?) {
-      session.syncCurrent(
-        ShortVideoEntry(
-          bvid: videoDetailController.bvid,
-          aid: videoDetailController.aid,
-          cid: videoDetailController.cid.value,
-          cover: videoDetailController.cover.value,
-          title: ugcIntroController.videoDetail.value.title,
-        ),
-      );
-    }
-    if (!await _changeShortMode(true) || !mounted) return;
-    _attachPlayerListeners();
-    if (videoDetailController.isQuerying) return;
-    if (videoDetailController.videoState.value &&
-        identical(
-          videoDetailController.plPlayerController.sourceOwner,
-          videoDetailController,
-        )) {
-      await plPlayerController!.play();
-    } else if (videoDetailController.videoUrl != null) {
-      await videoDetailController.playerInit(autoplay: true);
-    } else {
-      await videoDetailController.queryVideoUrl();
+    _enteringShortMode = true;
+    final entryBvid = videoDetailController.bvid;
+    final entryCid = videoDetailController.cid.value;
+    try {
+      if (isFullScreen)
+        await videoDetailController.plPlayerController.triggerFullScreen(
+          status: false,
+        );
+      if (!mounted ||
+          !isShowing ||
+          !Pref.shortVideoMode ||
+          _lifecycleState != AppLifecycleState.resumed ||
+          entryBvid != videoDetailController.bvid ||
+          entryCid != videoDetailController.cid.value)
+        return;
+      if (_shortSession case final session?) {
+        session.syncCurrent(
+          ShortVideoEntry(
+            bvid: videoDetailController.bvid,
+            aid: videoDetailController.aid,
+            cid: videoDetailController.cid.value,
+            cover: videoDetailController.cover.value,
+            title: ugcIntroController.videoDetail.value.title,
+          ),
+        );
+      }
+      if (!await _changeShortMode(true) || !mounted) return;
+      _attachPlayerListeners();
+      if (videoDetailController.isQuerying) return;
+      if (videoDetailController.videoState.value &&
+          identical(
+            videoDetailController.plPlayerController.sourceOwner,
+            videoDetailController,
+          )) {
+        await plPlayerController!.play();
+      } else if (videoDetailController.videoUrl != null) {
+        await videoDetailController.playerInit(autoplay: true);
+      } else {
+        await videoDetailController.queryVideoUrl();
+      }
+    } finally {
+      _enteringShortMode = false;
     }
   }
 
@@ -648,7 +670,17 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     _shortMode = _shortEntryPolicy.initialMode;
     videoDetailController.shortVideoMode = _shortMode;
     videoDetailController.onOrientationResolved = (portrait) {
-      final target = _shortEntryPolicy.resolve(portrait);
+      final player = videoDetailController.plPlayerController;
+      final target = _shortEntryPolicy.resolve(
+        portrait,
+        allowAutomaticEntry:
+            isShowing &&
+            _lifecycleState == AppLifecycleState.resumed &&
+            !isFullScreen &&
+            !player.isPipMode &&
+            !(OS.isHarmony &&
+                (HarmonyChannel.isWindowMode || HarmonyChannel.isMiniWindow)),
+      );
       if (!mounted ||
           target == null ||
           target == _shortMode ||
@@ -2139,7 +2171,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       );
     }
     result = Theme(data: theme, child: child);
-    return PlayerModeTransition(key: _modeTransitionKey, child: result);
+    return Listener(
+      // Once the user operates this page, late video dimensions may resize the
+      // picture but must not silently select another viewing mode.
+      onPointerDown: (_) => _shortEntryPolicy.manualSelection(),
+      child: PlayerModeTransition(key: _modeTransitionKey, child: result),
+    );
   }
 
   Widget buildTabBar({

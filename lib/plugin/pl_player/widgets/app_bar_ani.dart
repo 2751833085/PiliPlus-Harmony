@@ -84,25 +84,28 @@ class AppBarAni extends StatelessWidget {
       // 仅顶部栏需要，底部栏不避让
       result = TopInsetPadding(inset: isTop ? top : null, child: result);
     }
-    if (fadeOnly)
-      return AnimatedBuilder(
-        animation: controller,
-        child: result,
-        builder: (context, child) => IgnorePointer(
-          ignoring: controller.value == 0,
-          child: ExcludeSemantics(
-            excluding: controller.value == 0,
-            child: FadeTransition(opacity: controller, child: child),
-          ),
+    result = fadeOnly
+        ? FadeTransition(opacity: controller, child: result)
+        : SlideTransition(
+            position: controller.drive(isTop ? _topPos : _bottomPos),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: isTop ? _topDecoration : _bottomDecoration,
+              ),
+              child: result,
+            ),
+          );
+    // A partially visible/moving bar is not an actionable target. In
+    // particular, a video tap during fade-out must not hit its mode buttons.
+    return AnimatedBuilder(
+      animation: controller,
+      child: result,
+      builder: (context, child) => IgnorePointer(
+        ignoring: !controller.isCompleted,
+        child: ExcludeSemantics(
+          excluding: !controller.isCompleted,
+          child: child!,
         ),
-      );
-    return SlideTransition(
-      position: controller.drive(isTop ? _topPos : _bottomPos),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: isTop ? _topDecoration : _bottomDecoration,
-        ),
-        child: result,
       ),
     );
   }

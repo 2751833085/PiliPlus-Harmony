@@ -2,6 +2,30 @@ import 'package:PiliPlus/pages/video/shorts/entry_policy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('late dimensions cannot replace an active playback layout', () {
+    final entry = ShortVideoEntryPolicy(
+      enabled: true,
+      supported: true,
+      portraitHint: false,
+    );
+    expect(entry.resolve(true, allowAutomaticEntry: false), isNull);
+    expect(
+      entry.resolve(true),
+      isNull,
+      reason: 'leaving fullscreen or a small window must not retry entry',
+    );
+    final touched = ShortVideoEntryPolicy(
+      enabled: true,
+      supported: true,
+      portraitHint: false,
+    );
+    touched.manualSelection();
+    expect(
+      touched.resolve(true),
+      isNull,
+      reason: 'a late network response cannot change the selected page',
+    );
+  });
   test(
     'only portrait content enters by default; unknown dimensions resolve once',
     () {
