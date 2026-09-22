@@ -1,0 +1,33 @@
+{
+  "recorded_at": "2026-09-22T05:14:46.787455+00:00",
+  "version": "2.6.6+6092",
+  "base_commit": "8d34214ff0d55fa13d433b37e30dbaed39f7b8a4",
+  "artifact_sha256": "d3635ee3dbdc1a4f8c8e8531b3f61961dbb7af38bec092021915352e924a02e3",
+  "checks": {
+    "flutter_tests_passed": 80,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "pause_controls": "central resume invokes play, not toggle; visible metadata and stable scrubber; previous chrome preference restored after resume",
+    "pause_state_boundaries": "seeking, buffering, uninitialized duration, comments and fullscreen hide central pause controls",
+    "player_retention": "same player State and media rectangle through pause/resume; comments and fullscreen retain player State",
+    "widget_preview": "390x844 standard font; 320x640, 840x800, 600x320 at 1.8 text scale; fixture data and placeholder player"
+  },
+  "device": {
+    "connected_devices": 0,
+    "overwrite_install": "not_attempted",
+    "launch": "not_attempted",
+    "uninstalled_or_cleared_data": false,
+    "reason": "device_not_connected"
+  },
+  "not_verified": [
+    "real-device pause/resume layout and interaction on this HAP",
+    "native video playback and timing on this HAP"
+  ],
+  "remote_push": false
+}
