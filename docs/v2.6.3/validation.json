@@ -1,0 +1,37 @@
+{
+  "recorded_at": "2026-09-22T01:33:54.783981+00:00",
+  "version": "2.6.3+6089",
+  "base_commit": "84f4475b39a6e567575095c78441cd6812a92a0a",
+  "artifact_sha256": "83d135d49331466d699304a4246c5327cebe8d86089c78b4f9703a07bdc587c2",
+  "checks": {
+    "flutter_tests_passed": 63,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "widget_preview": "320x640, 840x800, 600x320; 1.8 text scale; normal/minimal fixture media",
+    "footer_interactions": "tap and drag seek with hidden chrome; button beside progress; play/pause fixed rect; video and progress geometry retained; double tap toggles once"
+  },
+  "device": {
+    "target": "HUAWEI Mate XTS",
+    "overwrite_install": "passed",
+    "installed_version": "2.6.3",
+    "installed_version_code": 6089,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "app_id_preserved": true,
+    "app_identifier_preserved": true,
+    "launch": "blocked_screen_locked",
+    "launch_error_code": 10106102,
+    "uninstalled_or_cleared_data": false
+  },
+  "not_verified": [
+    "real-device interaction with new footer",
+    "native playback and frame timing on this exact HAP"
+  ],
+  "remote_push": false
+}
