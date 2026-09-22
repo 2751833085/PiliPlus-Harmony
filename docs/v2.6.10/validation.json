@@ -1,0 +1,65 @@
+{
+  "recorded_at": "2026-09-22T06:52:55.055217+00:00",
+  "version": "2.6.10+6096",
+  "base_commit": "43d950ed475db58e60bf7c099141eddf861f41c9",
+  "artifact_sha256": "d6ffda94ec9d50ce15073899fed1a082a4aac3e0d4aab9777fb16e4b83f46ac5",
+  "layout_diagnostics": true,
+  "checks": {
+    "flutter_tests_passed": 90,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "short_video_layout_scenarios": 72,
+    "normal_player_layout_scenarios": 42,
+    "native_dimensions": [
+      [
+        1008,
+        2232
+      ],
+      [
+        2048,
+        2232
+      ],
+      [
+        3184,
+        2232
+      ]
+    ],
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "normal_player": "single-line time, SponsorBlock baseline, seek callbacks, desktop chapter clicks and overlay toggles",
+    "sponsor_block": "real BlockMixin with simulated events: automatic/once/manual/reset/listener cancellation; no network writes",
+    "surfaces": "native-pixel clipping checks, ordinary/Harmony/immersive surfaces and capsule hit target",
+    "preview": "actual components and local device fonts; directly rasterized native pixels; fixture content and safe insets"
+  },
+  "measured_display_forms": [
+    "triple"
+  ],
+  "simulated_reference_forms": [
+    "single",
+    "double"
+  ],
+  "device": {
+    "recorded_at": "2026-09-22T06:52:01.712635+00:00",
+    "previous_version": "2.6.9",
+    "installed_version": "2.6.10",
+    "installed_version_code": 6096,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false,
+    "artifact_sha256": "d6ffda94ec9d50ce15073899fed1a082a4aac3e0d4aab9777fb16e4b83f46ac5",
+    "base_commit": "43d950ed475db58e60bf7c099141eddf861f41c9",
+    "launch": "blocked_by_lock"
+  },
+  "not_verified": [
+    "single/double actual display density",
+    "app effective DPR, user scaling and insets",
+    "unlocked real-device playback, touch and visual acceptance in all three forms",
+    "live SponsorBlock service availability"
+  ],
+  "remote_push": false
+}
