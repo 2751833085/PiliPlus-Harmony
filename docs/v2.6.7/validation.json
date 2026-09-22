@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-09-22T05:27:08.040004+00:00",
+  "version": "2.6.7+6093",
+  "base_commit": "8e2c563ab105b8e2f6ec07b5031ff27aeb7d5640",
+  "artifact_sha256": "9d1b20b8695028a7ca6f74fba290d723d57115d9210a0332538352691495c01f",
+  "checks": {
+    "flutter_tests_passed": 80,
+    "dart_errors": 0,
+    "preexisting_dart_warnings": 6,
+    "hap_release_build": "passed",
+    "hap_archive_crc": "passed",
+    "native_mpv_hash": "passed",
+    "official_code_signature": "passed",
+    "official_digest": "passed",
+    "official_permission_signature": "passed",
+    "action_counts": "icons and counts only; missing counts do not display action names or shift icon positions",
+    "author_follow": "36dp avatar; follow button 10dp from author group; long author name and followed state fit at large text scales",
+    "video_aspect": "3:4, 9:16, 16:9 test frames retain source aspect; fitted frames remain within media pane and simulated safe area",
+    "widget_preview": "392x853.33 and 390x844 standard text; 320x640, 840x800, 600x320 at 1.8 scale; top 32dp / bottom 24dp simulated insets; fixture avatar and counts",
+    "retained_behavior": "pause/resume, seek, comments, fullscreen and player State regressions passed"
+  },
+  "device": {
+    "connected_devices": 0,
+    "overwrite_install": "not_attempted",
+    "launch": "not_attempted",
+    "uninstalled_or_cleared_data": false,
+    "reason": "device_not_connected"
+  },
+  "not_verified": [
+    "real-device layout and playback on this HAP",
+    "actual Mate XTS inset measurements",
+    "live account write actions"
+  ],
+  "remote_push": false
+}
