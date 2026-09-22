@@ -42,6 +42,8 @@ def parse_display(text):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--hdc', default='hdc')
+    parser.add_argument('--target', help='Explicit HDC target when phone and emulator are both connected')
+    parser.add_argument('--source', choices=['device', 'emulator'], default='device')
     parser.add_argument('--form', choices=['single', 'double', 'triple'], required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
@@ -49,9 +51,15 @@ def main():
         return subprocess.check_output([args.hdc, *argv], text=True, timeout=25)
     targets = [line.strip() for line in run('list', 'targets').splitlines()
                if line.strip() and not line.strip().startswith('[')]
-    if len(targets) != 1:
-        raise SystemExit('Exactly one connected device is required; found ' + str(len(targets)))
-    profile = parse_display(run('shell', 'hidumper', '-s', 'DisplayManagerService', '-a', '-a'))
+    if args.target:
+        if args.target not in targets:
+            raise SystemExit('Requested HDC target is not connected')
+        target = args.target
+    elif len(targets) == 1:
+        target = targets[0]
+    else:
+        raise SystemExit('Use --target when multiple devices are connected; found ' + str(len(targets)))
+    profile = parse_display(run('-t', target, 'shell', 'hidumper', '-s', 'DisplayManagerService', '-a', '-a'))
     # Device-specific form names should not silently label the wrong geometry.
     # Huawei Mate XTs official display dimensions (orientation may swap axes):
     # https://consumer.huawei.com/cn/phones/mate-xts-ultimate-design/specs/
@@ -60,10 +68,10 @@ def main():
         raise SystemExit('Current resolution does not match the requested Mate XTS form: '
                          + str(profile['physical_size_px']))
     profile = {
-        'device_model': 'HUAWEI Mate XTs',
+        'device_model': 'DevEco TripleFold (Mate XTS geometry)' if args.source == 'emulator' else 'HUAWEI Mate XTs',
         'form': args.form,
         'captured_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        'source': 'connected device, HDC DisplayManagerService (current fields)',
+        'source': args.source + ', HDC DisplayManagerService (current fields)',
         **profile,
         'scope': 'Display metrics only. App UI/text scale and safe-area insets are not inferred.',
     }

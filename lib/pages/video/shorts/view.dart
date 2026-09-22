@@ -79,14 +79,14 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
       0,
       session.entries.length - 1,
     );
-    widget.video
-        .preloadShortWindow([
-          if (index != session.index) session.entries[index],
-          ...session.entries.skip(index + 1).take(3),
-        ])
-        .whenComplete(() {
-          if (mounted) setState(() {});
-        });
+    // Buffered-byte updates only warm the next sources. Preview changes have
+    // their own revision listener; rebuilding here also rebuilds the live page.
+    unawaited(
+      widget.video.preloadShortWindow([
+        if (index != session.index) session.entries[index],
+        ...session.entries.skip(index + 1).take(3),
+      ]),
+    );
   }
 
   @override

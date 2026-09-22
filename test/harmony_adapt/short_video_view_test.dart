@@ -70,6 +70,62 @@ void main() {
     await temp.delete(recursive: true);
   });
   testWidgets(
+    'buffer prefetch completion leaves the playing surface unchanged while new previews update',
+    (tester) async {
+      final session = ShortVideoSession(
+        initial: const ShortVideoEntry(bvid: 'a'),
+        loadRelated: (_) async => const [ShortVideoEntry(bvid: 'b')],
+        play: (_) async => true,
+      );
+      final player = _FakePlayer();
+      final video = _FakeVideo(player);
+      var surfaceBuilds = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ShortVideoFeed(
+            session: session,
+            video: video,
+            intro: _FakeIntro(),
+            playerBuilder: (_, __) {
+              surfaceBuilds++;
+              return const ColoredBox(color: Colors.black);
+            },
+            onDetails: () {},
+            onComments: () {},
+            onEpisodes: () {},
+            onMore: () {},
+            fullscreen: false,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final buildsBeforeBuffering = surfaceBuilds;
+      final requestsBeforeBuffering = video.warmRequests;
+      final warm = Completer<void>();
+      video.pendingWarm = warm.future;
+      player.buffered.value = 90;
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(video.warmRequests, greaterThan(requestsBeforeBuffering));
+      warm.complete();
+      await tester.pumpAndSettle();
+      expect(
+        surfaceBuilds,
+        buildsBeforeBuffering,
+        reason: 'Speculative bytes must not rebuild the entire playing page.',
+      );
+      video.shortPreviewRevision.value++;
+      await tester.pumpAndSettle();
+      expect(
+        surfaceBuilds,
+        greaterThan(buildsBeforeBuffering),
+        reason: 'New neighbour preview images must still reach the pager.',
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      session.dispose();
+    },
+  );
+  testWidgets(
     'vertical swipes retain exactly one live player and can return to previous video',
     (tester) async {
       final playerKey = GlobalKey();
@@ -1171,7 +1227,13 @@ class _FakeVideo implements VideoDetailController {
   @override
   final shortChromeVisible = true.obs;
   @override
-  Future<void> preloadShortWindow(List<ShortVideoEntry> entries) async {}
+  Future<void> preloadShortWindow(List<ShortVideoEntry> entries) async {
+    warmRequests++;
+    await pendingWarm;
+  }
+
+  int warmRequests = 0;
+  Future<void>? pendingWarm;
   _FakeVideo(this.plPlayerController);
   @override
   final PlPlayerController plPlayerController;
