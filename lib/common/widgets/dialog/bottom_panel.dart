@@ -10,16 +10,19 @@ class BottomPanel extends StatelessWidget {
     required this.child,
     this.onClose,
     this.surface = true,
+    this.fitContent = false,
   });
   final String title;
   final Widget child;
   final VoidCallback? onClose;
   final bool surface;
+  final bool fitContent;
   @override
   Widget build(BuildContext context) {
     final content = SafeArea(
       top: false,
       child: Column(
+        mainAxisSize: fitContent ? MainAxisSize.min : MainAxisSize.max,
         children: [
           const SizedBox(height: 10),
           Center(
@@ -54,7 +57,10 @@ class BottomPanel extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(child: child),
+          Flexible(
+            fit: fitContent ? FlexFit.loose : FlexFit.tight,
+            child: child,
+          ),
         ],
       ),
     );

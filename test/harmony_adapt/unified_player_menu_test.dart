@@ -65,6 +65,69 @@ void main() {
   tearDown(Get.reset);
 
   testWidgets(
+    'short menus fit their content and large menus remain scrollable',
+    (tester) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      for (final pixels in _profiles) {
+        tester.view.physicalSize = pixels;
+        tester.view.devicePixelRatio = 2.875;
+        for (final count in [3, 30]) {
+          var called = 0;
+          await tester.pumpWidget(
+            GetMaterialApp(
+              home: Builder(
+                builder: (context) => Scaffold(
+                  body: TextButton(
+                    onPressed: () => PageUtils.showVideoBottomSheet(
+                      context,
+                      fitContent: true,
+                      child: BottomPanel(
+                        title: '选择',
+                        fitContent: true,
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: [
+                            for (var i = 0; i < count; i++)
+                              ListTile(
+                                title: Text('选项 $i'),
+                                onTap: () => called++,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    child: const Text('打开'),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.tap(find.text('打开'));
+          await tester.pumpAndSettle();
+          final size = pixels / 2.875;
+          final rect = tester.getRect(find.byType(BottomPanel));
+          expect(rect.bottom, closeTo(size.height, .01));
+          expect(rect.height, lessThanOrEqualTo(size.height * .78 + .01));
+          if (count == 3) expect(rect.height, lessThan(size.height * .55));
+          final last = find.text('选项 ${count - 1}');
+          await tester.scrollUntilVisible(
+            last,
+            250,
+            scrollable: find.byType(Scrollable).last,
+          );
+          await tester.tap(last);
+          expect(called, 1);
+          expect(tester.takeException(), isNull);
+          await tester.binding.handlePopRoute();
+          await tester.pumpAndSettle();
+          await tester.pumpWidget(const SizedBox());
+        }
+      }
+    },
+  );
+
+  testWidgets(
     'video menu captures the local dark theme, stays attached to the bottom and closes before its action',
     (tester) async {
       addTearDown(tester.view.resetPhysicalSize);

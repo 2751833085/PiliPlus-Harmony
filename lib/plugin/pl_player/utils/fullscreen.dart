@@ -91,15 +91,18 @@ Future<void>? landscapeRightMode() {
 }
 
 Future<void>? fullMode() {
+  if (OS.isHarmony) return harmonyFollowFold();
   return _setPreferredOrientations(
     const [.portraitUp, .portraitDown, .landscapeLeft, .landscapeRight],
   );
 }
 
-/// Clear the phone-only cache before the system takes over expanded panels.
+/// Follow system rotation, including Control Center's rotation lock. Also
+/// clears the phone-only cache when expanded panels hand orientation to Harmony.
 Future<void> harmonyFollowFold() {
   _lastOrientation = null;
-  return HarmonyChannel.setWindowOrientation(5);
+  // AUTO_ROTATION_RESTRICTED; AUTO_ROTATION (5) ignores the system lock.
+  return HarmonyChannel.setWindowOrientation(8);
 }
 
 /// 鸿蒙强制窗口转回竖屏（修mate80 横屏无法退出全屏bug）

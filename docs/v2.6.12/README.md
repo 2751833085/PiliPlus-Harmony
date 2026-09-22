@@ -13,3 +13,7 @@
 “我的”快捷入口收紧为自适应紧凑布局。关于页新增鸿蒙分区、开发历程与工作流，署名“厄斯因二次编辑”，保留上游来源、版本、日志和数据管理功能。
 
 [原生像素预览](previews/compare.html) · [验证记录](VALIDATION.md)。不 push。
+
+真机发现并修复短视频隐藏封面分支无 Rx 订阅触发的 GetX 错误：发布版会画出浅灰 ErrorWidget 并挡住手势。现在短视频直接跳过封面监听，普通模式仍响应自动播放状态。新增回归检查三种屏幕宽度中切换、暂停/播放和触控透传。
+
+鸿蒙自动方向使用 `AUTO_ROTATION_RESTRICTED`，且传感器回调在系统锁定时停止改变窗口方向；手动全屏方向选择和折叠返回小窗逻辑保留。依据[华为旋转说明](https://developer.huawei.com/consumer/cn/doc/harmonyos-guides/window-rotation)与本地 API 26 定义。

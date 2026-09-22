@@ -479,6 +479,7 @@ abstract final class PageUtils {
     required Widget child,
     ValueGetter<EdgeInsets>? padding,
     double maxWidth = 500,
+    bool fitContent = false,
   }) {
     if (!context.mounted) {
       return null;
@@ -495,10 +496,15 @@ abstract final class PageUtils {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      constraints: BoxConstraints(
+                        maxWidth: maxWidth,
+                        maxHeight: MediaQuery.sizeOf(context).height * .78,
+                      ),
                       child: SizedBox(
                         width: double.infinity,
-                        height: MediaQuery.sizeOf(context).height * .78,
+                        height: fitContent
+                            ? null
+                            : MediaQuery.sizeOf(context).height * .78,
                         child: child,
                       ),
                     ),

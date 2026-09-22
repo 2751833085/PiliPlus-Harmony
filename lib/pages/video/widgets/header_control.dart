@@ -388,7 +388,9 @@ class HeaderControlState extends State<HeaderControl>
   ) {
     showBottomSheet(
       title: title,
+      fitContent: true,
       (context, setState) => ListView(
+        shrinkWrap: true,
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
         children: [
           for (final choice in choices)

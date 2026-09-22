@@ -26,15 +26,18 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
     StatefulWidgetBuilder builder, {
     ValueGetter<EdgeInsets>? padding,
     String title = '播放设置',
+    bool fitContent = false,
   }) {
     return PageUtils.showVideoBottomSheet(
       context,
       maxWidth: 640,
+      fitContent: fitContent,
       padding: padding,
       child: Theme(
         data: theme ?? Theme.of(context),
         child: BottomPanel(
           title: title,
+          fitContent: fitContent,
           child: StatefulBuilder(
             builder: (context, setState) {
               final theme = this.theme;

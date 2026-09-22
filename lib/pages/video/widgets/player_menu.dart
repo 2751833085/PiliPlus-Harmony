@@ -14,11 +14,14 @@ class PlayerMenu extends StatelessWidget {
     super.key,
     required this.actions,
     this.children = const [],
+    this.shrinkWrap = false,
   });
   final List<PlayerMenuAction> actions;
   final List<Widget> children;
+  final bool shrinkWrap;
   @override
   Widget build(BuildContext context) => ListView(
+    shrinkWrap: shrinkWrap,
     padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
     children: [
       LayoutBuilder(

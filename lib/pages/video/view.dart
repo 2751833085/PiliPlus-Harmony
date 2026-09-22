@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/widgets/playback_cover.dart';
 import 'package:PiliPlus/common/widgets/dialog/bottom_panel.dart';
 import 'package:PiliPlus/pages/video/widgets/player_menu.dart';
 import 'package:PiliPlus/pages/video/shorts/episodes.dart';
@@ -1887,6 +1888,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       PageUtils.showVideoBottomSheet(
         context,
         maxWidth: 640,
+        fitContent: true,
         child: Theme(
           data: theme,
           child: Builder(
@@ -1901,7 +1903,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               });
               return BottomPanel(
                 title: '视频',
+                fitContent: true,
                 child: PlayerMenu(
+                  shrinkWrap: true,
                   actions: [
                     if (_shortMode)
                       action('我不想看', Icons.not_interested, _shortNotInterested),
@@ -2300,32 +2304,31 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
         plPlayer(width: width, height: height),
 
-        Obx(() {
-          if (!_shortMode && !videoDetailController.autoPlay) {
-            return Positioned.fill(
-              bottom: -1,
-              child: GestureDetector(
-                onTap: handlePlay,
-                behavior: .opaque,
-                child: Obx(
-                  () => NetworkImgLayer(
-                    type: .emote,
-                    quality: 60,
-                    src: videoDetailController.cover.value,
-                    width: width,
-                    height: height,
-                    fit: _shortMode ? BoxFit.contain : BoxFit.cover,
-                    cacheWidth: true,
-                    getPlaceHolder: () => Center(
-                      child: Image.asset(Assets.loading),
-                    ),
+        PlaybackCover(
+          shortMode: _shortMode,
+          autoPlay: () => videoDetailController.autoPlay,
+          builder: (context) => Positioned.fill(
+            bottom: -1,
+            child: GestureDetector(
+              onTap: handlePlay,
+              behavior: .opaque,
+              child: Obx(
+                () => NetworkImgLayer(
+                  type: .emote,
+                  quality: 60,
+                  src: videoDetailController.cover.value,
+                  width: width,
+                  height: height,
+                  fit: BoxFit.cover,
+                  cacheWidth: true,
+                  getPlaceHolder: () => Center(
+                    child: Image.asset(Assets.loading),
                   ),
                 ),
               ),
-            );
-          }
-          return const SizedBox.shrink();
-        }),
+            ),
+          ),
+        ),
         if (!_shortMode)
           manualPlayerWidget(height)
         else

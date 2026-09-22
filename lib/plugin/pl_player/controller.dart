@@ -549,7 +549,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   StreamSubscription<OrientationParams>? _orientationListener;
   // 对齐上游 ：监听旋转状态，Android/鸿蒙由checkIsAutoRotate原生读取系统旋转设置
   bool get checkIsAutoRotate =>
-      (Platform.isAndroid || OS.isHarmony) && mode != .gravity;
+      OS.isHarmony || (Platform.isAndroid && mode != .gravity);
 
   /// 传感器报竖屏后，延迟确认再自动退出全屏的定时器。
   ///
@@ -604,6 +604,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     final deviceOrientation = param.orientation;
     if (deviceOrientation == null) return;
     _orientation = deviceOrientation;
+    // The legacy fullscreen exception allowed landscape-to-landscape rotation
+    // even with the system lock enabled. On Harmony all sensor-driven changes
+    // respect that lock; explicit fullscreen buttons still choose a direction.
+    if (OS.isHarmony && param.isAutoRotate != true) {
+      _cancelAutoExitFs();
+      return;
+    }
     if (OS.isHarmony && HarmonyChannel.isWindowMode) {
       _cancelAutoExitFs();
       return;
@@ -1871,8 +1878,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     DeviceOrientation? orientation,
   }) {
     if (followExpandedFold) {
-      // Harmony window.Orientation.AUTO_ROTATION. Clears the old single-panel
-      // lock and lets the system resolve orientation across both fold axes.
+      // Clear the single-panel preference, while preserving the user's system
+      // rotation lock across both fold axes.
       return harmonyFollowFold();
     }
     if (orientation == null && (mode == .none || mode == .gravity)) {
