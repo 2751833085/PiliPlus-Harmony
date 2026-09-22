@@ -154,7 +154,11 @@ class _ShortVideoPagerState extends State<ShortVideoPager> {
           // create extra video players.
           allowImplicitScrolling: true,
           scrollDirection: Axis.vertical,
-          physics: !widget.enabled || session.refreshing || session.interacting
+          physics:
+              !widget.enabled ||
+                  session.refreshing ||
+                  session.interacting ||
+                  session.dismissing
               ? const NeverScrollableScrollPhysics()
               : const AlwaysScrollableScrollPhysics(
                   parent: ClampingScrollPhysics(),

@@ -26,6 +26,7 @@ bash tool/harmony.sh release
 | V2.6.1 RC1 | 双击播放、简洁界面、左右滑自定义、下一条媒体预加载 | [签名 HAP 与记录](releases/v2.6.1-rc1/README.md) · [使用说明](docs/v2.6.1/README.md) · [验证记录](docs/v2.6.1/VALIDATION.md) |
 | V2.6.2 RC1 | 平稳分页、快速切换保留播放器、短视频自动播放 | [签名 HAP 与记录](releases/v2.6.2-rc1/README.md) · [验证记录](docs/v2.6.2/VALIDATION.md) |
 | V2.6.3 RC1 | 简洁模式保留进度条、底部播放/暂停按钮 | [签名 HAP 与记录](releases/v2.6.3-rc1/README.md) · [验证记录](docs/v2.6.3/VALIDATION.md) |
+| V2.6.4 RC1 | 模式切换过渡、紧凑评论、缩小图标和不想看原因选择 | [签名 HAP 与记录](releases/v2.6.4-rc1/README.md) · [验证记录](docs/v2.6.4/VALIDATION.md) |
 
 [更新记录](CHANGELOG.md) · [开发约定](CONTRIBUTING.md) · [文档目录](docs/README.md) · [147 项功能核对](docs/harmony/feature-matrix.json)
 

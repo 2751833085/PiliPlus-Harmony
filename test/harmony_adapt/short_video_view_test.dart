@@ -97,6 +97,58 @@ void main() {
     },
   );
   testWidgets(
+    'dismissing the middle video keeps the player and page aligned, then swipes normally',
+    (tester) async {
+      final key = GlobalKey();
+      final session = ShortVideoSession(
+        initial: const ShortVideoEntry(bvid: 'a'),
+        loadRelated: (_) async => const [
+          ShortVideoEntry(bvid: 'b'),
+          ShortVideoEntry(bvid: 'c'),
+          ShortVideoEntry(bvid: 'd'),
+        ],
+        play: (_) async => true,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ShortVideoPager(
+              session: session,
+              builder: (_, index, active) => active
+                  ? _PlayerFixture(key: key)
+                  : Text(session.entries[index].bvid),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final state = key.currentState;
+      await tester.drag(find.byType(PageView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(session.current.bvid, 'b');
+      expect(await session.dismissCurrent(), isTrue);
+      await tester.pumpAndSettle();
+      expect(session.current.bvid, 'c');
+      expect(session.index, 1);
+      expect(key.currentState, same(state));
+      expect(
+        tester.getCenter(find.byType(_PlayerFixture)),
+        const Offset(400, 300),
+      );
+      await tester.drag(find.byType(PageView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(session.current.bvid, 'd');
+      await tester.drag(find.byType(PageView), const Offset(0, 500));
+      await tester.pumpAndSettle();
+      expect(session.current.bvid, 'c');
+      expect(key.currentState, same(state));
+      expect(find.byType(_PlayerFixture, skipOffstage: false), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      session.dispose();
+    },
+  );
+  testWidgets(
     'crossing halfway then dragging back does not open another video',
     (tester) async {
       var plays = 0;

@@ -1,4 +1,6 @@
 import 'package:PiliPlus/pages/video/shorts/gestures.dart';
+import 'package:PiliPlus/pages/video/shorts/feedback.dart';
+import 'package:PiliPlus/pages/video/shorts/mode_transition.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/pages/video/shorts/session.dart';
 import 'package:PiliPlus/pages/video/shorts/view.dart';
@@ -104,6 +106,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   PlPlayerController? plPlayerController;
 
   bool _shortMode = false;
+  final _modeTransitionKey = GlobalKey<PlayerModeTransitionState>();
+  late final _shortFeedback = ShortVideoFeedback(GStorage.setting);
   ShortVideoSession? _shortSession;
   int _shortRefreshIndex = 1;
   bool _shortPreference = Pref.shortVideoMode;
@@ -114,6 +118,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       !videoDetailController.isPlayAll;
 
   ShortVideoSession get _feed => _shortSession ??= ShortVideoSession(
+    accepts: (entry) => _shortFeedback.allows(entry.bvid),
     initial: ShortVideoEntry(
       bvid: videoDetailController.bvid,
       aid: videoDetailController.aid,
@@ -182,7 +187,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Future<void> _enterShortMode() async {
-    if (!_supportsShortMode || !Pref.shortVideoMode) return;
+    if (_shortMode || !_supportsShortMode || !Pref.shortVideoMode) return;
     if (isFullScreen)
       await videoDetailController.plPlayerController.triggerFullScreen(
         status: false,
@@ -199,9 +204,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         ),
       );
     }
-    videoDetailController.shortVideoMode = true;
-    setState(() => _shortMode = true);
-    _syncDecorDark();
+    if (!await _changeShortMode(true) || !mounted) return;
     _attachPlayerListeners();
     if (videoDetailController.isQuerying) return;
     if (videoDetailController.videoState.value &&
@@ -217,11 +220,72 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
   }
 
+  Future<bool> _changeShortMode(bool value) async {
+    void updateLayout() {
+      if (!value) videoDetailController.cancelShortPreload();
+      videoDetailController.shortVideoMode = value;
+      setState(() => _shortMode = value);
+      _syncDecorDark();
+    }
+
+    final transition = _modeTransitionKey.currentState;
+    if (transition == null) {
+      updateLayout();
+      return true;
+    }
+    return transition.change(updateLayout);
+  }
+
   void _leaveShortMode() {
-    videoDetailController.cancelShortPreload();
-    videoDetailController.shortVideoMode = false;
-    setState(() => _shortMode = false);
-    _syncDecorDark();
+    if (_shortMode) _changeShortMode(false);
+  }
+
+  Future<void> _shortNotInterested() async {
+    if (!mounted || !_shortMode || _feed.switching || _feed.interacting) return;
+    final feed = _feed;
+    final bvid = feed.current.bvid;
+    Object? choice;
+    await feed.interact(() async {
+      choice = await showModalBottomSheet<Object>(
+        context: context,
+        useSafeArea: true,
+        isScrollControlled: true,
+        constraints: const BoxConstraints(maxWidth: 520),
+        showDragHandle: false,
+        builder: (_) => ShortVideoFeedbackSheet(
+          hiddenCount: _shortFeedback.records.length,
+        ),
+      );
+    });
+    if (!mounted || !_shortMode) return;
+    if (choice == true) {
+      try {
+        await _shortFeedback.clear();
+        feed.restoreHidden();
+        if (mounted) feed.loadMore();
+        SmartDialog.showToast('已恢复本机隐藏的视频');
+      } catch (_) {
+        SmartDialog.showToast('恢复失败，请稍后重试');
+      }
+      return;
+    }
+    if (choice case final ShortVideoHideReason reason) {
+      // A collection action or end-of-video callback may have changed source
+      // while the sheet was open. Never apply its result to another video.
+      if (feed.current.bvid != bvid) return;
+      videoDetailController.cancelShortPreload();
+      if (!await feed.dismissCurrent()) {
+        if (mounted) SmartDialog.showToast(feed.error ?? '请稍后重试');
+        return;
+      }
+      try {
+        await _shortFeedback.hide(bvid, reason);
+        if (mounted) SmartDialog.showToast('已跳过，并从本机短视频推荐中隐藏');
+      } catch (_) {
+        if (mounted) SmartDialog.showToast('已跳过，但隐藏记录未能保存');
+      }
+      if (mounted && feed.entries.length - feed.index <= 3) feed.loadMore();
+    }
   }
 
   void _shortComments() {
@@ -235,7 +299,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       useSafeArea: true,
       isScrollControlled: true,
       constraints: const BoxConstraints(maxWidth: 720),
-      showDragHandle: true,
+      showDragHandle: false,
       builder: (context) => Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -245,31 +309,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               (MediaQuery.sizeOf(context).height -
                   MediaQuery.viewInsetsOf(context).bottom) *
               .78,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        '评论',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: '关闭评论',
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(child: videoReplyPanel()),
-            ],
+          child: MiniScaffold(
+            body: videoReplyPanel(onClose: () => Navigator.pop(context)),
           ),
         ),
       ),
@@ -1690,6 +1731,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       shadows: shadows,
     ),
     itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+      if (_shortMode)
+        PopupMenuItem(
+          onTap: _shortNotInterested,
+          child: const Text('我不想看'),
+        ),
       PopupMenuItem(
         onTap: introController.viewLater,
         child: const Text('稍后再看'),
@@ -1776,6 +1822,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               videoDetailController: videoDetailController,
               introController: introController,
               headerControl: HeaderControl(
+                onNotInterested: _shortMode ? _shortNotInterested : null,
                 key: videoDetailController.headerCtrKey,
                 isPortrait: isPortrait,
                 controller: videoDetailController.plPlayerController,
@@ -1870,7 +1917,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     result = videoDetailController.plPlayerController.darkVideoPage
         ? Theme(data: theme, child: child)
         : child;
-    return result;
+    return PlayerModeTransition(key: _modeTransitionKey, child: result);
   }
 
   Widget buildTabBar({
@@ -2451,11 +2498,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   }
 
-  Widget videoReplyPanel({bool isNested = false}) => VideoReplyPanel(
-    key: videoReplyPanelKey,
-    isNested: isNested,
-    heroTag: heroTag,
-  );
+  Widget videoReplyPanel({bool isNested = false, VoidCallback? onClose}) =>
+      VideoReplyPanel(
+        key: videoReplyPanelKey,
+        onClose: onClose,
+        isNested: isNested,
+        heroTag: heroTag,
+      );
 
   // ai总结
   void showAiBottomSheet() {

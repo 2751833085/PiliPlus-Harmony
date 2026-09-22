@@ -53,7 +53,7 @@ class ShortVideoControls extends StatelessWidget {
           tooltip: '普通详情',
           onPressed: onDetails,
           icon: const Icon(
-            Icons.featured_play_list_outlined,
+            Icons.fullscreen_exit,
             color: Colors.white,
           ),
         ),

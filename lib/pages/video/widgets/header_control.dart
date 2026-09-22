@@ -186,6 +186,7 @@ class HeaderControl extends StatefulWidget {
     required this.controller,
     required this.videoDetailCtr,
     required this.heroTag,
+    this.onNotInterested,
     super.key,
   });
 
@@ -193,6 +194,7 @@ class HeaderControl extends StatefulWidget {
   final PlPlayerController controller;
   final VideoDetailController videoDetailCtr;
   final String heroTag;
+  final VoidCallback? onNotInterested;
 
   @override
   State<HeaderControl> createState() => HeaderControlState();
@@ -380,6 +382,16 @@ class HeaderControlState extends State<HeaderControl>
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 14),
               children: [
+                if (widget.onNotInterested case final onNotInterested?)
+                  ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.not_interested, size: 20),
+                    title: const Text('我不想看', style: titleStyle),
+                    onTap: () {
+                      Get.back();
+                      onNotInterested();
+                    },
+                  ),
                 ListTile(
                   dense: true,
                   onTap: () {

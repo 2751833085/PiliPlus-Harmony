@@ -1,6 +1,6 @@
 import 'package:PiliPlus/common/skeleton/video_reply.dart';
 import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
-import 'package:PiliPlus/common/style.dart';
+import 'package:PiliPlus/pages/video/reply/widgets/panel_header.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
@@ -25,11 +25,13 @@ class VideoReplyPanel extends StatefulWidget {
     this.replyLevel = 1,
     required this.heroTag,
     required this.isNested,
+    this.onClose,
   });
 
   final int replyLevel;
   final String heroTag;
   final bool isNested;
+  final VoidCallback? onClose;
 
   @override
   State<VideoReplyPanel> createState() => _VideoReplyPanelState();
@@ -84,37 +86,15 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
             slivers: [
               SliverFloatingHeaderWidget(
                 backgroundColor: colorScheme.surface,
-                child: Padding(
-                  padding: const .fromLTRB(12, 2.5, 6, 2.5),
-                  child: Obx(() {
-                    final sortType = _videoReplyController.sortType.value;
-                    return Row(
-                      mainAxisAlignment: .spaceBetween,
-                      children: [
-                        Text(
-                          sortType.desc,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                        TextButton.icon(
-                          style: Style.buttonStyle,
-                          onPressed: _videoReplyController.queryBySort,
-                          icon: Icon(
-                            Icons.sort,
-                            size: 16,
-                            color: colorScheme.secondary,
-                          ),
-                          label: Text(
-                            sortType.descShort,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: colorScheme.secondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
+                child: Obx(() {
+                  final sortType = _videoReplyController.sortType.value;
+                  return ReplyPanelHeader(
+                    title: sortType.desc,
+                    sortLabel: sortType.descShort,
+                    onSort: _videoReplyController.queryBySort,
+                    onClose: widget.onClose,
+                  );
+                }),
               ),
               Obx(() => _buildBody(_videoReplyController.loadingState.value)),
             ],
