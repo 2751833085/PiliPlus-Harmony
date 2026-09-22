@@ -10,6 +10,7 @@ import 'dart:ui' as ui;
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/harmony_adapt/fold_playback.dart';
+import 'package:PiliPlus/harmony_adapt/player_cache.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
 import 'package:PiliPlus/http/constants.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -997,6 +998,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           (PlatformUtils.isMobile ? Pref.playerVolume : volume.value * 100)
               .toString(),
     };
+    if (OS.isHarmony) {
+      opt.addAll(await harmonyPlayerCacheOptions(tmpDirPath));
+    }
     final autosync = Pref.autosync;
     if (autosync != '0') {
       opt['autosync'] = autosync;
@@ -1009,9 +1013,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     );
 
     final pp = player.platform!.maybeAsNativePlayer;
-    for (var o in opt.entries) {
-      pp.setProperty(o.key, o.value);
-    }
+    await Future.wait(
+      opt.entries.map((o) => pp.setProperty(o.key, o.value)),
+    );
 
     assert(_videoController == null);
 
