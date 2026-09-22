@@ -1,3 +1,7 @@
+import 'package:PiliPlus/pages/video/shorts/media_cache.dart';
+import 'package:PiliPlus/pages/video/shorts/preloader.dart';
+import 'package:PiliPlus/pages/video/shorts/session.dart';
+import 'package:PiliPlus/http/search.dart';
 import 'package:PiliPlus/utils/overseas_playback.dart';
 import 'package:PiliPlus/plugin/pl_player/models/playback_owner.dart';
 import 'package:PiliPlus/pages/video/shorts/request_queue.dart';
@@ -73,7 +77,7 @@ import 'package:PiliPlus/utils/theme_utils.dart';
 import 'package:PiliPlus/utils/utils.dart';
 import 'package:PiliPlus/utils/video_utils.dart';
 import 'package:collection/collection.dart';
-import 'package:dio/dio.dart' show Options;
+import 'package:dio/dio.dart' show Options, Dio, BaseOptions, CancelToken;
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart'
     show ExtendedNestedScrollViewState;
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -705,6 +709,7 @@ class VideoDetailController extends GetxController
   /// 换流则应沿用换流前的播放状态，见 [_onNetworkScopeChanged]。
   void updatePlayer({bool autoplay = true}) {
     _manualRoute = false;
+    _usingWarmSelection = false;
     final currentVideoQa = this.currentVideoQa.value;
     if (currentVideoQa == null) return;
     _autoPlay.value = autoplay;
@@ -840,6 +845,231 @@ class VideoDetailController extends GetxController
     return null;
   }
 
+  ShortMediaCache? _shortMediaCache;
+  Dio? _preloadClient;
+  int _preloadLookupRevision = 0;
+  (String, Object)? _preloadLookup;
+  DateTime? _preloadLookupUntil;
+  Object get _preloadContext => (
+    Accounts.video.mid,
+    plPlayerController.cacheVideoQa,
+    plPlayerController.cacheAudioQa,
+    preferCodecs.map((e) => e.index).join(','),
+    Pref.defaultCDNService,
+    Pref.disableAudioCDN,
+    Pref.overseasMode,
+    currLang.value,
+    plPlayerController.tryLook,
+    plPlayerController.enableAudioNormalization,
+  );
+
+  (String, int, DateTime, VideoDetailData)? _preloadedIntro;
+  Future<void> _preloadIntro(String nextBvid, CancelToken cancel) async {
+    final account = Accounts.video.mid;
+    try {
+      final result = await VideoHttp.videoIntro(
+        bvid: nextBvid,
+        cancelToken: cancel,
+      );
+      if (!cancel.isCancelled &&
+          !isClosed &&
+          account == Accounts.video.mid &&
+          result.dataOrNull != null) {
+        _preloadedIntro = (
+          nextBvid,
+          account,
+          DateTime.now(),
+          result.dataOrNull!,
+        );
+      }
+    } catch (_) {}
+  }
+
+  VideoDetailData? takePreloadedIntro(String requestedBvid) {
+    final value = _preloadedIntro;
+    if (value == null ||
+        value.$1 != requestedBvid ||
+        value.$2 != Accounts.video.mid ||
+        DateTime.now().difference(value.$3) > const Duration(seconds: 45))
+      return null;
+    _preloadedIntro = null;
+    return value.$4;
+  }
+
+  late final _nextPreloader = NextVideoPreloader<PlayUrlModel>(
+    load: (nextBvid, nextCid, cancel) async {
+      unawaited(_preloadIntro(nextBvid, cancel));
+      final result = await VideoHttp.videoUrl(
+        bvid: nextBvid,
+        cid: nextCid,
+        qn: VideoQuality.hdrVivid.code,
+        tryLook: plPlayerController.tryLook,
+        videoType: VideoType.ugc,
+        language: currLang.value,
+        voiceBalance: plPlayerController.enableAudioNormalization,
+        cancelToken: cancel,
+      );
+      final model = result.dataOrNull;
+      if (model == null ||
+          cancel.isCancelled ||
+          model.dash?.video?.isNotEmpty != true)
+        return null;
+      if (!model.canDeferQualitySupplement(plPlayerController.cacheVideoQa!) &&
+          model.missingVideoQualityBelowHighest != -1) {
+        final extra = await VideoHttp.videoUrl(
+          bvid: nextBvid,
+          cid: nextCid,
+          qn: model.missingVideoQualityBelowHighest,
+          tryLook: plPlayerController.tryLook,
+          videoType: VideoType.ugc,
+          language: currLang.value,
+          voiceBalance: plPlayerController.enableAudioNormalization,
+          cancelToken: cancel,
+        );
+        if (cancel.isCancelled) return null;
+        model.dash!.video!.merge(extra.dataOrNull?.dash?.video);
+      }
+      return model;
+    },
+    warm: (model, cancel) async {
+      final videoQa = model.findAvailableVideoQuality(
+        plPlayerController.cacheVideoQa!,
+      );
+      final videos = model.dash!.video!
+          .where((v) => v.quality.code == videoQa)
+          .toList();
+      if (videos.isEmpty) return;
+      final codec = VideoUtils.selectCodec(
+        videos.map((v) => v.codecs!),
+        preferCodecs,
+      );
+      final video = videos.firstWhere(
+        (v) => codec.codes.any(v.codecs!.startsWith),
+        orElse: () => videos.first,
+      );
+      final audios = model.dash?.audio;
+      AudioItem? audio;
+      if (audios?.isNotEmpty == true) {
+        final ids = audios!.map((a) => a.id).toList();
+        final preferred = plPlayerController.cacheAudioQa;
+        var chosen = ids.findClosestTarget(
+          (e) => e <= preferred,
+          (a, b) => a > b ? a : b,
+        );
+        if (!ids.contains(preferred) && ids.any((e) => e > preferred))
+          chosen = AudioQuality.k192.code;
+        audio = audios.firstWhere(
+          (a) => a.id == chosen,
+          orElse: () => audios.first,
+        );
+      }
+      // Keep the same URL selection as foreground playback. Overseas routing
+      // resolves here once and its selected URLs travel with this model.
+      var nextVideo = VideoUtils.getCdnUrl(video.playUrls);
+      var nextAudio = audio == null
+          ? ''
+          : VideoUtils.getCdnUrl(audio.playUrls, isAudio: true);
+      if (Pref.overseasMode) {
+        final routes = _overseasRoutes ??= OverseasPlaybackRoutes();
+        final selected = await Future.wait([
+          routes.video.resolve(video.playUrls, fallback: nextVideo),
+          if (audio != null)
+            routes.audio.resolve(audio.playUrls, fallback: nextAudio),
+        ]);
+        nextVideo = selected.first;
+        if (selected.length > 1) nextAudio = selected[1];
+      }
+      if (cancel.isCancelled || isClosed) return;
+      _warmUrls.clear();
+      _warmUrls[video.baseUrl!] = nextVideo;
+      if (audio != null) _warmUrls[audio.baseUrl!] = nextAudio;
+      final client = _preloadClient ??= Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+          headers: {
+            'User-Agent': BrowserUa.pc,
+            'Referer': 'https://www.bilibili.com/',
+          },
+        ),
+      );
+      final cache = _shortMediaCache ??= ShortMediaCache(client);
+      cache.retain({
+        if (videoUrl != null) videoUrl!,
+        if (audioUrl != null) audioUrl!,
+        nextVideo,
+        nextAudio,
+      });
+      await Future.wait([
+        cache.warm(nextVideo, 2 * 1024 * 1024, cancel),
+        if (nextAudio.isNotEmpty) cache.warm(nextAudio, 256 * 1024, cancel),
+      ]);
+    },
+  );
+  final Map<String, String> _warmUrls = {};
+  bool _usingWarmSelection = false;
+  int? preloadedCid(String bvid) =>
+      _nextPreloader.cidFor(bvid, _preloadContext);
+
+  Future<void> preloadShortNext(ShortVideoEntry? entry) async {
+    if (isClosed ||
+        !shortVideoMode ||
+        !videoState.value ||
+        !Pref.shortPreload ||
+        entry == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused ||
+        !identical(plPlayerController.sourceOwner, this)) {
+      cancelShortPreload();
+      return;
+    }
+    if (plPlayerController.isBuffering.value) {
+      _preloadLookupRevision++;
+      _preloadLookup = null;
+      _nextPreloader.suspend();
+      return;
+    }
+    if (plPlayerController.cacheVideoQa == null ||
+        plPlayerController.buffered.value - plPlayerController.position.value <
+            3)
+      return;
+    final context = _preloadContext;
+    final identity = (entry.bvid, context);
+    if (_preloadLookup == identity &&
+        _preloadLookupUntil?.isAfter(DateTime.now()) == true)
+      return;
+    _preloadLookup = identity;
+    _preloadLookupUntil = DateTime.now().add(const Duration(seconds: 40));
+    final revision = ++_preloadLookupRevision;
+    try {
+      final cid =
+          entry.cid ??
+          (await SearchHttp.ab2cWithDimension(bvid: entry.bvid))?.cid;
+      if (isClosed ||
+          revision != _preloadLookupRevision ||
+          cid == null ||
+          context != _preloadContext ||
+          plPlayerController.isBuffering.value ||
+          !identical(plPlayerController.sourceOwner, this)) {
+        if (revision == _preloadLookupRevision) _preloadLookup = null;
+        return;
+      }
+      await _nextPreloader.prepare(entry.bvid, cid, context);
+    } catch (_) {
+      // Preloading is opportunistic; foreground error handling remains intact.
+    }
+  }
+
+  void cancelShortPreload() {
+    _preloadLookupRevision++;
+    _preloadLookup = null;
+    _nextPreloader.cancel();
+  }
+
+  @override
+  bool get usesPreloadedMedia =>
+      (_shortMediaCache?.contains(videoUrl) ?? false) ||
+      (_shortMediaCache?.contains(audioUrl) ?? false);
+
   final _playerRequests = VideoRequestQueue();
   OverseasPlaybackRoutes? _overseasRoutes;
   Timer? _routeRetry;
@@ -855,7 +1085,7 @@ class VideoDetailController extends GetxController
 
   @override
   void retryNetworkRoute() {
-    if (!usesOverseasRoutes ||
+    if ((!usesOverseasRoutes && !usesPreloadedMedia) ||
         isClosed ||
         _routeRetry != null ||
         _routeRetries >= 2 ||
@@ -870,11 +1100,14 @@ class VideoDetailController extends GetxController
           source != (bvid, cid.value) ||
           !identical(plPlayerController.sourceOwner, this) ||
           failedVideo != videoUrl ||
-          !usesOverseasRoutes)
+          (!usesOverseasRoutes && !usesPreloadedMedia))
         return;
       // Initial opening already owns the serial queue; enqueue after it, while
       // preserving a user's pause and the current position for interrupted play.
       _routeRetries++;
+      _shortMediaCache?.evict(videoUrl);
+      _shortMediaCache?.evict(audioUrl);
+      _usingWarmSelection = false;
       _overseasRoutes?.video.reject(failedVideo);
       _overseasRoutes?.audio.reject(failedAudio);
       playedTime =
@@ -903,6 +1136,7 @@ class VideoDetailController extends GetxController
         return;
       plPlayerController.sourceOwner = this;
       if (resolveRoutes &&
+          !_usingWarmSelection &&
           usesOverseasRoutes &&
           data.dash?.video?.isNotEmpty == true) {
         final routes = _overseasRoutes ??= OverseasPlaybackRoutes();
@@ -941,8 +1175,11 @@ class VideoDetailController extends GetxController
                 hasDashAudio: entry.hasDashAudio,
               )
             : NetworkSource(
-                videoSource: videoUrl!,
-                audioSource: audioUrl,
+                videoSource:
+                    _shortMediaCache?.sourceFor(videoUrl!) ?? videoUrl!,
+                audioSource: audioUrl == null
+                    ? null
+                    : _shortMediaCache?.sourceFor(audioUrl!) ?? audioUrl,
               ),
         seekTo: seek,
         duration: data.timeLength == null
@@ -992,6 +1229,7 @@ class VideoDetailController extends GetxController
   bool isQuerying = false;
   @override
   bool shortVideoMode = false;
+  final shortChromeVisible = true.obs;
   final _videoRequests = VideoRequestQueue();
 
   final languages = Rxn<List<LanguageItem>>();
@@ -1078,13 +1316,19 @@ class VideoDetailController extends GetxController
       preferCodecs = isWiFi ? Pref.preferCodecs : Pref.preferCodecsCellular;
     }
 
-    final result = await _getVideoUrl(VideoQuality.hdrVivid.code);
+    final prepared = shortVideoMode && Pref.shortPreload
+        ? _nextPreloader.take(bvid, cid.value, _preloadContext)
+        : null;
+    _usingWarmSelection = prepared != null;
+    final result = prepared == null
+        ? await _getVideoUrl(VideoQuality.hdrVivid.code)
+        : Success(prepared);
     if (!_videoRequests.isCurrent(ticket) || isClosed) return;
 
     if (result case Success(:final response)) {
       data = response;
       final deferQualities =
-          Pref.overseasMode &&
+          (Pref.overseasMode || _usingWarmSelection) &&
           data.canDeferQualitySupplement(plPlayerController.cacheVideoQa!);
       if (data.dash != null && !deferQualities)
         await _supplementVideoQualities(ticket);
@@ -1100,7 +1344,9 @@ class VideoDetailController extends GetxController
         if (progress != null) {
           defaultST = Duration(milliseconds: progress);
         } else {
-          defaultST = Duration(milliseconds: data.lastPlayTime);
+          defaultST = shortVideoMode
+              ? Duration.zero
+              : Duration(milliseconds: data.lastPlayTime);
         }
       }
 
@@ -1189,7 +1435,9 @@ class VideoDetailController extends GetxController
       );
       _setVideoHeight();
 
-      videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
+      videoUrl =
+          (_usingWarmSelection ? _warmUrls[firstVideo.baseUrl] : null) ??
+          VideoUtils.getCdnUrl(firstVideo.playUrls);
 
       /// 优先顺序 设置中指定质量 -> 当前可选的最高质量
       AudioItem? firstAudio;
@@ -1208,12 +1456,19 @@ class VideoDetailController extends GetxController
           (e) => e.id == closestNumber,
           orElse: () => audioList.first,
         );
-        audioUrl = VideoUtils.getCdnUrl(firstAudio.playUrls, isAudio: true);
+        audioUrl =
+            (_usingWarmSelection ? _warmUrls[firstAudio.baseUrl] : null) ??
+            VideoUtils.getCdnUrl(firstAudio.playUrls, isAudio: true);
         currentAudioQa = AudioQuality.fromCode(firstAudio.id);
       } else {
         audioUrl = '';
       }
+      _usingWarmSelection =
+          _usingWarmSelection &&
+          _warmUrls.containsKey(firstVideo.baseUrl) &&
+          (firstAudio == null || _warmUrls.containsKey(firstAudio.baseUrl));
       await _initPlayerIfNeeded(autoFullScreenFlag);
+      _warmUrls.clear();
       if (deferQualities && _videoRequests.isCurrent(ticket) && !isClosed) {
         unawaited(_supplementVideoQualities(ticket).catchError((Object _) {}));
       }
@@ -1494,6 +1749,10 @@ class VideoDetailController extends GetxController
 
   @override
   void onClose() {
+    _nextPreloader.dispose();
+    _preloadLookupRevision++;
+    unawaited(_shortMediaCache?.dispose());
+    _preloadClient?.close(force: true);
     _routeRetry?.cancel();
     _overseasRoutes?.dispose();
     _playerRequests.dispose();
@@ -1523,6 +1782,7 @@ class VideoDetailController extends GetxController
     _routeRetry?.cancel();
     _routeRetry = null;
     _routeRetries = 0;
+    _usingWarmSelection = false;
     _manualRoute = false;
     _playerRequests.invalidate();
     _videoRequests.invalidate();

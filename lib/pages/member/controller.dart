@@ -28,6 +28,7 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
     with GetTickerProviderStateMixin {
   MemberController({required this.mid});
   int mid;
+  final _requestedTab = Get.parameters['tab'];
   String? username;
   String? userAvatar;
 
@@ -120,7 +121,9 @@ class MemberController extends CommonDataController<SpaceData, SpaceData?>
       }
       if (tab2!.isNotEmpty) {
         int initialIndex = -1;
-        MemberTabType memberTab = Pref.memberTab;
+        MemberTabType memberTab = _requestedTab == 'contribute'
+            ? MemberTabType.contribute
+            : Pref.memberTab;
         if (memberTab != MemberTabType.def) {
           initialIndex = tab2!.indexWhere((item) {
             return item.param == memberTab.name;

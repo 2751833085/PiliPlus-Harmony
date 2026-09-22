@@ -93,7 +93,10 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
   Future<void> queryVideoIntro() async {
     queryVideoTags();
     final requestedBvid = bvid;
-    final res = await VideoHttp.videoIntro(bvid: requestedBvid);
+    final prepared = videoDetailCtr.takePreloadedIntro(requestedBvid);
+    final res = prepared == null
+        ? await VideoHttp.videoIntro(bvid: requestedBvid)
+        : Success(prepared);
     if (isClosed || requestedBvid != bvid) return;
     if (res case Success(:final response)) {
       if (response.redirectUrl != null &&

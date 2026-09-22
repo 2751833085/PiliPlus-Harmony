@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:PiliPlus/pages/video/shorts/pager.dart';
 import 'package:PiliPlus/pages/video/shorts/session.dart';
 import 'package:PiliPlus/pages/video/shorts/controls.dart';
+import 'package:PiliPlus/pages/video/shorts/chrome.dart';
 import 'package:PiliPlus/pages/video/shorts/view.dart';
 import 'package:PiliPlus/pages/video/controller.dart';
 import 'package:PiliPlus/pages/video/introduction/ugc/controller.dart';
@@ -193,6 +194,7 @@ void main() {
           play: (_) async => true,
         );
         final player = _FakePlayer();
+        final video = _FakeVideo(player);
         final playerKey = GlobalKey();
         final captureKey = GlobalKey();
         Widget build(bool fullscreen) => MaterialApp(
@@ -211,7 +213,7 @@ void main() {
               key: captureKey,
               child: ShortVideoFeed(
                 session: session,
-                video: _FakeVideo(player),
+                video: video,
                 intro: _FakeIntro(),
                 playerBuilder: (_, __) => _PlayerFixture(key: playerKey),
                 onDetails: () {},
@@ -245,6 +247,32 @@ void main() {
           });
         }
         final state = playerKey.currentState;
+        video.shortChromeVisible.value = false;
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<ShortVideoChrome>(find.byType(ShortVideoChrome))
+              .visible,
+          isFalse,
+        );
+        expect(find.byType(ShortVideoMinimalControls), findsWidgets);
+        expect(playerKey.currentState, same(state));
+        if (renderPath.isNotEmpty) {
+          await tester.runAsync(() async {
+            final boundary =
+                captureKey.currentContext!.findRenderObject()
+                    as RenderRepaintBoundary;
+            final image = await boundary.toImage();
+            final bytes = await image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
+            await File(
+              '$renderPath-minimal-${size.width.toInt()}.png',
+            ).writeAsBytes(bytes!.buffer.asUint8List());
+            image.dispose();
+          });
+        }
+        video.shortChromeVisible.value = true;
         await tester.pumpWidget(build(true));
         await tester.pumpAndSettle();
         expect(playerKey.currentState, same(state));
@@ -289,6 +317,8 @@ class _PlayerFixtureState extends State<_PlayerFixture> {
 
 class _FakePlayer implements PlPlayerController {
   @override
+  final isBuffering = false.obs;
+  @override
   final controlsLock = false.obs;
   @override
   final showControls = true.obs;
@@ -314,6 +344,10 @@ class _FakePlayer implements PlPlayerController {
 }
 
 class _FakeVideo implements VideoDetailController {
+  @override
+  final shortChromeVisible = true.obs;
+  @override
+  Future<void> preloadShortNext(ShortVideoEntry? entry) async {}
   _FakeVideo(this.plPlayerController);
   @override
   final PlPlayerController plPlayerController;

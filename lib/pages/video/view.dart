@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/pages/video/shorts/session.dart';
 import 'package:PiliPlus/pages/video/shorts/view.dart';
@@ -159,7 +160,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         ugc.BaseEpisodeItem(
           bvid: entry.bvid,
           aid: entry.aid,
-          cid: entry.cid,
+          cid: entry.cid ?? videoDetailController.preloadedCid(entry.bvid),
           cover: entry.cover,
           title: entry.title,
         ),
@@ -169,6 +170,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   );
 
   void _shortPreferenceChanged() {
+    if (mounted && !Pref.shortPreload)
+      videoDetailController.cancelShortPreload();
     if (!mounted || _shortPreference == Pref.shortVideoMode) return;
     _shortPreference = Pref.shortVideoMode;
     if (_shortPreference) {
@@ -202,6 +205,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   void _leaveShortMode() {
+    videoDetailController.cancelShortPreload();
     videoDetailController.shortVideoMode = false;
     setState(() => _shortMode = false);
     _syncDecorDark();
@@ -273,6 +277,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       playerBuilder: (width, height) =>
           videoPlayer(width: width, height: height),
       onDetails: _leaveShortMode,
+      onPlay: () {
+        if (!videoDetailController.autoPlay ||
+            !videoDetailController.videoState.value) {
+          videoDetailController.autoPlay = true;
+          if (videoDetailController.videoUrl == null) {
+            videoDetailController.queryVideoUrl();
+          } else {
+            videoDetailController.playerInit(autoplay: true);
+          }
+        } else {
+          videoDetailController.plPlayerController.onDoubleTapCenter();
+        }
+      },
       onComments: _shortComments,
       onEpisodes: () => showEpisodes(),
       onMore: () =>
@@ -537,6 +554,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         ctr.showDanmaku = true;
       }
     } else if (state == .paused) {
+      videoDetailController.cancelShortPreload();
       introController.cancelTimer();
       ctr.showDanmaku = false;
     }
@@ -756,6 +774,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   @override
   // 离开当前页面时
   void didPushNext() {
+    videoDetailController.cancelShortPreload();
     if (Get.routing.route is HeroDialogRoute) {
       videoDetailController.imageview = true;
       return;
@@ -1714,19 +1733,24 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               maxHeight: height,
               shortMode: _shortMode && !isFullScreen,
               feedGestures: _shortMode,
-              onShortDoubleTap: () {
-                if (_shortMode &&
-                    _supportsShortMode &&
-                    ugcIntroController.videoDetail.value.bvid ==
-                        _feed.current.bvid &&
-                    !ugcIntroController.hasLike.value) {
-                  _feed.interact(
-                    () => ugcIntroController.handleAction(
-                      ugcIntroController.actionLikeVideo,
-                    ),
-                  );
+              onShortNavigate: (action) {
+                if (!_shortMode || _feed.switching || _feed.interacting) return;
+                if (action == ShortSwipeAction.comments) {
+                  _shortComments();
+                } else if (action == ShortSwipeAction.author) {
+                  final detail = ugcIntroController.videoDetail.value;
+                  if (detail.bvid == _feed.current.bvid &&
+                      detail.owner?.mid != null) {
+                    Get.toNamed(
+                      '/member?mid=${detail.owner!.mid}&tab=contribute',
+                    );
+                  }
                 }
               },
+              onShortMore: () =>
+                  (videoDetailController.headerCtrKey.currentState
+                          as HeaderControlState?)
+                      ?.showSettingSheet(),
               onEnterShortMode: _supportsShortMode && Pref.shortVideoMode
                   ? _enterShortMode
                   : null,

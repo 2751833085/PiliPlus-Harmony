@@ -3,6 +3,9 @@
 abstract final class SettingBoxKey {
   static const String biliPlayerControls = 'biliPlayerControls';
   static const String overseasMode = 'overseasMode';
+  static const String shortSwipeLeft = 'shortSwipeLeft';
+  static const String shortSwipeRight = 'shortSwipeRight';
+  static const String shortPreload = 'shortPreload';
   static const String shortVideoMode = 'shortVideoMode';
   static const String harmonyFoldOrientation = 'harmonyFoldOrientation';
   static const String harmonyUI = 'harmonyUI',

@@ -1334,19 +1334,24 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         }
         if (isLive) {
           if (event.startsWith('tcp: ffurl_read returned ') ||
-              event.startsWith("Failed to open https://") ||
-              event.startsWith("Can not open external file https://")) {
+              event.startsWith("Failed to open http") ||
+              event.startsWith("Can not open external file http")) {
             Timer(const Duration(milliseconds: 3000), refreshPlayer);
           }
           return;
         }
-        if (event.startsWith("Failed to open https://") ||
-            event.startsWith("Can not open external file https://") ||
+        if (event.startsWith("Failed to open http") ||
+            event.startsWith("Can not open external file http") ||
             //tcp: ffurl_read returned 0xdfb9b0bb
             //tcp: ffurl_read returned 0xffffff99
-            event.startsWith('tcp: ffurl_read returned ')) {
-          if (sourceOwner case NetworkPlaybackOwner(usesOverseasRoutes: true)) {
-            (sourceOwner as NetworkPlaybackOwner).retryNetworkRoute();
+            (event.startsWith('tcp: ffurl_read returned ') ||
+                (event.contains('Stream ends prematurely') &&
+                    sourceOwner is NetworkPlaybackOwner &&
+                    (sourceOwner as NetworkPlaybackOwner)
+                        .usesPreloadedMedia))) {
+          if (sourceOwner case final NetworkPlaybackOwner owner
+              when owner.usesOverseasRoutes || owner.usesPreloadedMedia) {
+            owner.retryNetworkRoute();
             return;
           }
           EasyThrottle.throttle(

@@ -6,5 +6,6 @@ abstract interface class PortraitPlaybackOwner {
 /// A page can recover a failed media route without retrying the same URL.
 abstract interface class NetworkPlaybackOwner {
   bool get usesOverseasRoutes;
+  bool get usesPreloadedMedia;
   void retryNetworkRoute();
 }

@@ -1,10 +1,9 @@
-import 'package:PiliPlus/common/widgets/gesture/immediate_tap_gesture_recognizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:PiliPlus/pages/video/shorts/pager.dart';
 import 'package:PiliPlus/pages/video/shorts/session.dart';
-import 'package:PiliPlus/pages/video/shorts/seek_gesture.dart';
+import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 
 void main() {
   for (final size in [const Size(390, 844), const Size(900, 640)]) {
@@ -95,31 +94,30 @@ class _SeekFixture extends StatefulWidget {
 }
 
 class _SeekFixtureState extends State<_SeekFixture> {
-  final tap = ImmediateTapGestureRecognizer(onTapUp: (_) {});
-  final doubleTap = DoubleTapGestureRecognizer()..onDoubleTapDown = ((_) {});
-  final longPress = LongPressGestureRecognizer()..onLongPressStart = ((_) {});
-  late final HorizontalDragGestureRecognizer drag = feedSeekRecognizer(
-    onStart: () {},
-    onUpdate: (_) {},
-    onEnd: () => widget.onSeek(),
-    onCancel: () {},
+  late final gestures = ShortVideoGestures(
+    onTap: () {},
+    onDoubleTap: () {},
+    leftAction: () => ShortSwipeAction.seek,
+    rightAction: () => ShortSwipeAction.seek,
+    onSeekStart: () {},
+    onSeekUpdate: (_) {},
+    onSeekEnd: () => widget.onSeek(),
+    onSeekCancel: () {},
+    onNavigate: (_) {},
   );
+  final longPress = LongPressGestureRecognizer()..onLongPressStart = ((_) {});
   @override
   void dispose() {
-    tap.dispose();
-    doubleTap.dispose();
+    gestures.dispose();
     longPress.dispose();
-    drag.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => Listener(
     onPointerDown: (event) {
-      tap.addPointer(event);
-      doubleTap.addPointer(event);
+      gestures.addPointer(event);
       longPress.addPointer(event);
-      drag.addPointer(event);
     },
     child: const ColoredBox(color: Colors.black, child: SizedBox.expand()),
   );

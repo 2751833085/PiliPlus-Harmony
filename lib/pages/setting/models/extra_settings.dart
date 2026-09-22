@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'dart:io' show Platform, Directory;
 import 'dart:math' show max;
@@ -67,10 +68,33 @@ List<SettingsModel> get extraSettings => [
   SwitchModel(
     section: '播放器体验',
     title: '竖屏短视频模式',
-    subtitle: '普通视频以信息流打开，单屏、展开和横屏均可上下切换、左右调整进度；第一条下拉刷新。可随时返回普通详情',
+    subtitle: '双击播放/暂停，单击切换简洁界面；上下切视频，第一条下拉刷新，左右默认调进度。可随时返回普通详情',
     leading: const Icon(Icons.stay_current_portrait_outlined),
     setKey: SettingBoxKey.shortVideoMode,
     onChanged: (_) => HarmonyAppearance.changed(),
+  ),
+  for (final left in [true, false])
+    PopupModel<ShortSwipeAction>(
+      section: '竖屏短视频',
+      title: left ? '竖屏左滑动作' : '竖屏右滑动作',
+      leading: Icon(left ? Icons.swipe_left : Icons.swipe_right),
+      value: () => left ? Pref.shortSwipeLeft : Pref.shortSwipeRight,
+      items: ShortSwipeAction.values,
+      onSelected: (value, setState) => GStorage.setting
+          .put(
+            left ? SettingBoxKey.shortSwipeLeft : SettingBoxKey.shortSwipeRight,
+            value.index,
+          )
+          .whenComplete(setState),
+    ),
+  SwitchModel(
+    section: '竖屏短视频',
+    title: '预加载下一条视频',
+    subtitle: '当前视频播放稳定后预取下一条的开头画面与音频，减少滑动等待；蜂窝网络也会消耗少量流量',
+    leading: const Icon(Icons.skip_next_outlined),
+    setKey: SettingBoxKey.shortPreload,
+    onChanged: (_) => HarmonyAppearance.changed(),
+    defaultVal: true,
   ),
   SwitchModel(
     section: '网络与加载',

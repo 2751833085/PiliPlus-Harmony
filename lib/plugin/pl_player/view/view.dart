@@ -1,4 +1,4 @@
-import 'package:PiliPlus/pages/video/shorts/seek_gesture.dart';
+import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
@@ -112,7 +112,8 @@ class PLVideoPlayer extends StatefulWidget {
     this.shortMode = false,
     this.feedGestures = false,
     this.onEnterShortMode,
-    this.onShortDoubleTap,
+    this.onShortNavigate,
+    this.onShortMore,
     this.fill = Colors.black,
     this.alignment = Alignment.center,
     super.key,
@@ -120,7 +121,8 @@ class PLVideoPlayer extends StatefulWidget {
 
   final bool shortMode;
   final bool feedGestures;
-  final VoidCallback? onEnterShortMode, onShortDoubleTap;
+  final VoidCallback? onEnterShortMode, onShortMore;
+  final ValueChanged<ShortSwipeAction>? onShortNavigate;
   final double maxWidth;
   final double maxHeight;
   final PlPlayerController plPlayerController;
@@ -444,7 +446,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     _longPressRecognizer?.dispose();
     _doubleTapGestureRecognizer.dispose();
     _scaleGestureRecognizer.dispose();
-    _feedSeek.dispose();
+    _feedGestures.dispose();
     _brightnessListener?.cancel();
     _controlsListener?.cancel();
     HarmonyAppearance.revision.removeListener(_refreshControlAppearance);
@@ -1324,7 +1326,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   void onDoubleTapDownMobile(TapDownDetails details) {
     if (widget.shortMode) {
-      widget.onShortDoubleTap?.call();
+      plPlayerController.onDoubleTapCenter();
       return;
     }
     if (plPlayerController.isLive || plPlayerController.controlsLock.value) {
@@ -1345,7 +1347,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   void _onTapUp(TapUpDetails details) {
     if (widget.shortMode) {
-      plPlayerController.onDoubleTapCenter();
+      widget.videoDetailController?.shortChromeVisible.toggle();
       return;
     }
     switch (details.kind) {
@@ -1388,7 +1390,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
 
   void _onDoubleTapDown(TapDownDetails details) {
     if (widget.shortMode) {
-      widget.onShortDoubleTap?.call();
+      plPlayerController.onDoubleTapCenter();
       return;
     }
     switch (details.kind) {
@@ -1406,22 +1408,38 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               ? const Duration(milliseconds: 300)
               : null,
         )
-        ..onLongPressStart = ((_) =>
-            plPlayerController.setLongPressStatus(true))
+        ..onLongPressStart = ((details) {
+          if (widget.feedGestures && details.localPosition.dy < maxHeight / 2) {
+            widget.onShortMore?.call();
+          } else {
+            plPlayerController.setLongPressStatus(true);
+          }
+        })
         ..onLongPressEnd = ((_) => plPlayerController.setLongPressStatus(false))
         ..onLongPressCancel = (() =>
             plPlayerController.setLongPressStatus(false));
   late final ImmediateTapGestureRecognizer _tapGestureRecognizer;
   late final DoubleTapGestureRecognizer _doubleTapGestureRecognizer;
   late final PlayerScaleGestureRecognizer _scaleGestureRecognizer;
-  late final _feedSeek = feedSeekRecognizer(
-    onStart: _onHorizontalDragStart,
-    onUpdate: _onHorizontalDragUpdate,
-    onEnd: _onHorizontalDragEnd,
-    onCancel: () {
+  late final _feedGestures = ShortVideoGestures(
+    onTap: () {
+      if (widget.shortMode) {
+        widget.videoDetailController?.shortChromeVisible.toggle();
+      } else {
+        plPlayerController.controls = !plPlayerController.showControls.value;
+      }
+    },
+    onDoubleTap: () => plPlayerController.onDoubleTapCenter(),
+    leftAction: () => Pref.shortSwipeLeft,
+    rightAction: () => Pref.shortSwipeRight,
+    onSeekStart: _onHorizontalDragStart,
+    onSeekUpdate: _onHorizontalDragUpdate,
+    onSeekEnd: _onHorizontalDragEnd,
+    onSeekCancel: () {
       plPlayerController.seekToPos = null;
       if (plPlayerController.isSeeking.value) plPlayerController.onSeekEnd();
     },
+    onNavigate: (action) => widget.onShortNavigate?.call(action),
   );
 
   StreamSubscription<bool>? _danmakuListener;
@@ -1453,6 +1471,11 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     }
 
     final controlsUnlock = !plPlayerController.controlsLock.value;
+    if (widget.feedGestures && controlsUnlock) {
+      _feedGestures.addPointer(event);
+      longPressRecognizer.addPointer(event);
+      return;
+    }
     if (PlatformUtils.isMobile) {
       _tapGestureRecognizer.addPointer(event);
       if (controlsUnlock) {
@@ -1461,7 +1484,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           longPressRecognizer.addPointer(event);
         }
         if (widget.feedGestures) {
-          _feedSeek.addPointer(event);
+          _feedGestures.addPointer(event);
         } else
           _scaleGestureRecognizer
             ..isPosAllowed = _isPositionAllowed(event.localPosition)
@@ -1476,7 +1499,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         longPressRecognizer.addPointer(event);
       }
       if (widget.feedGestures) {
-        _feedSeek.addPointer(event);
+        _feedGestures.addPointer(event);
       } else {
         _scaleGestureRecognizer.addPointer(event);
       }

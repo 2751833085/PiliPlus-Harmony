@@ -1,0 +1,243 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:math' as math;
+import 'dart:typed_data';
+import 'package:dio/dio.dart';
+
+class _Prefix {
+  _Prefix(
+    this.url,
+    this.bytes,
+    this.total,
+    this.type,
+    this.validator,
+    this.token,
+  );
+  final String url, type, token;
+  final Uint8List bytes;
+  final int total;
+  final String? validator;
+}
+
+/// A bounded in-memory prefix cache, exposed to the native decoder through a
+/// loopback-only range server. Warmed bytes are actually reused, not downloaded
+/// for a speed test and thrown away. At most current+next video/audio are kept.
+class ShortMediaCache {
+  ShortMediaCache(this.client);
+  final Dio client;
+  final Map<String, _Prefix> _entries = {};
+  final Set<CancelToken> _transfers = {};
+  HttpServer? _server;
+  Future<HttpServer>? _starting;
+  bool _closed = false;
+  final String _secret = List.generate(
+    20,
+    (_) => math.Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0'),
+  ).join();
+  int _id = 0;
+  int get bytesHeld => _entries.values.fold(0, (n, p) => n + p.bytes.length);
+  int get entriesHeld => _entries.length;
+
+  Future<void> warm(String url, int limit, CancelToken cancel) async {
+    if (_closed || cancel.isCancelled || _entries.containsKey(url)) return;
+    // The caller preloads a single next item: never grow past four streams.
+    if (_entries.length >= 4 || limit <= 0) return;
+    final uri = Uri.tryParse(url);
+    if (uri == null || !['http', 'https'].contains(uri.scheme)) return;
+    final result = await client.get<ResponseBody>(
+      url,
+      cancelToken: cancel,
+      options: Options(
+        responseType: ResponseType.stream,
+        headers: {'Range': 'bytes=0-${limit - 1}'},
+        validateStatus: (_) => true,
+      ),
+    );
+    final body = result.data;
+    if (body == null) return;
+    final type =
+        result.headers.value('content-type') ?? 'application/octet-stream';
+    final range = RegExp(
+      r'^bytes 0-(\d+)/(\d+)$',
+    ).firstMatch(result.headers.value('content-range') ?? '');
+    final total = range == null
+        ? int.tryParse(result.headers.value('content-length') ?? '')
+        : int.parse(range[2]!);
+    final validType =
+        type.startsWith('video/') ||
+        type.startsWith('audio/') ||
+        type.startsWith('application/octet-stream');
+    final validRange =
+        result.statusCode == 206 &&
+        range != null &&
+        int.parse(range[1]!) + 1 == math.min(total!, limit);
+    final completeSmallFile =
+        result.statusCode == 200 && total != null && total <= limit;
+    if (!validType ||
+        total == null ||
+        total <= 0 ||
+        !(validRange || completeSmallFile)) {
+      await body.stream.listen((_) {}).cancel();
+      return;
+    }
+    final expected = math.min(total, limit);
+    final bytes = BytesBuilder(copy: false);
+    await for (final chunk in body.stream) {
+      if (_closed || cancel.isCancelled) return;
+      final remaining = expected - bytes.length;
+      bytes.add(
+        chunk.length > remaining
+            ? Uint8List.sublistView(chunk, 0, remaining)
+            : chunk,
+      );
+      if (bytes.length == expected) break;
+    }
+    if (_closed || cancel.isCancelled || bytes.length != expected) return;
+    final server = await (_starting ??=
+        HttpServer.bind(InternetAddress.loopbackIPv4, 0).then((server) {
+          if (_closed) {
+            server.close(force: true);
+            throw StateError('cache disposed');
+          }
+          _server = server;
+          server.listen(_serve, onError: (Object _) {});
+          return server;
+        }));
+    if (_closed || cancel.isCancelled || _entries.length >= 4) return;
+    _entries[url] = _Prefix(
+      url,
+      bytes.takeBytes(),
+      total,
+      type,
+      result.headers.value('etag') ?? result.headers.value('last-modified'),
+      '$_secret/${_id++}',
+    );
+    assert(server.address.isLoopback);
+  }
+
+  String sourceFor(String url) {
+    final prefix = _entries[url];
+    return prefix == null || _server == null || _closed
+        ? url
+        : 'http://127.0.0.1:${_server!.port}/${prefix.token}';
+  }
+
+  bool contains(String? url) => url != null && _entries.containsKey(url);
+  void retain(Set<String> urls) =>
+      _entries.removeWhere((url, _) => !urls.contains(url));
+  void evict(String? url) {
+    if (url != null) _entries.remove(url);
+  }
+
+  Future<void> _serve(HttpRequest request) async {
+    final response = request.response;
+    CancelToken? cancel;
+    try {
+      final prefix = _entries.values
+          .where((p) => '/${p.token}' == request.uri.path)
+          .firstOrNull;
+      if (_closed || prefix == null) {
+        response.statusCode = 404;
+        await response.close();
+        return;
+      }
+      if (request.method != 'GET' && request.method != 'HEAD') {
+        response.statusCode = 405;
+        await response.close();
+        return;
+      }
+      final requested = request.headers.value('range');
+      var start = 0, end = prefix.total - 1;
+      if (requested != null) {
+        final match = RegExp(r'^bytes=(\d*)-(\d*)$').firstMatch(requested);
+        if (match == null || (match[1]!.isEmpty && match[2]!.isEmpty)) {
+          response.statusCode = 416;
+          await response.close();
+          return;
+        }
+        if (match[1]!.isEmpty) {
+          start = math.max(0, prefix.total - int.parse(match[2]!));
+        } else {
+          start = int.parse(match[1]!);
+          if (match[2]!.isNotEmpty) end = math.min(end, int.parse(match[2]!));
+        }
+      }
+      if (start > end || start >= prefix.total) {
+        response.statusCode = 416;
+        response.headers.set('Content-Range', 'bytes */${prefix.total}');
+        await response.close();
+        return;
+      }
+      response.statusCode = requested == null ? 200 : 206;
+      response.headers.set('Content-Type', prefix.type);
+      response.headers.set('Accept-Ranges', 'bytes');
+      response.headers.set('Cache-Control', 'no-store');
+      if (requested != null)
+        response.headers.set(
+          'Content-Range',
+          'bytes $start-$end/${prefix.total}',
+        );
+      response.contentLength = end - start + 1;
+      if (request.method == 'HEAD') {
+        await response.close();
+        return;
+      }
+      if (start < prefix.bytes.length) {
+        final cachedEnd = math.min(prefix.bytes.length, end + 1);
+        response.add(Uint8List.sublistView(prefix.bytes, start, cachedEnd));
+        start = cachedEnd;
+      }
+      if (start <= end) {
+        cancel = CancelToken();
+        _transfers.add(cancel);
+        // Decoder disconnects and seek cancellations abort their remote request.
+        unawaited(
+          response.done.then<void>(
+            (_) => cancel?.cancel(),
+            onError: (Object _) => cancel?.cancel(),
+          ),
+        );
+        final remote = await client.get<ResponseBody>(
+          prefix.url,
+          cancelToken: cancel,
+          options: Options(
+            responseType: ResponseType.stream,
+            validateStatus: (_) => true,
+            headers: {
+              'Range': 'bytes=$start-$end',
+              if (prefix.validator != null) 'If-Range': prefix.validator,
+            },
+          ),
+        );
+        final expectedRange = 'bytes $start-$end/${prefix.total}';
+        if (remote.statusCode != 206 ||
+            remote.headers.value('content-range') != expectedRange ||
+            remote.data == null) {
+          if (remote.data != null)
+            await remote.data!.stream.listen((_) {}).cancel();
+          throw StateError('media range changed');
+        }
+        await response.addStream(remote.data!.stream);
+      }
+      await response.close();
+    } catch (_) {
+      try {
+        await response.close();
+      } catch (_) {}
+    } finally {
+      if (cancel != null) {
+        cancel.cancel();
+        _transfers.remove(cancel);
+      }
+    }
+  }
+
+  Future<void> dispose() async {
+    _closed = true;
+    _entries.clear();
+    for (final token in _transfers.toList()) {
+      token.cancel('cache disposed');
+    }
+    await _server?.close(force: true);
+  }
+}

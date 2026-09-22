@@ -211,6 +211,7 @@ abstract final class VideoHttp {
     required VideoType videoType,
     String? language,
     bool voiceBalance = false,
+    CancelToken? cancelToken,
   }) async {
     final dmImgStr = Utils.base64EncodeRandomString(16, 64);
     final dmCoverImgStr = Utils.base64EncodeRandomString(32, 128);
@@ -239,7 +240,11 @@ abstract final class VideoHttp {
     });
 
     try {
-      final res = await Request().get(videoType.api, queryParameters: params);
+      final res = await Request().get(
+        videoType.api,
+        queryParameters: params,
+        cancelToken: cancelToken,
+      );
 
       if (res.data['code'] == 0) {
         late PlayUrlModel data;
@@ -270,6 +275,7 @@ abstract final class VideoHttp {
           seasonId: seasonId,
           tryLook: tryLook,
           videoType: .pgc,
+          cancelToken: cancelToken,
         );
       }
       return Error(_parseVideoErr(res.data['code'], res.data['message']));
@@ -289,10 +295,12 @@ abstract final class VideoHttp {
   // 视频信息 标题、简介
   static Future<LoadingState<VideoDetailData>> videoIntro({
     required String bvid,
+    CancelToken? cancelToken,
   }) async {
     final res = await Request().get(
       Api.videoIntro,
       queryParameters: await WbiSign.makSign({'bvid': bvid}),
+      cancelToken: cancelToken,
     );
     if (res.data['code'] == 0) {
       return Success(VideoDetailData.fromJson(res.data['data']));

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'dart:io';
 
@@ -770,6 +771,20 @@ abstract final class Pref {
 
   static bool get overseasMode =>
       _setting.get(SettingBoxKey.overseasMode, defaultValue: false);
+
+  static bool get shortPreload =>
+      _setting.get(SettingBoxKey.shortPreload, defaultValue: true);
+  static ShortSwipeAction _shortSwipe(String key) {
+    final value = _setting.get(key, defaultValue: 0);
+    return value is int && value >= 0 && value < ShortSwipeAction.values.length
+        ? ShortSwipeAction.values[value]
+        : ShortSwipeAction.seek;
+  }
+
+  static ShortSwipeAction get shortSwipeLeft =>
+      _shortSwipe(SettingBoxKey.shortSwipeLeft);
+  static ShortSwipeAction get shortSwipeRight =>
+      _shortSwipe(SettingBoxKey.shortSwipeRight);
 
   static bool get shortVideoMode =>
       _setting.get(SettingBoxKey.shortVideoMode, defaultValue: false);
