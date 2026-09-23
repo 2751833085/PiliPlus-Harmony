@@ -1,0 +1,11 @@
+{
+  "previous_version": "2.7.0",
+  "installed_version": "2.7.0",
+  "installed_version_code": 6106,
+  "uid_preserved": true,
+  "first_install_time_preserved": true,
+  "overwrite_install": "passed",
+  "uninstalled_or_cleared_data": false,
+  "artifact_sha256": "5a0bb58778df50f0e5e862d7d10439826078c825f4e1711888c5cc5cc40fe700",
+  "source_commit": "90bc58fc33c01c4f1945ea2a4d9421ee7cd1ac1c"
+}
