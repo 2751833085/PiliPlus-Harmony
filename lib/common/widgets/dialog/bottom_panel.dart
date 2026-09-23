@@ -66,6 +66,7 @@ class BottomPanel extends StatelessWidget {
     );
     return surface
         ? ImmersiveSurface(
+            blurBackground: true,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             child: content,
           )
@@ -90,6 +91,7 @@ Future<T?> showSelectionSheet<T>({
       maxHeight: MediaQuery.sizeOf(context).height * .75,
     ),
     child: ImmersiveSurface(
+      blurBackground: true,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       child: SafeArea(
         top: false,
