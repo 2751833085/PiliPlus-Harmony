@@ -1,18 +1,19 @@
 {
   "previous_version": "3.0.0",
   "installed_version": "3.0.0",
-  "installed_version_code": 6112,
+  "installed_version_code": 6113,
   "uid_preserved": true,
   "first_install_time_preserved": true,
   "overwrite_install": "passed",
   "uninstalled_or_cleared_data": false,
   "checks": {
     "native_resolution": "1008x2232",
-    "single_bottom_loading_indicator": true,
-    "initial_skeleton_cards_absent": true,
-    "feed_visible_after_loading": true,
-    "pink_accent_visible": true,
-    "solid_color_page_verified_in_6111": true,
-    "physical_double_triple_fold_tested": false
+    "comments_bottom_composer_visible": true,
+    "emoji_button_opens_emoji_editor": true,
+    "back_returns_to_comments": true,
+    "comment_sent": false,
+    "dynamics_and_mine_refresh_returned": true,
+    "neutral_reply_background_checked": true,
+    "physical_tablet_landscape_tested": false
   }
 }
