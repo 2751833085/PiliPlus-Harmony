@@ -240,6 +240,8 @@ void main() {
       await future;
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 150));
+      expect(tester.getTopLeft(find.byKey(itemKey)).dy, closeTo(held, .1));
+      await tester.pump(const Duration(milliseconds: 100));
       await tester.pump(const Duration(milliseconds: 250));
       await tester.pump();
       expect(tester.getTopLeft(find.byKey(itemKey)).dy, closeTo(top, .1));
