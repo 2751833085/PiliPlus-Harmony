@@ -1,21 +1,13 @@
 {
   "previous_version": "3.0.0",
   "installed_version": "3.0.0",
-  "installed_version_code": 6117,
+  "installed_version_code": 6118,
   "uid_preserved": true,
   "first_install_time_preserved": true,
   "overwrite_install": "passed",
   "uninstalled_or_cleared_data": false,
-  "source_commit": "01967606350edff581d1c28cdfdb054b124eefb3",
-  "native_resolution": [
-    3184,
-    2232
-  ],
-  "ui_checked": [
-    "Mine title aligned with toolbar",
-    "Dynamics publish surface",
-    "About pink P icon"
-  ],
-  "physical_fold_transitions_tested": false,
-  "no_comments_or_social_actions_sent": true
+  "source_commit": "88bc9710e56c01d384e882b81d654b3825e97b25",
+  "launch_test": "blocked_by_device_lock",
+  "runtime_switching_test": "pending_unlock",
+  "quantitative_fps_comparison": false
 }

@@ -338,6 +338,7 @@ void main() {
             home: MediaQuery(
               data: MediaQueryData(highContrast: contrast),
               child: const ImmersiveSurface(
+                blurBackground: true,
                 child: SizedBox(width: 300, height: 200),
               ),
             ),
