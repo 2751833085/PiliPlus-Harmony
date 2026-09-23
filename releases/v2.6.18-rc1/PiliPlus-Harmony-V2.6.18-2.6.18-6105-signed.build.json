@@ -1,0 +1,10 @@
+{
+  "version": "2.6.18+6105",
+  "source_commit": "6e673cbf787b59539bfcfb5407156cf6453298ae",
+  "hap": "PiliPlus-Harmony-V2.6.18-2.6.18-6105-signed.hap",
+  "sha256": "c471204fd4a0322f502436fa69cf1d4b23e44b9f1829f6905545fdd749aef5e4",
+  "bytes": 33103929,
+  "signed": true,
+  "mode": "release",
+  "libmpv_sha256": "38664cf7dc7af1b3093a731c94f6e48f9c1092c97a774656e6c2b59cfe0df99e"
+}
