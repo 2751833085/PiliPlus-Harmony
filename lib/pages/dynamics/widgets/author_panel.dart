@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:math';
 
 import 'package:PiliPlus/common/assets.dart';
@@ -152,6 +153,13 @@ class AuthorPanel extends StatelessWidget {
               icon: const Icon(Icons.more_vert_outlined, size: 18),
             ),
           );
+    if (moreBtn != null && HarmonyStyle.enabled(context)) {
+      moreBtn = ImmersiveSurface(
+        blurBackground: false,
+        borderRadius: BorderRadius.circular(24),
+        child: moreBtn,
+      );
+    }
     final moduleTagText = !isDetail ? item.modules.moduleTag?.text : null;
     if (moduleTagText != null) {
       header = Row(
