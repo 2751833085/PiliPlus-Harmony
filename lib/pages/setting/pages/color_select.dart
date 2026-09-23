@@ -57,6 +57,11 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
     }
     ctr.dynamicColor.value = val;
     await GStorage.setting.put(SettingBoxKey.dynamicColor, val);
+    await _applyColors();
+  }
+
+  Future<void> _applyColors() async {
+    await HarmonyAppearance.selectCustomColors();
     Get.updateMyAppTheme();
   }
 
@@ -70,17 +75,6 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
 
   @override
   Widget build(BuildContext context) {
-    final blocked = HarmonyAppearance.colorsUnavailable();
-    if (blocked != null)
-      return SimpleScaffold(
-        appBar: AppBar(title: const Text('颜色选择')),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(blocked, textAlign: TextAlign.center),
-          ),
-        ),
-      );
     final titleStyle = theme.textTheme.titleMedium!;
     final subTitleStyle = theme.textTheme.labelMedium!.copyWith(
       color: theme.colorScheme.outline,
@@ -93,6 +87,14 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
       appBar: AppBar(title: const Text('颜色选择')),
       body: ListView(
         children: [
+          if (Pref.harmonyUI)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+              child: Text(
+                '颜色仅改变按钮、选中状态和强调色，保留鸿蒙界面风格。',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
           ListTile(
             onTap: () async {
               final result = await showDialog<ThemeType>(
@@ -138,7 +140,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
                 _dynamicSchemeVariant = value;
                 GStorage.setting
                     .put(SettingBoxKey.schemeVariant, value.index)
-                    .whenComplete(Get.updateMyAppTheme);
+                    .then((_) => _applyColors());
               },
             ),
           ),
@@ -205,10 +207,15 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
         children: [
           Builder(
             builder: (context) {
-              final isCurr = currentColor > colorThemeTypes.length;
-              final color = isCurr
-                  ? Color(currentColor)
-                  : colorThemeTypes[currentColor].color;
+              final isCurr =
+                  !Pref.harmonyNativeColors &&
+                  (currentColor < 0 || currentColor >= colorThemeTypes.length);
+              final storedColor =
+                  colorThemeTypes.elementAtOrNull(currentColor)?.color ??
+                  Color(currentColor);
+              final color = Pref.harmonyNativeColors
+                  ? theme.colorScheme.primary
+                  : storedColor;
               return GestureDetector(
                 behavior: .opaque,
                 onTap: () {
@@ -226,7 +233,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
                             ctr.currentColor.value = res;
                             GStorage.setting
                                 .put(SettingBoxKey.customColor, res)
-                                .whenComplete(Get.updateMyAppTheme);
+                                .then((_) => _applyColors());
                           }
                         },
                       ),
@@ -260,14 +267,14 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
           ...colorThemeTypes.mapIndexed(
             (i, e) {
               final color = e.color;
-              final isCurr = currentColor == i;
+              final isCurr = !Pref.harmonyNativeColors && currentColor == i;
               return GestureDetector(
                 behavior: .opaque,
                 onTap: () {
                   ctr.currentColor.value = i;
                   GStorage.setting
                       .put(SettingBoxKey.customColor, i)
-                      .whenComplete(Get.updateMyAppTheme);
+                      .then((_) => _applyColors());
                 },
                 child: Column(
                   spacing: 3,

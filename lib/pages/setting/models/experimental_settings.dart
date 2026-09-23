@@ -33,7 +33,7 @@ List<SettingsModel> get experimentalSettings => [
     SwitchModel(
       section: '鸿蒙界面风格',
       title: '采用鸿蒙原生配色',
-      subtitle: '使用哔哩哔哩粉色与鸿蒙明暗底色，并禁用原外观设置中的主题调色；关闭后恢复自定义配色',
+      subtitle: '使用哔哩哔哩粉色作为默认强调色；在外观设置中选择其他颜色后改用自选强调色，保留鸿蒙界面与明暗底色',
       leading: const Icon(Icons.palette_outlined),
       setKey: SettingBoxKey.harmonyNativeColors,
       onChanged: refreshHarmonySettings,

@@ -111,6 +111,33 @@ void main() {
     },
   );
 
+  test(
+    'custom accent stays available and preserves Harmony surfaces',
+    () async {
+      await GStorage.setting.put(SettingBoxKey.harmonyUI, true);
+      await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, true);
+      final entry = styleSettings.singleWhere((e) => e.title == '颜色选择');
+      expect(entry.disabledReason, isNull);
+      final scheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+      final before = ThemeUtils.getThemeData(
+        colorScheme: scheme,
+        isDynamic: false,
+      );
+      await HarmonyAppearance.selectCustomColors();
+      expect(Pref.harmonyUI, isTrue);
+      expect(Pref.harmonyNativeColors, isFalse);
+      final after = ThemeUtils.getThemeData(
+        colorScheme: scheme,
+        isDynamic: false,
+      );
+      expect(after.colorScheme.primary, scheme.primary);
+      expect(after.colorScheme.primary, isNot(before.colorScheme.primary));
+      expect(after.scaffoldBackgroundColor, before.scaffoldBackgroundColor);
+      expect(after.cardTheme, before.cardTheme);
+      expect(after.colorScheme.surface, before.colorScheme.surface);
+    },
+  );
+
   test('pure black remains effective with Harmony native colors', () async {
     await GStorage.setting.put(SettingBoxKey.harmonyUI, true);
     await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, true);

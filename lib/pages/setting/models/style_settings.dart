@@ -325,9 +325,13 @@ List<SettingsModel> get _appearanceSettings => [
     leading: const Icon(Icons.color_lens_outlined),
     title: '颜色选择',
     section: '主题与显示',
-    disabledReason: HarmonyAppearance.colorsUnavailable,
-    getSubtitle: () => '当前主题：${Pref.dynamicColor ? '动态取色' : '指定颜色'}',
+    getSubtitle: () => Pref.harmonyNativeColors
+        ? '当前：鸿蒙默认粉色；可更换按钮与强调色'
+        : '当前：${Pref.dynamicColor ? '动态取色' : '指定颜色'}',
     getTrailing: (theme) {
+      if (Pref.harmonyNativeColors) {
+        return Icon(Icons.circle, size: 20, color: theme.colorScheme.primary);
+      }
       if (Pref.dynamicColor) {
         return Icon(Icons.color_lens_rounded, color: theme.colorScheme.primary);
       }
