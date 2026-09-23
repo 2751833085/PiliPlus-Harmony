@@ -37,6 +37,8 @@ void main() {
       for (final size in [
         const Size(390, 844),
         const Size(840, 800),
+        const Size(2048 / 2.875, 2232 / 2.875),
+        const Size(2232 / 2.875, 3184 / 2.875),
         const Size(600, 320),
       ]) {
         tester.view.physicalSize = size;
@@ -69,7 +71,8 @@ void main() {
         final video = tester.getRect(find.byType(_Video));
         final comments = tester.getRect(find.byKey(const ValueKey('comments')));
         expect(video.overlaps(comments), isFalse);
-        if (size.width >= 600 && size.width > size.height) {
+        if (size.width >= 700 ||
+            (size.width >= 600 && size.width > size.height)) {
           expect(video.right, comments.left);
         } else {
           expect(video.bottom, comments.top);

@@ -52,7 +52,9 @@ class _ShortCommentsLayoutState extends State<ShortCommentsLayout>
     builder: (context, size) => AnimatedBuilder(
       animation: _animation,
       builder: (context, _) {
-        final side = size.maxWidth >= 600 && size.maxWidth > size.maxHeight;
+        final side =
+            size.maxWidth >= 700 ||
+            (size.maxWidth >= 600 && size.maxWidth > size.maxHeight);
         final metrics = ShortVideoMetrics.of(context);
         final minimumVideo = metrics.footerHeight + metrics.controlHeight + 96;
         final extent = side
