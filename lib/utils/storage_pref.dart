@@ -751,7 +751,7 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.p1080, defaultValue: true);
 
   static int get customColor =>
-      _setting.get(SettingBoxKey.customColor, defaultValue: 0);
+      _setting.get(SettingBoxKey.customColor, defaultValue: 1);
 
   static bool get dynamicColor =>
       !Platform.isIOS &&

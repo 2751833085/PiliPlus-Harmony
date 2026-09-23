@@ -1,7 +1,6 @@
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
     as refresh;
-import 'package:PiliPlus/common/skeleton/video_card_v.dart';
-import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/initial_feed_content.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/native_top_spacer.dart';
@@ -117,23 +116,31 @@ class _RcmdPageState extends State<RcmdPage>
       child: LayoutBuilder(
         builder: (context, constraints) {
           _gridWidth = constraints.maxWidth;
-          return NativeTopRefreshIndicator(
-            indicatorKey: _refreshKey,
-            onRefresh: controller.onRefresh,
-            child: CustomScrollView(
-              controller: controller.scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                // 原生顶栏启用时顶部的可滚动留白（内容可滑入顶栏下方重合）
-                const NativeTopSpacer(),
-                SliverPadding(
-                  padding: const .only(top: Style.cardSpace, bottom: 100),
-                  sliver: Obx(
-                    () =>
-                        _buildBody(colorScheme, controller.loadingState.value),
-                  ),
+          return Obx(
+            () => InitialFeedContent(
+              loading: controller.loadingState.value is Loading,
+              onReady: _fillViewport,
+              builder: (_) => NativeTopRefreshIndicator(
+                indicatorKey: _refreshKey,
+                onRefresh: controller.onRefresh,
+                child: CustomScrollView(
+                  controller: controller.scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    // 原生顶栏启用时顶部的可滚动留白（内容可滑入顶栏下方重合）
+                    const NativeTopSpacer(),
+                    SliverPadding(
+                      padding: const .only(top: Style.cardSpace, bottom: 100),
+                      sliver: Obx(
+                        () => _buildBody(
+                          colorScheme,
+                          controller.loadingState.value,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           );
         },
@@ -163,7 +170,7 @@ class _RcmdPageState extends State<RcmdPage>
     LoadingState<List<dynamic>?> loadingState,
   ) {
     return switch (loadingState) {
-      Loading() => _buildSkeleton,
+      Loading() => const SliverToBoxAdapter(child: SizedBox.shrink()),
       Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
@@ -232,22 +239,4 @@ class _RcmdPageState extends State<RcmdPage>
       ),
     };
   }
-
-  /// 骨架数量按视口实际能放下的格子数算：固定 10 个在大屏多列下只能占到
-  /// 页面上半部分，加载中看着像“只加载了半页”。
-  Widget get _buildSkeleton => SliverLayoutBuilder(
-    builder: (context, constraints) => SliverGrid(
-      gridDelegate: gridDelegate,
-      delegate: SliverSingleChildDelegate(
-        count:
-            gridDelegate
-                .getLayout(constraints)
-                .getMaxChildIndexForScrollOffset(
-                  constraints.remainingPaintExtent,
-                ) +
-            1,
-        child: const VideoCardVSkeleton(),
-      ),
-    ),
-  );
 }

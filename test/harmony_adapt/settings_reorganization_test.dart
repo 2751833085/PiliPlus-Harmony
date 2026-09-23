@@ -42,6 +42,11 @@ void main() {
   test(
     'Harmony defaults on; Material You changes only on next startup',
     () async {
+      await GStorage.setting.delete(SettingBoxKey.customColor);
+      expect(Pref.customColor, 1);
+      await GStorage.setting.put(SettingBoxKey.customColor, 12);
+      expect(Pref.customColor, 12);
+      await GStorage.setting.delete(SettingBoxKey.customColor);
       // Older disabled Harmony values must not reverse the new default.
       await GStorage.setting.delete(SettingBoxKey.materialYouUI);
       await GStorage.setting.put(SettingBoxKey.harmonyUI, false);
