@@ -1,0 +1,48 @@
+{
+  "tracked_lib_dart_files": 1375,
+  "dependencies": {
+    "material_ui_import": {
+      "files": 485,
+      "matches": 485
+    },
+    "flutter_material_import": {
+      "files": 43,
+      "matches": 43
+    },
+    "MaterialApp/GetMaterialApp": {
+      "files": 1,
+      "matches": 1
+    },
+    "ThemeData/ColorScheme": {
+      "files": 204,
+      "matches": 523
+    },
+    "Material/Scaffold": {
+      "files": 106,
+      "matches": 128
+    },
+    "Material_buttons": {
+      "files": 164,
+      "matches": 599
+    },
+    "Material_popup": {
+      "files": 116,
+      "matches": 346
+    },
+    "Material_navigation": {
+      "files": 39,
+      "matches": 111
+    },
+    "Material_Icons": {
+      "files": 186,
+      "matches": 782
+    }
+  },
+  "source_commit": "f10e29176c56edeb53d5b62985a6c939783a86d7",
+  "method": "Regex inventory of git-tracked lib/**/*.dart; file groups overlap; matches are not runtime calls.",
+  "third_party_material_import_files": {
+    "get": 19,
+    "flutter_smart_dialog": 43,
+    "extended_nested_scroll_view": 2
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "file": "PiliPlus-Harmony-V2.7-2.7.0-6106-signed.hap",
+  "bytes": 33112117,
+  "sha256": "5a0bb58778df50f0e5e862d7d10439826078c825f4e1711888c5cc5cc40fe700",
+  "signature_verified": false,
+  "app": {
+    "bundleName": "com.example.piliplus",
+    "versionName": "2.7.0",
+    "versionCode": 6106,
+    "minAPIVersion": 60002022,
+    "targetAPIVersion": 260000026,
+    "apiReleaseType": "Release"
+  },
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "mainElement": "EntryAbility",
+    "deviceTypes": [
+      "phone",
+      "2in1",
+      "tablet"
+    ]
+  },
+  "entry_count": 92,
+  "top_level_counts": {
+    ".pages.info": 1,
+    "ets": 3,
+    "libs": 5,
+    "module.json": 1,
+    "pack.info": 1,
+    "pkgSdkInfo.json": 1,
+    "resources": 79,
+    "resources.index": 1
+  },
+  "suffix_counts": {
+    "(none)": 1,
+    ".Z": 1,
+    ".abc": 2,
+    ".bin": 1,
+    ".css": 1,
+    ".frag": 2,
+    ".gif": 2,
+    ".glsl": 9,
+    ".html": 1,
+    ".index": 1,
+    ".info": 2,
+    ".jpeg": 1,
+    ".js": 3,
+    ".json": 11,
+    ".json5": 1,
+    ".otf": 1,
+    ".png": 36,
+    ".so": 5,
+    ".svg": 2,
+    ".ttf": 7,
+    ".webp": 2
+  },
+  "native_libraries": [
+    "libs/arm64-v8a/libapp.so",
+    "libs/arm64-v8a/libc++_shared.so",
+    "libs/arm64-v8a/libflutter.so",
+    "libs/arm64-v8a/libinappwebview.so",
+    "libs/arm64-v8a/libmpv.so"
+  ],
+  "contains_flutter_runtime": true,
+  "contains_ark_bytecode": true,
+  "interpretation": "Runtime presence is a clue, not proof that every page uses that framework. This report does not recover gesture logic or source code."
+}
