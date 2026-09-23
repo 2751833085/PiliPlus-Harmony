@@ -90,7 +90,19 @@ void main() {
         await tester.pump(const Duration(milliseconds: 180));
         await tester.pump(const Duration(milliseconds: 200));
         expect(calls, 1);
-        expect(tester.widget<Opacity>(find.ancestor(of: find.byType(HarmonyLoadingIndicator), matching: find.byType(Opacity)).first).opacity, 0);
+        expect(
+          tester
+              .widget<Opacity>(
+                find
+                    .ancestor(
+                      of: find.byType(HarmonyLoadingIndicator),
+                      matching: find.byType(Opacity),
+                    )
+                    .first,
+              )
+              .opacity,
+          1,
+        );
         await tester.pump(const Duration(seconds: 1));
         expect(
           tester.state(find.byType(HarmonyLoadingIndicator)),
@@ -111,8 +123,21 @@ void main() {
         done.complete();
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 70));
-        expect(tester.getTopLeft(find.text('row 0')).dy, lessThan(held), reason: 'Content retracts smoothly after refresh.');
-        await tester.pump(const Duration(milliseconds: 100));
+        expect(
+          tester.getTopLeft(find.text('row 0')).dy,
+          closeTo(held, 1),
+          reason: 'Content remains held until the planet has faded.',
+        );
+        final fading = tester.widget<Opacity>(
+          find
+              .ancestor(
+                of: find.byType(HarmonyLoadingIndicator),
+                matching: find.byType(Opacity),
+              )
+              .first,
+        );
+        expect(fading.opacity, inExclusiveRange(0, 1));
+        await tester.pump(const Duration(milliseconds: 180));
         await tester.pump(const Duration(milliseconds: 250));
         await tester.pump();
         expect(find.byType(HarmonyLoadingIndicator), findsNothing);

@@ -345,8 +345,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         // Decide from the final finger position, before the first spring
         // frame consumes overscroll. A delayed frame can otherwise unarm an
         // already completed pull and make release appear to do nothing.
-        if (notification.dragDetails == null &&
-            _valueColor.value!.a == _effectiveValueColor.a) {
+        if (notification.dragDetails == null && _isArmed) {
           // On iOS start the refresh when the Scrollable bounces back from the
           // overscroll (ScrollNotification indicating this don't have dragDetails
           // because the scroll activity is not directly triggered by a drag).
@@ -364,7 +363,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     } else if (notification is ScrollEndNotification) {
       switch (_status) {
         case RefreshIndicatorStatus.drag:
-          if (_valueColor.value!.a == _effectiveValueColor.a) {
+          if (_isArmed) {
             _show();
           } else {
             _dismiss(RefreshIndicatorStatus.canceled);
@@ -404,12 +403,24 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     return true;
   }
 
+  double get _triggerDistance => HarmonyStyle.enabled(context)
+      ? 96.0
+      : _containerExtent *
+            kDragContainerExtentPercentage /
+            _kDragSizeFactorLimit;
+
+  bool get _isArmed =>
+      (_dragOffset ?? 0) >= _triggerDistance && _triggerDistance > 0;
+
   void _checkDragOffset(double containerExtent) {
     assert(
       _status == RefreshIndicatorStatus.drag,
     );
     double newValue =
-        _dragOffset! / (containerExtent * kDragContainerExtentPercentage);
+        _dragOffset! /
+        (HarmonyStyle.enabled(context)
+            ? 96.0 * _kDragSizeFactorLimit
+            : containerExtent * kDragContainerExtentPercentage);
     _positionController.value = clampDouble(
       newValue,
       0.0,
@@ -436,9 +447,10 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         if (HarmonyStyle.enabled(context)) {
           await _scaleController.animateTo(
             1,
-            duration: _scaleController.value == 1
+            duration: MediaQuery.disableAnimationsOf(context)
                 ? Duration.zero
-                : const Duration(milliseconds: 140),
+                : const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
           );
           if (!mounted || _status != newMode) return;
           await _positionController.animateTo(
@@ -497,23 +509,13 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           snapTarget,
           duration: _kIndicatorSnapDuration,
         )
-        .whenComplete(() async {
+        .whenComplete(() {
           if (mounted && _status == RefreshIndicatorStatus.snap) {
             setState(() {
               // Show the indeterminate progress indicator.
               _status = RefreshIndicatorStatus.refresh;
             });
 
-            if (HarmonyStyle.enabled(context)) {
-              await _scaleController.animateTo(
-                1,
-                duration: MediaQuery.disableAnimationsOf(context)
-                    ? Duration.zero
-                    : const Duration(milliseconds: 180),
-                curve: Curves.easeOut,
-              );
-              if (!mounted) return;
-            }
             Future<void>.sync(widget.onRefresh).whenComplete(() {
               if (mounted && _status == RefreshIndicatorStatus.refresh) {
                 completer.complete();

@@ -146,6 +146,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                           vertical: 10,
                         ),
                       }) => ImmersiveSurface(
+                        blurBackground: false,
                         borderRadius: HarmonyTheme.cardRadius,
                         child: Padding(padding: padding, child: child),
                       );
@@ -250,6 +251,7 @@ class _MediaPageState extends CommonPageState<MinePage>
         padding: const EdgeInsets.only(bottom: 10),
         child: harmony
             ? ImmersiveSurface(
+                blurBackground: false,
                 borderRadius: HarmonyTheme.cardRadius,
                 child: child,
               )

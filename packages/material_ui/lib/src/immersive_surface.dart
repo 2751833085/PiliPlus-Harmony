@@ -9,10 +9,14 @@ class ImmersiveSurface extends StatelessWidget {
     super.key,
     required this.child,
     this.color,
+    this.blurBackground = true,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
   final Widget child;
   final Color? color;
+
+  /// Scrolling cards over a flat page keep the finish without offscreen blur.
+  final bool blurBackground;
   final BorderRadius borderRadius;
   @override
   Widget build(BuildContext context) {
@@ -26,9 +30,8 @@ class ImmersiveSurface extends StatelessWidget {
     return ClipRRect(
       borderRadius: borderRadius,
       child: immersive
-          ? BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-              child: DecoratedBox(
+          ? _withBlur(
+              DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: borderRadius,
                   border: Border.all(
@@ -57,4 +60,11 @@ class ImmersiveSurface extends StatelessWidget {
           : ColoredBox(color: base, child: content),
     );
   }
+
+  Widget _withBlur(Widget child) => blurBackground
+      ? BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: child,
+        )
+      : RepaintBoundary(child: child);
 }
