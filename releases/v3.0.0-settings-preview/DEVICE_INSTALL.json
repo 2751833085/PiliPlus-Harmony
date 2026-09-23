@@ -1,19 +1,21 @@
 {
   "previous_version": "3.0.0",
   "installed_version": "3.0.0",
-  "installed_version_code": 6113,
+  "installed_version_code": 6117,
   "uid_preserved": true,
   "first_install_time_preserved": true,
   "overwrite_install": "passed",
   "uninstalled_or_cleared_data": false,
-  "checks": {
-    "native_resolution": "1008x2232",
-    "comments_bottom_composer_visible": true,
-    "emoji_button_opens_emoji_editor": true,
-    "back_returns_to_comments": true,
-    "comment_sent": false,
-    "dynamics_and_mine_refresh_returned": true,
-    "neutral_reply_background_checked": true,
-    "physical_tablet_landscape_tested": false
-  }
+  "source_commit": "01967606350edff581d1c28cdfdb054b124eefb3",
+  "native_resolution": [
+    3184,
+    2232
+  ],
+  "ui_checked": [
+    "Mine title aligned with toolbar",
+    "Dynamics publish surface",
+    "About pink P icon"
+  ],
+  "physical_fold_transitions_tested": false,
+  "no_comments_or_social_actions_sent": true
 }
