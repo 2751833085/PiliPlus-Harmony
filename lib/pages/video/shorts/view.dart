@@ -189,9 +189,9 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                 padding: EdgeInsets.only(
                                   bottom: widget.fullscreen
                                       ? 0
-                                      : ShortVideoControls.heightFor(
-                                          MediaQuery.textScalerOf(context),
-                                        ),
+                                      : ShortVideoMetrics.of(
+                                          context,
+                                        ).footerHeight,
                                 ),
                                 child: LayoutBuilder(
                                   builder: (_, media) => NetworkImgLayer(

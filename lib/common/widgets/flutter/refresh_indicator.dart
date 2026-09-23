@@ -415,6 +415,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   // Stop showing the refresh indicator.
   Future<void> _dismiss(RefreshIndicatorStatus newMode) async {
     await Future<void>.value();
+    if (!mounted) return;
     // This can only be called from _show() when refreshing and
     // _handleScrollNotification in response to a ScrollEndNotification or
     // direction change.
@@ -427,6 +428,14 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     });
     switch (_status!) {
       case RefreshIndicatorStatus.done:
+        if (HarmonyStyle.enabled(context)) {
+          await _positionController.animateTo(
+            0.0,
+            duration: _kIndicatorScaleDuration,
+            curve: Curves.easeOutCubic,
+          );
+          break;
+        }
         await _scaleController.animateTo(
           1.0,
           duration: _kIndicatorScaleDuration,
@@ -498,6 +507,9 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         _status != RefreshIndicatorStatus.snap) {
       if (_status == null) {
         _start();
+      } else {
+        _scaleController.stop();
+        _scaleController.value = 0;
       }
       _show();
     }
@@ -539,9 +551,9 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           : AnimatedBuilder(
               animation: _positionController,
               builder: (context, child) => HarmonyStyle.enabled(context)
-                  ? HarmonyLoadingIndicator(
-                      value: showIndeterminateIndicator ? null : _value.value,
-                    )
+                  // Keep one native LoadingProgress alive from pull to
+                  // release; changing determinate mode recreates its surface.
+                  ? const HarmonyLoadingIndicator()
                   : RefreshProgressIndicator(
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,

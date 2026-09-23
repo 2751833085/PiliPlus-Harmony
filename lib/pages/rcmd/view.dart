@@ -1,3 +1,5 @@
+import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
+    as refresh;
 import 'package:PiliPlus/common/skeleton/video_card_v.dart';
 import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/style.dart';
@@ -25,6 +27,26 @@ class _RcmdPageState extends State<RcmdPage>
   final controller = Get.put(RcmdController());
 
   Worker? _fillWorker;
+  final _refreshKey = GlobalKey<refresh.RefreshIndicatorState>();
+  bool _returningToRefresh = false;
+
+  Future<void> _refreshFromHistory() async {
+    if (_returningToRefresh || controller.isLoading) return;
+    _returningToRefresh = true;
+    try {
+      final scroll = controller.scrollController;
+      if (scroll.hasClients) {
+        await scroll.animateTo(
+          scroll.position.minScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+        );
+      }
+      if (mounted) await _refreshKey.currentState?.show();
+    } finally {
+      _returningToRefresh = false;
+    }
+  }
 
   @override
   void initState() {
@@ -78,6 +100,7 @@ class _RcmdPageState extends State<RcmdPage>
       margin: const EdgeInsets.symmetric(horizontal: Style.safeSpace),
       decoration: const BoxDecoration(borderRadius: Style.mdRadius),
       child: NativeTopRefreshIndicator(
+        indicatorKey: _refreshKey,
         onRefresh: controller.onRefresh,
         child: CustomScrollView(
           controller: controller.scrollController,
@@ -119,9 +142,7 @@ class _RcmdPageState extends State<RcmdPage>
                   if (controller.lastRefreshAt != null) {
                     if (controller.lastRefreshAt == index) {
                       return GestureDetector(
-                        onTap: () => controller
-                          ..animateToTop()
-                          ..onRefresh(),
+                        onTap: _refreshFromHistory,
                         child: Card(
                           child: Container(
                             alignment: Alignment.center,

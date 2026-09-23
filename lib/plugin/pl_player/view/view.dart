@@ -2336,7 +2336,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       clipBehavior: .none,
       width: maxWidth,
       height: maxHeight,
-      color: widget.fill,
+      // Keep the preloaded first frame underneath visible while the native
+      // texture reports zero size during a source switch.
+      color: widget.shortMode ? Colors.transparent : widget.fill,
       child: Obx(
         () => MouseInteractiveViewer(
           scaleEnabled: !plPlayerController.controlsLock.value,
@@ -2381,7 +2383,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                             visible: false,
                           ),
                       controller: plPlayerController.videoController!,
-                      fill: widget.fill,
+                      fill: widget.shortMode ? Colors.transparent : widget.fill,
                       fit: videoFit.boxFit,
                       aspectRatio: videoFit.aspectRatio,
                     ),

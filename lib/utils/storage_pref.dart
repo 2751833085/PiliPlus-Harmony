@@ -315,8 +315,12 @@ abstract final class Pref {
   static double get blockLimit =>
       _setting.get(SettingBoxKey.blockLimit, defaultValue: 0.0);
 
-  static double get refreshDragPercentage =>
-      _setting.get(SettingBoxKey.refreshDragPercentage, defaultValue: 0.25);
+  static bool get refreshUseDefault =>
+      _setting.get(SettingBoxKey.refreshUseDefault, defaultValue: true);
+
+  static double get refreshDragPercentage => refreshUseDefault
+      ? 0.25
+      : _setting.get(SettingBoxKey.refreshDragPercentage, defaultValue: 0.25);
 
   static double get refreshDisplacement => _setting.get(
     SettingBoxKey.refreshDisplacement,

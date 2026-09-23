@@ -312,7 +312,9 @@ List<SettingsModel> get extraSettings => [
   NormalModel(
     title: '刷新滑动距离',
     leading: const Icon(Icons.refresh),
-    getSubtitle: () => '当前滑动距离: ${Pref.refreshDragPercentage}x',
+    getSubtitle: () => Pref.refreshUseDefault
+        ? '默认（原版下拉距离）'
+        : '自定义: ${Pref.refreshDragPercentage}x',
     onTap: _showRefreshDragDialog,
   ),
   NormalModel(
@@ -1020,6 +1022,21 @@ Future<void> _showRefreshDragDialog(
   BuildContext context,
   VoidCallback setState,
 ) async {
+  final useDefault = await showDialog<bool>(
+    context: context,
+    builder: (_) => SelectDialog<bool>(
+      title: '刷新滑动距离',
+      value: Pref.refreshUseDefault,
+      values: const [(true, '默认（原版下拉距离）'), (false, '自定义')],
+    ),
+  );
+  if (useDefault == null || !context.mounted) return;
+  if (useDefault) {
+    await GStorage.setting.put(SettingBoxKey.refreshUseDefault, true);
+    kDragContainerExtentPercentage = Pref.refreshDragPercentage;
+    setState();
+    return;
+  }
   final res = await showDialog<double>(
     context: context,
     builder: (context) => SliderDialog(
@@ -1033,6 +1050,7 @@ Future<void> _showRefreshDragDialog(
     ),
   );
   if (res != null) {
+    await GStorage.setting.put(SettingBoxKey.refreshUseDefault, false);
     kDragContainerExtentPercentage = res;
     await GStorage.setting.put(SettingBoxKey.refreshDragPercentage, res);
     setState();

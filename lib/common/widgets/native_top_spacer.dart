@@ -4,7 +4,7 @@ import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/pages/home/controller.dart';
 import 'package:PiliPlus/pages/main/controller.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide RefreshIndicatorState;
 import 'package:get/get.dart';
 
 /// 原生顶栏启用时，首页各 Tab 列表顶部注入的可滚动留白。
@@ -115,8 +115,10 @@ class NativeTopRefreshIndicator extends StatelessWidget {
     super.key,
     required this.onRefresh,
     required this.child,
+    this.indicatorKey,
   });
 
+  final GlobalKey<RefreshIndicatorState>? indicatorKey;
   final RefreshCallback onRefresh;
   final Widget child;
 
@@ -124,6 +126,7 @@ class NativeTopRefreshIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(
       () => refreshIndicator(
+        key: indicatorKey,
         edgeOffset: NativeTopSpacer.refreshEdgeOffset(context),
         onRefresh: onRefresh,
         child: child,

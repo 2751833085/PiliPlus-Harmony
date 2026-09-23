@@ -95,6 +95,7 @@ class RenderRefreshLayout extends RenderBox
         ? 0.0
         : (target - _bodyOverscroll!.value).clamp(0.0, target);
     setOffset(body, Offset(0, shift));
+    _layoutIndicator();
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -170,6 +171,10 @@ class RenderRefreshLayout extends RenderBox
     final indicator = this.indicator;
     if (indicator == null) return;
     final scaleSize = kIndicatorSize * scaleFactor;
+    final hold = (kIndicatorSize + displacement) * heightFactor * scaleFactor;
+    final gap = _bodyOverscroll == null
+        ? 0.0
+        : (_bodyOverscroll!.value > hold ? _bodyOverscroll!.value : hold);
     indicator.layout(
       BoxConstraints.tightFor(width: scaleSize, height: scaleSize),
     );
@@ -177,10 +182,12 @@ class RenderRefreshLayout extends RenderBox
       indicator,
       Offset(
         (constraints.maxWidth - scaleSize) / 2,
-        edgeOffset +
-            (kIndicatorSize + displacement) * heightFactor -
-            kIndicatorSize +
-            (kIndicatorSize - scaleSize) / 2,
+        _bodyOverscroll != null
+            ? edgeOffset + (gap - scaleSize) / 2
+            : edgeOffset +
+                  (kIndicatorSize + displacement) * heightFactor -
+                  kIndicatorSize +
+                  (kIndicatorSize - scaleSize) / 2,
       ),
     );
   }

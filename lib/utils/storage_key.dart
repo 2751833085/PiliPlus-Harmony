@@ -119,6 +119,7 @@ abstract final class SettingBoxKey {
       openInBrowser = 'openInBrowser',
       refreshDragPercentage = 'refreshDragPercentage',
       refreshDisplacement = 'refreshDisplacement',
+      refreshUseDefault = 'refreshUseDefault',
       showHotRcmd = 'showHotRcmd',
       audioNormalization = 'audioNormalization',
       fallbackNormalization = 'fallbackNormalization',
