@@ -69,18 +69,13 @@ class _SettingPageState extends State<SettingPage> {
     ),
     _SettingsModel(
       type: SettingType.styleSetting,
-      subtitle: '横屏适配（平板）、侧栏、列宽、首页、动态红点、主题、字号、图片、帧率等',
+      subtitle: '鸿蒙底栏、首页栏数、颜色选择、纯黑主题、字体与显示',
       icon: Icon(Icons.style_outlined),
     ),
     _SettingsModel(
       type: SettingType.extraSetting,
-      subtitle: '震动、搜索、收藏、ai、评论、动态、代理、更新检查等',
+      subtitle: '鸿蒙界面风格、沉浸光感、折叠屏、播放器体验与其他功能',
       icon: Icon(Icons.extension_outlined),
-    ),
-    _SettingsModel(
-      type: SettingType.experimentalSetting,
-      subtitle: '界面风格、展开 Dock、智感握姿、全屏折叠适配等',
-      icon: Icon(Icons.science_outlined),
     ),
     _SettingsModel(
       type: SettingType.webdavSetting,

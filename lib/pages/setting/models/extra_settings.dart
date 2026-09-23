@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/setting/models/experimental_settings.dart';
 import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'dart:io' show Platform, Directory;
@@ -57,6 +58,7 @@ import 'package:os_type/os_type.dart';
 import 'package:material_ui/material_ui.dart' hide RefreshIndicator;
 
 List<SettingsModel> get extraSettings => [
+  ...experimentalSettings,
   const SwitchModel(
     section: '我的页面',
     title: '在我的页面展示观看历史',
@@ -213,13 +215,13 @@ List<SettingsModel> get extraSettings => [
     title: '横屏分P/合集列表显示在Tab栏',
     leading: const Icon(Icons.format_list_numbered_rtl_sharp),
     setKey: SettingBoxKey.horizontalSeasonPanel,
-    defaultVal: Pref.horizontalScreen,
+    defaultVal: Pref.legacyHorizontalScreen,
   ),
   SwitchModel(
     title: '横屏播放页在侧栏打开UP主页',
     leading: const Icon(Icons.account_circle_outlined),
     setKey: SettingBoxKey.horizontalMemberPage,
-    defaultVal: Pref.horizontalScreen,
+    defaultVal: Pref.legacyHorizontalScreen,
   ),
   SwitchModel(
     title: '横屏在侧栏打开图片预览',

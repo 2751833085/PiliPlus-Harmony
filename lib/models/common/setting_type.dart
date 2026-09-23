@@ -13,7 +13,7 @@ enum SettingType {
   videoSetting('音视频设置'),
   playSetting('播放器设置'),
   styleSetting('外观设置'),
-  extraSetting('其它设置'),
+  extraSetting('其他设置'),
   experimentalSetting('鸿蒙特色功能'),
   webdavSetting('WebDAV 设置'),
   about('关于'),

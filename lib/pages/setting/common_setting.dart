@@ -56,6 +56,8 @@ class _CommonSettingState extends State<CommonSetting> {
       body: ValueListenableBuilder<int>(
         valueListenable: HarmonyAppearance.revision,
         builder: (context, _, _) {
+          // Conditional rows must reflect mode changes without reopening the page.
+          _initSetting();
           final rows = HarmonyStyle.enabled(context)
               ? <SettingsModel>[
                   for (final group in settings.map((e) => e.section).toSet())
@@ -71,7 +73,10 @@ class _CommonSettingState extends State<CommonSetting> {
               bottom: padding.bottom + 100,
             ),
             itemCount: rows.length,
-            itemBuilder: (context, index) => rows[index].widget,
+            itemBuilder: (context, index) => KeyedSubtree(
+              key: ValueKey(rows[index].effectiveTitle),
+              child: rows[index].widget,
+            ),
           );
         },
       ),

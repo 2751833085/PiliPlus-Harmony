@@ -12,7 +12,7 @@ import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
-void _refreshHarmony(bool _) {
+void refreshHarmonySettings(bool _) {
   HarmonyAppearance.changed();
   Get.updateMyAppTheme();
   if (Get.isRegistered<MainController>()) {
@@ -27,7 +27,7 @@ List<SettingsModel> get experimentalSettings => [
     subtitle: '立即切换“我的”、设置、导航、开关、弹层与已有加载动画；关闭后恢复原界面与配色',
     leading: const Icon(Icons.auto_awesome_outlined),
     setKey: SettingBoxKey.harmonyUI,
-    onChanged: _refreshHarmony,
+    onChanged: refreshHarmonySettings,
   ),
   if (Pref.harmonyUI) ...[
     SwitchModel(
@@ -36,33 +36,8 @@ List<SettingsModel> get experimentalSettings => [
       subtitle: '使用哔哩哔哩粉色与鸿蒙明暗底色，并禁用原外观设置中的主题调色；关闭后恢复自定义配色',
       leading: const Icon(Icons.palette_outlined),
       setKey: SettingBoxKey.harmonyNativeColors,
-      onChanged: _refreshHarmony,
+      onChanged: refreshHarmonySettings,
     ),
-    PopupModel(
-      section: '鸿蒙界面风格',
-      title: '导航布局',
-      leading: const Icon(Icons.space_dashboard_outlined),
-      value: () => Pref.harmonyNavigation,
-      items: HarmonyNavigation.values,
-      onSelected: (value, setState) async {
-        await GStorage.setting.put(
-          SettingBoxKey.harmonyNavigation,
-          value.index,
-        );
-        _refreshHarmony(true);
-        setState();
-      },
-    ),
-    if (Pref.harmonyNavigation == HarmonyNavigation.floatingDock)
-      SwitchModel(
-        section: '鸿蒙界面风格',
-        title: '展开时也采用悬浮 Dock',
-        subtitle: '开启后双折、三折展开保留底部悬浮 Dock；关闭后在宽屏使用鸿蒙侧栏',
-        leading: const Icon(Icons.tablet_mac_outlined),
-        setKey: SettingBoxKey.harmonyKeepDock,
-        defaultVal: true,
-        onChanged: _refreshHarmony,
-      ),
     SwitchModel(
       section: '鸿蒙界面风格',
       title: '沉浸光感',
@@ -70,7 +45,7 @@ List<SettingsModel> get experimentalSettings => [
       leading: const Icon(Icons.water_drop_outlined),
       setKey: SettingBoxKey.harmonyImmersive,
       defaultVal: true,
-      onChanged: _refreshHarmony,
+      onChanged: refreshHarmonySettings,
     ),
   ],
   SwitchModel(
@@ -79,7 +54,7 @@ List<SettingsModel> get experimentalSettings => [
     subtitle: '接入系统握持识别：单手时 Dock 靠近握持侧，双手时居中；全屏进度条保持全宽，不支持的设备保持居中',
     leading: const Icon(Icons.back_hand_outlined),
     setKey: SettingBoxKey.harmonyHandedness,
-    onChanged: _refreshHarmony,
+    onChanged: refreshHarmonySettings,
   ),
   const SwitchModel(
     section: '折叠屏与握持',
@@ -157,4 +132,36 @@ List<SettingsModel> get experimentalSettings => [
             ),
           ),
   ),
+];
+
+// Shared navigation rows live in Appearance; keys remain unchanged.
+List<SettingsModel> get harmonyNavigationSettings => [
+  PopupModel(
+    section: '导航与首页',
+    disabledReason: () => Pref.harmonyUI ? null : '请先在其他设置中开启鸿蒙界面风格。',
+    title: '鸿蒙底栏与侧栏',
+    leading: const Icon(Icons.space_dashboard_outlined),
+    value: () => Pref.harmonyNavigation,
+    items: HarmonyNavigation.values,
+    onSelected: (value, setState) async {
+      await GStorage.setting.put(
+        SettingBoxKey.harmonyNavigation,
+        value.index,
+      );
+      refreshHarmonySettings(true);
+      setState();
+    },
+  ),
+  if (Pref.harmonyUI &&
+      Pref.harmonyNavigation == HarmonyNavigation.floatingDock)
+    SwitchModel(
+      section: '导航与首页',
+      disabledReason: () => Pref.harmonyUI ? null : '请先在其他设置中开启鸿蒙界面风格。',
+      title: '展开时也采用悬浮 Dock',
+      subtitle: '开启后双折、三折展开保留底部悬浮 Dock；关闭后在宽屏使用鸿蒙侧栏',
+      leading: const Icon(Icons.tablet_mac_outlined),
+      setKey: SettingBoxKey.harmonyKeepDock,
+      defaultVal: true,
+      onChanged: refreshHarmonySettings,
+    ),
 ];

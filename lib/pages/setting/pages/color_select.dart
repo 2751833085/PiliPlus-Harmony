@@ -73,7 +73,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
     final blocked = HarmonyAppearance.colorsUnavailable();
     if (blocked != null)
       return SimpleScaffold(
-        appBar: AppBar(title: const Text('选择应用主题')),
+        appBar: AppBar(title: const Text('颜色选择')),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -90,7 +90,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
       context,
     ).copyWith(top: 0, bottom: 0);
     return SimpleScaffold(
-      appBar: AppBar(title: const Text('选择应用主题')),
+      appBar: AppBar(title: const Text('颜色选择')),
       body: ListView(
         children: [
           ListTile(

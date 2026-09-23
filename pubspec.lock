@@ -822,11 +822,9 @@ packages:
   get:
     dependency: "direct main"
     description:
-      path: "."
-      ref: dev
-      resolved-ref: "3e65da893d9736135b2631a39e46c8f5388c2536"
-      url: "https://github.com/bggRGjQaUbCoE/getx.git"
-    source: git
+      path: "packages/get"
+      relative: true
+    source: path
     version: "4.7.2"
   glob:
     dependency: transitive

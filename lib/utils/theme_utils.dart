@@ -236,12 +236,13 @@ abstract final class ThemeUtils {
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.ohos: OpenRightwardsPageTransitionsBuilder(),
         },
       ),
     );
     if (OS.isHarmony && Pref.harmonyUI)
       theme = HarmonyTheme.apply(theme, immersive: Pref.harmonyImmersive);
-    if (isDark && Pref.isPureBlackTheme && !Pref.harmonyNativeColors) {
+    if (isDark && Pref.isPureBlackTheme) {
       return darkenTheme(theme);
     }
     return theme;

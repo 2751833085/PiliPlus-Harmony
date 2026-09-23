@@ -17,7 +17,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 # update when release
-version: 2.7.0+6106
+version: 3.0.0+6107
 
 environment:
   sdk: ">=3.11.1"
@@ -52,9 +52,7 @@ dependencies:
 
   # get: ^4.7.2
   get:
-    git:
-      url: https://github.com/bggRGjQaUbCoE/getx.git
-      ref: dev
+    path: packages/get
 
   # 网络
   dio: 5.9.2

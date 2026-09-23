@@ -412,12 +412,12 @@ abstract final class Pref {
 
   static bool get horizontalSeasonPanel => _setting.get(
     SettingBoxKey.horizontalSeasonPanel,
-    defaultValue: horizontalScreen,
+    defaultValue: legacyHorizontalScreen,
   );
 
   static bool get horizontalMemberPage => _setting.get(
     SettingBoxKey.horizontalMemberPage,
-    defaultValue: horizontalScreen,
+    defaultValue: legacyHorizontalScreen,
   );
 
   static int? get replyLengthLimit {
@@ -640,7 +640,10 @@ abstract final class Pref {
   static bool get optTabletNav =>
       _setting.get(SettingBoxKey.optTabletNav, defaultValue: true);
 
-  static bool get horizontalScreen {
+  static bool get horizontalScreen => OS.isHarmony || legacyHorizontalScreen;
+
+  // Preserve legacy defaults for unrelated dynamic/search preferences.
+  static bool get legacyHorizontalScreen {
     bool? horizontalScreen = _setting.get(SettingBoxKey.horizontalScreen);
     if (horizontalScreen == null) {
       final isTablet = DeviceUtils.isTablet;
@@ -705,7 +708,7 @@ abstract final class Pref {
 
   static bool get dynamicsWaterfallFlow => _setting.get(
     SettingBoxKey.dynamicsWaterfallFlow,
-    defaultValue: horizontalScreen,
+    defaultValue: legacyHorizontalScreen,
   );
 
   static bool get hideTopBar => _setting.get(
@@ -853,11 +856,12 @@ abstract final class Pref {
   static bool get enableHeroCoverAnimation =>
       _setting.get(SettingBoxKey.enableHeroCoverAnimation, defaultValue: false);
 
-  static Transition get pageTransition =>
-      Transition.values[_setting.get(
-        SettingBoxKey.pageTransition,
-        defaultValue: Transition.cupertino.index,
-      )];
+  static Transition get pageTransition => OS.isHarmony
+      ? Transition.native
+      : Transition.values[_setting.get(
+          SettingBoxKey.pageTransition,
+          defaultValue: Transition.cupertino.index,
+        )];
 
   static bool get enableQuickDouble =>
       _setting.get(SettingBoxKey.enableQuickDouble, defaultValue: true);

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/setting/models/experimental_settings.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/harmony_adapt/feed_columns.dart';
 import 'dart:io';
@@ -26,7 +27,6 @@ import 'package:PiliPlus/pages/setting/widgets/dual_slider_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/multi_select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/slider_dialog.dart';
-import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
@@ -45,7 +45,23 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:material_ui/material_ui.dart' hide StatefulBuilder;
 import 'package:path/path.dart' as path;
 
-List<SettingsModel> get styleSettings => [
+List<SettingsModel> get styleSettings {
+  final settings = _appearanceSettings;
+  return [
+    for (final section in const [
+      '主题与显示',
+      '导航与首页',
+      '首页布局',
+      '界面与布局',
+      '动态与消息',
+      null,
+    ])
+      ...settings.where((item) => item.section == section),
+  ];
+}
+
+List<SettingsModel> get _appearanceSettings => [
+  ...harmonyNavigationSettings,
   if (PlatformUtils.isDesktop) ...[
     const SwitchModel(
       title: '显示窗口标题栏',
@@ -63,31 +79,6 @@ List<SettingsModel> get styleSettings => [
     ),
   ],
   if (Platform.isLinux) _useSSDModel(),
-  SwitchModel(
-    title: '横屏适配',
-    section: '界面与布局',
-    subtitle: '启用横屏布局与逻辑，平板、折叠屏等可开启；建议全屏方向设为【不改变当前方向】',
-    leading: const Icon(Icons.phonelink_outlined),
-    setKey: SettingBoxKey.horizontalScreen,
-    defaultVal: Pref.horizontalScreen,
-    onChanged: (value) {
-      if (value) {
-        fullMode();
-      } else {
-        portraitUpMode();
-      }
-    },
-  ),
-  const SwitchModel(
-    title: '改用侧边栏',
-    section: '导航与首页',
-    disabledReason: HarmonyAppearance.navigationUnavailable,
-    subtitle: '开启后底栏与顶栏被替换，且相关设置失效',
-    leading: Icon(Icons.chrome_reader_mode_outlined),
-    setKey: SettingBoxKey.useSideBar,
-    defaultVal: false,
-    needReboot: true,
-  ),
   NormalModel(
     title: 'App字体设置',
     section: '界面与布局',
@@ -101,41 +92,6 @@ List<SettingsModel> get styleSettings => [
     getSubtitle: () => '当前缩放比例：${Pref.uiScale.toStringAsFixed(2)}',
     leading: const Icon(Icons.zoom_in_outlined),
     onTap: _showUiScaleDialog,
-  ),
-  NormalModel(
-    title: '页面过渡动画',
-    section: '界面与布局',
-    leading: const Icon(Icons.animation),
-    getSubtitle: () => '当前：${Pref.pageTransition.name}',
-    onTap: _showTransitionDialog,
-  ),
-  const SwitchModel(
-    title: '优化平板导航栏',
-    section: '导航与首页',
-    disabledReason: HarmonyAppearance.navigationUnavailable,
-    leading: Icon(Icons.auto_fix_high),
-    setKey: SettingBoxKey.optTabletNav,
-    defaultVal: true,
-    needReboot: true,
-  ),
-  const SwitchModel(
-    title: 'MD3样式底栏',
-    section: '导航与首页',
-    disabledReason: HarmonyAppearance.navigationUnavailable,
-    subtitle: 'Material You设计规范底栏，关闭可变窄',
-    leading: Icon(Icons.design_services_outlined),
-    setKey: SettingBoxKey.enableMYBar,
-    defaultVal: true,
-    needReboot: true,
-  ),
-  const SwitchModel(
-    title: '悬浮底栏',
-    section: '导航与首页',
-    disabledReason: HarmonyAppearance.navigationUnavailable,
-    leading: Icon(MdiIcons.soundbar),
-    setKey: SettingBoxKey.floatingNavBar,
-    defaultVal: false,
-    needReboot: true,
   ),
   for (var profile = 0; profile < FeedColumns.labels.length; profile++)
     NormalModel(
@@ -187,7 +143,7 @@ List<SettingsModel> get styleSettings => [
     subtitle: '关闭会显示为单列',
     leading: const Icon(Icons.view_array_outlined),
     setKey: SettingBoxKey.dynamicsWaterfallFlow,
-    defaultVal: Pref.horizontalScreen,
+    defaultVal: Pref.legacyHorizontalScreen,
     needReboot: true,
   ),
   PopupModel(
@@ -356,7 +312,6 @@ List<SettingsModel> get styleSettings => [
     leading: const Icon(Icons.invert_colors),
     title: '纯黑主题',
     section: '主题与显示',
-    disabledReason: HarmonyAppearance.colorsUnavailable,
     setKey: SettingBoxKey.isPureBlackTheme,
     defaultVal: false,
     onChanged: (value) {
@@ -368,7 +323,7 @@ List<SettingsModel> get styleSettings => [
   NormalModel(
     onTap: (context, setState) => Get.toNamed('/colorSetting'),
     leading: const Icon(Icons.color_lens_outlined),
-    title: '应用主题',
+    title: '颜色选择',
     section: '主题与显示',
     disabledReason: HarmonyAppearance.colorsUnavailable,
     getSubtitle: () => '当前主题：${Pref.dynamicColor ? '动态取色' : '指定颜色'}',
@@ -432,12 +387,12 @@ List<SettingsModel> get styleSettings => [
       arguments: {
         'key': SettingBoxKey.navBarSort,
         'defaultBars': NavigationBarType.values,
-        'title': 'Navbar',
+        'title': '底栏项目与顺序',
       },
     ),
-    title: 'Navbar编辑',
+    title: '底栏项目与顺序',
     section: '导航与首页',
-    subtitle: '删除或调换Navbar',
+    subtitle: '选择底栏显示的页面并调整顺序',
     leading: const Icon(Icons.toc_outlined),
   ),
   SwitchModel(
@@ -708,25 +663,6 @@ void _showSpringDialog(BuildContext context, _) {
       ],
     ),
   );
-}
-
-Future<void> _showTransitionDialog(
-  BuildContext context,
-  VoidCallback setState,
-) async {
-  final res = await showDialog<Transition>(
-    context: context,
-    builder: (context) => SelectDialog<Transition>(
-      title: '页面过渡动画',
-      value: Pref.pageTransition,
-      values: Transition.values.map((e) => (e, e.name)).toList(),
-    ),
-  );
-  if (res != null) {
-    Get.rootController.defaultTransition = res;
-    await GStorage.setting.put(SettingBoxKey.pageTransition, res.index);
-    setState();
-  }
 }
 
 Future<void> _showFeedColumns(

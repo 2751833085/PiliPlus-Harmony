@@ -19,7 +19,7 @@ abstract final class HarmonyAppearance {
   static void changed() => revision.value++;
 
   static String? navigationUnavailable() => Pref.harmonyUI
-      ? '因为开启了鸿蒙界面风格，此选项已由鸿蒙导航接管，无法选择。请前往“鸿蒙特色功能 → 鸿蒙界面风格”调整导航。关闭鸿蒙界面风格后将恢复原设置。'
+      ? '因为开启了鸿蒙界面风格，此选项已由鸿蒙导航接管，无法选择。请前往“外观设置 → 鸿蒙底栏与侧栏”调整导航。关闭鸿蒙界面风格后将恢复原设置。'
       : null;
 
   static String? colorsUnavailable() => Pref.harmonyNativeColors
