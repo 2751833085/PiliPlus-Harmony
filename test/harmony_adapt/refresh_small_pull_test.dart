@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
     as refresh;
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
@@ -13,7 +14,7 @@ void main() {
     ClampingScrollPhysics(),
   ]) {
     testWidgets(
-      'small pull follows content but does not refresh with $physics',
+      'normal scrolling and small pulls show no loader or content movement with $physics',
       (tester) async {
         var calls = 0;
         await tester.pumpWidget(
@@ -35,13 +36,26 @@ void main() {
             ),
           ),
         );
+        await tester.drag(find.byType(ListView), const Offset(0, -120));
+        await tester.pumpAndSettle();
+        expect(calls, 0);
+        expect(find.byType(HarmonyLoadingIndicator), findsNothing);
+        await tester.drag(find.byType(ListView), const Offset(0, 100));
+        await tester.pumpAndSettle();
+        expect(calls, 0);
+        expect(find.byType(HarmonyLoadingIndicator), findsNothing);
+        tester
+            .state<ScrollableState>(find.byType(Scrollable))
+            .position
+            .jumpTo(0);
+        await tester.pump();
         final before = tester.getTopLeft(find.text('first')).dy;
         final gesture = await tester.startGesture(const Offset(150, 160));
-        await gesture.moveBy(const Offset(0, 35));
+        await gesture.moveBy(const Offset(0, 100));
         await tester.pump();
-        await gesture.moveBy(const Offset(0, 20));
+        await gesture.moveBy(const Offset(0, 45));
         await tester.pump();
-        expect(tester.getTopLeft(find.text('first')).dy, greaterThan(before));
+        expect(tester.getTopLeft(find.text('first')).dy, closeTo(before, 1));
         expect(calls, 0);
         await gesture.up();
         await tester.pumpAndSettle();

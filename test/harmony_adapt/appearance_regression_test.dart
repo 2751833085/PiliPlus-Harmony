@@ -207,7 +207,7 @@ void main() {
   );
 
   testWidgets(
-    'refresh holds content until its future completes, then returns it',
+    'bottom refresh keeps content fixed throughout the request',
     (tester) async {
       final complete = Completer<void>();
       final refreshKey = GlobalKey<refresh.RefreshIndicatorState>();
@@ -233,7 +233,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
       final held = tester.getTopLeft(find.byKey(itemKey)).dy;
-      expect(held, greaterThan(top + 40));
+      expect(held, closeTo(top, .1));
       await tester.pump(const Duration(seconds: 2));
       expect(tester.getTopLeft(find.byKey(itemKey)).dy, held);
       complete.complete();

@@ -223,7 +223,7 @@ class RenderRefreshLayout extends RenderBox
       Offset(
         (constraints.maxWidth - scaleSize) / 2,
         _bodyOverscroll != null
-            ? edgeOffset + (gap.clamp(0.0, 52.0) - scaleSize) / 2
+            ? edgeOffset + (gap.clamp(0.0, 88.0) - scaleSize) / 2
             : edgeOffset +
                   (kIndicatorSize + displacement) * heightFactor -
                   kIndicatorSize +
