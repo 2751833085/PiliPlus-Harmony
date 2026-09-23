@@ -1,6 +1,6 @@
 # V2.6.5 RC1 · 2.6.5+6091
 
-[开发签名 HAP](PiliPlus-Harmony-V2.6.5-2.6.5-6091-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.5-2.6.5-6091-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.5-2.6.5-6091-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.5-2.6.5-6091-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.5-2.6.5-6091-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.5-2.6.5-6091-signed.build.json)
 
 开启竖屏短视频模式后，仅竖屏内容自动进入；横屏默认普通详情页。预取窗口扩展为后面三条，前台复用正在进行的取流请求，并通过本机 Range 缓存读取实际预取的音视频头部。布局按用户提供的 iOS 截图调整底部播控、信息显隐、拖动进度、评论展开及三点菜单。
 

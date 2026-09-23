@@ -1,6 +1,6 @@
 # V2.6.17 RC1 · 2.6.17+6104
 
-[签名 HAP](PiliPlus-Harmony-V2.6.17-2.6.17-6104-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.17-2.6.17-6104-signed.hap.sha256) · [构建信息](PiliPlus-Harmony-V2.6.17-2.6.17-6104-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.17-2.6.17-6104-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.17-2.6.17-6104-signed.hap.sha256) · [构建信息](PiliPlus-Harmony-V2.6.17-2.6.17-6104-signed.build.json)
 
 修复原生显隐调用的异步错误处理，以及短视频预取失败后已发出的缓存地址返回 404；复用不可变队列快照，减少重复分配。原有大结构不变。
 

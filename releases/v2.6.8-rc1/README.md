@@ -1,6 +1,6 @@
 # V2.6.8 RC1 · 2.6.8+6094
 
-[开发签名 HAP](PiliPlus-Harmony-V2.6.8-2.6.8-6094-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.8-2.6.8-6094-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.8-2.6.8-6094-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.8-2.6.8-6094-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.8-2.6.8-6094-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.8-2.6.8-6094-signed.build.json)
 
 短视频底部新增根据视频标签/标题生成的关联搜索词；发弹幕改为较短的点击输入入口，旁边独立显示弹幕开关与完整弹幕设置入口。搜索和合集行统一样式，视频区域与底部进度保持稳定。
 

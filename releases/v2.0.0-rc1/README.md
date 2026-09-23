@@ -3,7 +3,7 @@
 - 应用版本：`2.2.0+6083`，包名 `com.example.piliplus`。
 - 源码提交：`faf1f06526cbebfdb08d9ec30922ea412b63252e`，分支 `harmony/v2-native-ui`。
 - 构建：ARM64 Release，SDK 26，最低 API 22；已使用本机 DevEco 开发签名。
-- 安装包：[PiliPlus-Harmony-V2-2.2.0-6083-signed.hap](PiliPlus-Harmony-V2-2.2.0-6083-signed.hap)，32,934,799 字节。
+- 安装包：本地 HAP：`PiliPlus-Harmony-V2-2.2.0-6083-signed.hap`，32,934,799 字节。
 - SHA256：`44c7688aad985c1763136f7ae9ba58d3827bf732c1c0fa00756fbf0a6a56331e`。
 - [构建元数据](build.json) · [校验文件](SHA256SUMS) · [详细验证记录](../../docs/v2/VALIDATION.md)。
 

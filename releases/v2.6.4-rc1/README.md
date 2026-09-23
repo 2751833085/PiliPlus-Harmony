@@ -1,6 +1,6 @@
 # V2.6.4 RC1 · 2.6.4+6090
 
-[开发签名 HAP](PiliPlus-Harmony-V2.6.4-2.6.4-6090-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.4-2.6.4-6090-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.4-2.6.4-6090-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.4-2.6.4-6090-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.4-2.6.4-6090-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.4-2.6.4-6090-signed.build.json)
 
 本版增加普通/短视频模式淡出淡入过渡、缩小图标、紧凑评论标题区及“我不想看”原因菜单。反馈记录仅用于本机短视频推荐过滤，并可恢复。
 

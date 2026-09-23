@@ -2,7 +2,11 @@
 
 基于 [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus) 的鸿蒙 HAP 项目，面向手机、平板和折叠屏，优先适配 Huawei Mate XTS。
 
-V1 保存功能移植基线；V2 增加可选鸿蒙风格、原生 Dock/加载、系统智感握姿与折叠适配；V2.5 增加可手动开启的竖屏短视频信息流；V2.6 统一展开全屏刷视频手势并加入可选海外模式。V2.6.1 调整单/双击、提供左右滑自定义，并预加载下一条媒体。所有版本保留原播放器与业务功能。
+由 **厄斯因二次编辑** 维护鸿蒙适配。在原有播放器与业务功能基础上，增加可选鸿蒙界面、原生 Dock/加载、系统智感握姿、折叠适配、竖屏短视频和海外播放优化。竖屏短视频与海外模式均在「其他设置」中手动启用。
+
+当前候选版本为 **V2.6.17 RC1（2.6.17+6104）**。132 项 Flutter 回归通过，已完成 HAP 构建、签名校验和 DevEco 模拟器部分界面回归；模拟器不支持当前播放器的视频输出，最新候选包的真实播放与流畅度仍待真机验收。详见[验证记录](docs/v2.6.17/VALIDATION.md)。
+
+本仓库提供源码、构建方法和版本记录。开发签名 HAP 只在本地归档，不随源码上传；`releases/` 中的包名和哈希是构建记录，不是公共下载地址。
 
 ## 开始使用
 
@@ -19,27 +23,27 @@ bash tool/harmony.sh release
 
 | 版本 | 定位 | 入口 |
 | --- | --- | --- |
+| V2.6.17 RC1 | 原生显隐异步保护、预加载失败回退和队列快照复用 | [版本记录](releases/v2.6.17-rc1/README.md) · [验证记录](docs/v2.6.17/VALIDATION.md) |
+| V2.6.16 RC1 | DevEco 运行回归、预取重建优化、沙箱缓存与评论对比度修复 | [版本记录](releases/v2.6.16-rc1/README.md) · [验证记录](docs/v2.6.16/VALIDATION.md) |
+| V2.6.15 RC1 | 可选历史卡片、账号请求保护与挖孔/手势区避让；真机验收待解锁 | [版本记录](releases/v2.6.15-rc1/README.md) · [验证记录](docs/v2.6.15/VALIDATION.md) |
+| V2.6.14 RC1 | 播放栏动画防误触与迟到尺寸信息切换保护 | [版本记录](releases/v2.6.14-rc1/README.md) · [说明](docs/v2.6.14/README.md) |
+| V2.6.13 RC1 | 双手握持居中，握姿切换防抖与触控保护 | [版本记录](releases/v2.6.13-rc1/README.md) · [说明](docs/v2.6.13/README.md) |
+| V2.6.12 RC1 | 统一贴底菜单、更多光感表面、三折全宽播放栏与关于页 | [版本记录](releases/v2.6.12-rc1/README.md) · [说明](docs/v2.6.12/README.md) |
+| V2.6.11 RC1 | 选集可用、弹层优先返回、显隐与暂停独立、单行普通播控 | [版本记录](releases/v2.6.11-rc1/README.md) · [说明](docs/v2.6.11/README.md) |
+| V2.6.10 RC1 | 圆角裁切、普通播放器单行时间、进度条与空降标记对齐 | [版本记录](releases/v2.6.10-rc1/README.md) · [说明](docs/v2.6.10/README.md) |
+| V2.6.9 RC1 | 短视频字号与控件比例统一、进度条点击和绘制位置修正 | [版本记录](releases/v2.6.9-rc1/README.md) · [验证记录](docs/v2.6.9/VALIDATION.md) |
+| V2.6.8 RC1 | 底部关联搜索、短弹幕输入入口与独立弹幕设置 | [版本记录](releases/v2.6.8-rc1/README.md) · [验证记录](docs/v2.6.8/VALIDATION.md) |
+| V2.6.7 RC1 | 图标与数量、紧凑作者关注行、按视频比例验证布局 | [版本记录](releases/v2.6.7-rc1/README.md) · [验证记录](docs/v2.6.7/VALIDATION.md) |
+| V2.6.6 RC1 | 参考 iOS 的短视频暂停状态与中央继续播放入口 | [版本记录](releases/v2.6.6-rc1/README.md) · [验证记录](docs/v2.6.6/VALIDATION.md) |
+| V2.6.5 RC1 | 按视频比例进入短视频、连续预加载、参考 iOS 的播控与评论布局 | [版本记录](releases/v2.6.5-rc1/README.md) · [验证记录](docs/v2.6.5/VALIDATION.md) |
+| V2.6.4 RC1 | 模式切换过渡、紧凑评论、缩小图标和不想看原因选择 | [版本记录](releases/v2.6.4-rc1/README.md) · [验证记录](docs/v2.6.4/VALIDATION.md) |
+| V2.6.3 RC1 | 简洁模式保留进度条、底部播放/暂停按钮 | [版本记录](releases/v2.6.3-rc1/README.md) · [验证记录](docs/v2.6.3/VALIDATION.md) |
+| V2.6.2 RC1 | 平稳分页、快速切换保留播放器、短视频自动播放 | [版本记录](releases/v2.6.2-rc1/README.md) · [验证记录](docs/v2.6.2/VALIDATION.md) |
+| V2.6.1 RC1 | 双击播放、简洁界面、左右滑自定义、下一条媒体预加载 | [版本记录](releases/v2.6.1-rc1/README.md) · [使用说明](docs/v2.6.1/README.md) · [验证记录](docs/v2.6.1/VALIDATION.md) |
+| V2.6 RC1 | 展开全屏刷视频、第一条下拉刷新、可选海外模式 | [版本记录](releases/v2.6.0-rc1/README.md) · [使用说明](docs/v2.6/README.md) · [验证记录](docs/v2.6/VALIDATION.md) |
+| V2.5 RC1 | 竖屏短视频信息流，其他设置手动启用 | [版本记录](releases/v2.5.0-rc1/README.md) · [使用说明](docs/v2.5/README.md) · [验证记录](docs/v2.5/VALIDATION.md) |
+| V2 RC2 | 统一界面、设置互斥、原生加载与播放器控制改进 | [版本记录](releases/v2.0.0-rc2/README.md) · [验证记录](docs/v2/VALIDATION.md) |
 | V1 | 功能移植与回退基线，标签 `harmony-v1.0.0` | [版本记录](releases/v1.0.0/README.md) |
-| V2 RC2 | 统一界面、设置互斥、原生加载与播放器控制改进 | [HAP 与版本记录](releases/v2.0.0-rc2/README.md) · [验证记录](docs/v2/VALIDATION.md) |
-| V2.5 RC1 | 竖屏短视频信息流，其他设置手动启用 | [签名 HAP 与记录](releases/v2.5.0-rc1/README.md) · [使用说明](docs/v2.5/README.md) · [验证记录](docs/v2.5/VALIDATION.md) |
-| V2.6 RC1 | 展开全屏刷视频、第一条下拉刷新、可选海外模式 | [签名 HAP 与记录](releases/v2.6.0-rc1/README.md) · [使用说明](docs/v2.6/README.md) · [验证记录](docs/v2.6/VALIDATION.md) |
-| V2.6.1 RC1 | 双击播放、简洁界面、左右滑自定义、下一条媒体预加载 | [签名 HAP 与记录](releases/v2.6.1-rc1/README.md) · [使用说明](docs/v2.6.1/README.md) · [验证记录](docs/v2.6.1/VALIDATION.md) |
-| V2.6.2 RC1 | 平稳分页、快速切换保留播放器、短视频自动播放 | [签名 HAP 与记录](releases/v2.6.2-rc1/README.md) · [验证记录](docs/v2.6.2/VALIDATION.md) |
-| V2.6.3 RC1 | 简洁模式保留进度条、底部播放/暂停按钮 | [签名 HAP 与记录](releases/v2.6.3-rc1/README.md) · [验证记录](docs/v2.6.3/VALIDATION.md) |
-| V2.6.4 RC1 | 模式切换过渡、紧凑评论、缩小图标和不想看原因选择 | [签名 HAP 与记录](releases/v2.6.4-rc1/README.md) · [验证记录](docs/v2.6.4/VALIDATION.md) |
-| V2.6.5 RC1 | 按视频比例进入短视频、连续预加载、参考 iOS 的播控与评论布局 | [签名 HAP 与记录](releases/v2.6.5-rc1/README.md) · [验证记录](docs/v2.6.5/VALIDATION.md) |
-| V2.6.6 RC1 | 参考 iOS 的短视频暂停状态与中央继续播放入口 | [签名 HAP 与记录](releases/v2.6.6-rc1/README.md) · [验证记录](docs/v2.6.6/VALIDATION.md) |
-| V2.6.7 RC1 | 图标与数量、紧凑作者关注行、按视频比例验证布局 | [签名 HAP 与记录](releases/v2.6.7-rc1/README.md) · [验证记录](docs/v2.6.7/VALIDATION.md) |
-| V2.6.17 RC1 | 原生显隐异步保护、预加载失败回退和队列快照复用 | [签名 HAP 与记录](releases/v2.6.17-rc1/README.md) · [验证记录](docs/v2.6.17/VALIDATION.md) |
-| V2.6.16 RC1 | DevEco 运行回归、预取重建优化、沙箱缓存与评论对比度修复 | [签名 HAP 与记录](releases/v2.6.16-rc1/README.md) · [验证记录](docs/v2.6.16/VALIDATION.md) |
-| V2.6.15 RC1 | 可选历史卡片、账号请求保护与挖孔/手势区避让；真机验收待解锁 | [签名 HAP 与记录](releases/v2.6.15-rc1/README.md) · [验证记录](docs/v2.6.15/VALIDATION.md) |
-| V2.6.14 RC1 | 播放栏动画防误触与迟到尺寸信息切换保护 | [签名 HAP 与记录](releases/v2.6.14-rc1/README.md) · [说明](docs/v2.6.14/README.md) |
-| V2.6.13 RC1 | 双手握持居中，握姿切换防抖与触控保护 | [签名 HAP 与记录](releases/v2.6.13-rc1/README.md) · [说明](docs/v2.6.13/README.md) |
-| V2.6.12 RC1 | 统一贴底菜单、更多光感表面、三折全宽播放栏与关于页 | [签名 HAP 与记录](releases/v2.6.12-rc1/README.md) · [说明](docs/v2.6.12/README.md) |
-| V2.6.11 RC1 | 选集可用、弹层优先返回、显隐与暂停独立、单行普通播控 | [签名 HAP 与记录](releases/v2.6.11-rc1/README.md) · [说明](docs/v2.6.11/README.md) |
-| V2.6.10 RC1 | 圆角裁切、普通播放器单行时间、进度条与空降标记对齐 | [签名 HAP 与记录](releases/v2.6.10-rc1/README.md) · [说明](docs/v2.6.10/README.md) |
-| V2.6.9 RC1 | 短视频字号与控件比例统一、进度条点击和绘制位置修正 | [签名 HAP 与记录](releases/v2.6.9-rc1/README.md) · [验证记录](docs/v2.6.9/VALIDATION.md) |
-| V2.6.8 RC1 | 底部关联搜索、短弹幕输入入口与独立弹幕设置 | [签名 HAP 与记录](releases/v2.6.8-rc1/README.md) · [验证记录](docs/v2.6.8/VALIDATION.md) |
 
 [更新记录](CHANGELOG.md) · [开发约定](CONTRIBUTING.md) · [文档目录](docs/README.md) · [147 项功能核对](docs/harmony/feature-matrix.json)
 

@@ -1,6 +1,6 @@
 # V2.6.15 RC1 · 2.6.15+6102
 
-[普通配置签名 HAP](PiliPlus-Harmony-V2.6.15-2.6.15-6102-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.15-2.6.15-6102-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.15-2.6.15-6102-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.15-2.6.15-6102-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.15-2.6.15-6102-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.15-2.6.15-6102-signed.build.json)
 
 新增「其他设置 → 我的页面 → 在我的页面展示观看历史」，默认关闭。补充大字号卡片约束、账号请求失效保护，以及横屏挖孔和全屏底部手势区避让。
 

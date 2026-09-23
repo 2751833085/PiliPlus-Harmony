@@ -1,6 +1,6 @@
 # V2.6.12 RC1 · 2.6.12+6099
 
-[签名 HAP](PiliPlus-Harmony-V2.6.12-2.6.12-6099-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.12-2.6.12-6099-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.12-2.6.12-6099-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.12-2.6.12-6099-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.12-2.6.12-6099-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.12-2.6.12-6099-signed.build.json)
 
 统一播放器和二级菜单为贴底面板，扩展沉浸光感；修正深色视频表面、全宽时间轴、三折全屏标题、短视频灰白错误遮层和系统旋转锁定。收紧我的快捷入口并重做鸿蒙关于分区。
 

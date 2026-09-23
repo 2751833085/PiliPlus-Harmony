@@ -1,6 +1,6 @@
 # V2.6.7 RC1 · 2.6.7+6093
 
-[开发签名 HAP](PiliPlus-Harmony-V2.6.7-2.6.7-6093-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.7-2.6.7-6093-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.7-2.6.7-6093-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.7-2.6.7-6093-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.7-2.6.7-6093-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.7-2.6.7-6093-signed.build.json)
 
 右侧操作只显示图标与数量，取消名称占位，数量加载前后位置稳定；关注按钮紧随作者信息。布局验证加入等比例视频画面、头像、统计数量和模拟手机安全区，覆盖 3:4、9:16、16:9、展开屏及大字号。
 

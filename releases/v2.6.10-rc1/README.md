@@ -1,6 +1,6 @@
 # V2.6.10 RC1 · 2.6.10+6096
 
-[签名 HAP](PiliPlus-Harmony-V2.6.10-2.6.10-6096-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.10-2.6.10-6096-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.10-2.6.10-6096-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.10-2.6.10-6096-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.10-2.6.10-6096-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.10-2.6.10-6096-signed.build.json)
 
 修复普通播放器时间上下堆叠、控制条空间分配与空降标记错位；统一评论、弹窗及输入面板四角裁切，胶囊背景与按压形状保持一致。
 

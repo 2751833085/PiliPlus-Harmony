@@ -1,6 +1,6 @@
 # V2.6.9 RC1 · 2.6.9+6095 · 显示参数诊断候选
 
-[签名 HAP](PiliPlus-Harmony-V2.6.9-2.6.9-6095-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.9-2.6.9-6095-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.9-2.6.9-6095-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.9-2.6.9-6095-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.9-2.6.9-6095-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.9-2.6.9-6095-signed.build.json)
 
 统一短视频字号、图标、胶囊输入和进度条比例；修复双屏逻辑宽度在 600～720dp 时错误缩至 600dp、窄屏弹幕入口文字截断，以及拖动时进度轨道上下偏移。评论关闭保持 48dp 点击区，常规胶囊点击区至少 44dp。
 

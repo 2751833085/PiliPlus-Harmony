@@ -1,6 +1,6 @@
 # V2.6.13 RC1 · 2.6.13+6100
 
-[签名 HAP](PiliPlus-Harmony-V2.6.13-2.6.13-6100-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.13-2.6.13-6100-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.13-2.6.13-6100-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.13-2.6.13-6100-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.13-2.6.13-6100-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.13-2.6.13-6100-signed.build.json)
 
 应用侧握姿状态补齐双手居中：单手靠近握持侧、双手居中，未知样本保持位置。原生 Dock 继续由系统 HDS 跟手；全屏播放条保持全宽。设置说明明确这一规则。
 

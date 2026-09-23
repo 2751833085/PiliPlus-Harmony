@@ -1,6 +1,6 @@
 # V2.6.11 RC1 · 2.6.11+6097
 
-[签名 HAP](PiliPlus-Harmony-V2.6.11-2.6.11-6097-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.11-2.6.11-6097-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.11-2.6.11-6097-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.11-2.6.11-6097-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.11-2.6.11-6097-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.11-2.6.11-6097-signed.build.json)
 
 接通合集和分 P 选择；搜索与选集并排。返回优先关闭弹层和评论，暂停保持信息显隐；更新全屏图标、评论暗色和普通播放器单行控制条。
 

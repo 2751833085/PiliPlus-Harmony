@@ -1,6 +1,6 @@
 # V2.6.6 RC1 · 2.6.6+6092
 
-[开发签名 HAP](PiliPlus-Harmony-V2.6.6-2.6.6-6092-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.6-2.6.6-6092-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.6-2.6.6-6092-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.6-2.6.6-6092-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.6-2.6.6-6092-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.6-2.6.6-6092-signed.build.json)
 
 短视频暂停界面按最新参考图调整：保留作者、简介和右侧操作，中央显示半透明播放按钮与当前/总时间；底部进度和弹幕入口保持原位。中央按钮直接继续播放，恢复此前信息显隐偏好；拖动、缓冲和评论/全屏状态使用各自控件。
 

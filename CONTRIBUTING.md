@@ -1,6 +1,6 @@
 # 开发约定
 
-1. `main` 保留原 PiliPlus 对照来源；`harmony/mate-xts` 保存 V1；V2 在 `harmony/v2-native-ui` 开发。
+1. 新仓库的 `main` 保存当前鸿蒙版本；原 PiliPlus 通过 `upstream/main` 对照。`harmony/mate-xts`、`harmony/v2-native-ui`、`harmony/v2.5-short-video` 分别保留 V1、V2、V2.5，当前开发分支为 `harmony/v2.6-video-experience`。
 2. 不移动 Flutter / ArkTS 工具依赖的标准目录。共享界面能力放入 `lib/harmony_adapt/`，系统能力放入 `ohos/entry/src/main/ets/plugins/`。
 3. V2 鸿蒙风格必须可以关闭，不重置账号、播放器、下载记录及用户既有设置。
 4. 桥接字段要同时更新 Dart 与 ArkTS。新系统能力需有版本判断、失败回退、监听释放。

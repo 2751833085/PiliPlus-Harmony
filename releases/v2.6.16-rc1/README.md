@@ -1,6 +1,6 @@
 # V2.6.16 RC1 · 2.6.16+6103
 
-[签名 HAP](PiliPlus-Harmony-V2.6.16-2.6.16-6103-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.16-2.6.16-6103-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.16-2.6.16-6103-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.16-2.6.16-6103-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.16-2.6.16-6103-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.16-2.6.16-6103-signed.build.json)
 
 减少短视频缓冲预取造成的整页重建，修复鸿蒙文件缓存目录和浅色主题下的短视频评论对比度。
 

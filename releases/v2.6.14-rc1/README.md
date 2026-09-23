@@ -1,6 +1,6 @@
 # V2.6.14 RC1 · 2.6.14+6101
 
-[签名 HAP](PiliPlus-Harmony-V2.6.14-2.6.14-6101-signed.hap) · [SHA256](PiliPlus-Harmony-V2.6.14-2.6.14-6101-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.14-2.6.14-6101-signed.build.json)
+本地 HAP：`PiliPlus-Harmony-V2.6.14-2.6.14-6101-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.14-2.6.14-6101-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.14-2.6.14-6101-signed.build.json)
 
 播放栏完整显示后才响应点击；锁定、进度拖动、长按倍速时模式按钮不切换。迟到的视频尺寸不能替换已经操作的观看模式；明确按钮入口保留。
 
