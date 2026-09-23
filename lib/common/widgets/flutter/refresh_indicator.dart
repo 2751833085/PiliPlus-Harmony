@@ -436,7 +436,9 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         if (HarmonyStyle.enabled(context)) {
           await _scaleController.animateTo(
             1,
-            duration: const Duration(milliseconds: 140),
+            duration: _scaleController.value == 1
+                ? Duration.zero
+                : const Duration(milliseconds: 140),
           );
           if (!mounted || _status != newMode) return;
           await _positionController.animateTo(
@@ -482,7 +484,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       final gap = _bodyOverscroll.value > minimum
           ? _bodyOverscroll.value
           : minimum;
-      _holdExtent = gap / _positionFactor.value;
+      _holdExtent = gap.clamp(0.0, 88.0) / _positionFactor.value;
     } else {
       _holdExtent = null;
     }
@@ -495,13 +497,23 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           snapTarget,
           duration: _kIndicatorSnapDuration,
         )
-        .whenComplete(() {
+        .whenComplete(() async {
           if (mounted && _status == RefreshIndicatorStatus.snap) {
             setState(() {
               // Show the indeterminate progress indicator.
               _status = RefreshIndicatorStatus.refresh;
             });
 
+            if (HarmonyStyle.enabled(context)) {
+              await _scaleController.animateTo(
+                1,
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 180),
+                curve: Curves.easeOut,
+              );
+              if (!mounted) return;
+            }
             Future<void>.sync(widget.onRefresh).whenComplete(() {
               if (mounted && _status == RefreshIndicatorStatus.refresh) {
                 completer.complete();

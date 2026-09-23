@@ -326,17 +326,9 @@ abstract final class Pref {
   static double get blockLimit =>
       _setting.get(SettingBoxKey.blockLimit, defaultValue: 0.0);
 
-  static bool get refreshUseDefault =>
-      _setting.get(SettingBoxKey.refreshUseDefault, defaultValue: true);
-
-  static double get refreshDragPercentage => refreshUseDefault
-      ? 0.25
-      : _setting.get(SettingBoxKey.refreshDragPercentage, defaultValue: 0.25);
-
-  static double get refreshDisplacement => _setting.get(
-    SettingBoxKey.refreshDisplacement,
-    defaultValue: PlatformUtils.isMobile ? 20.0 : 40.0,
-  );
+  static bool get refreshUseDefault => true;
+  static double get refreshDragPercentage => 0.25;
+  static double get refreshDisplacement => PlatformUtils.isMobile ? 20.0 : 40.0;
 
   static String get blockUserID {
     String? blockUserID = _setting.get(SettingBoxKey.blockUserID);
@@ -408,7 +400,7 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.alwaysExpandIntroPanel, defaultValue: false);
 
   static bool get expandIntroPanelH =>
-      _setting.get(SettingBoxKey.expandIntroPanelH, defaultValue: false);
+      _setting.get(SettingBoxKey.expandIntroPanelH, defaultValue: true);
 
   static bool get horizontalSeasonPanel => _setting.get(
     SettingBoxKey.horizontalSeasonPanel,

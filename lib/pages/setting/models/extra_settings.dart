@@ -7,7 +7,6 @@ import 'dart:math' show max;
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
 import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
 import 'package:PiliPlus/common/widgets/emote_tooltip.dart';
-import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart'
     show deviceTouchSlop, touchSlopH;
 import 'package:PiliPlus/common/widgets/image_grid/image_grid_view.dart'
@@ -206,10 +205,10 @@ List<SettingsModel> get extraSettings => [
     defaultVal: false,
   ),
   const SwitchModel(
-    title: '横屏自动展开视频简介',
+    title: '平板横屏自动展开视频简介',
     leading: Icon(Icons.expand_more),
     setKey: SettingBoxKey.expandIntroPanelH,
-    defaultVal: false,
+    defaultVal: true,
   ),
   SwitchModel(
     title: '横屏分P/合集列表显示在Tab栏',
@@ -310,20 +309,6 @@ List<SettingsModel> get extraSettings => [
     getSubtitle: () => '当前:「${Pref.touchSlopH}」，系统默认值: $deviceTouchSlop',
     onTap: _showTouchSlopDialog,
     leading: const Icon(Icons.pan_tool_alt_outlined),
-  ),
-  NormalModel(
-    title: '刷新滑动距离',
-    leading: const Icon(Icons.refresh),
-    getSubtitle: () => Pref.refreshUseDefault
-        ? '默认（原版下拉距离）'
-        : '自定义: ${Pref.refreshDragPercentage}x',
-    onTap: _showRefreshDragDialog,
-  ),
-  NormalModel(
-    title: '刷新指示器高度',
-    leading: const Icon(Icons.height),
-    getSubtitle: () => '当前指示器高度: ${Pref.refreshDisplacement}',
-    onTap: _showRefreshDialog,
   ),
   const SwitchModel(
     title: '显示会员彩色弹幕',
@@ -1018,78 +1003,6 @@ void _showTouchSlopDialog(BuildContext context, VoidCallback setState) {
       ],
     ),
   );
-}
-
-Future<void> _showRefreshDragDialog(
-  BuildContext context,
-  VoidCallback setState,
-) async {
-  final useDefault = await showDialog<bool>(
-    context: context,
-    builder: (_) => SelectDialog<bool>(
-      title: '刷新滑动距离',
-      value: Pref.refreshUseDefault,
-      values: const [(true, '默认（原版下拉距离）'), (false, '自定义')],
-    ),
-  );
-  if (useDefault == null || !context.mounted) return;
-  if (useDefault) {
-    await GStorage.setting.put(SettingBoxKey.refreshUseDefault, true);
-    kDragContainerExtentPercentage = Pref.refreshDragPercentage;
-    setState();
-    return;
-  }
-  final res = await showDialog<double>(
-    context: context,
-    builder: (context) => SliderDialog(
-      title: const Text('刷新滑动距离'),
-      min: 0.1,
-      max: 0.5,
-      divisions: 8,
-      precise: 2,
-      value: Pref.refreshDragPercentage,
-      suffix: 'x',
-    ),
-  );
-  if (res != null) {
-    await GStorage.setting.put(SettingBoxKey.refreshUseDefault, false);
-    kDragContainerExtentPercentage = res;
-    await GStorage.setting.put(SettingBoxKey.refreshDragPercentage, res);
-    setState();
-  }
-}
-
-Future<void> _showRefreshDialog(
-  BuildContext context,
-  VoidCallback setState,
-) async {
-  final res = await showDialog<double>(
-    context: context,
-    builder: (context) => SliderDialog(
-      title: const Text('刷新指示器高度'),
-      min: 10.0,
-      max: 100.0,
-      divisions: 9,
-      value: Pref.refreshDisplacement,
-    ),
-  );
-  if (res != null) {
-    displacement = res;
-    await GStorage.setting.put(SettingBoxKey.refreshDisplacement, res);
-    if (WidgetsBinding.instance.rootElement case final context?) {
-      context.visitChildElements(_visitor);
-    }
-    setState();
-  }
-}
-
-void _visitor(Element context) {
-  if (!context.mounted) return;
-  if (context.widget is RefreshIndicator) {
-    context.markNeedsBuild();
-  } else {
-    context.visitChildren(_visitor);
-  }
 }
 
 Future<void> _showSuperResolutionDialog(

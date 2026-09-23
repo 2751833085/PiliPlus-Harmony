@@ -129,6 +129,7 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
     ReplyInfo? replyItem, {
     int? oid,
     int? replyType,
+    bool openEmoji = false,
   }) {
     if (loadingState.value case Error(:final errMsg, :final code)) {
       if (errMsg != null && (code == 12061 || code == 12002)) {
@@ -150,6 +151,7 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
           PublishRoute(
             pageBuilder: (buildContext, animation, secondaryAnimation) {
               return ReplyPage(
+                openEmoji: openEmoji,
                 hint: hint,
                 oid: oid ?? replyItem!.oid.toInt(),
                 root: oid != null ? 0 : replyItem!.id.toInt(),

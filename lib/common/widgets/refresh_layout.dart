@@ -131,7 +131,7 @@ class RenderRefreshLayout extends RenderBox
     // displacement, then hold it after the viewport springs back to zero.
     final shift = _bodyOverscroll == null
         ? 0.0
-        : (target - _bodyOverscroll!.value).clamp(0.0, target);
+        : (target.clamp(0.0, 88.0) - _bodyOverscroll!.value);
     setOffset(body, Offset(0, shift));
     _layoutIndicator();
     markNeedsPaint();

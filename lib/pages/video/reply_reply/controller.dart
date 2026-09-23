@@ -151,6 +151,7 @@ class VideoReplyReplyController extends ReplyController
     ReplyInfo? replyItem, {
     int? oid,
     int? replyType,
+    bool openEmoji = false,
     int? index,
   }) {
     assert(replyItem != null && index != null);
@@ -169,6 +170,7 @@ class VideoReplyReplyController extends ReplyController
           PublishRoute(
             pageBuilder: (buildContext, animation, secondaryAnimation) {
               return ReplyPage(
+                openEmoji: openEmoji,
                 hint: hint,
                 oid: oid,
                 root: root,

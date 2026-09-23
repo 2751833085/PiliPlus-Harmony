@@ -1,3 +1,5 @@
+import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/harmony_adapt/window_layout.dart';
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/common/style.dart';
@@ -70,6 +72,7 @@ class UgcIntroPanel extends StatefulWidget {
 
 class _UgcIntroPanelState extends State<UgcIntroPanel> {
   late ColorScheme colorScheme;
+  bool _wasTabletLandscape = false;
   late final UgcIntroController introController;
   late final VideoDetailController videoDetailCtr =
       Get.find<VideoDetailController>(tag: widget.heroTag);
@@ -87,6 +90,17 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     colorScheme = ColorScheme.of(context);
+    final tabletLandscape = HarmonyWindowLayout.autoExpandIntroduction(
+      MediaQuery.sizeOf(context),
+    );
+    if (tabletLandscape && !_wasTabletLandscape && Pref.expandIntroPanelH) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _wasTabletLandscape && !videoDetailCtr.isFullScreen) {
+          introController.expand.value = true;
+        }
+      });
+    }
+    _wasTabletLandscape = tabletLandscape;
   }
 
   @override

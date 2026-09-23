@@ -27,19 +27,27 @@ class ImmersiveSurface extends StatelessWidget {
       borderRadius: borderRadius,
       child: immersive
           ? BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: borderRadius,
                   border: Border.all(
-                    color: theme.colorScheme.onSurface.withValues(alpha: .07),
+                    color: Colors.white.withValues(
+                      alpha: theme.brightness == Brightness.dark ? .12 : .75,
+                    ),
                   ),
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      base.withValues(alpha: .96),
-                      base.withValues(alpha: .88),
+                      (theme.brightness == Brightness.dark
+                              ? const Color(0xFF25262A)
+                              : const Color(0xFFF7F8FA))
+                          .withValues(alpha: .82),
+                      (theme.brightness == Brightness.dark
+                              ? const Color(0xFF25262A)
+                              : const Color(0xFFF7F8FA))
+                          .withValues(alpha: .72),
                     ],
                   ),
                 ),

@@ -75,22 +75,47 @@ class ReplyPanelHeader extends StatelessWidget {
 }
 
 class ShortReplyComposer extends StatelessWidget {
-  const ShortReplyComposer({super.key, required this.onReply});
+  const ShortReplyComposer({super.key, required this.onReply, this.onEmoji});
   final VoidCallback onReply;
+  final VoidCallback? onEmoji;
   @override
   Widget build(BuildContext context) => SafeArea(
     top: false,
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-      child: ShortVideoPillButton(
-        onPressed: onReply,
-        label: '发一条友善的评论',
-        foreground: Theme.of(context).colorScheme.onSurfaceVariant,
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        trailing: Icon(
-          Icons.sentiment_satisfied_alt,
-          size: ShortVideoMetrics.of(context).icon,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      child: ImmersiveSurface(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF242528)
+            : const Color(0xFFF1F2F3),
+        borderRadius: BorderRadius.circular(24),
+        child: Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: onReply,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 13,
+                  ),
+                  child: Text(
+                    '尊重是评论打动人心的入场券',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: '发表情',
+              onPressed: onEmoji ?? onReply,
+              icon: const Icon(Icons.sentiment_satisfied_alt, size: 24),
+            ),
+          ],
         ),
       ),
     ),

@@ -110,43 +110,25 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                   ],
                 ),
               ),
-              if (widget.onClose != null) ShortReplyComposer(onReply: _onReply),
+              ShortReplyComposer(
+                onReply: _onReply,
+                onEmoji: () => _onReply(emoji: true),
+              ),
             ],
           ),
-          fab: widget.onClose != null
-              ? null
-              : SlideTransition(
-                  position: fabAnimation,
-                  child: Padding(
-                    padding: .only(
-                      right: kFloatingActionButtonMargin,
-                      bottom: kFloatingActionButtonMargin + bottom,
-                    ),
-                    child: ImmersiveSurface(
-                      color: colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(16),
-                      child: FloatingActionButton(
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
-                        heroTag: null,
-                        onPressed: _onReply,
-                        tooltip: '发表评论',
-                        child: const Icon(Icons.reply),
-                      ),
-                    ),
-                  ),
-                ),
+          fab: null,
         ),
       ),
     );
   }
 
-  void _onReply() {
+  void _onReply({bool emoji = false}) {
     feedBack();
     _videoReplyController.onReply(
       null,
       oid: _videoReplyController.aid,
       replyType: _videoReplyController.videoType.replyType,
+      openEmoji: emoji,
     );
   }
 

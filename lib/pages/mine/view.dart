@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/initial_feed_content.dart';
 import 'package:PiliPlus/pages/mine/widgets/recent_history.dart';
 import 'package:PiliPlus/pages/history/open_item.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_quick_actions.dart';
@@ -74,7 +75,14 @@ class _MediaPageState extends CommonPageState<MinePage>
     final theme = Theme.of(context);
     final secondary = theme.colorScheme.secondary;
     if (HarmonyStyle.enabled(context))
-      return _buildHarmonyPage(theme, secondary);
+      return Obx(
+        () => InitialFeedContent(
+          loading:
+              controller.accountService.isLogin.value &&
+              controller.loadingState.value is Loading,
+          builder: (_) => _buildHarmonyPage(theme, secondary),
+        ),
+      );
     return SafeArea(
       // 避让安全区
       child: Column(

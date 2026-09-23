@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/initial_feed_content.dart';
 import 'dart:async';
 
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
@@ -50,26 +51,31 @@ class _DynamicsTabPageState extends State<DynamicsTabPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return refreshIndicator(
-      onRefresh: onRefresh,
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        controller: controller.scrollController,
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.only(bottom: 100),
-            sliver: buildPage(
-              Obx(() => _buildBody(controller.loadingState.value)),
-            ),
+    return Obx(
+      () => InitialFeedContent(
+        loading: controller.loadingState.value is Loading,
+        builder: (_) => refreshIndicator(
+          onRefresh: onRefresh,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            controller: controller.scrollController,
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.only(bottom: 100),
+                sliver: buildPage(
+                  Obx(() => _buildBody(controller.loadingState.value)),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildBody(LoadingState<List<DynamicItemModel>?> loadingState) {
     return switch (loadingState) {
-      Loading() => dynSkeleton,
+      Loading() => const SliverToBoxAdapter(),
       Success(:final response) =>
         response != null && response.isNotEmpty
             ? GlobalData().dynamicsWaterfallFlow

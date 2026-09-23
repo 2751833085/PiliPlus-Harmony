@@ -31,8 +31,6 @@ import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/android/android_helper.dart';
-import 'package:PiliPlus/utils/device_utils.dart';
-import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
 import 'package:PiliPlus/utils/global_data.dart';
@@ -74,13 +72,6 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     super.onInit();
     final alwaysExpandIntroPanel = Pref.alwaysExpandIntroPanel;
     expand = RxBool(alwaysExpandIntroPanel);
-    if (!alwaysExpandIntroPanel && Pref.expandIntroPanelH) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!expand.value && !DeviceUtils.size.isPortrait) {
-          expand.toggle();
-        }
-      });
-    }
     videoDetail.value.title = Get.arguments['title'] ?? '';
 
     // 注册播控中心上一集/下一集回调

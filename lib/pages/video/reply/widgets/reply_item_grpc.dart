@@ -575,7 +575,9 @@ class ReplyItemGrpc extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 42, right: 4),
       child: Material(
-        color: colorScheme.onInverseSurface,
+        color: colorScheme.brightness == Brightness.dark
+            ? const Color(0xFF242528)
+            : const Color(0xFFF1F2F3),
         borderRadius: const BorderRadius.all(Radius.circular(6)),
         clipBehavior: Clip.hardEdge,
         animationDuration: Duration.zero,

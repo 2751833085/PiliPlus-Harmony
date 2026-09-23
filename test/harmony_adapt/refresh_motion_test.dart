@@ -16,13 +16,13 @@ void main() {
     GStorage.setting = MemoryBox();
   });
   test(
-    'default pull threshold preserves custom value for later selection',
+    'legacy custom pull threshold is ignored',
     () async {
       await GStorage.setting.put(SettingBoxKey.refreshDragPercentage, .5);
       expect(Pref.refreshUseDefault, isTrue);
       expect(Pref.refreshDragPercentage, .25);
       await GStorage.setting.put(SettingBoxKey.refreshUseDefault, false);
-      expect(Pref.refreshDragPercentage, .5);
+      expect(Pref.refreshDragPercentage, .25);
       await GStorage.setting.put(SettingBoxKey.refreshUseDefault, true);
       expect(Pref.refreshDragPercentage, .25);
     },
@@ -88,7 +88,9 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 180));
         await tester.pump(const Duration(milliseconds: 180));
+        await tester.pump(const Duration(milliseconds: 200));
         expect(calls, 1);
+        expect(tester.widget<Opacity>(find.ancestor(of: find.byType(HarmonyLoadingIndicator), matching: find.byType(Opacity)).first).opacity, 0);
         await tester.pump(const Duration(seconds: 1));
         expect(
           tester.state(find.byType(HarmonyLoadingIndicator)),
@@ -103,26 +105,13 @@ void main() {
           closeTo(24 + 26, 1),
         );
         final held = tester.getTopLeft(find.text('row 0')).dy;
-        expect(held, greaterThan(0));
+        expect(held, inInclusiveRange(1, 88));
         await tester.pump(const Duration(milliseconds: 300));
         expect(tester.getTopLeft(find.text('row 0')).dy, held);
         done.complete();
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 70));
-        expect(
-          tester.getTopLeft(find.text('row 0')).dy,
-          closeTo(held, 1),
-          reason: 'Content stays held while the planet fades out.',
-        );
-        final fade = tester.widget<Opacity>(
-          find
-              .ancestor(
-                of: find.byType(HarmonyLoadingIndicator),
-                matching: find.byType(Opacity),
-              )
-              .first,
-        );
-        expect(fade.opacity, inExclusiveRange(0, 1));
+        expect(tester.getTopLeft(find.text('row 0')).dy, lessThan(held), reason: 'Content retracts smoothly after refresh.');
         await tester.pump(const Duration(milliseconds: 100));
         await tester.pump(const Duration(milliseconds: 250));
         await tester.pump();
@@ -132,6 +121,7 @@ void main() {
         final manual = key.currentState!.show();
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 180));
+        await tester.pump(const Duration(milliseconds: 200));
         expect(calls, 2);
         expect(find.byType(HarmonyLoadingIndicator), findsOneWidget);
         done.complete();

@@ -40,6 +40,7 @@ class ReplyPage extends CommonRichTextPubPage {
   final ReplyInfo? replyItem;
   final String? hint;
   final bool canUploadPic;
+  final bool openEmoji;
 
   const ReplyPage({
     super.key,
@@ -53,13 +54,23 @@ class ReplyPage extends CommonRichTextPubPage {
     this.replyItem,
     this.hint,
     this.canUploadPic = true,
-  });
+    this.openEmoji = false,
+  }) : super(autofocus: !openEmoji);
 
   @override
   State<ReplyPage> createState() => _ReplyPageState();
 }
 
 class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.openEmoji)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) updatePanelType(.emoji);
+      });
+  }
+
   final RxBool _syncToDynamic = false.obs;
   final heroTag = Get.arguments?['heroTag'];
 
