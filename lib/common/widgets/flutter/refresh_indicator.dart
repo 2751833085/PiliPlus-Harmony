@@ -341,15 +341,18 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     }
     if (notification is ScrollUpdateNotification) {
       if (_status == RefreshIndicatorStatus.drag) {
-        _dragOffset = _dragOffset! - notification.scrollDelta!;
-        _checkDragOffset(notification.metrics.viewportDimension);
-
+        // Decide from the final finger position, before the first spring
+        // frame consumes overscroll. A delayed frame can otherwise unarm an
+        // already completed pull and make release appear to do nothing.
         if (notification.dragDetails == null &&
             _valueColor.value!.a == _effectiveValueColor.a) {
           // On iOS start the refresh when the Scrollable bounces back from the
           // overscroll (ScrollNotification indicating this don't have dragDetails
           // because the scroll activity is not directly triggered by a drag).
           _show();
+        } else {
+          _dragOffset = _dragOffset! - notification.scrollDelta!;
+          _checkDragOffset(notification.metrics.viewportDimension);
         }
       }
     } else if (notification is OverscrollNotification) {

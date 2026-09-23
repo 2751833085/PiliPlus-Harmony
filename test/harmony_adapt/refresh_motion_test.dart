@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:PiliPlus/common/widgets/refresh_layout.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
     as refresh;
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
@@ -26,9 +27,16 @@ void main() {
       expect(Pref.refreshDragPercentage, .25);
     },
   );
-  for (final width in [1008.0, 2048.0, 3184.0]) {
+  for (final (width, physics) in [
+    for (final width in [1008.0, 2048.0, 3184.0])
+      for (final physics in const [
+        ClampingScrollPhysics(),
+        BouncingScrollPhysics(),
+      ])
+        (width, physics),
+  ]) {
     testWidgets(
-      'pull, release, hold, retract and repeated manual refresh at $width',
+      'pull, release, hold, retract and repeated manual refresh at $width with $physics',
       (tester) async {
         tester.view.devicePixelRatio = 2.875;
         tester.view.physicalSize = Size(width, 2232);
@@ -49,9 +57,7 @@ void main() {
                   return done.future;
                 },
                 child: ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: ClampingScrollPhysics(),
-                  ),
+                  physics: AlwaysScrollableScrollPhysics(parent: physics),
                   itemExtent: 80,
                   itemCount: 40,
                   itemBuilder: (_, index) => Text('row $index'),
@@ -70,12 +76,20 @@ void main() {
           find.byType(HarmonyLoadingIndicator),
         );
         expect(calls, 0);
-        await gesture.moveBy(const Offset(0, 240));
+        await gesture.moveBy(const Offset(0, 500));
         await tester.pump();
+        expect(
+          tester
+              .renderObject<RenderRefreshLayout>(find.byType(RefreshLayout))
+              .heightFactor,
+          greaterThanOrEqualTo(1),
+        );
         await gesture.up();
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 180));
+        await tester.pump(const Duration(milliseconds: 180));
         expect(calls, 1);
+        await tester.pump(const Duration(seconds: 1));
         expect(
           tester.state(find.byType(HarmonyLoadingIndicator)),
           same(indicatorState),
