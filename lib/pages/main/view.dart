@@ -682,6 +682,23 @@ class _MainAppState extends PopScopeState<MainApp>
     );
   }
 
+  List<Widget> _navigationPages() => [
+    for (var index = 0; index < _mainController.navigationBars.length; index++)
+      _navigationPage(index),
+  ];
+
+  Widget _navigationPage(int index) {
+    final page = RepaintBoundary(
+      child: _mainController.navigationBars[index].page,
+    );
+    return Obx(
+      () => TickerMode(
+        enabled: _mainController.selectedIndex.value == index,
+        child: page,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget child;
@@ -690,13 +707,13 @@ class _MainAppState extends PopScopeState<MainApp>
         scrollDirection: _mainController.useBottomNav ? .horizontal : .vertical,
         physics: const NeverScrollableScrollPhysics(),
         controller: _mainController.controller,
-        children: _mainController.navigationBars.map((i) => i.page).toList(),
+        children: _navigationPages(),
       );
     } else {
       child = PageView(
         physics: const NeverScrollableScrollPhysics(),
         controller: _mainController.controller,
-        children: _mainController.navigationBars.map((i) => i.page).toList(),
+        children: _navigationPages(),
       );
     }
 

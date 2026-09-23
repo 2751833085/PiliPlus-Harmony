@@ -9,13 +9,14 @@ class ImmersiveSurface extends StatelessWidget {
     super.key,
     required this.child,
     this.color,
-    this.blurBackground = true,
+    this.blurBackground = false,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
   final Widget child;
   final Color? color;
 
-  /// Scrolling cards over a flat page keep the finish without offscreen blur.
+  /// Page surfaces default to a cached finish. Opt in only for overlays
+  /// that actually need to sample the content behind them.
   final bool blurBackground;
   final BorderRadius borderRadius;
   @override

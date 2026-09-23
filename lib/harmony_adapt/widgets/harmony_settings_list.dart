@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../harmony_theme.dart';
 
 /// Grouped settings rows stay lazy even on long settings pages. Only the first
@@ -59,13 +59,13 @@ class HarmonySettingsList extends StatelessWidget {
                       ),
                     ),
                   ),
-                Material(
+                ImmersiveSurface(
+                  blurBackground: false,
                   color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.vertical(
                     top: first ? radius : Radius.zero,
                     bottom: last ? radius : Radius.zero,
                   ),
-                  clipBehavior: Clip.antiAlias,
                   child: Column(
                     children: [
                       child,
@@ -96,10 +96,10 @@ class HarmonySettingsSearch extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Material(
+      child: ImmersiveSurface(
+        blurBackground: false,
         color: theme.colorScheme.surfaceContainerHigh,
-        shape: const StadiumBorder(),
-        clipBehavior: Clip.antiAlias,
+        borderRadius: BorderRadius.circular(28),
         child: InkWell(
           onTap: onTap,
           child: ConstrainedBox(

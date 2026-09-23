@@ -64,6 +64,18 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
     );
   }
 
+  Widget _tabSurface(Widget child) => HarmonyStyle.enabled(context)
+      ? Align(
+          alignment: Alignment.centerLeft,
+          widthFactor: 1,
+          child: ImmersiveSurface(
+            blurBackground: false,
+            borderRadius: BorderRadius.circular(24),
+            child: child,
+          ),
+        )
+      : child;
+
   Widget upPanelPart(ThemeData theme) {
     final isTop = upPanelPosition == .top;
     final needBg = upPanelPosition.index > 2;
@@ -185,28 +197,30 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
         leadingWidth: HarmonyStyle.enabled(context) ? 56 : 50,
         toolbarHeight: 50,
         backgroundColor: Colors.transparent,
-        title: SizedBox(
-          height: 50,
-          child: TabBar(
-            dividerHeight: 0,
-            isScrollable: true,
-            tabAlignment: .center,
-            dividerColor: Colors.transparent,
-            labelColor: theme.colorScheme.primary,
-            indicatorColor: theme.colorScheme.primary,
-            controller: _dynamicsController.tabController,
-            unselectedLabelColor: theme.colorScheme.onSurface,
-            labelStyle:
-                TabBarTheme.of(context).labelStyle?.copyWith(fontSize: 13) ??
-                const TextStyle(fontSize: 13),
-            tabs: DynamicsTabType.values
-                .map((e) => Tab(text: e.label))
-                .toList(),
-            onTap: (index) {
-              if (!_dynamicsController.tabController.indexIsChanging) {
-                _dynamicsController.animateToTop();
-              }
-            },
+        title: _tabSurface(
+          SizedBox(
+            height: 44,
+            child: TabBar(
+              dividerHeight: 0,
+              isScrollable: true,
+              tabAlignment: .center,
+              dividerColor: Colors.transparent,
+              labelColor: theme.colorScheme.primary,
+              indicatorColor: theme.colorScheme.primary,
+              controller: _dynamicsController.tabController,
+              unselectedLabelColor: theme.colorScheme.onSurface,
+              labelStyle:
+                  TabBarTheme.of(context).labelStyle?.copyWith(fontSize: 13) ??
+                  const TextStyle(fontSize: 13),
+              tabs: DynamicsTabType.values
+                  .map((e) => Tab(text: e.label))
+                  .toList(),
+              onTap: (index) {
+                if (!_dynamicsController.tabController.indexIsChanging) {
+                  _dynamicsController.animateToTop();
+                }
+              },
+            ),
           ),
         ),
         actions: actions,

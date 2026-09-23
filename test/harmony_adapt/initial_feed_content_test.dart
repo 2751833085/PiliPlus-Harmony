@@ -10,6 +10,7 @@ void main() {
       var loading = true;
       var reduceMotion = false;
       var ready = 0;
+      var contentBuilds = 0;
       late StateSetter update;
       await tester.pumpWidget(
         MaterialApp(
@@ -24,7 +25,10 @@ void main() {
                   body: InitialFeedContent(
                     loading: loading,
                     onReady: () => ready++,
-                    builder: (_) => const Text('Feed'),
+                    builder: (_) {
+                      contentBuilds++;
+                      return const Text('Feed');
+                    },
                   ),
                 ),
               );
@@ -47,6 +51,11 @@ void main() {
       expect(find.text('Feed'), findsOneWidget);
       await tester.pumpAndSettle();
       expect(ready, 1);
+      expect(
+        contentBuilds,
+        1,
+        reason: 'Fading must not rebuild the feed every frame.',
+      );
       update(() => loading = true);
       await tester.pump();
       expect(find.text('Feed'), findsNothing);

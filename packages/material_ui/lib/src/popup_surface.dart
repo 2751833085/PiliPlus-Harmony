@@ -50,6 +50,7 @@ Future<T?> _showMenuSheet<T>({
       maxHeight: MediaQuery.sizeOf(context).height * .78,
     ),
     child: ImmersiveSurface(
+      blurBackground: true,
       color: color,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       child: SafeArea(

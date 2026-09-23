@@ -16,6 +16,32 @@ import 'package:hive_ce/hive.dart';
 import 'package:material_ui/material_ui.dart' as ui;
 
 void main() {
+  testWidgets('settings light-effect rows stay lazy without backdrop filters', (
+    tester,
+  ) async {
+    var built = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: HarmonyTheme.apply(ThemeData(), immersive: true),
+        home: Scaffold(
+          body: HarmonySettingsList(
+            itemCount: 100,
+            itemBuilder: (_, index) {
+              built++;
+              return SizedBox(height: 64, child: Text('setting $index'));
+            },
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(ui.ImmersiveSurface), findsWidgets);
+    expect(find.byType(BackdropFilter), findsNothing);
+    expect(built, lessThan(30));
+    await tester.drag(find.byType(ListView), const Offset(0, -400));
+    await tester.pumpAndSettle();
+    expect(find.byType(BackdropFilter), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
   late Directory temp;
   setUpAll(() async {
     temp = await Directory.systemTemp.createTemp('piliplus-ui-test-');

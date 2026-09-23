@@ -52,7 +52,8 @@ class _InitialFeedContentState extends State<InitialFeedContent>
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: _transition,
-    builder: (context, _) {
+    child: Builder(builder: widget.builder),
+    builder: (context, content) {
       final progress = _transition.value;
       return SizedBox.expand(
         child: Stack(
@@ -63,7 +64,7 @@ class _InitialFeedContentState extends State<InitialFeedContent>
                   opacity: Curves.easeOut.transform(
                     ((progress - .35) / .65).clamp(0.0, 1.0),
                   ),
-                  child: widget.builder(context),
+                  child: RepaintBoundary(child: content!),
                 ),
               ),
             if (progress <= .35)
