@@ -1,5 +1,3 @@
-import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
-import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -225,8 +223,13 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   late Future<void> _pendingRefreshFuture;
   double? _dragOffset;
   int? _dragPointer;
-  double? _holdExtent;
-  final _bodyOverscroll = ValueNotifier<double>(0);
+
+  bool get _isArmed =>
+      _containerExtent > 0 &&
+      (_dragOffset ?? 0) >=
+          _containerExtent *
+              kDragContainerExtentPercentage /
+              _kDragSizeFactorLimit;
 
   // 鸿蒙保留kDragContainerExtentPercentage= Pref.refreshDragPercentage所需
   double _containerExtent = 0.0;
@@ -281,7 +284,6 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   @protected
   @override
   void dispose() {
-    _bodyOverscroll.dispose();
     _positionController.dispose();
     _scaleController.dispose();
     super.dispose();
@@ -314,13 +316,11 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     // user dragging. It may be a result of ScrollController.jumpTo or ballistic scroll.
     // In this case, we don't want to trigger the refresh indicator.
     return _status == null &&
+        ((notification is ScrollStartNotification &&
+                notification.dragDetails != null) ||
+            (notification is ScrollUpdateNotification &&
+                notification.dragDetails != null)) &&
         notification.metrics.extentBefore == 0.0 &&
-        ((notification is ScrollUpdateNotification &&
-                notification.dragDetails != null &&
-                (notification.scrollDelta ?? 0) < 0) ||
-            (notification is OverscrollNotification &&
-                notification.dragDetails != null &&
-                notification.overscroll < 0)) &&
         _start();
   }
 
@@ -328,30 +328,21 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
-    if (notification.metrics.axis != Axis.vertical) return false;
-    _bodyOverscroll.value = (-notification.metrics.pixels).clamp(
-      0.0,
-      double.infinity,
-    );
     final viewportDimension = notification.metrics.viewportDimension;
     if (viewportDimension > 0) {
       _containerExtent = viewportDimension;
     }
     if (_shouldStart(notification)) {
-      _dragOffset = notification is ScrollUpdateNotification
-          ? -(notification.scrollDelta ?? 0)
-          : -(notification as OverscrollNotification).overscroll;
       setState(() {
         _status = RefreshIndicatorStatus.drag;
       });
-      _checkDragOffset(notification.metrics.viewportDimension);
       return false;
     }
     if (notification is ScrollUpdateNotification) {
       if (_status == RefreshIndicatorStatus.drag) {
-        // Decide from the final finger position, before the first spring
-        // frame consumes overscroll. A delayed frame can otherwise unarm an
-        // already completed pull and make release appear to do nothing.
+        _dragOffset = _dragOffset! - notification.scrollDelta!;
+        _checkDragOffset(notification.metrics.viewportDimension);
+
         if (notification.dragDetails == null &&
             _dragPointer == null &&
             _isArmed) {
@@ -359,9 +350,6 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           // overscroll (ScrollNotification indicating this don't have dragDetails
           // because the scroll activity is not directly triggered by a drag).
           _show();
-        } else {
-          _dragOffset = _dragOffset! - notification.scrollDelta!;
-          _checkDragOffset(notification.metrics.viewportDimension);
         }
       }
     } else if (notification is OverscrollNotification) {
@@ -404,7 +392,6 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   }
 
   bool _start() {
-    _holdExtent = null;
     assert(_status == null);
     assert(_dragOffset == null);
     _dragOffset = 0.0;
@@ -413,24 +400,12 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     return true;
   }
 
-  double get _triggerDistance => HarmonyStyle.enabled(context)
-      ? 180.0
-      : _containerExtent *
-            kDragContainerExtentPercentage /
-            _kDragSizeFactorLimit;
-
-  bool get _isArmed =>
-      (_dragOffset ?? 0) >= _triggerDistance && _triggerDistance > 0;
-
   void _checkDragOffset(double containerExtent) {
     assert(
       _status == RefreshIndicatorStatus.drag,
     );
     double newValue =
-        _dragOffset! /
-        (HarmonyStyle.enabled(context)
-            ? 180.0 * _kDragSizeFactorLimit
-            : containerExtent * kDragContainerExtentPercentage);
+        _dragOffset! / (containerExtent * kDragContainerExtentPercentage);
     _positionController.value = clampDouble(
       newValue,
       0.0,
@@ -454,18 +429,6 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     });
     switch (_status!) {
       case RefreshIndicatorStatus.done:
-        if (HarmonyStyle.enabled(context)) {
-          await _scaleController.animateTo(
-            1,
-            duration: MediaQuery.disableAnimationsOf(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 220),
-            curve: Curves.easeOut,
-          );
-          if (!mounted || _status != newMode) return;
-          _positionController.value = 0;
-          break;
-        }
         await _scaleController.animateTo(
           1.0,
           duration: _kIndicatorScaleDuration,
@@ -493,38 +456,11 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     assert(_status != RefreshIndicatorStatus.snap);
     final Completer<void> completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
-    if (HarmonyStyle.enabled(context)) {
-      setState(() => _status = RefreshIndicatorStatus.refresh);
-      Future<void>.sync(widget.onRefresh).whenComplete(() {
-        if (!completer.isCompleted) completer.complete();
-        if (mounted && _status == RefreshIndicatorStatus.refresh) {
-          _dismiss(RefreshIndicatorStatus.done);
-        }
-      });
-      return;
-    }
-    final holdingPull =
-        HarmonyStyle.enabled(context) &&
-        _status == RefreshIndicatorStatus.drag &&
-        _positionFactor.value > 0;
-    if (holdingPull) {
-      final minimum = (kIndicatorSize + displacement) * _positionFactor.value;
-      final gap = _bodyOverscroll.value > minimum
-          ? _bodyOverscroll.value
-          : minimum;
-      _holdExtent = gap.clamp(0.0, 88.0) / _positionFactor.value;
-    } else {
-      _holdExtent = null;
-    }
-    final snapTarget = holdingPull
-        ? _positionController.value * .9
-        : 1.0 / _kDragSizeFactorLimit;
     setState(() => _status = RefreshIndicatorStatus.snap);
     _positionController
         .animateTo(
-          snapTarget,
+          1.0 / _kDragSizeFactorLimit,
           duration: _kIndicatorSnapDuration,
-          curve: Curves.easeOutCubic,
         )
         .whenComplete(() {
           if (mounted && _status == RefreshIndicatorStatus.snap) {
@@ -533,7 +469,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
               _status = RefreshIndicatorStatus.refresh;
             });
 
-            Future<void>.sync(widget.onRefresh).whenComplete(() {
+            widget.onRefresh().whenComplete(() {
               if (mounted && _status == RefreshIndicatorStatus.refresh) {
                 completer.complete();
                 _dismiss(RefreshIndicatorStatus.done);
@@ -564,9 +500,6 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         _status != RefreshIndicatorStatus.snap) {
       if (_status == null) {
         _start();
-      } else {
-        _scaleController.stop();
-        _scaleController.value = 0;
       }
       _show();
     }
@@ -577,7 +510,14 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    Widget child = Listener(
+    Widget child = NotificationListener<ScrollNotification>(
+      onNotification: _handleScrollNotification,
+      child: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: _handleIndicatorNotification,
+        child: widget.child,
+      ),
+    );
+    child = Listener(
       onPointerDown: (event) => _dragPointer ??= event.pointer,
       onPointerUp: (event) {
         if (_dragPointer != event.pointer) return;
@@ -593,16 +533,11 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       onPointerCancel: (event) {
         if (_dragPointer != event.pointer) return;
         _dragPointer = null;
-        if (_status == RefreshIndicatorStatus.drag)
+        if (_status == RefreshIndicatorStatus.drag) {
           _dismiss(RefreshIndicatorStatus.canceled);
+        }
       },
-      child: NotificationListener<ScrollNotification>(
-        onNotification: _handleScrollNotification,
-        child: NotificationListener<OverscrollIndicatorNotification>(
-          onNotification: _handleIndicatorNotification,
-          child: widget.child,
-        ),
-      ),
+      child: child,
     );
     assert(() {
       if (_status == null) {
@@ -617,76 +552,22 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         _status == RefreshIndicatorStatus.refresh ||
         _status == RefreshIndicatorStatus.done;
 
-    if (HarmonyStyle.enabled(context)) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          ValueListenableBuilder<double>(
-            valueListenable: _bodyOverscroll,
-            child: child,
-            builder: (context, overscroll, child) => Transform.translate(
-              offset: Offset(0, -overscroll),
-              child: child,
-            ),
-          ),
-          if (showIndeterminateIndicator)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: MediaQuery.paddingOf(context).bottom + 116,
-              child: IgnorePointer(
-                child: AnimatedBuilder(
-                  animation: _scaleController,
-                  builder: (context, _) => _scaleFactor.value <= 0
-                      ? const SizedBox.shrink()
-                      : Opacity(
-                          opacity: _scaleFactor.value,
-                          child: const Center(
-                            child: HarmonyLoadingIndicator(size: 32),
-                          ),
-                        ),
-                ),
-              ),
-            ),
-        ],
-      );
-    }
-
     child = RefreshLayout(
       body: child,
-      bodyOverscroll: HarmonyStyle.enabled(context) ? _bodyOverscroll : null,
-      scale: HarmonyStyle.enabled(context)
-          ? const AlwaysStoppedAnimation(1.0)
-          : _scaleFactor,
-      holdExtent: _holdExtent,
+      scale: _scaleFactor,
       position: _positionFactor,
       edgeOffset: widget.edgeOffset,
       indicator: _status == null
           ? null
           : AnimatedBuilder(
-              animation: Listenable.merge([
-                _positionController,
-                _scaleController,
-              ]),
-              builder: (context, child) =>
-                  _positionFactor.value <= 0 || _scaleFactor.value <= 0
-                  ? const SizedBox.shrink()
-                  : HarmonyStyle.enabled(context)
-                  // Keep one native LoadingProgress alive from pull to
-                  // release; changing determinate mode recreates its surface.
-                  ? Opacity(
-                      opacity:
-                          (_positionFactor.value * 2).clamp(0.0, 1.0) *
-                          _scaleFactor.value,
-                      child: const HarmonyLoadingIndicator(),
-                    )
-                  : RefreshProgressIndicator(
-                      value: showIndeterminateIndicator ? null : _value.value,
-                      valueColor: _valueColor,
-                      backgroundColor: widget.backgroundColor,
-                      strokeWidth: widget.strokeWidth,
-                      elevation: widget.elevation,
-                    ),
+              animation: _positionController,
+              builder: (context, child) => RefreshProgressIndicator(
+                value: showIndeterminateIndicator ? null : _value.value,
+                valueColor: _valueColor,
+                backgroundColor: widget.backgroundColor,
+                strokeWidth: widget.strokeWidth,
+                elevation: widget.elevation,
+              ),
             ),
     );
 

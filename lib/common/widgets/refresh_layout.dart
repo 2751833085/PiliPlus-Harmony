@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
     show displacement, kIndicatorSize;
 import 'package:PiliPlus/common/widgets/slotted_layout_helper.dart';
@@ -16,16 +15,12 @@ class RefreshLayout
     required this.indicator,
     required this.body,
     this.edgeOffset = 0.0,
-    this.bodyOverscroll,
-    this.holdExtent,
   });
 
-  final double? holdExtent;
   final Animation<double> scale;
   final Animation<double> position;
   final Widget? indicator;
   final Widget body;
-  final ValueListenable<double>? bodyOverscroll;
 
   /// 指示器出现位置相对顶边的下移量，对应 RefreshIndicator.edgeOffset。
   /// 上游 RefreshLayout 无此参数；鸿蒙沉浸顶栏下列表顶边在 ArkTS 顶栏
@@ -45,10 +40,8 @@ class RefreshLayout
   RenderRefreshLayout createRenderObject(BuildContext context) {
     return RenderRefreshLayout(
       scale: scale,
-      holdExtent: holdExtent,
       position: position,
       edgeOffset: edgeOffset,
-      bodyOverscroll: bodyOverscroll,
     );
   }
 
@@ -57,88 +50,24 @@ class RefreshLayout
     BuildContext context,
     RenderRefreshLayout renderObject,
   ) {
-    renderObject
-      ..scale = scale
-      ..position = position
-      ..holdExtent = holdExtent
-      ..edgeOffset = edgeOffset
-      ..bodyOverscroll = bodyOverscroll;
+    renderObject.edgeOffset = edgeOffset;
   }
 }
 
 class RenderRefreshLayout extends RenderBox
     with SlottedContainerRenderObjectMixin<RefreshType, RenderBox> {
   RenderRefreshLayout({
-    required Animation<double> scale,
-    required Animation<double> position,
+    required this.scale,
+    required this.position,
     double edgeOffset = 0.0,
-    double? holdExtent,
-    ValueListenable<double>? bodyOverscroll,
-  }) : _scale = scale,
-       _position = position,
-       _edgeOffset = edgeOffset,
-       _holdExtent = holdExtent {
-    this.bodyOverscroll = bodyOverscroll;
-    _scaleFactor = scale.value;
-    _heightFactor = position.value;
+  }) : _edgeOffset = edgeOffset {
     scale.addListener(_scaleListener);
     position.addListener(_positionListener);
   }
 
-  Animation<double> _scale;
-  Animation<double> get scale => _scale;
-  set scale(Animation<double> value) {
-    if (_scale == value) return;
-    _scale.removeListener(_scaleListener);
-    _scale = value..addListener(_scaleListener);
-    _scaleListener();
-  }
+  final Animation<double> scale;
 
-  Animation<double> _position;
-  Animation<double> get position => _position;
-  set position(Animation<double> value) {
-    if (_position == value) return;
-    _position.removeListener(_positionListener);
-    _position = value..addListener(_positionListener);
-    _positionListener();
-  }
-
-  double? _holdExtent;
-  set holdExtent(double? value) {
-    if (_holdExtent == value) return;
-    _holdExtent = value;
-    _bodyPositionChanged();
-  }
-
-  double get _target =>
-      (_holdExtent ?? (kIndicatorSize + displacement)) *
-      heightFactor *
-      scaleFactor;
-
-  ValueListenable<double>? _bodyOverscroll;
-  set bodyOverscroll(ValueListenable<double>? value) {
-    if (_bodyOverscroll == value) return;
-    _bodyOverscroll?.removeListener(_bodyPositionChanged);
-    _bodyOverscroll = value;
-    value?.addListener(_bodyPositionChanged);
-    _bodyPositionChanged();
-  }
-
-  void _bodyPositionChanged() {
-    if (!hasSize) return;
-    final target = _target;
-    // A bouncing viewport already shifts its contents. Only supply the missing
-    // displacement, then hold it after the viewport springs back to zero.
-    final shift = _bodyOverscroll == null
-        ? 0.0
-        : ((target > _bodyOverscroll!.value ? target : _bodyOverscroll!.value)
-                  .clamp(0.0, 88.0) -
-              _bodyOverscroll!.value);
-    setOffset(body, Offset(0, shift));
-    _layoutIndicator();
-    markNeedsPaint();
-    markNeedsSemanticsUpdate();
-  }
+  final Animation<double> position;
 
   double _edgeOffset;
   double get edgeOffset => _edgeOffset;
@@ -148,7 +77,6 @@ class RenderRefreshLayout extends RenderBox
     }
     _edgeOffset = value;
     _layoutIndicator();
-    _bodyPositionChanged();
     markNeedsPaint();
   }
 
@@ -160,7 +88,6 @@ class RenderRefreshLayout extends RenderBox
     }
     _heightFactor = value;
     _layoutIndicator();
-    _bodyPositionChanged();
     markNeedsPaint();
   }
 
@@ -172,7 +99,6 @@ class RenderRefreshLayout extends RenderBox
     }
     _scaleFactor = value;
     _layoutIndicator();
-    _bodyPositionChanged();
     markNeedsPaint();
   }
 
@@ -186,7 +112,6 @@ class RenderRefreshLayout extends RenderBox
 
   @override
   void dispose() {
-    _bodyOverscroll?.removeListener(_bodyPositionChanged);
     scale.removeListener(_scaleListener);
     position.removeListener(_positionListener);
     super.dispose();
@@ -202,7 +127,6 @@ class RenderRefreshLayout extends RenderBox
 
     final body = this.body..layout(constraints);
     setOffset(body, .zero);
-    _bodyPositionChanged();
 
     _layoutIndicator();
   }
@@ -211,10 +135,6 @@ class RenderRefreshLayout extends RenderBox
     final indicator = this.indicator;
     if (indicator == null) return;
     final scaleSize = kIndicatorSize * scaleFactor;
-    final hold = _target;
-    final gap = _bodyOverscroll == null
-        ? 0.0
-        : (_bodyOverscroll!.value > hold ? _bodyOverscroll!.value : hold);
     indicator.layout(
       BoxConstraints.tightFor(width: scaleSize, height: scaleSize),
     );
@@ -222,12 +142,10 @@ class RenderRefreshLayout extends RenderBox
       indicator,
       Offset(
         (constraints.maxWidth - scaleSize) / 2,
-        _bodyOverscroll != null
-            ? edgeOffset + (gap.clamp(0.0, 88.0) - scaleSize) / 2
-            : edgeOffset +
-                  (kIndicatorSize + displacement) * heightFactor -
-                  kIndicatorSize +
-                  (kIndicatorSize - scaleSize) / 2,
+        edgeOffset +
+            (kIndicatorSize + displacement) * heightFactor -
+            kIndicatorSize +
+            (kIndicatorSize - scaleSize) / 2,
       ),
     );
   }
@@ -260,12 +178,6 @@ class RenderRefreshLayout extends RenderBox
     } else {
       layer = null;
     }
-  }
-
-  @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final offset = getOffset(child);
-    transform.translateByDouble(offset.dx, offset.dy, 0, 1);
   }
 
   @override

@@ -23,7 +23,7 @@ void main() {
       BouncingScrollPhysics(),
     ]) {
       testWidgets(
-        'refresh requires release and shows one bottom loader at $width with $physics',
+        'original refresh requires release and shows the top circular indicator at $width with $physics',
         (tester) async {
           tester.view.devicePixelRatio = 2.875;
           tester.view.physicalSize = Size(width, 2232);
@@ -68,37 +68,34 @@ void main() {
             reason: 'Holding a long pull never starts a request.',
           );
           expect(find.byType(HarmonyLoadingIndicator), findsNothing);
-          expect(tester.getTopLeft(find.text('row 0')).dy, closeTo(top, 1));
+          expect(find.byType(RefreshProgressIndicator), findsOneWidget);
           await gesture.up();
           await tester.pump();
+          await tester.pump(const Duration(milliseconds: 200));
           expect(calls, 1);
-          expect(find.byType(HarmonyLoadingIndicator), findsOneWidget);
+          expect(find.byType(RefreshProgressIndicator), findsOneWidget);
           expect(
-            tester.getCenter(find.byType(HarmonyLoadingIndicator)).dy,
-            greaterThan(500),
+            tester.getCenter(find.byType(RefreshProgressIndicator)).dy,
+            lessThan(120),
           );
           await tester.pump(const Duration(seconds: 1));
           expect(tester.getTopLeft(find.text('row 0')).dy, closeTo(top, 1));
           done.complete();
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
-          final fade = tester.widget<Opacity>(
-            find
-                .ancestor(
-                  of: find.byType(HarmonyLoadingIndicator),
-                  matching: find.byType(Opacity),
-                )
-                .first,
+          expect(
+            tester.getSize(find.byType(RefreshProgressIndicator)).width,
+            inExclusiveRange(0, refresh.kIndicatorSize),
           );
-          expect(fade.opacity, inExclusiveRange(0, 1));
           await tester.pumpAndSettle();
           expect(find.byType(HarmonyLoadingIndicator), findsNothing);
-          expect(tester.getTopLeft(find.text('row 0')).dy, closeTo(top, 1));
+          expect(find.byType(RefreshProgressIndicator), findsNothing);
           done = Completer<void>();
           final manual = key.currentState!.show();
           await tester.pump();
+          await tester.pump(const Duration(milliseconds: 200));
           expect(calls, 2);
-          expect(find.byType(HarmonyLoadingIndicator), findsOneWidget);
+          expect(find.byType(RefreshProgressIndicator), findsOneWidget);
           done.complete();
           await manual;
           await tester.pumpAndSettle();

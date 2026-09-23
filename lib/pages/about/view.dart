@@ -109,7 +109,7 @@ class _AboutPageState extends State<AboutPage> {
           height: 150,
           excludeFromSemantics: true,
           cacheWidth: 150.cacheSize(context),
-          Assets.logo,
+          Assets.logo2,
         ),
       ),
       ListTile(

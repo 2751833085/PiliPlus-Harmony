@@ -207,7 +207,7 @@ void main() {
   );
 
   testWidgets(
-    'bottom refresh keeps content fixed throughout the request',
+    'original programmatic refresh keeps content fixed throughout the request',
     (tester) async {
       final complete = Completer<void>();
       final refreshKey = GlobalKey<refresh.RefreshIndicatorState>();

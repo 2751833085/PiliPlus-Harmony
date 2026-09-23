@@ -20,7 +20,7 @@ class HarmonyAboutHeader extends StatelessWidget {
           onTap: onLogoTap,
           onSecondaryTap: onLogoSecondaryTap,
           child: Image.asset(
-            Assets.logo,
+            Assets.logo2,
             width: 88,
             height: 88,
             excludeFromSemantics: true,

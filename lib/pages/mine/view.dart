@@ -179,13 +179,6 @@ class _MediaPageState extends CommonPageState<MinePage>
                         padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: [
-                          Text(
-                            '我的',
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
                           if (split)
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,10 +287,15 @@ class _MediaPageState extends CommonPageState<MinePage>
     );
   }
 
+  Widget _headerSurface(Widget child) => HarmonyStyle.enabled(context)
+      ? ImmersiveSurface(borderRadius: BorderRadius.circular(24), child: child)
+      : child;
+
   Widget get _buildHeaderActions {
     const iconSize = 22.0;
     const padding = EdgeInsets.all(8);
     const style = ButtonStyle(tapTargetSize: .shrinkWrap);
+    final harmony = HarmonyStyle.enabled(context);
     return PlayerBar(
       children: [
         if (widget.showBackBtn)
@@ -305,76 +303,98 @@ class _MediaPageState extends CommonPageState<MinePage>
             padding: EdgeInsets.only(left: 8),
             child: BackButton(),
           )
+        else if (harmony)
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 8),
+            child: Text(
+              '我的',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                height: 1.2,
+              ),
+            ),
+          )
         else
           const SizedBox.shrink(),
         Row(
           spacing: 5,
           mainAxisSize: .min,
-          children: [
-            if (!_mainController.hasHome) ...[
-              IconButton(
-                iconSize: iconSize,
-                padding: padding,
-                style: style,
-                tooltip: '搜索',
-                onPressed: () => Get.toNamed('/search'),
-                icon: const Icon(Icons.search),
-              ),
-              msgBadge(_mainController),
-            ],
-            if (GStorage.reply != null)
-              IconButton(
-                iconSize: iconSize,
-                padding: padding,
-                style: style,
-                tooltip: '评论记录',
-                onPressed: () => Get.toNamed('/myReply'),
-                icon: const Icon(Icons.message_outlined),
-              ),
-            Obx(
-              () {
-                final anonymity = MineController.anonymity.value;
-                return IconButton(
-                  iconSize: iconSize,
-                  padding: padding,
-                  style: style,
-                  tooltip: "${anonymity ? '退出' : '进入'}无痕模式",
-                  onPressed: MineController.onChangeAnonymity,
-                  icon: anonymity
-                      ? const Icon(MdiIcons.incognito)
-                      : const Icon(MdiIcons.incognitoOff),
-                );
-              },
-            ),
-            IconButton(
-              iconSize: iconSize,
-              padding: padding,
-              style: style,
-              tooltip: '切换账号',
-              onPressed: () => LoginPageController.switchAccountDialog(context),
-              icon: const Icon(Icons.switch_account_outlined),
-            ),
-            Obx(
-              () => IconButton(
-                iconSize: iconSize,
-                padding: padding,
-                style: style,
-                tooltip: '切换至${controller.nextThemeType.label}主题',
-                onPressed: controller.onChangeTheme,
-                icon: controller.themeType.value.icon,
-              ),
-            ),
-            IconButton(
-              iconSize: iconSize,
-              padding: padding,
-              style: style,
-              tooltip: '设置',
-              onPressed: () =>
-                  Get.toNamed('/setting', preventDuplicates: false),
-              icon: const Icon(Icons.settings_outlined),
-            ),
-            const SizedBox(width: 16),
-          ],
+          children:
+              [
+                    if (!_mainController.hasHome) ...[
+                      IconButton(
+                        iconSize: iconSize,
+                        padding: padding,
+                        style: style,
+                        tooltip: '搜索',
+                        onPressed: () => Get.toNamed('/search'),
+                        icon: const Icon(Icons.search),
+                      ),
+                      msgBadge(_mainController),
+                    ],
+                    if (GStorage.reply != null)
+                      IconButton(
+                        iconSize: iconSize,
+                        padding: padding,
+                        style: style,
+                        tooltip: '评论记录',
+                        onPressed: () => Get.toNamed('/myReply'),
+                        icon: const Icon(Icons.message_outlined),
+                      ),
+                    Obx(
+                      () {
+                        final anonymity = MineController.anonymity.value;
+                        return IconButton(
+                          iconSize: iconSize,
+                          padding: padding,
+                          style: style,
+                          tooltip: "${anonymity ? '退出' : '进入'}无痕模式",
+                          onPressed: MineController.onChangeAnonymity,
+                          icon: anonymity
+                              ? const Icon(MdiIcons.incognito)
+                              : const Icon(MdiIcons.incognitoOff),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      iconSize: iconSize,
+                      padding: padding,
+                      style: style,
+                      tooltip: '切换账号',
+                      onPressed: () =>
+                          LoginPageController.switchAccountDialog(context),
+                      icon: const Icon(Icons.switch_account_outlined),
+                    ),
+                    Obx(
+                      () => IconButton(
+                        iconSize: iconSize,
+                        padding: padding,
+                        style: style,
+                        tooltip: '切换至${controller.nextThemeType.label}主题',
+                        onPressed: controller.onChangeTheme,
+                        icon: controller.themeType.value.icon,
+                      ),
+                    ),
+                    IconButton(
+                      iconSize: iconSize,
+                      padding: padding,
+                      style: style,
+                      tooltip: '设置',
+                      onPressed: () =>
+                          Get.toNamed('/setting', preventDuplicates: false),
+                      icon: const Icon(Icons.settings_outlined),
+                    ),
+                    const SizedBox(width: 16),
+                  ]
+                  .map(
+                    (child) => harmony && child is! SizedBox
+                        ? ImmersiveSurface(
+                            borderRadius: BorderRadius.circular(24),
+                            child: child,
+                          )
+                        : child,
+                  )
+                  .toList(),
         ),
       ],
     );
@@ -646,10 +666,12 @@ class _MediaPageState extends CommonPageState<MinePage>
               ),
             ),
           ),
-          trailing: IconButton(
-            tooltip: '刷新',
-            onPressed: controller.onRefresh,
-            icon: const Icon(Icons.refresh, size: 20),
+          trailing: _headerSurface(
+            IconButton(
+              tooltip: '刷新',
+              onPressed: controller.onRefresh,
+              icon: const Icon(Icons.refresh, size: 20),
+            ),
           ),
         ),
         _buildFavBody(theme, secondary, controller.loadingState.value),

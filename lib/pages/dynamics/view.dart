@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamics_type.dart';
@@ -29,28 +30,39 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
   @override
   bool get wantKeepAlive => true;
 
-  Widget _createDynamicBtn(ThemeData theme, {bool isRight = true}) => Center(
-    child: Container(
-      width: 34,
-      height: 34,
-      margin: EdgeInsets.only(left: !isRight ? 16 : 0, right: isRight ? 16 : 0),
-      child: IconButton(
-        tooltip: '发布动态',
-        style: ButtonStyle(
-          padding: const WidgetStatePropertyAll(EdgeInsets.zero),
-          backgroundColor: WidgetStatePropertyAll(
-            theme.colorScheme.secondaryContainer,
-          ),
-        ),
-        onPressed: () => CreateDynPanel.onCreateDyn(context),
-        icon: Icon(
-          Icons.add,
-          size: 18,
-          color: theme.colorScheme.onSecondaryContainer,
-        ),
+  Widget _createDynamicBtn(ThemeData theme, {bool isRight = true}) {
+    final harmony = HarmonyStyle.enabled(context);
+    final button = IconButton(
+      tooltip: '发布动态',
+      style: IconButton.styleFrom(
+        padding: EdgeInsets.zero,
+        backgroundColor: harmony
+            ? Colors.transparent
+            : theme.colorScheme.secondaryContainer,
+        foregroundColor: harmony
+            ? theme.colorScheme.onSurface
+            : theme.colorScheme.onSecondaryContainer,
+        minimumSize: Size.square(harmony ? 40 : 34),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-    ),
-  );
+      onPressed: () => CreateDynPanel.onCreateDyn(context),
+      icon: Icon(Icons.add, size: harmony ? 22 : 18),
+    );
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: !isRight ? 16 : 0,
+          right: isRight ? 16 : 0,
+        ),
+        child: harmony
+            ? ImmersiveSurface(
+                borderRadius: BorderRadius.circular(24),
+                child: button,
+              )
+            : button,
+      ),
+    );
+  }
 
   Widget upPanelPart(ThemeData theme) {
     final isTop = upPanelPosition == .top;
@@ -170,7 +182,7 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
       appBar: AppBar(
         primary: true, // 避让安全区
         leading: leading,
-        leadingWidth: 50,
+        leadingWidth: HarmonyStyle.enabled(context) ? 56 : 50,
         toolbarHeight: 50,
         backgroundColor: Colors.transparent,
         title: SizedBox(
