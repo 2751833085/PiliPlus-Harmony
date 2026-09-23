@@ -1,0 +1,10 @@
+{
+  "version": "3.0.0+6112",
+  "source_commit": "c5169e05909610e114124c90e589e6e0d32a0818",
+  "hap": "PiliPlus-Harmony-3.0.0-6112-settings-preview-signed.hap",
+  "sha256": "47a0be87b5cbfea93abf39a82d3b97c5ecc03330896b7773448fb15f6f31f0bc",
+  "bytes": 33112117,
+  "signed": true,
+  "mode": "release",
+  "tests_passed": 151
+}

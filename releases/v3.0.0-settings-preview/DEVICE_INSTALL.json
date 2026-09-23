@@ -1,0 +1,18 @@
+{
+  "previous_version": "3.0.0",
+  "installed_version": "3.0.0",
+  "installed_version_code": 6112,
+  "uid_preserved": true,
+  "first_install_time_preserved": true,
+  "overwrite_install": "passed",
+  "uninstalled_or_cleared_data": false,
+  "checks": {
+    "native_resolution": "1008x2232",
+    "single_bottom_loading_indicator": true,
+    "initial_skeleton_cards_absent": true,
+    "feed_visible_after_loading": true,
+    "pink_accent_visible": true,
+    "solid_color_page_verified_in_6111": true,
+    "physical_double_triple_fold_tested": false
+  }
+}
