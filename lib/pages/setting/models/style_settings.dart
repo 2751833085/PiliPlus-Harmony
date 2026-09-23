@@ -329,7 +329,7 @@ List<SettingsModel> get _appearanceSettings => [
         ? '当前：鸿蒙默认粉色；可更换按钮与强调色'
         : '当前：${Pref.dynamicColor ? '动态取色' : '指定颜色'}',
     getTrailing: (theme) {
-      if (Pref.harmonyNativeColors) {
+      if (Pref.harmonyUI || Pref.harmonyNativeColors) {
         return Icon(Icons.circle, size: 20, color: theme.colorScheme.primary);
       }
       if (Pref.dynamicColor) {

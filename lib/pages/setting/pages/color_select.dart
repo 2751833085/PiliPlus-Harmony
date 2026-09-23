@@ -1,4 +1,5 @@
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_accent_choices.dart';
 import 'package:PiliPlus/common/widgets/animated_height.dart';
 import 'dart:io' show Platform;
 
@@ -85,112 +86,156 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
     ).copyWith(top: 0, bottom: 0);
     return SimpleScaffold(
       appBar: AppBar(title: const Text('颜色选择')),
-      body: ListView(
-        children: [
-          if (Pref.harmonyUI)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-              child: Text(
-                '颜色仅改变按钮、选中状态和强调色，保留鸿蒙界面风格。',
-                style: theme.textTheme.bodyMedium,
-              ),
-            ),
-          ListTile(
-            onTap: () async {
-              final result = await showDialog<ThemeType>(
-                context: context,
-                builder: (context) => SelectDialog<ThemeType>(
-                  title: '主题模式',
-                  value: ctr.themeType.value,
-                  values: ThemeType.values.map((e) => (e, e.label)).toList(),
-                ),
-              );
-              if (result != null) {
-                try {
-                  Get.find<MineController>().themeType.value = result;
-                } catch (_) {}
-                ctr.themeType.value = result;
-                GStorage.setting.put(SettingBoxKey.themeMode, result.index);
-                Get.changeThemeMode(ThemeUtils.themeMode = result.toThemeMode);
-                ThemeUtils.syncColorModeToNative();
-              }
-            },
-            leading: const Icon(Icons.flashlight_on_outlined),
-            title: Text('主题模式', style: titleStyle),
-            subtitle: Obx(
-              () => Text(
-                '当前模式：${ctr.themeType.value.label}',
-                style: subTitleStyle,
-              ),
-            ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: Pref.harmonyUI ? 640 : double.infinity,
           ),
-          Obx(
-            () => PopupListTile<FlexSchemeVariant>(
-              enabled: !ctr.dynamicColor.value,
-              leading: const Icon(Icons.palette_outlined),
-              title: const Text('调色板风格'),
-              value: () =>
-                  (_dynamicSchemeVariant, _dynamicSchemeVariant.variantName),
-              itemBuilder: (_) => FlexSchemeVariant.values
-                  .map(
-                    (e) => PopupMenuItem(value: e, child: Text(e.variantName)),
-                  )
-                  .toList(),
-              onSelected: (value, setState) {
-                _dynamicSchemeVariant = value;
-                GStorage.setting
-                    .put(SettingBoxKey.schemeVariant, value.index)
-                    .then((_) => _applyColors());
-              },
-            ),
-          ),
-          if (!(Platform.isIOS || OS.isHarmony))
-            Obx(
-              () => ListTile(
-                title: const Text('动态取色'),
-                leading: ExcludeFocus(
-                  child: Checkbox(
-                    value: ctr.dynamicColor.value,
-                    onChanged: _onChanged,
-                    materialTapTargetSize: .shrinkWrap,
-                    visualDensity: const .new(horizontal: -4, vertical: -4),
+          child: ListView(
+            padding: Pref.harmonyUI
+                ? const EdgeInsets.fromLTRB(16, 12, 16, 32)
+                : null,
+            children: [
+              if (Pref.harmonyUI)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                  child: Text(
+                    '颜色仅改变按钮、选中状态和强调色，保留鸿蒙界面风格。',
+                    style: theme.textTheme.bodyMedium,
                   ),
                 ),
-                onTap: _onChanged,
-              ),
-            ),
-          Padding(
-            padding: padding + const .all(12),
-            child: Obx(_buildColorPanel),
-          ),
-          Padding(
-            padding: padding,
-            child: ExcludeFocus(
-              child: IgnorePointer(
-                child: Container(
-                  height: size.height / 2,
-                  width: size.width,
-                  color: theme.colorScheme.surface,
-                  child: const HomePage(),
+              ListTile(
+                onTap: () async {
+                  final result = await showDialog<ThemeType>(
+                    context: context,
+                    builder: (context) => SelectDialog<ThemeType>(
+                      title: '主题模式',
+                      value: ctr.themeType.value,
+                      values: ThemeType.values
+                          .map((e) => (e, e.label))
+                          .toList(),
+                    ),
+                  );
+                  if (result != null) {
+                    try {
+                      Get.find<MineController>().themeType.value = result;
+                    } catch (_) {}
+                    ctr.themeType.value = result;
+                    GStorage.setting.put(SettingBoxKey.themeMode, result.index);
+                    Get.changeThemeMode(
+                      ThemeUtils.themeMode = result.toThemeMode,
+                    );
+                    ThemeUtils.syncColorModeToNative();
+                  }
+                },
+                leading: const Icon(Icons.flashlight_on_outlined),
+                title: Text('主题模式', style: titleStyle),
+                subtitle: Obx(
+                  () => Text(
+                    '当前模式：${ctr.themeType.value.label}',
+                    style: subTitleStyle,
+                  ),
                 ),
               ),
-            ),
-          ),
-          ExcludeFocus(
-            child: IgnorePointer(
-              child: NavigationBar(
-                destinations: NavigationBarType.values
-                    .map(
-                      (item) => NavigationDestination(
-                        icon: item.icon,
-                        label: item.label,
+              if (!Pref.harmonyUI)
+                Obx(
+                  () => PopupListTile<FlexSchemeVariant>(
+                    enabled: !ctr.dynamicColor.value,
+                    leading: const Icon(Icons.palette_outlined),
+                    title: const Text('调色板风格'),
+                    value: () => (
+                      _dynamicSchemeVariant,
+                      _dynamicSchemeVariant.variantName,
+                    ),
+                    itemBuilder: (_) => FlexSchemeVariant.values
+                        .map(
+                          (e) => PopupMenuItem(
+                            value: e,
+                            child: Text(e.variantName),
+                          ),
+                        )
+                        .toList(),
+                    onSelected: (value, setState) {
+                      _dynamicSchemeVariant = value;
+                      GStorage.setting
+                          .put(SettingBoxKey.schemeVariant, value.index)
+                          .then((_) => _applyColors());
+                    },
+                  ),
+                ),
+              if (!(Platform.isIOS || OS.isHarmony))
+                Obx(
+                  () => ListTile(
+                    title: const Text('动态取色'),
+                    leading: ExcludeFocus(
+                      child: Checkbox(
+                        value: ctr.dynamicColor.value,
+                        onChanged: _onChanged,
+                        materialTapTargetSize: .shrinkWrap,
+                        visualDensity: const .new(horizontal: -4, vertical: -4),
                       ),
-                    )
-                    .toList(),
+                    ),
+                    onTap: _onChanged,
+                  ),
+                ),
+              Padding(
+                padding:
+                    padding +
+                    (Pref.harmonyUI
+                        ? EdgeInsets.zero
+                        : const EdgeInsets.all(12)),
+                child: Pref.harmonyUI
+                    ? Obx(
+                        () => HarmonyAccentChoices(
+                          selected:
+                              ctr.currentColor.value == 1 ||
+                                  Pref.harmonyNativeColors
+                              ? 1
+                              : ctr.currentColor.value,
+                          onSelected: (index) async {
+                            ctr.currentColor.value = index;
+                            await GStorage.setting.put(
+                              SettingBoxKey.customColor,
+                              index,
+                            );
+                            await _applyColors();
+                          },
+                        ),
+                      )
+                    : Obx(_buildColorPanel),
               ),
-            ),
+              if (!Pref.harmonyUI)
+                Padding(
+                  padding: padding,
+                  child: ExcludeFocus(
+                    child: IgnorePointer(
+                      child: Container(
+                        height: size.height / 2,
+                        width: size.width,
+                        color: theme.colorScheme.surface,
+                        child: const HomePage(),
+                      ),
+                    ),
+                  ),
+                ),
+              if (!Pref.harmonyUI)
+                ExcludeFocus(
+                  child: IgnorePointer(
+                    child: NavigationBar(
+                      destinations: NavigationBarType.values
+                          .map(
+                            (item) => NavigationDestination(
+                              icon: item.icon,
+                              label: item.label,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
