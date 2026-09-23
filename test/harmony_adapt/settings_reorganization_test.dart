@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/rcmd/controller.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/setting/common_setting.dart';
 import 'package:PiliPlus/models/common/setting_type.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
@@ -38,6 +40,19 @@ void main() {
     await GStorage.setting.put(SettingBoxKey.harmonyNavigation, 0);
   });
   tearDown(() => debugDefaultTargetPlatformOverride = null);
+
+  test(
+    'initial recommendation failures show retry while refresh keeps existing data',
+    () {
+      final controller = RcmdController()..enableSaveLastData = true;
+      expect(controller.handleError('offline'), isFalse);
+      controller.loadingState.value = Success([Object()]);
+      expect(controller.handleError('offline'), isTrue);
+      controller.loadingState.value = Success([]);
+      expect(controller.handleError('offline'), isFalse);
+      controller.scrollController.dispose();
+    },
+  );
 
   test(
     'Harmony defaults on; Material You changes only on next startup',
