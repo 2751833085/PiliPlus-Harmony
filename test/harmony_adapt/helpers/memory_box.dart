@@ -10,5 +10,10 @@ class MemoryBox<T> implements Box<T> {
   }
 
   @override
+  Future<void> delete(dynamic key) async {
+    _values.remove(key);
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

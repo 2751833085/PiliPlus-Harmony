@@ -9,6 +9,8 @@ abstract final class SettingBoxKey {
   static const String shortPreload = 'shortPreload';
   static const String shortVideoMode = 'shortVideoMode';
   static const String harmonyFoldOrientation = 'harmonyFoldOrientation';
+  static const String materialYouUI = 'materialYouUI';
+  // Legacy key retained for importing older settings.
   static const String harmonyUI = 'harmonyUI',
       harmonyKeepDock = 'harmonyKeepDock',
       harmonyNavigation = 'harmonyNavigation',

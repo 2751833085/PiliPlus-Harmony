@@ -22,12 +22,13 @@ void refreshHarmonySettings(bool _) {
 
 List<SettingsModel> get experimentalSettings => [
   SwitchModel(
-    title: '鸿蒙界面风格',
-    section: '鸿蒙界面风格',
-    subtitle: '立即切换“我的”、设置、导航、开关、弹层与已有加载动画；关闭后恢复原界面与配色',
+    title: 'Material You 界面风格',
+    section: '界面风格',
+    subtitle: '默认关闭，使用鸿蒙界面风格；开启后恢复原版 Material You 界面。开关此选项均需重启应用后生效。',
     leading: const Icon(Icons.auto_awesome_outlined),
-    setKey: SettingBoxKey.harmonyUI,
-    onChanged: refreshHarmonySettings,
+    setKey: SettingBoxKey.materialYouUI,
+    defaultVal: false,
+    needReboot: true,
   ),
   if (Pref.harmonyUI) ...[
     SwitchModel(
@@ -138,7 +139,8 @@ List<SettingsModel> get experimentalSettings => [
 List<SettingsModel> get harmonyNavigationSettings => [
   PopupModel(
     section: '导航与首页',
-    disabledReason: () => Pref.harmonyUI ? null : '请先在其他设置中开启鸿蒙界面风格。',
+    disabledReason: () =>
+        Pref.harmonyUI ? null : '请在其他设置中关闭 Material You 界面风格，并重启应用。',
     title: '鸿蒙底栏与侧栏',
     leading: const Icon(Icons.space_dashboard_outlined),
     value: () => Pref.harmonyNavigation,
@@ -156,7 +158,8 @@ List<SettingsModel> get harmonyNavigationSettings => [
       Pref.harmonyNavigation == HarmonyNavigation.floatingDock)
     SwitchModel(
       section: '导航与首页',
-      disabledReason: () => Pref.harmonyUI ? null : '请先在其他设置中开启鸿蒙界面风格。',
+      disabledReason: () =>
+          Pref.harmonyUI ? null : '请在其他设置中关闭 Material You 界面风格，并重启应用。',
       title: '展开时也采用悬浮 Dock',
       subtitle: '开启后双折、三折展开保留底部悬浮 Dock；关闭后在宽屏使用鸿蒙侧栏',
       leading: const Icon(Icons.tablet_mac_outlined),

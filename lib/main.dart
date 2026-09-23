@@ -118,6 +118,7 @@ void main() async {
     if (kDebugMode) debugPrint('GStorage init error: $e');
     exit(0);
   }
+  Pref.captureAppearanceAtStartup();
   ScaledWidgetsFlutterBinding.instance.scaleFactor = Pref.uiScale;
   await Future.wait([
     _initDownPath(),

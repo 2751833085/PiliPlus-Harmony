@@ -74,7 +74,7 @@ class _SettingPageState extends State<SettingPage> {
     ),
     _SettingsModel(
       type: SettingType.extraSetting,
-      subtitle: '鸿蒙界面风格、沉浸光感、折叠屏、播放器体验与其他功能',
+      subtitle: '界面风格、沉浸光感、折叠屏、播放器体验与其他功能',
       icon: Icon(Icons.extension_outlined),
     ),
     _SettingsModel(

@@ -21,7 +21,7 @@ abstract final class HarmonyAppearance {
   static void changed() => revision.value++;
 
   static String? navigationUnavailable() => Pref.harmonyUI
-      ? '因为开启了鸿蒙界面风格，此选项已由鸿蒙导航接管，无法选择。请前往“外观设置 → 鸿蒙底栏与侧栏”调整导航。关闭鸿蒙界面风格后将恢复原设置。'
+      ? '因为开启了鸿蒙界面风格，此选项已由鸿蒙导航接管，无法选择。请前往“外观设置 → 鸿蒙底栏与侧栏”调整导航。开启 Material You 界面风格并重启后将恢复原设置。'
       : null;
 
   /// A chosen accent replaces the pink preset, never the Harmony UI style.

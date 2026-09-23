@@ -31,12 +31,34 @@ void main() {
   });
   setUp(() async {
     debugDefaultTargetPlatformOverride = TargetPlatform.ohos;
-    await GStorage.setting.put(SettingBoxKey.harmonyUI, false);
+    await GStorage.setting.put(SettingBoxKey.materialYouUI, true);
+    Pref.captureAppearanceAtStartup();
     await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, false);
     await GStorage.setting.put(SettingBoxKey.isPureBlackTheme, false);
     await GStorage.setting.put(SettingBoxKey.harmonyNavigation, 0);
   });
   tearDown(() => debugDefaultTargetPlatformOverride = null);
+
+  test(
+    'Harmony defaults on; Material You changes only on next startup',
+    () async {
+      // Older disabled Harmony values must not reverse the new default.
+      await GStorage.setting.delete(SettingBoxKey.materialYouUI);
+      await GStorage.setting.put(SettingBoxKey.harmonyUI, false);
+      expect(Pref.materialYouUI, isFalse);
+      Pref.captureAppearanceAtStartup();
+      expect(Pref.harmonyUI, isTrue);
+      await GStorage.setting.put(SettingBoxKey.materialYouUI, true);
+      expect(Pref.materialYouUI, isTrue);
+      expect(Pref.harmonyUI, isTrue);
+      Pref.captureAppearanceAtStartup();
+      expect(Pref.harmonyUI, isFalse);
+      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
+      expect(Pref.harmonyUI, isFalse);
+      Pref.captureAppearanceAtStartup();
+      expect(Pref.harmonyUI, isTrue);
+    },
+  );
 
   test(
     'old orientation and transition values survive but no longer override Harmony policy',
@@ -88,9 +110,10 @@ void main() {
   test(
     'Harmony sections live in Other with conditional rows and no duplicated navigation',
     () async {
-      expect(extraSettings.map((e) => e.title), contains('鸿蒙界面风格'));
+      expect(extraSettings.map((e) => e.title), contains('Material You 界面风格'));
       expect(extraSettings.map((e) => e.title), isNot(contains('沉浸光感')));
-      await GStorage.setting.put(SettingBoxKey.harmonyUI, true);
+      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
+      Pref.captureAppearanceAtStartup();
       expect(
         extraSettings.map((e) => e.title),
         containsAll(['沉浸光感', '采用鸿蒙原生配色', '智感握姿', '全屏跟随折叠形态']),
@@ -114,7 +137,8 @@ void main() {
   test(
     'custom accent stays available and preserves Harmony surfaces',
     () async {
-      await GStorage.setting.put(SettingBoxKey.harmonyUI, true);
+      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
+      Pref.captureAppearanceAtStartup();
       await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, true);
       final entry = styleSettings.singleWhere((e) => e.title == '颜色选择');
       expect(entry.disabledReason, isNull);
@@ -139,7 +163,8 @@ void main() {
   );
 
   test('pure black remains effective with Harmony native colors', () async {
-    await GStorage.setting.put(SettingBoxKey.harmonyUI, true);
+    await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
+    Pref.captureAppearanceAtStartup();
     await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, true);
     await GStorage.setting.put(SettingBoxKey.isPureBlackTheme, true);
     final theme = ThemeUtils.getThemeData(
@@ -162,7 +187,8 @@ void main() {
     (tester) async {
       debugDefaultTargetPlatformOverride = null;
       Get.testMode = true;
-      await GStorage.setting.put(SettingBoxKey.harmonyUI, true);
+      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
+      Pref.captureAppearanceAtStartup();
       tester.view.devicePixelRatio = 2.875;
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetPhysicalSize);

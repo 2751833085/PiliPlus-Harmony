@@ -815,9 +815,19 @@ abstract final class Pref {
 
   static bool get harmonyFoldOrientation =>
       _setting.get(SettingBoxKey.harmonyFoldOrientation, defaultValue: true);
+  static bool get materialYouUI =>
+      _setting.get(SettingBoxKey.materialYouUI, defaultValue: false);
+
+  static bool? _materialYouAtStartup;
+
+  /// Called after storage initialization, before themes/controllers are built.
+  /// A settings toggle only changes the persisted value for the next launch.
+  static void captureAppearanceAtStartup() {
+    _materialYouAtStartup = materialYouUI;
+  }
+
   static bool get harmonyUI =>
-      OS.isHarmony &&
-      _setting.get(SettingBoxKey.harmonyUI, defaultValue: false);
+      OS.isHarmony && !(_materialYouAtStartup ?? materialYouUI);
 
   static HarmonyNavigation get harmonyNavigation =>
       HarmonyNavigation.values[(_setting.get(
