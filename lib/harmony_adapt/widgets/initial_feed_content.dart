@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 
-/// First-load handoff: one bottom indicator leaves before the feed fades in.
+/// First-load handoff: one centered indicator leaves before the feed fades in.
 /// Existing data refreshes stay in the scroll view and retain their position.
 class InitialFeedContent extends StatefulWidget {
   const InitialFeedContent({
@@ -70,12 +70,9 @@ class _InitialFeedContentState extends State<InitialFeedContent>
             if (progress <= .35)
               Positioned.fill(
                 child: IgnorePointer(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.paddingOf(context).bottom + 116,
-                      ),
+                  child: SafeArea(
+                    child: Align(
+                      alignment: const Alignment(0, -0.1),
                       child: Opacity(
                         opacity: (1 - progress / .35).clamp(0.0, 1.0),
                         child: const HarmonyLoadingIndicator(size: 32),

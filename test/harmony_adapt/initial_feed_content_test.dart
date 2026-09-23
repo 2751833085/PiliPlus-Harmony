@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-    'one bottom loader leaves before content, including retry and reduced motion',
+    'one near-center loader leaves before content, including retry and reduced motion',
     (tester) async {
       var loading = true;
       var reduceMotion = false;
@@ -40,7 +40,7 @@ void main() {
       expect(find.text('Feed'), findsNothing);
       expect(
         tester.getCenter(find.byType(HarmonyLoadingIndicator)).dy,
-        greaterThan(400),
+        inInclusiveRange(260, 300),
       );
       update(() => loading = false);
       await tester.pump();
