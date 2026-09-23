@@ -19,7 +19,8 @@ mixin GridMixin {
 }
 
 abstract final class Grid {
-  static final double smallCardWidth = Pref.smallCardWidth;
+  static double get smallCardWidth =>
+      Pref.useCardWidthLimit ? Pref.smallCardWidth : 240;
 
   static SliverGridDelegateWithMaxCrossAxisExtent videoCardHDelegate({
     double mainAxisExtent = 110,
@@ -39,11 +40,13 @@ class SliverGridDelegateWithExtentAndRatio extends SliverGridDelegate {
   /// The [childAspectRatio] argument must be greater than zero.
   SliverGridDelegateWithExtentAndRatio({
     required this.maxCrossAxisExtent,
+    this.columns,
     this.mainAxisSpacing = 0.0,
     this.crossAxisSpacing = 0.0,
     this.childAspectRatio = 1.0,
     this.mainAxisExtent = 0.0,
-  }) : assert(maxCrossAxisExtent > 0),
+  }) : assert(columns == null || columns > 0),
+       assert(maxCrossAxisExtent > 0),
        assert(mainAxisSpacing >= 0),
        assert(crossAxisSpacing >= 0),
        assert(childAspectRatio > 0);
@@ -60,6 +63,7 @@ class SliverGridDelegateWithExtentAndRatio extends SliverGridDelegate {
   /// [maxCrossAxisExtent] is 150.0, this delegate will create a grid with 4
   /// columns that are 125.0 pixels wide.
   final double maxCrossAxisExtent;
+  final int? columns;
 
   /// The number of logical pixels between each child along the main axis.
   final double mainAxisSpacing;
@@ -101,7 +105,7 @@ class SliverGridDelegateWithExtentAndRatio extends SliverGridDelegate {
             .ceil();
     // Ensure a minimum count of 1, can be zero and result in an infinite extent
     // below when the window size is 0.
-    crossAxisCount = max(1, crossAxisCount);
+    crossAxisCount = columns ?? max(1, crossAxisCount);
     final double usableCrossAxisExtent = max(
       0.0,
       constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1),
@@ -122,6 +126,7 @@ class SliverGridDelegateWithExtentAndRatio extends SliverGridDelegate {
   @override
   bool shouldRelayout(SliverGridDelegateWithExtentAndRatio oldDelegate) {
     final flag =
+        oldDelegate.columns != columns ||
         oldDelegate.maxCrossAxisExtent != maxCrossAxisExtent ||
         oldDelegate.mainAxisSpacing != mainAxisSpacing ||
         oldDelegate.crossAxisSpacing != crossAxisSpacing ||

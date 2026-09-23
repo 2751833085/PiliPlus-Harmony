@@ -172,7 +172,6 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                         _warmWindow();
                       },
                       enabled:
-                          !compact &&
                           !widget.video.plPlayerController.controlsLock.value,
                       onError: (message) => SmartDialog.showToast(message),
                       builder: (context, index, active) {
@@ -291,7 +290,6 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
   }
 
   Widget _currentPage(BoxConstraints pane, {bool compact = false}) {
-    if (compact) return widget.playerBuilder(pane.maxWidth, pane.maxHeight);
     final player = widget.video.plPlayerController;
     if (widget.fullscreen)
       return Stack(
@@ -339,7 +337,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
             () => ShortVideoChrome(
               visible:
                   !player.isSeeking.value &&
-                  widget.video.shortChromeVisible.value,
+                  widget.video.shortChromeVisible.value &&
+                  !compact,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -725,15 +724,16 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
           bottom: bottomHeight,
           child: Obx(() {
             if (player.isSeeking.value ||
+                compact ||
                 !widget.video.shortChromeVisible.value ||
                 !_pausedPresentation) {
               return const SizedBox.shrink();
             }
-            final compact = pane.maxHeight - bottomHeight < 360;
+            final smallPlayer = pane.maxHeight - bottomHeight < 360;
             return Align(
-              alignment: Alignment(0, compact ? -.4 : 0),
+              alignment: Alignment(0, smallPlayer ? -.4 : 0),
               child: ShortVideoPausedControls(
-                compact: compact,
+                compact: smallPlayer,
                 time:
                     '${DurationUtils.formatDuration(player.progress)} / ${DurationUtils.formatDuration(player.duration.value)}',
                 onResume: () => player.play(),
@@ -756,7 +756,8 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                 Obx(
                   () => ShortVideoMinimalControls(
                     playing: player.playerStatus.isPlaying,
-                    showPlayback: !widget.video.shortChromeVisible.value,
+                    showPlayback:
+                        compact || !widget.video.shortChromeVisible.value,
                     seeking: player.isSeeking.value,
                     time:
                         '${DurationUtils.formatDuration(player.progress)} / ${DurationUtils.formatDuration(player.duration.value)}',

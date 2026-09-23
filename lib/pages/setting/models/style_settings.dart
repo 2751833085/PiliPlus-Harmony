@@ -1,4 +1,5 @@
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
+import 'package:PiliPlus/harmony_adapt/feed_columns.dart';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -136,10 +137,32 @@ List<SettingsModel> get styleSettings => [
     defaultVal: false,
     needReboot: true,
   ),
+  for (var profile = 0; profile < FeedColumns.labels.length; profile++)
+    NormalModel(
+      leading: const Icon(Icons.grid_view_outlined),
+      title: '首页栏数 · ${FeedColumns.labels[profile]}',
+      section: '首页布局',
+      disabledReason: () =>
+          Pref.useCardWidthLimit ? '已启用高级 DP 宽度限制，关闭后可按栏数设置。' : null,
+      getSubtitle: () => Pref.feedColumns[profile] == 0
+          ? '默认（${FeedColumns.defaults[profile]} 栏，随可用窗口适配）'
+          : '${Pref.feedColumns[profile]} 栏（窄窗口自动减少）',
+      onTap: (context, update) => _showFeedColumns(context, update, profile),
+    ),
+  SwitchModel(
+    onChanged: (_) => HarmonyAppearance.changed(),
+    title: '高级：使用 DP 宽度限制',
+    section: '首页布局',
+    subtitle: '默认关闭；开启后取代首页栏数设置。保留以前的自定义宽度。',
+    setKey: SettingBoxKey.useCardWidthLimit,
+    defaultVal: false,
+  ),
   NormalModel(
+    disabledReason: () =>
+        Pref.useCardWidthLimit ? null : '请先开启“高级：使用 DP 宽度限制”。',
     leading: const Icon(Icons.calendar_view_week_outlined),
     title: '列表宽度（dp）限制',
-    section: '界面与布局',
+    section: '首页布局',
     getSubtitle: () =>
         '当前: 主页${Pref.recommendCardWidth.toInt()}dp 其他${Pref.smallCardWidth.toInt()}dp，屏幕宽度:${DoubleExt(MediaQuery.widthOf(Get.context!)).toPrecision(2)}dp。宽度越小列数越多。',
     onTap: _showCardWidthDialog,
@@ -704,6 +727,28 @@ Future<void> _showTransitionDialog(
     await GStorage.setting.put(SettingBoxKey.pageTransition, res.index);
     setState();
   }
+}
+
+Future<void> _showFeedColumns(
+  BuildContext context,
+  VoidCallback update,
+  int profile,
+) async {
+  final res = await showDialog<int>(
+    context: context,
+    builder: (context) => SelectDialog<int>(
+      title: '首页栏数 · ${FeedColumns.labels[profile]}',
+      value: Pref.feedColumns[profile],
+      values: [
+        (0, '默认（自动适配）'),
+        for (var n = 1; n <= (profile == 0 ? 2 : 6); n++) (n, '$n 栏'),
+      ],
+    ),
+  );
+  if (res == null) return;
+  final values = List<int>.of(Pref.feedColumns)..[profile] = res;
+  await GStorage.setting.put(SettingBoxKey.feedColumns, values);
+  update();
 }
 
 Future<void> _showCardWidthDialog(

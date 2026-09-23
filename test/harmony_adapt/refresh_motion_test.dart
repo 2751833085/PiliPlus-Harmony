@@ -100,7 +100,7 @@ void main() {
         expect(indicator.dx, closeTo(width / 2.875 / 2, 1));
         expect(
           indicator.dy,
-          closeTo(24 + (refresh.kIndicatorSize + refresh.displacement) / 2, 1),
+          closeTo(24 + 26, 1),
         );
         final held = tester.getTopLeft(find.text('row 0')).dy;
         expect(held, greaterThan(0));
@@ -108,6 +108,22 @@ void main() {
         expect(tester.getTopLeft(find.text('row 0')).dy, held);
         done.complete();
         await tester.pump();
+        await tester.pump(const Duration(milliseconds: 70));
+        expect(
+          tester.getTopLeft(find.text('row 0')).dy,
+          closeTo(held, 1),
+          reason: 'Content stays held while the planet fades out.',
+        );
+        final fade = tester.widget<Opacity>(
+          find
+              .ancestor(
+                of: find.byType(HarmonyLoadingIndicator),
+                matching: find.byType(Opacity),
+              )
+              .first,
+        );
+        expect(fade.opacity, inExclusiveRange(0, 1));
+        await tester.pump(const Duration(milliseconds: 100));
         await tester.pump(const Duration(milliseconds: 250));
         await tester.pump();
         expect(find.byType(HarmonyLoadingIndicator), findsNothing);

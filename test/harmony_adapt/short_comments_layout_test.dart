@@ -69,7 +69,7 @@ void main() {
         final video = tester.getRect(find.byType(_Video));
         final comments = tester.getRect(find.byKey(const ValueKey('comments')));
         expect(video.overlaps(comments), isFalse);
-        if (size.width >= 720) {
+        if (size.width >= 600 && size.width > size.height) {
           expect(video.right, comments.left);
         } else {
           expect(video.bottom, comments.top);

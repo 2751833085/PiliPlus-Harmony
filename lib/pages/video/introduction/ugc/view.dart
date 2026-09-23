@@ -432,28 +432,32 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
     return Obx(
       () {
         int attr = introController.followStatus.value.attribute ?? 0;
-        return TextButton(
-          onPressed: () => introController.actionRelationMod(context),
-          style: TextButton.styleFrom(
-            tapTargetSize: .shrinkWrap,
-            visualDensity: const VisualDensity(vertical: -2.8),
-            foregroundColor: attr != 0
-                ? colorScheme.outline
-                : colorScheme.onSecondaryContainer,
-            backgroundColor: attr != 0
-                ? colorScheme.onInverseSurface
-                : colorScheme.secondaryContainer,
-          ),
-          child: Text(
-            switch (attr) {
-              1 => '悄悄关注',
-              2 => '已关注',
-              4 || 6 => '已互关',
-              128 => '已拉黑',
-              -10 => '特别关注',
-              _ => ' 关注 ',
-            },
-            style: const TextStyle(fontSize: 13),
+        return ImmersiveSurface(
+          color: attr != 0
+              ? colorScheme.onInverseSurface
+              : colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(100),
+          child: TextButton(
+            onPressed: () => introController.actionRelationMod(context),
+            style: TextButton.styleFrom(
+              tapTargetSize: .shrinkWrap,
+              visualDensity: const VisualDensity(vertical: -2.8),
+              foregroundColor: attr != 0
+                  ? colorScheme.outline
+                  : colorScheme.onSecondaryContainer,
+              backgroundColor: Colors.transparent,
+            ),
+            child: Text(
+              switch (attr) {
+                1 => '悄悄关注',
+                2 => '已关注',
+                4 || 6 => '已互关',
+                128 => '已拉黑',
+                -10 => '特别关注',
+                _ => ' 关注 ',
+              },
+              style: const TextStyle(fontSize: 13),
+            ),
           ),
         );
       },

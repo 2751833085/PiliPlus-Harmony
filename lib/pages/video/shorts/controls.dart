@@ -108,10 +108,9 @@ class ShortVideoContextLink extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: Colors.white.withValues(alpha: .10),
+  Widget build(BuildContext context) => ImmersiveSurface(
+    color: const Color(0xFF2C2D2E),
     borderRadius: BorderRadius.circular(8),
-    clipBehavior: Clip.antiAlias,
     child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),

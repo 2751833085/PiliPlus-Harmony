@@ -1020,8 +1020,44 @@ void main() {
         await tester.pumpWidget(build(false));
         await tester.pumpAndSettle();
         expect(playerKey.currentState, same(state));
-        expect(find.byType(ShortVideoControls), findsNothing);
+        expect(find.byType(ShortVideoControls), findsOneWidget);
+        expect(find.byType(ProgressBar).hitTestable(), findsOneWidget);
+        expect(
+          tester.widget<ShortVideoPager>(find.byType(ShortVideoPager)).enabled,
+          isTrue,
+        );
+        final commentPlay = find.byIcon(Icons.play_arrow_rounded).hitTestable();
+        expect(
+          commentPlay,
+          findsOneWidget,
+          reason: 'Comments playback control: $scenario',
+        );
+        await tester.tap(commentPlay);
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.pumpAndSettle();
+        expect(player.playerStatus, PlayerStatus.playing);
+        expect(find.byIcon(Icons.pause_rounded).hitTestable(), findsOneWidget);
         expect(find.byType(ShortVideoPausedControls), findsNothing);
+        final pager = find.byType(PageView);
+        final swipeDistance = tester.getSize(pager).height * .8;
+        await tester.dragFrom(
+          tester.getCenter(find.byType(_PlayerFixture)),
+          Offset(0, -swipeDistance),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          session.index,
+          1,
+          reason: 'Video paging remains enabled beside comments',
+        );
+        expect(find.text('评论内容（布局测试）'), findsOneWidget);
+        await tester.dragFrom(
+          tester.getCenter(find.byType(_PlayerFixture)),
+          Offset(0, swipeDistance),
+        );
+        await tester.pumpAndSettle();
+        expect(session.index, 0);
+        expect(playerKey.currentState, same(state));
         final commentBox = tester.getRect(find.text('评论内容（布局测试）'));
         expect(
           tester.getRect(find.byType(_PlayerFixture)).overlaps(commentBox),

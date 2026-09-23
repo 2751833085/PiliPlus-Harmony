@@ -1,5 +1,7 @@
 # 文档目录
 
+- [V2.7 首页与评论优化](v2.7/README.md)：默认栏数、刷新衔接、评论播控与光感；[验证记录](v2.7/VALIDATION.md)。
+
 - [构建与环境](harmony/README.md)：SDK、Flutter OH、HAP、签名与 Mate XTS 验收。
 - [V2 计划](v2/PLAN.md)：鸿蒙界面、Dock、智感握姿、封面动画及工作量。
 - [V2 验证记录](v2/VALIDATION.md)：自动回归、签名构建和真机验证的实际范围。

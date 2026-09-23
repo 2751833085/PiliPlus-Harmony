@@ -239,6 +239,7 @@ void main() {
       complete.complete();
       await future;
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
       await tester.pump(const Duration(milliseconds: 250));
       await tester.pump();
       expect(tester.getTopLeft(find.byKey(itemKey)).dy, closeTo(top, .1));

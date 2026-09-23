@@ -237,11 +237,23 @@ void main() {
       );
       final pill = find.byType(ShortVideoPillButton);
       final target = tester.getRect(pill);
-      final material = tester.widget<Material>(
-        find.descendant(of: pill, matching: find.byType(Material)),
+      final clipFinder = find.descendant(
+        of: pill,
+        matching: find.byType(ClipRRect),
       );
-      expect(material.shape, isA<StadiumBorder>());
-      expect(material.clipBehavior, Clip.antiAlias);
+      final clip = tester.widget<ClipRRect>(clipFinder);
+      final radius = clip.borderRadius.resolve(TextDirection.ltr);
+      final halfHeight = tester.getSize(clipFinder).height / 2;
+      for (final corner in [
+        radius.topLeft,
+        radius.topRight,
+        radius.bottomLeft,
+        radius.bottomRight,
+      ]) {
+        expect(corner.x, greaterThanOrEqualTo(halfHeight));
+        expect(corner.y, greaterThanOrEqualTo(halfHeight));
+      }
+      expect(clip.clipBehavior, Clip.antiAlias);
       await tester.tapAt(target.topCenter + const Offset(0, 1));
       await tester.pump();
       await tester.tap(find.text('发弹幕'));

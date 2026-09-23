@@ -184,6 +184,17 @@ abstract final class Pref {
   static int get previewQ =>
       _setting.get(SettingBoxKey.previewQuality, defaultValue: 100);
 
+  static bool get useCardWidthLimit =>
+      _setting.get(SettingBoxKey.useCardWidthLimit, defaultValue: false);
+
+  static List<int> get feedColumns =>
+      (_setting.get(
+                SettingBoxKey.feedColumns,
+                defaultValue: <int>[0, 0, 0, 0, 0, 0],
+              )
+              as List)
+          .cast<int>();
+
   static double get smallCardWidth =>
       _setting.get(SettingBoxKey.smallCardWidth, defaultValue: 240.0);
 

@@ -224,6 +224,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   RefreshIndicatorStatus? _status;
   late Future<void> _pendingRefreshFuture;
   double? _dragOffset;
+  double? _holdExtent;
   final _bodyOverscroll = ValueNotifier<double>(0);
 
   // 鸿蒙保留kDragContainerExtentPercentage= Pref.refreshDragPercentage所需
@@ -394,6 +395,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   }
 
   bool _start() {
+    _holdExtent = null;
     assert(_status == null);
     assert(_dragOffset == null);
     _dragOffset = 0.0;
@@ -432,6 +434,11 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     switch (_status!) {
       case RefreshIndicatorStatus.done:
         if (HarmonyStyle.enabled(context)) {
+          await _scaleController.animateTo(
+            1,
+            duration: const Duration(milliseconds: 140),
+          );
+          if (!mounted || _status != newMode) return;
           await _positionController.animateTo(
             0.0,
             duration: _kIndicatorScaleDuration,
@@ -466,10 +473,26 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     assert(_status != RefreshIndicatorStatus.snap);
     final Completer<void> completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
+    final holdingPull =
+        HarmonyStyle.enabled(context) &&
+        _status == RefreshIndicatorStatus.drag &&
+        _positionFactor.value > 0;
+    if (holdingPull) {
+      final minimum = (kIndicatorSize + displacement) * _positionFactor.value;
+      final gap = _bodyOverscroll.value > minimum
+          ? _bodyOverscroll.value
+          : minimum;
+      _holdExtent = gap / _positionFactor.value;
+    } else {
+      _holdExtent = null;
+    }
+    final snapTarget = holdingPull
+        ? _positionController.value
+        : 1.0 / _kDragSizeFactorLimit;
     setState(() => _status = RefreshIndicatorStatus.snap);
     _positionController
         .animateTo(
-          1.0 / _kDragSizeFactorLimit,
+          snapTarget,
           duration: _kIndicatorSnapDuration,
         )
         .whenComplete(() {
@@ -546,17 +569,28 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     child = RefreshLayout(
       body: child,
       bodyOverscroll: HarmonyStyle.enabled(context) ? _bodyOverscroll : null,
-      scale: _scaleFactor,
+      scale: HarmonyStyle.enabled(context)
+          ? const AlwaysStoppedAnimation(1.0)
+          : _scaleFactor,
+      holdExtent: _holdExtent,
       position: _positionFactor,
       edgeOffset: widget.edgeOffset,
       indicator: _status == null
           ? null
           : AnimatedBuilder(
-              animation: _positionController,
+              animation: Listenable.merge([
+                _positionController,
+                _scaleController,
+              ]),
               builder: (context, child) => HarmonyStyle.enabled(context)
                   // Keep one native LoadingProgress alive from pull to
                   // release; changing determinate mode recreates its surface.
-                  ? const HarmonyLoadingIndicator()
+                  ? Opacity(
+                      opacity:
+                          (_positionFactor.value * 2).clamp(0.0, 1.0) *
+                          _scaleFactor.value,
+                      child: const HarmonyLoadingIndicator(),
+                    )
                   : RefreshProgressIndicator(
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,

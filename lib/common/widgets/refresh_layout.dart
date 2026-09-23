@@ -17,8 +17,10 @@ class RefreshLayout
     required this.body,
     this.edgeOffset = 0.0,
     this.bodyOverscroll,
+    this.holdExtent,
   });
 
+  final double? holdExtent;
   final Animation<double> scale;
   final Animation<double> position;
   final Widget? indicator;
@@ -43,6 +45,7 @@ class RefreshLayout
   RenderRefreshLayout createRenderObject(BuildContext context) {
     return RenderRefreshLayout(
       scale: scale,
+      holdExtent: holdExtent,
       position: position,
       edgeOffset: edgeOffset,
       bodyOverscroll: bodyOverscroll,
@@ -55,6 +58,9 @@ class RefreshLayout
     RenderRefreshLayout renderObject,
   ) {
     renderObject
+      ..scale = scale
+      ..position = position
+      ..holdExtent = holdExtent
       ..edgeOffset = edgeOffset
       ..bodyOverscroll = bodyOverscroll;
   }
@@ -63,19 +69,51 @@ class RefreshLayout
 class RenderRefreshLayout extends RenderBox
     with SlottedContainerRenderObjectMixin<RefreshType, RenderBox> {
   RenderRefreshLayout({
-    required this.scale,
-    required this.position,
+    required Animation<double> scale,
+    required Animation<double> position,
     double edgeOffset = 0.0,
+    double? holdExtent,
     ValueListenable<double>? bodyOverscroll,
-  }) : _edgeOffset = edgeOffset {
+  }) : _scale = scale,
+       _position = position,
+       _edgeOffset = edgeOffset,
+       _holdExtent = holdExtent {
     this.bodyOverscroll = bodyOverscroll;
+    _scaleFactor = scale.value;
+    _heightFactor = position.value;
     scale.addListener(_scaleListener);
     position.addListener(_positionListener);
   }
 
-  final Animation<double> scale;
+  Animation<double> _scale;
+  Animation<double> get scale => _scale;
+  set scale(Animation<double> value) {
+    if (_scale == value) return;
+    _scale.removeListener(_scaleListener);
+    _scale = value..addListener(_scaleListener);
+    _scaleListener();
+  }
 
-  final Animation<double> position;
+  Animation<double> _position;
+  Animation<double> get position => _position;
+  set position(Animation<double> value) {
+    if (_position == value) return;
+    _position.removeListener(_positionListener);
+    _position = value..addListener(_positionListener);
+    _positionListener();
+  }
+
+  double? _holdExtent;
+  set holdExtent(double? value) {
+    if (_holdExtent == value) return;
+    _holdExtent = value;
+    _bodyPositionChanged();
+  }
+
+  double get _target =>
+      (_holdExtent ?? (kIndicatorSize + displacement)) *
+      heightFactor *
+      scaleFactor;
 
   ValueListenable<double>? _bodyOverscroll;
   set bodyOverscroll(ValueListenable<double>? value) {
@@ -88,7 +126,7 @@ class RenderRefreshLayout extends RenderBox
 
   void _bodyPositionChanged() {
     if (!hasSize) return;
-    final target = (kIndicatorSize + displacement) * heightFactor * scaleFactor;
+    final target = _target;
     // A bouncing viewport already shifts its contents. Only supply the missing
     // displacement, then hold it after the viewport springs back to zero.
     final shift = _bodyOverscroll == null
@@ -171,7 +209,7 @@ class RenderRefreshLayout extends RenderBox
     final indicator = this.indicator;
     if (indicator == null) return;
     final scaleSize = kIndicatorSize * scaleFactor;
-    final hold = (kIndicatorSize + displacement) * heightFactor * scaleFactor;
+    final hold = _target;
     final gap = _bodyOverscroll == null
         ? 0.0
         : (_bodyOverscroll!.value > hold ? _bodyOverscroll!.value : hold);
@@ -183,7 +221,7 @@ class RenderRefreshLayout extends RenderBox
       Offset(
         (constraints.maxWidth - scaleSize) / 2,
         _bodyOverscroll != null
-            ? edgeOffset + (gap - scaleSize) / 2
+            ? edgeOffset + (gap.clamp(0.0, 52.0) - scaleSize) / 2
             : edgeOffset +
                   (kIndicatorSize + displacement) * heightFactor -
                   kIndicatorSize +

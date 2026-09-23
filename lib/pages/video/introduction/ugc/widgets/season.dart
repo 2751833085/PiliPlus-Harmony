@@ -97,7 +97,7 @@ class _SeasonPanelState extends State<SeasonPanel> {
         left: 2,
         right: 2,
       ),
-      child: Material(
+      child: ImmersiveSurface(
         color: theme.colorScheme.onInverseSurface,
         borderRadius: const BorderRadius.all(Radius.circular(6)),
         child: InkWell(

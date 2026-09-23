@@ -1,6 +1,5 @@
 import 'dart:math' as math;
-import 'dart:ui' show FontFeature;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// One visual scale for feed chrome. Text keeps the user's scaler and font;
 /// container heights follow it instead of inheriting app-wide button defaults.
@@ -131,10 +130,9 @@ class ShortVideoPillButton extends StatelessWidget {
           height: metrics.controlHeight,
           child: Center(
             widthFactor: 1,
-            child: Material(
-              color: color,
-              shape: const StadiumBorder(),
-              clipBehavior: Clip.antiAlias,
+            child: ImmersiveSurface(
+              color: Color.alphaBlend(color, const Color(0xFF141517)),
+              borderRadius: BorderRadius.circular(100),
               child: InkWell(
                 customBorder: const StadiumBorder(),
                 onTap: onPressed,

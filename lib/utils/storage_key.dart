@@ -251,6 +251,8 @@ abstract final class SettingBoxKey {
       displayMode = 'displayMode',
       smallCardWidth = 'smallCardWidth',
       recommendCardWidth = 'recommendCardWidth',
+      useCardWidthLimit = 'useCardWidthLimit',
+      feedColumns = 'feedColumns',
       dynamicsWaterfallFlow = 'dynamicsWaterfallFlow',
       upPanelPosition = 'upPanelPosition',
       dynamicsShowAllFollowedUp = 'dynamicsShowAllFollowedUp',

@@ -79,10 +79,17 @@ class ShortVideoFeedbackSheet extends StatelessWidget {
             child: Text('选择原因后跳过此视频，并在本机短视频推荐中隐藏。'),
           ),
           for (final reason in ShortVideoHideReason.values)
-            ListTile(
-              title: Text(reason.label),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.pop(context, reason),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: ImmersiveSurface(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(12),
+                child: ListTile(
+                  title: Text(reason.label),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.pop(context, reason),
+                ),
+              ),
             ),
           if (hiddenCount > 0)
             TextButton.icon(

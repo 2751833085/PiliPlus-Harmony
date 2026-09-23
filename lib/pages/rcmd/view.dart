@@ -10,6 +10,9 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/harmony_adapt/feed_columns.dart';
+import 'dart:async';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -27,6 +30,7 @@ class _RcmdPageState extends State<RcmdPage>
   final controller = Get.put(RcmdController());
 
   Worker? _fillWorker;
+  StreamSubscription<dynamic>? _layoutSettings;
   final _refreshKey = GlobalKey<refresh.RefreshIndicatorState>();
   bool _returningToRefresh = false;
 
@@ -52,6 +56,16 @@ class _RcmdPageState extends State<RcmdPage>
   void initState() {
     super.initState();
     controller.scrollController.addListener(_onScroll);
+    _layoutSettings = GStorage.setting.watch().listen((event) {
+      if (const {
+            'feedColumns',
+            'useCardWidthLimit',
+            'recommendCardWidth',
+          }.contains(event.key) &&
+          mounted) {
+        setState(() {});
+      }
+    });
     // 大屏多列下一页数据可能填不满视口：此时列表不可滚动，_onScroll 永远不会
     // 触发，页面就一直空着下半屏，只有手动下拉刷新才会变多。每次数据变化后
     // 补一次判断，不可滚动就继续拉下一页，直到出现可滚动区域。
@@ -83,6 +97,7 @@ class _RcmdPageState extends State<RcmdPage>
 
   @override
   void dispose() {
+    _layoutSettings?.cancel();
     _fillWorker?.dispose();
     controller.scrollController.removeListener(_onScroll);
     super.dispose();
@@ -99,34 +114,49 @@ class _RcmdPageState extends State<RcmdPage>
       clipBehavior: OS.isHarmony ? Clip.none : Clip.hardEdge,
       margin: const EdgeInsets.symmetric(horizontal: Style.safeSpace),
       decoration: const BoxDecoration(borderRadius: Style.mdRadius),
-      child: NativeTopRefreshIndicator(
-        indicatorKey: _refreshKey,
-        onRefresh: controller.onRefresh,
-        child: CustomScrollView(
-          controller: controller.scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // 原生顶栏启用时顶部的可滚动留白（内容可滑入顶栏下方重合）
-            const NativeTopSpacer(),
-            SliverPadding(
-              padding: const .only(top: Style.cardSpace, bottom: 100),
-              sliver: Obx(
-                () => _buildBody(colorScheme, controller.loadingState.value),
-              ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          _gridWidth = constraints.maxWidth;
+          return NativeTopRefreshIndicator(
+            indicatorKey: _refreshKey,
+            onRefresh: controller.onRefresh,
+            child: CustomScrollView(
+              controller: controller.scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // 原生顶栏启用时顶部的可滚动留白（内容可滑入顶栏下方重合）
+                const NativeTopSpacer(),
+                SliverPadding(
+                  padding: const .only(top: Style.cardSpace, bottom: 100),
+                  sliver: Obx(
+                    () =>
+                        _buildBody(colorScheme, controller.loadingState.value),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  late final gridDelegate = SliverGridDelegateWithExtentAndRatio(
-    mainAxisSpacing: Style.cardSpace,
-    crossAxisSpacing: Style.cardSpace,
-    maxCrossAxisExtent: Pref.recommendCardWidth,
-    childAspectRatio: Style.aspectRatio,
-    mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
-  );
+  double _gridWidth = 0;
+  SliverGridDelegateWithExtentAndRatio get gridDelegate =>
+      SliverGridDelegateWithExtentAndRatio(
+        columns: Pref.useCardWidthLimit
+            ? null
+            : FeedColumns.resolve(
+                MediaQuery.sizeOf(context),
+                _gridWidth,
+                Pref.feedColumns,
+              ),
+        mainAxisSpacing: Style.cardSpace,
+        crossAxisSpacing: Style.cardSpace,
+        maxCrossAxisExtent: Pref.recommendCardWidth,
+        childAspectRatio: Style.aspectRatio,
+        mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
+      );
 
   Widget _buildBody(
     ColorScheme colorScheme,

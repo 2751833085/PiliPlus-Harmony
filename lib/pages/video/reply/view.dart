@@ -88,7 +88,9 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                   key: const PageStorageKey(_VideoReplyPanelState),
                   slivers: [
                     SliverFloatingHeaderWidget(
-                      backgroundColor: colorScheme.surface,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).scaffoldBackgroundColor,
                       child: Obx(() {
                         final sortType = _videoReplyController.sortType.value;
                         return ReplyPanelHeader(
@@ -120,11 +122,17 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                       right: kFloatingActionButtonMargin,
                       bottom: kFloatingActionButtonMargin + bottom,
                     ),
-                    child: FloatingActionButton(
-                      heroTag: null,
-                      onPressed: _onReply,
-                      tooltip: '发表评论',
-                      child: const Icon(Icons.reply),
+                    child: ImmersiveSurface(
+                      color: colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(16),
+                      child: FloatingActionButton(
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        heroTag: null,
+                        onPressed: _onReply,
+                        tooltip: '发表评论',
+                        child: const Icon(Icons.reply),
+                      ),
                     ),
                   ),
                 ),
