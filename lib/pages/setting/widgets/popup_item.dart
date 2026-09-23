@@ -1,4 +1,4 @@
-import 'package:PiliPlus/common/widgets/dialog/bottom_panel.dart';
+import 'dart:math' as math;
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:PiliPlus/models/common/enum_with_label.dart';
@@ -65,11 +65,29 @@ class _PopupListTileState<T> extends State<PopupListTile<T>> {
       dx = thisOffset.dx + titleOffset.dx;
     }
     final selection = HarmonyStyle.enabled(context)
-        ? showSelectionSheet<T>(
+        ? showAnchoredMenu<T>(
             context: context,
-            title: widget.title,
+            positionBuilder: (context, constraints) {
+              final overlay =
+                  Navigator.of(context).overlay!.context.findRenderObject()
+                      as RenderBox;
+              final row = this.context.findRenderObject() as RenderBox;
+              final topLeft = row.localToGlobal(Offset.zero, ancestor: overlay);
+              final anchor = Rect.fromLTWH(
+                topLeft.dx + 16,
+                topLeft.dy,
+                math.max(0, row.size.width - 32),
+                row.size.height,
+              );
+              return RelativeRect.fromRect(anchor, Offset.zero & overlay.size);
+            },
+            constraints: BoxConstraints(
+              minWidth: math.min(200, MediaQuery.sizeOf(context).width - 32),
+              maxWidth: math.min(360, MediaQuery.sizeOf(context).width - 32),
+              maxHeight: MediaQuery.sizeOf(context).height * .65,
+            ),
             items: widget.itemBuilder(context),
-            selected: value,
+            initialValue: value,
           )
         : showMenu<T>(
             context: context,

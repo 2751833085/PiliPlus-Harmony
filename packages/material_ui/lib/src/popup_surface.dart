@@ -102,10 +102,11 @@ Future<T?> _showMenuSheet<T>({
 
 List<PopupMenuEntry<T>> _surfaceItems<T>(
   BuildContext context,
-  List<PopupMenuEntry<T>> items,
-) {
+  List<PopupMenuEntry<T>> items, {
+  bool anchored = false,
+}) {
   if (Theme.of(context).extension<PopupSurfaceStyle>() == null ||
-      Theme.of(context).extension<PopupSheetStyle>() != null)
+      (!anchored && Theme.of(context).extension<PopupSheetStyle>() != null))
     return items;
   return [for (final entry in items) _SurfaceEntry<T>(entry)];
 }
@@ -126,7 +127,8 @@ class _SurfaceEntryState<T> extends State<_SurfaceEntry<T>> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
-    if (MediaQuery.highContrastOf(context))
+    if (MediaQuery.highContrastOf(context) ||
+        MediaQuery.disableAnimationsOf(context))
       return ColoredBox(color: theme.colorScheme.surface, child: widget.entry);
     return ClipRect(
       child: BackdropFilter(
@@ -273,3 +275,31 @@ Future<T?> showMenu<T>({
         popUpAnimationStyle: popUpAnimationStyle,
         requestFocus: requestFocus,
       );
+
+/// A value selector stays attached to its invoking row even when action menus
+/// use bottom sheets. SDK positioning, scrolling, focus and return semantics
+/// remain intact; only the opt-in light surface is wrapped around each entry.
+Future<T?> showAnchoredMenu<T>({
+  required BuildContext context,
+  required PopupMenuPositionBuilder positionBuilder,
+  required List<PopupMenuEntry<T>> items,
+  T? initialValue,
+  BoxConstraints? constraints,
+  String? semanticLabel,
+}) {
+  final theme = Theme.of(context);
+  final surface = theme.extension<PopupSurfaceStyle>() != null;
+  return m.showMenu<T>(
+    context: context,
+    positionBuilder: positionBuilder,
+    items: _surfaceItems(context, items, anchored: true),
+    initialValue: initialValue,
+    semanticLabel: semanticLabel,
+    constraints: constraints,
+    menuPadding: EdgeInsets.zero,
+    clipBehavior: Clip.antiAlias,
+    color: surface ? Colors.transparent : theme.colorScheme.surface,
+    surfaceTintColor: Colors.transparent,
+    requestFocus: true,
+  );
+}
