@@ -34,7 +34,7 @@ void main() {
         ),
       ),
     );
-    expect(find.byType(ui.ImmersiveSurface), findsWidgets);
+    expect(find.text('setting 0'), findsOneWidget);
     expect(find.byType(BackdropFilter), findsNothing);
     expect(built, lessThan(30));
     await tester.drag(find.byType(ListView), const Offset(0, -400));

@@ -59,22 +59,44 @@ class HarmonySettingsList extends StatelessWidget {
                       ),
                     ),
                   ),
-                ImmersiveSurface(
-                  blurBackground: false,
+                Material(
                   color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.vertical(
                     top: first ? radius : Radius.zero,
                     bottom: last ? radius : Radius.zero,
                   ),
-                  child: Column(
-                    children: [
-                      child,
-                      if (!last)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Divider(height: 1),
-                        ),
-                    ],
+                  clipBehavior: Clip.antiAlias,
+                  child: Ink(
+                    decoration: theme.extension<PopupSurfaceStyle>() != null
+                        ? BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.white.withValues(
+                                  alpha: theme.brightness == Brightness.dark
+                                      ? .025
+                                      : .22,
+                                ),
+                                Colors.transparent,
+                              ],
+                            ),
+                          )
+                        : null,
+                    child: Column(
+                      children: [
+                        child,
+                        if (!last)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Divider(
+                              height: .5,
+                              thickness: .5,
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: .07,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
                 if (last) const SizedBox(height: 12),
