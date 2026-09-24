@@ -23,7 +23,29 @@ import 'package:get/get.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:material_ui/material_ui.dart';
 
-List<SettingsModel> get videoSettings => [
+List<SettingsModel> get videoSettings => prioritizeSettings(
+  _videoSettings,
+  sections: ['画质与解码', '音质与音量', '网络与加载', '缓冲与同步', '竖屏短视频'],
+  titles: [
+    '默认画质',
+    '蜂窝网络画质',
+    '默认音质',
+    '蜂窝网络音质',
+    '音量均衡',
+    '海外模式',
+    'CDN 设置',
+    '直播 CDN 设置',
+    'CDN 测速',
+    '音频不跟随 CDN 设置',
+    '启用HTTP/2',
+    '连接重试次数',
+    '连接重试间隔',
+    '设置代理',
+    '禁用 SSL 证书验证',
+  ],
+);
+
+List<SettingsModel> get _videoSettings => [
   ...audioVideoExtraSettings,
   ...preloadSettings,
   const SwitchModel(

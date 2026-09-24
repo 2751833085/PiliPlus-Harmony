@@ -25,7 +25,31 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:material_ui/material_ui.dart';
 import 'package:os_type/os_type.dart';
 
-List<SettingsModel> get playSettings => [
+List<SettingsModel> get playSettings => prioritizeSettings(
+  _playSettings,
+  sections: [
+    '播放控制',
+    '竖屏短视频',
+    '播放手势',
+    '全屏与折叠屏',
+    '弹幕与字幕',
+    '进度条',
+    '后台与小窗',
+    '播放顺序与跳过',
+    '视频详情',
+  ],
+  titles: [
+    '自动播放',
+    '哔哩哔哩式播放器控制栏',
+    '倍速设置',
+    '竖屏短视频模式',
+    '弹幕开关',
+    '自动启用字幕',
+    '全屏跟随折叠形态',
+  ],
+);
+
+List<SettingsModel> get _playSettings => [
   ...harmonyPlaybackSettings,
   ...playbackExtraSettings,
   const SwitchModel(

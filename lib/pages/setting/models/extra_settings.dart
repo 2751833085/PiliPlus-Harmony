@@ -388,7 +388,7 @@ List<SettingsModel> get preloadSettings => [
   SwitchModel(
     section: '竖屏短视频',
     title: '连续视频预加载',
-    subtitle: '提前准备后面三条的播放地址和音视频开头，滑动时优先准备目标视频；蜂窝网络也会消耗流量',
+    subtitle: '提前准备后面三条的播放地址和音视频开头，以及相邻视频的评论首屏；滑动时优先准备目标视频，蜂窝网络也会消耗流量',
     leading: const Icon(Icons.skip_next_outlined),
     setKey: SettingBoxKey.shortPreload,
     onChanged: (_) => HarmonyAppearance.changed(),

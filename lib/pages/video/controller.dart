@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/reply/controller.dart';
 import 'package:PiliPlus/pages/video/shorts/media_cache.dart';
 import 'package:PiliPlus/pages/video/shorts/preloader.dart';
 import 'package:PiliPlus/pages/video/shorts/session.dart';
@@ -1051,6 +1052,11 @@ class VideoDetailController extends GetxController
       cancelShortPreload();
       return;
     }
+    if (showReply && Get.isRegistered<VideoReplyController>(tag: heroTag)) {
+      unawaited(
+        Get.find<VideoReplyController>(tag: heroTag).preloadWindow(entries),
+      );
+    }
     if (plPlayerController.cacheVideoQa == null ||
         !identical(plPlayerController.sourceOwner, this))
       return;
@@ -1110,6 +1116,9 @@ class VideoDetailController extends GetxController
   }
 
   void cancelShortPreload() {
+    if (Get.isRegistered<VideoReplyController>(tag: heroTag)) {
+      Get.find<VideoReplyController>(tag: heroTag).cancelPreload();
+    }
     _preloadLookupRevision++;
     for (final value in _preloadLookup.values) {
       value.$3.cancel('preload cancelled');
@@ -1867,7 +1876,10 @@ class VideoDetailController extends GetxController
   }
 
   void onReset({bool isStein = false}) {
-    if (shortVideoMode) _autoPlay.value = true;
+    if (shortVideoMode) {
+      _autoPlay.value = true;
+      plPlayerController.sourceFrameGate.invalidate();
+    }
     _routeRetry?.cancel();
     _routeRetry = null;
     _routeRetries = 0;

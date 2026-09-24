@@ -107,6 +107,7 @@ void main() {
     () {
       final rows = styleSettings;
       final titles = rows.map((e) => e.title).toList();
+      expect(titles.last, 'Material You 界面风格');
       for (final title in [
         '横屏适配',
         '页面过渡动画',
@@ -168,6 +169,16 @@ void main() {
         for (final type in SettingType.searchable) type: type.settings,
       };
       final rows = SettingType.searchSettings;
+      expect(catalog[SettingType.videoSetting]!.first.effectiveTitle, '默认画质');
+      expect(catalog[SettingType.playSetting]!.first.effectiveTitle, '自动播放');
+      expect(
+        catalog[SettingType.styleSetting]!
+            .firstWhere((row) => row.section == '主题与显示')
+            .effectiveTitle,
+        '颜色选择',
+      );
+      expect(SettingType.featuredSetting.settings.first.effectiveTitle, '空降助手');
+
       final titles = rows.map((row) => row.effectiveTitle).toList();
       expect(
         titles.toSet().length,

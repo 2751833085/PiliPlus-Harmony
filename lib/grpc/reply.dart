@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart' show CancelToken;
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart';
 import 'package:PiliPlus/grpc/bilibili/pagination.pb.dart';
@@ -47,6 +48,8 @@ abstract final class ReplyGrpc {
     required Mode mode,
     required String? offset,
     required Int64? cursorNext,
+    CancelToken? cancelToken,
+    bool silent = false,
   }) async {
     final res = await GrpcReq.request(
       GrpcUrl.mainList,
@@ -62,6 +65,8 @@ abstract final class ReplyGrpc {
         // pagination: offset == null ? null : FeedPagination(offset: offset),
       ),
       MainListReply.fromBuffer,
+      cancelToken: cancelToken,
+      silent: silent,
     );
     if (res case Success(:final response)) {
       // keyword filter

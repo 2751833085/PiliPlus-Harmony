@@ -8,7 +8,13 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
-List<SettingsModel> get privacySettings => [
+List<SettingsModel> get privacySettings => prioritizeSettings(
+  _privacySettings,
+  sections: ['账号与隐私', '搜索偏好', '评论与隐私', '我的页面', '网络与加载'],
+  titles: [],
+);
+
+List<SettingsModel> get _privacySettings => [
   ...privacyRecordSettings,
   ...historyVisibilitySettings,
   ...networkSecuritySettings,

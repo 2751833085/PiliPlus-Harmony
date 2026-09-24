@@ -46,15 +46,15 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:material_ui/material_ui.dart' hide StatefulBuilder;
 import 'package:path/path.dart' as path;
 
-List<SettingsModel> get styleSettings {
-  final settings = [
-    ...harmonyAppearanceSettings,
-    ..._appearanceSettings,
-    ...appearanceExtraSettings,
-    ...playerAppearanceSettings,
-  ];
-  return [
-    for (final section in const [
+List<SettingsModel> get styleSettings => [
+  ...prioritizeSettings(
+    [
+      ...harmonyAppearanceSettings,
+      ..._appearanceSettings,
+      ...appearanceExtraSettings,
+      ...playerAppearanceSettings,
+    ],
+    sections: const [
       '界面风格',
       '鸿蒙界面风格',
       '主题与显示',
@@ -68,11 +68,11 @@ List<SettingsModel> get styleSettings {
       '图片预览',
       '交互与动画',
       '用户主页',
-      null,
-    ])
-      ...settings.where((item) => item.section == section),
-  ];
-}
+    ],
+    titles: const ['颜色选择', '主题模式', '纯黑主题'],
+  ),
+  ...harmonyStyleModeSettings,
+];
 
 List<SettingsModel> get _appearanceSettings => [
   ...harmonyNavigationSettings,

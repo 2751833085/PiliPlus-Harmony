@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/video/shorts/frame_overlay.dart';
+import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/control_bar.dart';
 import 'package:PiliPlus/pages/video/shorts/loading_grace.dart';
 import 'package:PiliPlus/pages/video/shorts/gestures.dart';
@@ -2331,7 +2333,44 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     return child;
   }
 
-  Widget get _videoWidget {
+  Widget get _videoWidget => Stack(
+    fit: StackFit.expand,
+    children: [
+      _videoSurface,
+      if (widget.shortMode && widget.videoDetailController != null)
+        Positioned.fill(
+          child: Obx(() {
+            final detail = widget.videoDetailController!;
+            detail.shortPreviewRevision.value;
+            final cid = detail.cid.value;
+            final preview =
+                detail.preloadedFirstFrame(detail.bvid, cid: cid) ??
+                detail.cover.value;
+            return AnimatedBuilder(
+              animation: plPlayerController.sourceFrameGate,
+              builder: (context, child) => ShortFrameOverlay(
+                key: ValueKey('${detail.bvid}:$cid'),
+                ready: plPlayerController.sourceFrameGate.ready,
+                child: child!,
+              ),
+              child: ColoredBox(
+                color: Colors.black,
+                child: NetworkImgLayer(
+                  src: preview,
+                  width: maxWidth,
+                  height: maxHeight,
+                  fit: BoxFit.contain,
+                  borderRadius: BorderRadius.zero,
+                  getPlaceHolder: () => const SizedBox.expand(),
+                ),
+              ),
+            );
+          }),
+        ),
+    ],
+  );
+
+  Widget get _videoSurface {
     return Container(
       clipBehavior: .none,
       width: maxWidth,

@@ -287,6 +287,7 @@ class Request {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
+    bool silent = false,
   }) async {
     // if (kDebugMode) debugPrint('post-data: $data');
     try {
@@ -298,7 +299,7 @@ class Request {
         cancelToken: cancelToken,
       );
     } on DioException catch (e) {
-      AccountManager.toast(e);
+      if (!silent && !CancelToken.isCancel(e)) AccountManager.toast(e);
       return Response(
         data: {
           'message': await AccountManager.dioError(e),

@@ -86,6 +86,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
       widget.video.preloadShortWindow([
         if (index != session.index) entries[index],
         ...entries.skip(index + 1).take(3),
+        if (index > 0) entries[index - 1],
       ]),
     );
   }
@@ -180,9 +181,10 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                           fit: StackFit.expand,
                           children: [
                             if (widget.video.preloadedFirstFrame(
-                                  session.entries[index].bvid,
-                                  cid: session.entries[index].cid,
-                                )
+                                      session.entries[index].bvid,
+                                      cid: session.entries[index].cid,
+                                    ) ??
+                                    session.entries[index].cover
                                 case final cover?)
                               Padding(
                                 padding: EdgeInsets.only(

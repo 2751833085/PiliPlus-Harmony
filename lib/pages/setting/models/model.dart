@@ -11,6 +11,23 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart' hide PopupMenuItemSelected;
 
+/// Stable section and row ordering; unknown/new rows are always retained.
+List<SettingsModel> prioritizeSettings(
+  List<SettingsModel> rows, {
+  List<String?> sections = const [],
+  List<String> titles = const [],
+}) => [
+  for (final section in {...sections, ...rows.map((row) => row.section)}) ...[
+    for (final title in titles)
+      ...rows.where(
+        (row) => row.section == section && row.effectiveTitle == title,
+      ),
+    ...rows.where(
+      (row) => row.section == section && !titles.contains(row.effectiveTitle),
+    ),
+  ],
+];
+
 @immutable
 sealed class SettingsModel {
   final String? subtitle;

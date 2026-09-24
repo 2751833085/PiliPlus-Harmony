@@ -20,7 +20,7 @@ void refreshHarmonySettings(bool _) {
   }
 }
 
-List<SettingsModel> get harmonyAppearanceSettings => [
+List<SettingsModel> get harmonyStyleModeSettings => [
   SwitchModel(
     title: 'Material You 界面风格',
     section: '界面风格',
@@ -30,6 +30,9 @@ List<SettingsModel> get harmonyAppearanceSettings => [
     defaultVal: false,
     needReboot: true,
   ),
+];
+
+List<SettingsModel> get harmonyAppearanceSettings => [
   if (Pref.harmonyUI) ...[
     SwitchModel(
       section: '鸿蒙界面风格',

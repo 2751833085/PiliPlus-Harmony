@@ -1,3 +1,4 @@
+import 'package:PiliPlus/plugin/pl_player/models/source_frame_gate.dart';
 import 'package:PiliPlus/plugin/pl_player/models/playback_owner.dart';
 import 'package:PiliPlus/pages/setting/models/play_settings.dart'
     show kMaxVolume;
@@ -215,6 +216,33 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   /// [videoController] instance of Player
   VideoController? get videoController => _videoController;
+
+  final sourceFrameGate = SourceFrameGate();
+
+  Future<void> _watchSourceFrame(Player player, String uri) async {
+    final native = player.platform!.maybeAsNativePlayer;
+    final generation = sourceFrameGate.begin(uri);
+    if (native.observed.containsKey('video-pts')) {
+      await native.unobserveProperty('video-pts', waitForInitialization: false);
+    }
+    await native.observeProperty('video-pts', (_) async {
+      if (!sourceFrameGate.isCurrent(generation) || native.disposed) return;
+      // Dimensions / playing may be emitted before any new frame exists.
+      // Read both properties now, rather than trusting a queued old-source event.
+      try {
+        final source = await native.getProperty('path');
+        final pts = await native.getProperty('video-pts');
+        if (sourceFrameGate.accept(generation, source: source, pts: pts)) {
+          await native.unobserveProperty(
+            'video-pts',
+            waitForInitialization: false,
+          );
+        }
+      } catch (_) {
+        // The player may be disposed while a property read is in flight.
+      }
+    });
+  }
 
   bool isMuted = false;
 
@@ -1110,6 +1138,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
 
     assert(!isLive || seekTo == null);
+    await _watchSourceFrame(player, Media(video).uri);
     await player.open(
       Media(
         video,
@@ -1413,6 +1442,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   /// 移除事件监听
   void _removeListeners() {
+    sourceFrameGate.invalidate();
     _stallWatchdog?.cancel();
     _stallWatchdog = null;
     if (Floating().onPipAction == _onPipAction) {

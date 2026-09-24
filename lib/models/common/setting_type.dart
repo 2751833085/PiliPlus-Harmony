@@ -69,10 +69,10 @@ enum SettingType {
   List<SettingsModel> get settings => switch (this) {
     .featuredSetting => _featuredSettings,
     .privacySetting => privacySettings,
-    .recommendSetting => [
-      ...recommendSettings,
-      ...personalizationExtraSettings,
-    ],
+    .recommendSetting => prioritizeSettings(
+      [...recommendSettings, ...personalizationExtraSettings],
+      sections: const ['推荐偏好', '内容过滤', '搜索偏好', '评论偏好', '动态偏好', '消息偏好', '评论与隐私'],
+    ),
     .videoSetting => videoSettings,
     .playSetting => playSettings,
     .styleSetting => styleSettings,

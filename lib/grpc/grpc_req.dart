@@ -57,11 +57,15 @@ abstract final class GrpcReq {
     GeneratedMessage request,
     T Function(Uint8List) grpcParser, {
     bool isolate = false,
+    CancelToken? cancelToken,
+    bool silent = false,
   }) async {
     final response = await Request().post<Uint8List>(
       HttpString.appBaseUrl + url,
       data: compressProtobuf(request.writeToBuffer()),
       options: options,
+      cancelToken: cancelToken,
+      silent: silent,
     );
 
     if (response.data case final Map map) {
