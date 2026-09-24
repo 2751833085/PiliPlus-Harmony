@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/setting/models/extra_settings.dart';
 import 'package:PiliPlus/pages/setting/models/experimental_settings.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/harmony_adapt/feed_columns.dart';
@@ -46,14 +47,27 @@ import 'package:material_ui/material_ui.dart' hide StatefulBuilder;
 import 'package:path/path.dart' as path;
 
 List<SettingsModel> get styleSettings {
-  final settings = _appearanceSettings;
+  final settings = [
+    ...harmonyAppearanceSettings,
+    ..._appearanceSettings,
+    ...appearanceExtraSettings,
+    ...playerAppearanceSettings,
+  ];
   return [
     for (final section in const [
+      '界面风格',
+      '鸿蒙界面风格',
       '主题与显示',
       '导航与首页',
       '首页布局',
       '界面与布局',
       '动态与消息',
+      '播放控制',
+      '我的页面',
+      '装饰与显示',
+      '图片预览',
+      '交互与动画',
+      '用户主页',
       null,
     ])
       ...settings.where((item) => item.section == section),

@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/setting/models/experimental_settings.dart';
+import 'package:PiliPlus/pages/setting/models/extra_settings.dart';
 import 'dart:io' show Platform;
 
 import 'package:PiliPlus/common/widgets/custom_icon.dart';
@@ -24,7 +26,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:os_type/os_type.dart';
 
 List<SettingsModel> get playSettings => [
+  ...harmonyPlaybackSettings,
+  ...playbackExtraSettings,
   const SwitchModel(
+    section: '弹幕与字幕',
     title: '弹幕开关',
     subtitle: '是否展示弹幕',
     leading: Icon(CustomIcons.dm_settings),
@@ -33,6 +38,7 @@ List<SettingsModel> get playSettings => [
   ),
   if (PlatformUtils.isMobile)
     const SwitchModel(
+      section: '弹幕与字幕',
       title: '启用点击弹幕',
       subtitle: '点击弹幕悬停，支持点赞、复制、举报操作',
       leading: Icon(Icons.touch_app_outlined),
@@ -40,6 +46,7 @@ List<SettingsModel> get playSettings => [
       defaultVal: true,
     ),
   NormalModel(
+    section: '播放控制',
     onTap: (context, setState) => Get.toNamed('/playSpeedSet'),
     leading: const Icon(Icons.speed_outlined),
     title: '倍速设置',
@@ -47,12 +54,14 @@ List<SettingsModel> get playSettings => [
   ),
   if (Platform.isAndroid || OS.isHarmony)
     NormalModel(
+      section: '全屏与折叠屏',
       onTap: _showAngleDegreesDialog,
       leading: const Icon(MdiIcons.angleAcute),
       title: '倾斜角度阈值',
       getSubtitle: () => '当前:「${Pref.angleDegrees}°」',
     ),
   const SwitchModel(
+    section: '播放控制',
     title: '自动播放',
     subtitle: '进入详情页自动播放',
     leading: Icon(Icons.motion_photos_auto_outlined),
@@ -60,24 +69,28 @@ List<SettingsModel> get playSettings => [
     defaultVal: false,
   ),
   const SwitchModel(
+    section: '全屏与折叠屏',
     title: '全屏显示锁定按钮',
     leading: Icon(Icons.lock_outline),
     setKey: SettingBoxKey.showFsLockBtn,
     defaultVal: true,
   ),
   const SwitchModel(
+    section: '全屏与折叠屏',
     title: '全屏显示截图按钮',
     leading: Icon(Icons.photo_camera_outlined),
     setKey: SettingBoxKey.showFsScreenshotBtn,
     defaultVal: true,
   ),
   SwitchModel(
+    section: '全屏与折叠屏',
     title: '全屏显示电池电量',
     leading: const Icon(Icons.battery_3_bar),
     setKey: SettingBoxKey.showBatteryLevel,
     defaultVal: PlatformUtils.isMobile,
   ),
   const SwitchModel(
+    section: '播放手势',
     title: '双击快退/快进',
     subtitle: '左侧双击快退/右侧双击快进，关闭则双击均为暂停/播放',
     leading: Icon(Icons.touch_app_outlined),
@@ -85,6 +98,7 @@ List<SettingsModel> get playSettings => [
     defaultVal: true,
   ),
   const SwitchModel(
+    section: '播放手势',
     title: '左右侧滑动调节亮度/音量',
     leading: Icon(MdiIcons.tuneVerticalVariant),
     setKey: SettingBoxKey.enableSlideVolumeBrightness,
@@ -92,12 +106,14 @@ List<SettingsModel> get playSettings => [
   ),
   if (Platform.isAndroid)
     const SwitchModel(
+      section: '播放手势',
       title: '调节系统亮度',
       leading: Icon(Icons.brightness_6_outlined),
       setKey: SettingBoxKey.setSystemBrightness,
       defaultVal: false,
     ),
   const SwitchModel(
+    section: '全屏与折叠屏',
     title: '中间滑动进入/退出全屏',
     leading: Icon(MdiIcons.panVertical),
     setKey: SettingBoxKey.enableSlideFS,
@@ -105,6 +121,7 @@ List<SettingsModel> get playSettings => [
   ),
   if (PlatformUtils.isMobile)
     NormalModel(
+      section: '播放控制',
       title: '播放器音量',
       leading: const Icon(Icons.volume_up),
       getSubtitle: () => '当前:「${Pref.playerVolume.toStringAsFixed(0)}%」',
@@ -112,12 +129,14 @@ List<SettingsModel> get playSettings => [
     )
   else
     NormalModel(
+      section: '播放控制',
       title: '最高音量',
       leading: const Icon(Icons.volume_up),
       getSubtitle: () => '当前:「${(Pref.maxVolume * 100).toStringAsFixed(0)}%」',
       onTap: _showMaxVolumeDialog,
     ),
   getVideoFilterSelectModel(
+    section: '播放手势',
     title: '双击快进/快退时长',
     suffix: 's',
     key: SettingBoxKey.fastForBackwardDuration,
@@ -126,12 +145,14 @@ List<SettingsModel> get playSettings => [
     isFilter: false,
   ),
   const SwitchModel(
+    section: '播放手势',
     title: '滑动快进/快退使用相对时长',
     leading: Icon(Icons.swap_horiz_outlined),
     setKey: SettingBoxKey.useRelativeSlide,
     defaultVal: false,
   ),
   getVideoFilterSelectModel(
+    section: '播放手势',
     title: '滑动快进/快退时长',
     subtitle: '从播放器一端滑到另一端的快进/快退时长',
     suffix: Pref.useRelativeSlide ? '%' : 's',
@@ -141,6 +162,7 @@ List<SettingsModel> get playSettings => [
     isFilter: false,
   ),
   NormalModel(
+    section: '弹幕与字幕',
     title: '自动启用字幕',
     leading: const Icon(Icons.closed_caption_outlined),
     getSubtitle: () => '当前选择偏好：${Pref.subtitlePreferenceV2.desc}',
@@ -148,6 +170,7 @@ List<SettingsModel> get playSettings => [
   ),
   if (PlatformUtils.isDesktop)
     SwitchModel(
+      section: '后台与小窗',
       title: '最小化时暂停/还原时播放',
       leading: const Icon(Icons.pause_circle_outline),
       setKey: SettingBoxKey.pauseOnMinimize,
@@ -159,12 +182,14 @@ List<SettingsModel> get playSettings => [
       },
     ),
   const SwitchModel(
+    section: '播放手势',
     title: '启用键盘控制',
     leading: Icon(Icons.keyboard_alt_outlined),
     setKey: SettingBoxKey.keyboardControl,
     defaultVal: true,
   ),
   PopupModel(
+    section: '弹幕与字幕',
     title: 'SuperChat (醒目留言) 显示类型',
     leading: const Icon(Icons.live_tv),
     value: () => Pref.superChatType,
@@ -174,12 +199,14 @@ List<SettingsModel> get playSettings => [
         .whenComplete(setState),
   ),
   NormalModel(
+    section: '弹幕与字幕',
     title: '全屏 SC 大小',
     subtitle: 'SuperChat (醒目留言) 大小设置',
     leading: const Icon(Icons.open_in_full),
     onTap: (_, _) => Get.to(const FullScreenScSize()),
   ),
   const SwitchModel(
+    section: '全屏与折叠屏',
     title: '竖屏扩大展示',
     subtitle: '小屏竖屏视频宽高比由16:9扩大至1:1（不支持收起）；横屏适配时，扩大至9:16',
     leading: Icon(Icons.expand_outlined),
@@ -187,6 +214,7 @@ List<SettingsModel> get playSettings => [
     defaultVal: false,
   ),
   const SwitchModel(
+    section: '全屏与折叠屏',
     title: '自动全屏',
     subtitle: '视频开始播放时进入全屏',
     leading: Icon(Icons.fullscreen_outlined),
@@ -194,6 +222,7 @@ List<SettingsModel> get playSettings => [
     defaultVal: false,
   ),
   const SwitchModel(
+    section: '全屏与折叠屏',
     title: '自动退出全屏',
     subtitle: '视频结束播放时退出全屏',
     leading: Icon(Icons.fullscreen_exit_outlined),
@@ -201,6 +230,7 @@ List<SettingsModel> get playSettings => [
     defaultVal: true,
   ),
   const SwitchModel(
+    section: '播放控制',
     title: '延长播放控件显示时间',
     subtitle: '开启后延长至30秒，便于屏幕阅读器滑动切换控件焦点',
     leading: Icon(Icons.timer_outlined),
@@ -209,6 +239,7 @@ List<SettingsModel> get playSettings => [
   ),
   if (PlatformUtils.isMobile)
     const SwitchModel(
+      section: '后台与小窗',
       title: '后台播放',
       subtitle: '进入后台时继续播放',
       leading: Icon(Icons.motion_photos_pause_outlined),
@@ -217,6 +248,7 @@ List<SettingsModel> get playSettings => [
     ),
   if (Platform.isAndroid || OS.isHarmony) ...[
     SwitchModel(
+      section: '后台与小窗',
       title: '后台画中画',
       subtitle: '进入后台时以小窗形式（PiP）播放',
       leading: const Icon(Icons.picture_in_picture_outlined),
@@ -229,6 +261,7 @@ List<SettingsModel> get playSettings => [
       },
     ),
     const SwitchModel(
+      section: '后台与小窗',
       title: '画中画不加载弹幕',
       subtitle: '当弹幕开关开启时，小窗屏蔽弹幕以获得较好的体验',
       leading: Icon(CustomIcons.dm_off),
@@ -237,6 +270,7 @@ List<SettingsModel> get playSettings => [
     ),
   ],
   const SwitchModel(
+    section: '全屏与折叠屏',
     title: '全屏手势反向',
     subtitle: '默认播放器中部向上滑动进入全屏，向下退出\n开启后向下全屏，向上退出',
     leading: Icon(Icons.swap_vert),
@@ -244,12 +278,14 @@ List<SettingsModel> get playSettings => [
     defaultVal: false,
   ),
   const SwitchModel(
+    section: '全屏与折叠屏',
     title: '全屏展示点赞/投币/收藏等操作按钮',
     leading: Icon(MdiIcons.dotsHorizontalCircleOutline),
     setKey: SettingBoxKey.showFSActionItem,
     defaultVal: true,
   ),
   const SwitchModel(
+    section: '播放控制',
     title: '观看人数',
     subtitle: '展示同时在看人数',
     leading: Icon(Icons.people_outlined),
@@ -257,12 +293,14 @@ List<SettingsModel> get playSettings => [
     defaultVal: false,
   ),
   NormalModel(
+    section: '全屏与折叠屏',
     title: '默认全屏方向',
     leading: const Icon(Icons.open_with_outlined),
     getSubtitle: () => '当前全屏方向：${Pref.fullScreenMode.desc}',
     onTap: _showFullScreenModeDialog,
   ),
   PopupModel(
+    section: '进度条',
     title: '底部进度条展示',
     leading: const Icon(Icons.border_bottom_outlined),
     value: () => Pref.btmProgressBehavior,
@@ -273,6 +311,7 @@ List<SettingsModel> get playSettings => [
   ),
   if (PlatformUtils.isMobile)
     SwitchModel(
+      section: '后台与小窗',
       title: '后台音频服务',
       subtitle: '避免画中画没有播放暂停功能',
       leading: const Icon(Icons.volume_up_outlined),
@@ -282,6 +321,7 @@ List<SettingsModel> get playSettings => [
           videoPlayerServiceHandler!.enableBackgroundPlay = value,
     ),
   PopupModel(
+    section: '播放顺序与跳过',
     title: '播放顺序',
     leading: const Icon(Icons.repeat),
     value: () => Pref.playRepeat,
@@ -291,6 +331,7 @@ List<SettingsModel> get playSettings => [
         .whenComplete(setState),
   ),
   const SwitchModel(
+    section: '播放控制',
     title: '播放器设置仅对当前生效',
     subtitle: '弹幕、字幕及部分设置中没有的设置除外',
     leading: Icon(Icons.video_settings_outlined),

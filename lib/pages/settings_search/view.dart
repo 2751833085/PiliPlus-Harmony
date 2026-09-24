@@ -1,16 +1,11 @@
+import 'package:PiliPlus/models/common/setting_type.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/view_sliver_safe_area.dart';
 import 'package:PiliPlus/pages/search/controller.dart' show DebounceStreamState;
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
-import 'package:PiliPlus/pages/setting/models/extra_settings.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
-import 'package:PiliPlus/pages/setting/models/play_settings.dart';
-import 'package:PiliPlus/pages/setting/models/privacy_settings.dart';
-import 'package:PiliPlus/pages/setting/models/recommend_settings.dart';
-import 'package:PiliPlus/pages/setting/models/style_settings.dart';
-import 'package:PiliPlus/pages/setting/models/video_settings.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/waterfall.dart';
@@ -39,14 +34,7 @@ class _SettingsSearchPageState
   late final RxList<String> _history = RxList<String>.from(
     GStorage.historyWord.get(_historyKey) ?? const <String>[],
   );
-  List<SettingsModel> get _settings => [
-    ...extraSettings,
-    ...privacySettings,
-    ...recommendSettings,
-    ...videoSettings,
-    ...playSettings,
-    ...styleSettings,
-  ];
+  List<SettingsModel> get _settings => SettingType.searchSettings;
 
   @override
   void initState() {

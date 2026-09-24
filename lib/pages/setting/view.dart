@@ -41,40 +41,45 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
-  late SettingType _type = SettingType.privacySetting;
+  late SettingType _type = SettingType.styleSetting;
   final RxBool _noAccount = Accounts.account.isEmpty.obs;
   late bool _isPortrait;
   late ThemeData theme;
 
   static const List<_SettingsModel> _items = [
     _SettingsModel(
-      type: SettingType.privacySetting,
-      subtitle: '黑名单',
-      icon: Icon(Icons.privacy_tip_outlined),
-    ),
-    _SettingsModel(
-      type: SettingType.recommendSetting,
-      subtitle: '推荐来源（web/app）、刷新保留内容、过滤器',
-      icon: Icon(Icons.explore_outlined),
-    ),
-    _SettingsModel(
-      type: SettingType.videoSetting,
-      subtitle: '画质、音质、解码、缓冲、音频输出等',
-      icon: Icon(Icons.video_settings_outlined),
-    ),
-    _SettingsModel(
-      type: SettingType.playSetting,
-      subtitle: '双击/长按、全屏、后台播放、弹幕、字幕、底部进度条等',
-      icon: Icon(Icons.touch_app_outlined),
-    ),
-    _SettingsModel(
       type: SettingType.styleSetting,
-      subtitle: '鸿蒙底栏、首页栏数、颜色选择、纯黑主题、字体与显示',
+      subtitle: '界面风格、颜色、沉浸光感、导航与页面布局',
       icon: Icon(Icons.style_outlined),
     ),
     _SettingsModel(
+      type: SettingType.playSetting,
+      subtitle: '播放控制、全屏与折叠屏、竖屏短视频、弹幕与字幕',
+      icon: Icon(Icons.touch_app_outlined),
+    ),
+    _SettingsModel(
+      type: SettingType.videoSetting,
+      subtitle: '画质、音质、解码、缓冲、CDN 与海外模式',
+      icon: Icon(Icons.video_settings_outlined),
+    ),
+    _SettingsModel(
+      type: SettingType.featuredSetting,
+      subtitle: '空降助手、海外模式、短视频、AI 总结与鸿蒙增强',
+      icon: Icon(Icons.auto_awesome_outlined),
+    ),
+    _SettingsModel(
+      type: SettingType.recommendSetting,
+      subtitle: '推荐偏好、内容过滤、搜索、评论与动态',
+      icon: Icon(Icons.tune_rounded),
+    ),
+    _SettingsModel(
+      type: SettingType.privacySetting,
+      subtitle: '搜索与评论记录、历史展示、黑名单与网络安全',
+      icon: Icon(Icons.privacy_tip_outlined),
+    ),
+    _SettingsModel(
       type: SettingType.extraSetting,
-      subtitle: '界面风格、沉浸光感、折叠屏、播放器体验与其他功能',
+      subtitle: '系统能力、存储缓存、链接下载与更新',
       icon: Icon(Icons.extension_outlined),
     ),
     _SettingsModel(
@@ -138,6 +143,7 @@ class _SettingPageState extends State<SettingPage> {
                           ),
                         Expanded(
                           child: switch (_type) {
+                            .featuredSetting ||
                             .privacySetting ||
                             .recommendSetting ||
                             .videoSetting ||
@@ -175,6 +181,7 @@ class _SettingPageState extends State<SettingPage> {
     if (_isPortrait) {
       Get.to(
         () => switch (type) {
+          .featuredSetting ||
           .privacySetting ||
           .recommendSetting ||
           .videoSetting ||

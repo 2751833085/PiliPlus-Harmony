@@ -20,7 +20,7 @@ void refreshHarmonySettings(bool _) {
   }
 }
 
-List<SettingsModel> get experimentalSettings => [
+List<SettingsModel> get harmonyAppearanceSettings => [
   SwitchModel(
     title: 'Material You 界面风格',
     section: '界面风格',
@@ -50,29 +50,12 @@ List<SettingsModel> get experimentalSettings => [
     ),
   ],
   SwitchModel(
-    section: '折叠屏与握持',
+    section: '导航与首页',
     title: '智感握姿',
     subtitle: '接入系统握持识别：单手时 Dock 靠近握持侧，双手时居中；全屏进度条保持全宽，不支持的设备保持居中',
     leading: const Icon(Icons.back_hand_outlined),
     setKey: SettingBoxKey.harmonyHandedness,
     onChanged: refreshHarmonySettings,
-  ),
-  const SwitchModel(
-    section: '折叠屏与握持',
-    title: '全屏跟随折叠形态',
-    subtitle: '默认开启：展开时重新适配全屏方向，合回单屏时回到详情页播放器并继续播放；关闭后保留原有全屏方向行为',
-    leading: Icon(Icons.screen_rotation_alt_outlined),
-    setKey: SettingBoxKey.harmonyFoldOrientation,
-    defaultVal: true,
-  ),
-  const SwitchModel(
-    section: '交互与动画',
-    title: '显示实际百分比音量',
-    subtitle:
-        '某些系统(鸿蒙)或设备只支持整数音量级别，如0~15，对应的百分比音量只有0%、7%、···、93%和100%，不存在1%、2%和50%等实际百分比音量',
-    leading: Icon(Icons.science_outlined),
-    setKey: SettingBoxKey.showActualVolume,
-    defaultVal: false,
   ),
   const SwitchModel(
     section: '交互与动画',
@@ -91,6 +74,29 @@ List<SettingsModel> get experimentalSettings => [
     defaultVal: false,
     onChanged: (_) => SmartDialog.showToast("建议重启以应用更改"),
   ),
+];
+
+List<SettingsModel> get harmonyPlaybackSettings => [
+  const SwitchModel(
+    section: '全屏与折叠屏',
+    title: '全屏跟随折叠形态',
+    subtitle: '默认开启：展开时重新适配全屏方向，合回单屏时回到详情页播放器并继续播放；关闭后保留原有全屏方向行为',
+    leading: Icon(Icons.screen_rotation_alt_outlined),
+    setKey: SettingBoxKey.harmonyFoldOrientation,
+    defaultVal: true,
+  ),
+  const SwitchModel(
+    section: '播放控制',
+    title: '显示实际百分比音量',
+    subtitle:
+        '某些系统(鸿蒙)或设备只支持整数音量级别，如0~15，对应的百分比音量只有0%、7%、···、93%和100%，不存在1%、2%和50%等实际百分比音量',
+    leading: Icon(Icons.science_outlined),
+    setKey: SettingBoxKey.showActualVolume,
+    defaultVal: false,
+  ),
+];
+
+List<SettingsModel> get experimentalSettings => [
   NormalModel(
     section: '系统能力',
     title: '应用接续',
@@ -140,7 +146,7 @@ List<SettingsModel> get harmonyNavigationSettings => [
   PopupModel(
     section: '导航与首页',
     disabledReason: () =>
-        Pref.harmonyUI ? null : '请在其他设置中关闭 Material You 界面风格，并重启应用。',
+        Pref.harmonyUI ? null : '请在外观设置中关闭 Material You 界面风格，并重启应用。',
     title: '鸿蒙底栏与侧栏',
     leading: const Icon(Icons.space_dashboard_outlined),
     value: () => Pref.harmonyNavigation,
@@ -159,7 +165,7 @@ List<SettingsModel> get harmonyNavigationSettings => [
     SwitchModel(
       section: '导航与首页',
       disabledReason: () =>
-          Pref.harmonyUI ? null : '请在其他设置中关闭 Material You 界面风格，并重启应用。',
+          Pref.harmonyUI ? null : '请在外观设置中关闭 Material You 界面风格，并重启应用。',
       title: '展开时也采用悬浮 Dock',
       subtitle: '开启后双折、三折展开保留底部悬浮 Dock；关闭后在宽屏使用鸿蒙侧栏',
       leading: const Icon(Icons.tablet_mac_outlined),

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/setting/models/extra_settings.dart';
 import 'dart:io';
 
 import 'package:PiliPlus/models/common/video/audio_quality.dart';
@@ -23,7 +24,10 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:material_ui/material_ui.dart';
 
 List<SettingsModel> get videoSettings => [
+  ...audioVideoExtraSettings,
+  ...preloadSettings,
   const SwitchModel(
+    section: '画质与解码',
     title: '开启硬解',
     subtitle: '以较低功耗播放视频，若异常卡死请关闭',
     leading: Icon(Icons.flash_on_outlined),
@@ -31,6 +35,7 @@ List<SettingsModel> get videoSettings => [
     defaultVal: true,
   ),
   const SwitchModel(
+    section: '画质与解码',
     title: '免登录1080P',
     subtitle: '免登录查看1080P视频',
     leading: Icon(Icons.hd_outlined),
@@ -38,6 +43,7 @@ List<SettingsModel> get videoSettings => [
     defaultVal: true,
   ),
   NormalModel(
+    section: '网络与加载',
     title: 'B站定向流量支持',
     subtitle: '若套餐含B站定向流量，则会自动使用。可查阅运营商的流量记录确认。',
     leading: const Icon(Icons.perm_data_setting_outlined),
@@ -56,6 +62,7 @@ List<SettingsModel> get videoSettings => [
     ),
   ),
   NormalModel(
+    section: '网络与加载',
     title: 'CDN 设置',
     disabledReason: () =>
         Pref.overseasMode ? '已开启海外模式，视频和音频线路由应用自动选择。关闭海外模式后可恢复手动设置。' : null,
@@ -65,12 +72,14 @@ List<SettingsModel> get videoSettings => [
     onTap: _showCDNDialog,
   ),
   NormalModel(
+    section: '网络与加载',
     title: '直播 CDN 设置',
     leading: const Icon(MdiIcons.cloudPlusOutline),
     getSubtitle: () => '当前使用：${Pref.liveCdnUrl ?? "默认"}',
     onTap: _showLiveCDNDialog,
   ),
   const SwitchModel(
+    section: '网络与加载',
     title: 'CDN 测速',
     leading: Icon(Icons.speed),
     subtitle: '测速通过模拟加载视频实现，注意流量消耗，结果仅供参考',
@@ -78,6 +87,7 @@ List<SettingsModel> get videoSettings => [
     defaultVal: true,
   ),
   SwitchModel(
+    section: '网络与加载',
     title: '音频不跟随 CDN 设置',
     disabledReason: () =>
         Pref.overseasMode ? '已开启海外模式，音频会单独探测并选择可用线路。关闭海外模式后可恢复此设置。' : null,
@@ -88,6 +98,7 @@ List<SettingsModel> get videoSettings => [
     onChanged: (value) => VideoUtils.disableAudioCDN = value,
   ),
   NormalModel(
+    section: '画质与解码',
     title: '默认画质',
     leading: const Icon(Icons.video_settings_outlined),
     getSubtitle: () =>
@@ -95,6 +106,7 @@ List<SettingsModel> get videoSettings => [
     onTap: _showVideoQaDialog,
   ),
   NormalModel(
+    section: '画质与解码',
     title: '蜂窝网络画质',
     leading: const Icon(Icons.video_settings_outlined),
     getSubtitle: () =>
@@ -102,6 +114,7 @@ List<SettingsModel> get videoSettings => [
     onTap: _showVideoCellularQaDialog,
   ),
   NormalModel(
+    section: '音质与音量',
     title: '默认音质',
     leading: const Icon(Icons.music_video_outlined),
     getSubtitle: () =>
@@ -109,6 +122,7 @@ List<SettingsModel> get videoSettings => [
     onTap: _showAudioQaDialog,
   ),
   NormalModel(
+    section: '音质与音量',
     title: '蜂窝网络音质',
     leading: const Icon(Icons.music_video_outlined),
     getSubtitle: () =>
@@ -116,12 +130,14 @@ List<SettingsModel> get videoSettings => [
     onTap: _showAudioCellularQaDialog,
   ),
   NormalModel(
+    section: '画质与解码',
     title: '直播默认画质',
     leading: const Icon(Icons.video_settings_outlined),
     getSubtitle: () => '当前画质：${LiveQuality.fromCode(Pref.liveQuality)?.desc}',
     onTap: _showLiveQaDialog,
   ),
   NormalModel(
+    section: '画质与解码',
     title: '蜂窝网络直播默认画质',
     leading: const Icon(Icons.video_settings_outlined),
     getSubtitle: () =>
@@ -129,6 +145,7 @@ List<SettingsModel> get videoSettings => [
     onTap: _showLiveCellularQaDialog,
   ),
   NormalModel(
+    section: '画质与解码',
     title: '首选解码格式',
     leading: const Icon(Icons.movie_creation_outlined),
     getSubtitle: () =>
@@ -136,6 +153,7 @@ List<SettingsModel> get videoSettings => [
     onTap: _showCodecsDialog,
   ),
   NormalModel(
+    section: '画质与解码',
     title: '蜂窝网络首选解码格式',
     leading: const Icon(Icons.movie_creation_outlined),
     getSubtitle: () =>
@@ -144,12 +162,14 @@ List<SettingsModel> get videoSettings => [
   ),
   if (kDebugMode || Platform.isAndroid)
     NormalModel(
+      section: '音质与音量',
       title: '音频输出设备',
       leading: const Icon(Icons.speaker_outlined),
       getSubtitle: () => '当前：${Pref.audioOutput}',
       onTap: _showAudioOutputDialog,
     ),
   NormalModel(
+    section: '缓冲与同步',
     title: '缓冲大小',
     leading: const Icon(Icons.storage_outlined),
     getSubtitle: () =>
@@ -157,6 +177,7 @@ List<SettingsModel> get videoSettings => [
     onTap: _showBufferSizeDialog,
   ),
   NormalModel(
+    section: '缓冲与同步',
     title: '缓冲时长',
     leading: const Icon(Icons.av_timer),
     getSubtitle: () =>
@@ -164,18 +185,21 @@ List<SettingsModel> get videoSettings => [
     onTap: _showBufferSecDialog,
   ),
   NormalModel(
+    section: '缓冲与同步',
     title: '自动同步',
     leading: const Icon(Icons.sync_rounded),
     getSubtitle: () => '当前：${Pref.autosync}（此项即mpv的--autosync）',
     onTap: _showAutoSyncDialog,
   ),
   NormalModel(
+    section: '缓冲与同步',
     title: '视频同步',
     leading: const Icon(Icons.view_timeline_outlined),
     getSubtitle: () => '当前：${Pref.videoSync}（此项即mpv的--video-sync）',
     onTap: _showVideoSyncDialog,
   ),
   NormalModel(
+    section: '画质与解码',
     title: '硬解模式',
     leading: const Icon(Icons.memory_outlined),
     getSubtitle: () => '当前：${Pref.hardwareDecoding}（此项即mpv的--hwdec）',

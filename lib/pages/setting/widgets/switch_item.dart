@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:hive_ce/hive.dart' show BoxEvent;
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
@@ -41,6 +43,19 @@ class SetSwitchItem extends StatefulWidget {
 
 class _SetSwitchItemState extends State<SetSwitchItem> {
   late bool val;
+  StreamSubscription<BoxEvent>? _subscription;
+
+  void _watchValue() {
+    _subscription?.cancel();
+    _subscription = GStorage.setting.watch(key: widget.setKey).listen((_) {
+      if (!mounted) return;
+      final next = GStorage.setting.get(
+        widget.setKey,
+        defaultValue: widget.defaultVal,
+      );
+      if (next != val) setState(() => val = next);
+    });
+  }
 
   void _setVal() {
     val = GStorage.setting.get(widget.setKey, defaultValue: widget.defaultVal);
@@ -51,6 +66,7 @@ class _SetSwitchItemState extends State<SetSwitchItem> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.setKey != widget.setKey) {
       _setVal();
+      _watchValue();
     }
   }
 
@@ -58,6 +74,13 @@ class _SetSwitchItemState extends State<SetSwitchItem> {
   void initState() {
     super.initState();
     _setVal();
+    _watchValue();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 
   Future<void> switchChange([bool? value]) async {

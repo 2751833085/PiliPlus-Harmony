@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/setting/models/extra_settings.dart';
 import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
@@ -8,7 +9,11 @@ import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
 List<SettingsModel> get privacySettings => [
+  ...privacyRecordSettings,
+  ...historyVisibilitySettings,
+  ...networkSecuritySettings,
   NormalModel(
+    section: '账号与隐私',
     onTap: (context, setState) {
       if (!Accounts.main.isLogin) {
         SmartDialog.showToast('登录后查看');
@@ -21,6 +26,7 @@ List<SettingsModel> get privacySettings => [
     leading: const Icon(Icons.block),
   ),
   NormalModel(
+    section: '账号与隐私',
     onTap: (context, setState) {
       showDialog(
         context: context,

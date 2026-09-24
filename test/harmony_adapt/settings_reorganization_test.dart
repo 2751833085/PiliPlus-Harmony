@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/pages/setting/common_setting.dart';
@@ -22,6 +23,8 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
     GStorage.setting = MemoryBox();
+    GStorage.video = MemoryBox();
+    GStorage.localCache = MemoryBox();
     debugDefaultTargetPlatformOverride = TargetPlatform.ohos;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
@@ -128,15 +131,15 @@ void main() {
   );
 
   test(
-    'Harmony sections live in Other with conditional rows and no duplicated navigation',
+    'appearance owns Harmony style with conditional rows and no duplicate navigation',
     () async {
-      expect(extraSettings.map((e) => e.title), contains('Material You 界面风格'));
-      expect(extraSettings.map((e) => e.title), isNot(contains('沉浸光感')));
+      expect(styleSettings.map((e) => e.title), contains('Material You 界面风格'));
+      expect(styleSettings.map((e) => e.title), isNot(contains('沉浸光感')));
       await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
       Pref.captureAppearanceAtStartup();
       expect(
-        extraSettings.map((e) => e.title),
-        containsAll(['沉浸光感', '采用鸿蒙原生配色', '智感握姿', '全屏跟随折叠形态']),
+        styleSettings.map((e) => e.title),
+        containsAll(['沉浸光感', '采用鸿蒙原生配色', '智感握姿']),
       );
       expect(extraSettings.map((e) => e.title), isNot(contains('鸿蒙底栏与侧栏')));
       expect(
@@ -151,6 +154,129 @@ void main() {
         harmonyNavigationSettings.map((e) => e.title),
         isNot(contains('展开时也采用悬浮 Dock')),
       );
+    },
+  );
+
+  test(
+    'related categories share settings while search deduplicates and values persist',
+    () async {
+      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
+      Pref.captureAppearanceAtStartup();
+      await GStorage.setting.put(SettingBoxKey.shortVideoMode, true);
+      await GStorage.setting.put(SettingBoxKey.overseasMode, true);
+      final catalog = {
+        for (final type in SettingType.searchable) type: type.settings,
+      };
+      final rows = SettingType.searchSettings;
+      final titles = rows.map((row) => row.effectiveTitle).toList();
+      expect(
+        titles.toSet().length,
+        titles.length,
+        reason: 'No duplicate search entries',
+      );
+      final keys = <String>[];
+      for (final row in rows) {
+        if (row is SwitchModel) keys.add(row.setKey);
+        if (row is SplitModel) keys.add(row.switchModel.setKey);
+        expect(row.section, isNotNull, reason: row.effectiveTitle);
+      }
+      expect(keys.toSet().length, keys.length);
+      expect(
+        catalog[SettingType.styleSetting]!.map((e) => e.effectiveTitle),
+        containsAll(['Material You 界面风格', '颜色选择', '沉浸光感', '在我的页面展示观看历史']),
+      );
+      expect(
+        catalog[SettingType.playSetting]!.map((e) => e.effectiveTitle),
+        containsAll(['竖屏短视频模式', '全屏跟随折叠形态', '空降助手', '弹幕行高']),
+      );
+      expect(
+        catalog[SettingType.videoSetting]!.map((e) => e.effectiveTitle),
+        containsAll(['海外模式', 'CDN 设置', '音量均衡', '设置代理']),
+      );
+      expect(
+        catalog[SettingType.recommendSetting]!.map((e) => e.effectiveTitle),
+        containsAll(['记录搜索历史', '评论关键词过滤', '动态关键词过滤']),
+      );
+      expect(SettingType.recommendSetting.title, '个性化设置');
+      expect(
+        SettingType.privacySetting.settings.map((e) => e.effectiveTitle),
+        containsAll([
+          '黑名单管理',
+          '记录搜索历史',
+          '记录评论',
+          '在我的页面展示观看历史',
+          '禁用 SSL 证书验证',
+          '设置代理',
+        ]),
+      );
+      expect(
+        SettingType.featuredSetting.settings.map((e) => e.effectiveTitle),
+        containsAll(['空降助手', '海外模式', '竖屏短视频模式', '启用AI总结', '智感握姿', '沉浸光感']),
+      );
+      for (final type in [
+        SettingType.playSetting,
+        SettingType.videoSetting,
+        SettingType.featuredSetting,
+      ]) {
+        expect(
+          type.settings.map((row) => row.effectiveTitle),
+          contains('连续视频预加载'),
+        );
+      }
+      expect(
+        extraSettings.map((e) => e.effectiveTitle),
+        containsAll(['应用接续', '最大缓存大小', '检查更新']),
+      );
+      expect(
+        extraSettings.map((e) => e.effectiveTitle),
+        isNot(contains('竖屏短视频模式')),
+      );
+      final short =
+          rows.singleWhere((e) => e.title == '竖屏短视频模式') as SwitchModel;
+      final overseas =
+          rows.singleWhere((e) => e.title == '海外模式') as SwitchModel;
+      expect(GStorage.setting.get(short.setKey), isTrue);
+      expect(GStorage.setting.get(overseas.setKey), isTrue);
+    },
+  );
+
+  testWidgets(
+    'shared switches update in both menus without duplicate side effects',
+    (tester) async {
+      debugDefaultTargetPlatformOverride = null;
+      await GStorage.setting.put(SettingBoxKey.showMineHistory, false);
+      final appearance = SettingType.styleSetting.settings.singleWhere(
+        (e) => e.title == '在我的页面展示观看历史',
+      );
+      final privacy = SettingType.privacySetting.settings.singleWhere(
+        (e) => e.title == '在我的页面展示观看历史',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(children: [appearance.widget, privacy.widget]),
+          ),
+        ),
+      );
+      expect(
+        tester.widgetList<Switch>(find.byType(Switch)).map((w) => w.value),
+        [false, false],
+      );
+      await tester.tap(find.byType(Switch).first);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widgetList<Switch>(find.byType(Switch)).map((w) => w.value),
+        [true, true],
+      );
+      await tester.tap(find.byType(Switch).last);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widgetList<Switch>(find.byType(Switch)).map((w) => w.value),
+        [false, false],
+      );
+      await tester.pumpWidget(const SizedBox());
+      await GStorage.setting.put(SettingBoxKey.showMineHistory, true);
+      expect(tester.takeException(), isNull);
     },
   );
 
@@ -203,7 +329,7 @@ void main() {
   });
 
   testWidgets(
-    'appearance layout fits original-resolution fold profiles and large text',
+    'all setting categories fit original-resolution fold profiles and large text',
     (tester) async {
       debugDefaultTargetPlatformOverride = null;
       Get.testMode = true;
@@ -218,39 +344,44 @@ void main() {
         const Size(3184, 2232),
       ]) {
         tester.view.physicalSize = pixels;
-        for (final dark in [false, true]) {
-          final theme = ThemeUtils.getThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
-            isDynamic: false,
-            isDark: dark,
-          );
-          await tester.pumpWidget(
-            GetMaterialApp(
-              theme: theme,
-              builder: (context, child) => MediaQuery(
-                data: MediaQuery.of(
-                  context,
-                ).copyWith(textScaler: const TextScaler.linear(1.3)),
-                child: child!,
+        for (final type in [
+          ...SettingType.searchable,
+          SettingType.featuredSetting,
+        ]) {
+          for (final dark in [false, true]) {
+            final theme = ThemeUtils.getThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
+              isDynamic: false,
+              isDark: dark,
+            );
+            await tester.pumpWidget(
+              GetMaterialApp(
+                theme: theme,
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: const TextScaler.linear(1.3)),
+                  child: child!,
+                ),
+                home: CommonSetting(settingType: type),
               ),
-              home: const CommonSetting(settingType: SettingType.styleSetting),
-            ),
-          );
-          await tester.pumpAndSettle();
-          for (var i = 0; i < 12; i++) {
-            await tester.drag(
-              find.byType(ListView).first,
-              const Offset(0, -450),
             );
             await tester.pumpAndSettle();
-            expect(
-              tester.takeException(),
-              isNull,
-              reason: '$pixels dark=$dark scroll=$i',
-            );
+            for (var i = 0; i < 12; i++) {
+              await tester.drag(
+                find.byType(ListView).first,
+                const Offset(0, -450),
+              );
+              await tester.pumpAndSettle();
+              expect(
+                tester.takeException(),
+                isNull,
+                reason: '$type $pixels dark=$dark scroll=$i',
+              );
+            }
+            await tester.pumpWidget(const SizedBox());
+            Get.reset();
           }
-          await tester.pumpWidget(const SizedBox());
-          Get.reset();
         }
       }
     },

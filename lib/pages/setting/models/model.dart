@@ -28,6 +28,12 @@ sealed class SettingsModel {
           child: child,
         );
 
+  String get searchIdentity => switch (this) {
+    SwitchModel(:final setKey) => 'setting:$setKey',
+    SplitModel(:final switchModel) => 'setting:${switchModel.setKey}',
+    _ => 'title:$effectiveTitle',
+  };
+
   String? get title;
   Widget get widget;
   String get effectiveTitle;
@@ -239,11 +245,13 @@ class SwitchModel extends SettingsModel {
 
 SettingsModel getBanWordModel({
   required String title,
+  String? section,
   required String key,
   required ValueChanged<RegExp> onChanged,
 }) {
   String banWord = GStorage.setting.get(key, defaultValue: '');
   return NormalModel(
+    section: section,
     leading: const Icon(Icons.filter_alt_outlined),
     title: title,
     getSubtitle: () => banWord.isEmpty ? "点击添加" : banWord,
@@ -297,6 +305,7 @@ SettingsModel getBanWordModel({
 
 SettingsModel getVideoFilterSelectModel({
   required String title,
+  String? section,
   String? subtitle,
   String? suffix,
   required String key,
@@ -308,6 +317,7 @@ SettingsModel getVideoFilterSelectModel({
   assert(!isFilter || onChanged != null);
   int value = GStorage.setting.get(key, defaultValue: defaultValue);
   return NormalModel(
+    section: section,
     title: '$title${isFilter ? '过滤' : ''}',
     leading: const Icon(Icons.timelapse_outlined),
     subtitle: subtitle,
