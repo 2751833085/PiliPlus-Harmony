@@ -184,12 +184,14 @@ class _MediaPageState extends CommonPageState<MinePage>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(
-                                  width: 340,
+                                  width: (constraints.maxWidth - 46) * .43,
                                   child: Column(
                                     children: [
                                       account,
                                       const SizedBox(height: 10),
                                       actions,
+                                      const SizedBox(height: 10),
+                                      favorites,
                                     ],
                                   ),
                                 ),
@@ -197,8 +199,10 @@ class _MediaPageState extends CommonPageState<MinePage>
                                 Expanded(
                                   child: Column(
                                     children: [
-                                      _buildRecentHistory(harmony: true),
-                                      favorites,
+                                      _buildRecentHistory(
+                                        harmony: true,
+                                        expanded: true,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -225,33 +229,35 @@ class _MediaPageState extends CommonPageState<MinePage>
     ),
   );
 
-  Widget _buildRecentHistory({bool harmony = false}) => ListenableBuilder(
-    listenable: controller.recentHistory,
-    builder: (context, _) {
-      if (!controller.recentHistory.enabled) return const SizedBox.shrink();
-      final child = MineHistoryPreview(
-        history: controller.recentHistory,
-        onOpen: (item) async {
-          await openHistoryItem(item);
-          if (mounted) controller.recentHistory.refresh();
+  Widget _buildRecentHistory({bool harmony = false, bool expanded = false}) =>
+      ListenableBuilder(
+        listenable: controller.recentHistory,
+        builder: (context, _) {
+          if (!controller.recentHistory.enabled) return const SizedBox.shrink();
+          final child = MineHistoryPreview(
+            expanded: expanded,
+            history: controller.recentHistory,
+            onOpen: (item) async {
+              await openHistoryItem(item);
+              if (mounted) controller.recentHistory.refresh();
+            },
+            onViewAll: () => Get.toNamed('/history')?.whenComplete(() {
+              if (mounted) controller.recentHistory.refresh();
+            }),
+            onLogin: () => Get.toNamed('/loginPage'),
+          );
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: harmony
+                ? ImmersiveSurface(
+                    blurBackground: false,
+                    borderRadius: HarmonyTheme.cardRadius,
+                    child: child,
+                  )
+                : child,
+          );
         },
-        onViewAll: () => Get.toNamed('/history')?.whenComplete(() {
-          if (mounted) controller.recentHistory.refresh();
-        }),
-        onLogin: () => Get.toNamed('/loginPage'),
       );
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: harmony
-            ? ImmersiveSurface(
-                blurBackground: false,
-                borderRadius: HarmonyTheme.cardRadius,
-                child: child,
-              )
-            : child,
-      );
-    },
-  );
 
   Widget _buildActions(Color primary) {
     return Row(

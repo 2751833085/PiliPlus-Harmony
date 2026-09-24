@@ -211,6 +211,7 @@ void main() {
                           child: ListView(
                             children: [
                               MineHistoryPreview(
+                                expanded: harmony && size.width >= 3184,
                                 history: state,
                                 onOpen: (_) => opened++,
                                 onViewAll: () => all++,
