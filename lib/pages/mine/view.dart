@@ -4,6 +4,7 @@ import 'package:PiliPlus/pages/history/open_item.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_quick_actions.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/style.dart';
@@ -120,7 +121,49 @@ class _MediaPageState extends CommonPageState<MinePage>
     );
   }
 
-  Widget _buildHarmonyPage(ThemeData theme, Color accent) => SafeArea(
+  Widget _buildHarmonyPage(ThemeData theme, Color accent) => ColoredBox(
+    color: theme.scaffoldBackgroundColor,
+    child: Stack(
+      fit: StackFit.expand,
+      children: [
+        _buildHarmonyContent(theme, accent),
+        if (MediaQuery.sizeOf(context).width < 600)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: IgnorePointer(
+              child: ClipRect(
+                child: ShaderMask(
+                  blendMode: BlendMode.dstIn,
+                  shaderCallback: (bounds) => const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.white],
+                  ).createShader(bounds),
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                    child: ColoredBox(
+                      color: theme.scaffoldBackgroundColor.withValues(
+                        alpha: .55,
+                      ),
+                      child: SizedBox(
+                        height: 48 + MediaQuery.viewPaddingOf(context).bottom,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+
+  Widget _buildHarmonyContent(ThemeData theme, Color accent) => SafeArea(
+    // Paint and scroll behind the floating Dock instead of cutting the page
+    // off at Scaffold's synthetic bottom navigation inset.
+    bottom: false,
     child: Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(

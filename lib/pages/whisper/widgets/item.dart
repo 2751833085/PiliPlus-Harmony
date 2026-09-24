@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/whisper/message_route.dart';
+import 'package:PiliPlus/pages/whisper_detail/view.dart';
 import 'dart:convert';
 
 import 'package:PiliPlus/common/assets.dart';
@@ -187,8 +189,9 @@ class WhisperSessionItem extends StatelessWidget {
           }
         }
         if (item.id.privateId.hasTalkerUid()) {
-          Get.toNamed(
+          openMessagePage(
             '/whisperDetail',
+            () => const WhisperDetailPage(),
             arguments: {
               'talkerId': item.id.privateId.talkerUid.toInt(),
               'name': item.sessionInfo.sessionName,

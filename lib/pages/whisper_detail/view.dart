@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/pages/whisper/widgets/message_surface.dart';
 import 'dart:async';
 import 'dart:io' show File;
 
@@ -55,8 +57,12 @@ class _WhisperDetailPageState
       theme.hoverColor,
       1,
     );
+    final harmony = HarmonyStyle.enabled(context);
     return SimpleScaffold(
+      backgroundColor: harmony ? theme.scaffoldBackgroundColor : null,
       appBar: AppBar(
+        centerTitle: false,
+        titleSpacing: 4,
         title: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
@@ -74,7 +80,7 @@ class _WhisperDetailPageState
                 type: ImageType.avatar,
                 src: _whisperDetailController.face,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 12),
               Flexible(
                 child: Text(
                   _whisperDetailController.name,
@@ -101,49 +107,58 @@ class _WhisperDetailPageState
           ),
         ),
         actions: [
-          IconButton(
-            tooltip: '设置',
-            onPressed: () => Get.to(
-              WhisperLinkSettingPage(
-                talkerUid: _whisperDetailController.talkerId,
+          messageActionSurface(
+            context,
+            IconButton(
+              tooltip: '聊天设置',
+              onPressed: () => Get.to(
+                WhisperLinkSettingPage(
+                  talkerUid: _whisperDetailController.talkerId,
+                ),
               ),
-            ),
-            icon: Icon(
-              size: 22,
-              Icons.settings,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-            ),
-          ),
-          const SizedBox(width: 5),
-        ],
-      ),
-      body: Padding(
-        padding: EdgeInsets.only(left: padding.left, right: padding.right),
-        child: Column(
-          children: [
-            Expanded(
-              child: Listener(
-                onPointerDown: hidePanel,
-                behavior: HitTestBehavior.opaque,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Obx(
-                    () =>
-                        _buildBody(_whisperDetailController.loadingState.value),
-                  ),
+              icon: Icon(
+                size: 22,
+                Icons.settings,
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.8,
                 ),
               ),
             ),
-            if (_whisperDetailController.mid != null) ...[
-              _buildInputView(containerColor),
-              buildPanelContainer(
-                containerColor,
-              ),
-            ] else
-              SizedBox(height: padding.bottom),
-          ],
-        ),
-      ).constraintWidth(),
+          ),
+          const SizedBox(width: 10),
+        ],
+      ),
+      body:
+          Padding(
+            padding: EdgeInsets.only(left: padding.left, right: padding.right),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Listener(
+                    onPointerDown: hidePanel,
+                    behavior: HitTestBehavior.opaque,
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Obx(
+                        () => _buildBody(
+                          _whisperDetailController.loadingState.value,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                if (_whisperDetailController.mid != null) ...[
+                  _buildInputView(containerColor),
+                  buildPanelContainer(
+                    containerColor,
+                  ),
+                ] else
+                  SizedBox(height: padding.bottom),
+              ],
+            ),
+          ).constraintWidth(
+            constraints: BoxConstraints(maxWidth: harmony ? 840 : 625),
+          ),
     );
   }
 
@@ -168,6 +183,13 @@ class _WhisperDetailPageState
                       item.senderUid.toInt() ==
                       _whisperDetailController.account.mid;
                   return ChatItem(
+                    showTimestamp:
+                        !HarmonyStyle.enabled(context) ||
+                        index == response.length - 1 ||
+                        (item.timestamp - response[index + 1].timestamp)
+                                .abs()
+                                .toInt() >=
+                            300,
                     item: item,
                     eInfos: _whisperDetailController.eInfos,
                     onLongPress: () => onLongPress(index, item, isOwner),
@@ -179,7 +201,7 @@ class _WhisperDetailPageState
                   );
                 },
                 separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
               )
             : scrollErrorWidget(onReload: _whisperDetailController.onReload),
       Error(:final errMsg) => scrollErrorWidget(
@@ -262,10 +284,11 @@ class _WhisperDetailPageState
   }
 
   Widget _buildInputView(Color containerColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+    final harmony = HarmonyStyle.enabled(context);
+    final input = Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       decoration: BoxDecoration(
-        color: containerColor,
+        color: harmony ? Colors.transparent : containerColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Row(
@@ -274,7 +297,7 @@ class _WhisperDetailPageState
           IconButton(
             onPressed: () =>
                 updatePanelType(panelType.value == .emoji ? .keyboard : .emoji),
-            icon: const Icon(Icons.emoji_emotions),
+            icon: const Icon(Icons.emoji_emotions_outlined),
             tooltip: '表情',
           ),
           Expanded(
@@ -292,10 +315,12 @@ class _WhisperDetailPageState
                 decoration: InputDecoration(
                   filled: true,
                   hintText: '发个消息聊聊呗~',
-                  fillColor: theme.colorScheme.surface,
-                  border: const OutlineInputBorder(
+                  fillColor: harmony
+                      ? theme.colorScheme.surfaceContainerLow
+                      : theme.colorScheme.surface,
+                  border: OutlineInputBorder(
                     borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.all(Radius.circular(6)),
+                    borderRadius: BorderRadius.circular(harmony ? 20 : 6),
                     gapPadding: 0,
                   ),
                   contentPadding: const EdgeInsets.all(10),
@@ -379,6 +404,15 @@ class _WhisperDetailPageState
         ],
       ),
     );
+    return harmony
+        ? Padding(
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+            child: ImmersiveSurface(
+              borderRadius: BorderRadius.circular(24),
+              child: input,
+            ),
+          )
+        : input;
   }
 
   @override

@@ -2356,6 +2356,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               child: ColoredBox(
                 color: Colors.black,
                 child: NetworkImgLayer(
+                  maxDecodeDimension: 960,
                   src: preview,
                   width: maxWidth,
                   height: maxHeight,

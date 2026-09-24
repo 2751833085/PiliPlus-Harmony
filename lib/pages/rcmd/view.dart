@@ -57,6 +57,7 @@ class _RcmdPageState extends State<RcmdPage>
     controller.scrollController.addListener(_onScroll);
     _layoutSettings = GStorage.setting.watch().listen((event) {
       if (const {
+            'shortVideoMode',
             'feedColumns',
             'useCardWidthLimit',
             'recommendCardWidth',

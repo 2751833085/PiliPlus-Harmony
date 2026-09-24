@@ -136,39 +136,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       cover: videoDetailController.cover.value,
       title: ugcIntroController.videoDetail.value.title,
     ),
-    loadRelated: (bvid) async {
-      final response = await VideoHttp.relatedVideoList(bvid: bvid);
-      if (!response.isSuccess) throw StateError('recommendations unavailable');
-      return [
-        for (final item in response.dataOrNull ?? [])
-          if (item.bvid != null && item.redirectUrl == null)
-            ShortVideoEntry(
-              bvid: item.bvid!,
-              aid: item.aid,
-              cid: item.cid,
-              cover: item.cover,
-              title: item.title,
-            ),
-      ];
-    },
-    loadFresh: () async {
-      final response = await VideoHttp.rcmdVideoList(
-        ps: 20,
-        freshIdx: _shortRefreshIndex++,
-      );
-      if (!response.isSuccess) throw StateError('refresh unavailable');
-      return [
-        for (final item in response.dataOrNull ?? [])
-          if (item.bvid?.isNotEmpty == true)
-            ShortVideoEntry(
-              bvid: item.bvid!,
-              aid: item.aid,
-              cid: item.cid,
-              cover: item.cover,
-              title: item.title,
-            ),
-      ];
-    },
+    // Related-video APIs bias the entire queue toward the first clip.
+    // Use the account's homepage feed for both pagination and refresh.
+    loadRelated: (_) => _loadShortRecommendations(),
+    loadRecommendations: _loadShortRecommendations,
+    loadFresh: _loadShortRecommendations,
     play: (entry) async {
       if (!mounted) return false;
       _shortEntryPolicy.manualSelection();
@@ -184,6 +156,25 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       );
     },
   );
+
+  Future<List<ShortVideoEntry>> _loadShortRecommendations() async {
+    final response = await VideoHttp.rcmdVideoList(
+      ps: 20,
+      freshIdx: _shortRefreshIndex++,
+    );
+    if (!response.isSuccess) throw StateError('recommendations unavailable');
+    return [
+      for (final item in response.dataOrNull ?? [])
+        if (item.bvid?.isNotEmpty == true)
+          ShortVideoEntry(
+            bvid: item.bvid!,
+            aid: item.aid,
+            cid: item.cid,
+            cover: item.cover,
+            title: item.title,
+          ),
+    ];
+  }
 
   void _shortPreferenceChanged() {
     if (mounted && !Pref.shortPreload)

@@ -25,10 +25,12 @@ class ShortVideoSession extends ChangeNotifier {
     required this.loadRelated,
     required this.play,
     this.loadFresh,
+    this.loadRecommendations,
     this.accepts,
   }) : _entries = [initial];
   final Future<List<ShortVideoEntry>> Function(String bvid) loadRelated;
   final Future<bool> Function(ShortVideoEntry entry) play;
+  final Future<List<ShortVideoEntry>> Function()? loadRecommendations;
   final Future<List<ShortVideoEntry>> Function()? loadFresh;
   final bool Function(ShortVideoEntry entry)? accepts;
   final Set<String> _hidden = {};
@@ -62,12 +64,13 @@ class ShortVideoSession extends ChangeNotifier {
     // Each seed is fetched once after success; failures stay retryable.
     final seeds = [current, ..._entries.reversed];
     final seed = seeds.where((e) => !_fetched.contains(e.bvid)).firstOrNull;
-    if (seed == null) return;
+    if (seed == null && loadRecommendations == null) return;
     loading = true;
     error = null;
     notifyListeners();
     try {
-      final incoming = await loadRelated(seed.bvid);
+      final incoming =
+          await (loadRecommendations?.call() ?? loadRelated(seed!.bvid));
       if (_disposed || generation != _generation) return;
       final seen = _entries.map((e) => e.bvid).toSet();
       for (final entry in incoming) {
@@ -76,7 +79,7 @@ class ShortVideoSession extends ChangeNotifier {
           _entriesSnapshot = null;
         }
       }
-      _fetched.add(seed.bvid);
+      if (loadRecommendations == null) _fetched.add(seed!.bvid);
     } catch (_) {
       if (!_disposed && generation == _generation) error = '暂时无法加载更多视频，点击重试';
     } finally {

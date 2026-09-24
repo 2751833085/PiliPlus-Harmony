@@ -41,21 +41,21 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
-  late SettingType _type = SettingType.styleSetting;
+  late SettingType _type = SettingType.playSetting;
   final RxBool _noAccount = Accounts.account.isEmpty.obs;
   late bool _isPortrait;
   late ThemeData theme;
 
   static const List<_SettingsModel> _items = [
     _SettingsModel(
-      type: SettingType.styleSetting,
-      subtitle: '界面风格、颜色、沉浸光感、导航与页面布局',
-      icon: Icon(Icons.style_outlined),
-    ),
-    _SettingsModel(
       type: SettingType.playSetting,
       subtitle: '播放控制、全屏与折叠屏、竖屏短视频、弹幕与字幕',
       icon: Icon(Icons.touch_app_outlined),
+    ),
+    _SettingsModel(
+      type: SettingType.styleSetting,
+      subtitle: '界面风格、颜色、沉浸光感、导航与页面布局',
+      icon: Icon(Icons.style_outlined),
     ),
     _SettingsModel(
       type: SettingType.videoSetting,

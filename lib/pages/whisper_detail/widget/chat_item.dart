@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -39,6 +40,7 @@ class ChatItem extends StatelessWidget {
     required this.onLongPress,
     required this.onSecondaryTapUp,
     required this.isOwner,
+    this.showTimestamp = true,
   });
 
   final Msg item;
@@ -46,6 +48,7 @@ class ChatItem extends StatelessWidget {
   final VoidCallback onLongPress;
   final GestureTapUpCallback? onSecondaryTapUp;
   final bool isOwner;
+  final bool showTimestamp;
 
   // 消息来源
   // enum MsgSource {
@@ -63,7 +66,8 @@ class ChatItem extends StatelessWidget {
     // }
 
     late final ThemeData theme = Theme.of(context);
-    late final Color textColor = isOwner
+    final harmony = HarmonyStyle.enabled(context);
+    late final Color textColor = isOwner && !harmony
         ? theme.colorScheme.onSecondaryContainer
         : theme.colorScheme.onSurface;
     late final dynamic content = jsonDecode(item.content);
@@ -90,12 +94,26 @@ class ChatItem extends StatelessWidget {
             : MainAxisAlignment.start,
         children: [
           Container(
-            constraints: const BoxConstraints(maxWidth: 300.0),
+            constraints: BoxConstraints(
+              maxWidth: math.min(
+                harmony ? 420.0 : 300.0,
+                MediaQuery.sizeOf(context).width * .78,
+              ),
+            ),
             decoration: BoxDecoration(
-              color: isOwner
+              color: harmony
+                  ? (isOwner
+                        ? Color.alphaBlend(
+                            theme.colorScheme.primary.withValues(alpha: .12),
+                            theme.colorScheme.surface,
+                          )
+                        : theme.colorScheme.surface)
+                  : isOwner
                   ? theme.colorScheme.secondaryContainer
                   : theme.colorScheme.onInverseSurface,
-              borderRadius: isOwner
+              borderRadius: harmony
+                  ? BorderRadius.circular(18)
+                  : isOwner
                   ? const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
@@ -148,14 +166,20 @@ class ChatItem extends StatelessWidget {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 6, bottom: 18),
-          child: Text(
-            DateFormatUtils.chatFormat(item.timestamp.toInt()),
-            textAlign: TextAlign.center,
-            style: TextStyle(color: theme.colorScheme.outline),
+        if (showTimestamp)
+          Padding(
+            padding: EdgeInsets.only(
+              top: harmony ? 10 : 6,
+              bottom: harmony ? 12 : 18,
+            ),
+            child: Text(
+              DateFormatUtils.chatFormat(item.timestamp.toInt()),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
-        ),
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onLongPress: onLongPress,

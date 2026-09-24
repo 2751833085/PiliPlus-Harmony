@@ -22,6 +22,7 @@ class NetworkImgLayer extends StatelessWidget {
     this.fit = BoxFit.cover,
     this.alignment = Alignment.center,
     this.cacheWidth,
+    this.maxDecodeDimension,
   });
 
   final String? src;
@@ -36,6 +37,9 @@ class NetworkImgLayer extends StatelessWidget {
   final BoxFit fit;
   final Alignment alignment;
   final bool? cacheWidth;
+
+  /// Cap transient previews without changing their layout size.
+  final int? maxDecodeDimension;
 
   static Color? reduceLuxColor = Pref.reduceLuxColor;
   static bool reduce = false;
@@ -71,6 +75,10 @@ class NetworkImgLayer extends StatelessWidget {
       memCacheHeight = height.cacheSize(context);
     }
 
+    if (maxDecodeDimension case final limit? when limit > 0) {
+      memCacheWidth = memCacheWidth?.clamp(1, limit);
+      memCacheHeight = memCacheHeight?.clamp(1, limit);
+    }
     return CachedNetworkImage(
       imageUrl: (isEmote)
           ? ImageUtils.thumbnailUrl(src, quality)

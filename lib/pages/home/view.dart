@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/whisper/message_route.dart';
+import 'package:PiliPlus/pages/whisper/view.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/custom_height_widget.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -331,7 +333,7 @@ Widget msgBadge(MainController mainController) {
             mainController
               ..clearUnreadMsg()
               ..lastCheckUnreadAt = DateTime.now().millisecondsSinceEpoch;
-            Get.toNamed('/whisper');
+            openMessagePage('/whisper', () => const WhisperPage());
           },
           icon: Badge(
             isLabelVisible:

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/shorts/preview_chrome.dart';
 import 'package:PiliPlus/pages/video/shorts/episodes.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -170,7 +171,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                       session: session,
                       onTargetChanged: (index) {
                         _targetIndex = index;
-                        _warmWindow();
+                        _warmNext();
                       },
                       enabled:
                           !widget.video.plPlayerController.controlsLock.value,
@@ -196,6 +197,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                 ),
                                 child: LayoutBuilder(
                                   builder: (_, media) => NetworkImgLayer(
+                                    maxDecodeDimension: 960,
                                     src: cover,
                                     getPlaceHolder: () =>
                                         const SizedBox.expand(),
@@ -204,6 +206,16 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                                     width: media.maxWidth,
                                     height: media.maxHeight,
                                   ),
+                                ),
+                              ),
+                            if (!widget.fullscreen &&
+                                (index != session.index || session.switching))
+                              Obx(
+                                () => ShortPreviewChrome(
+                                  title: session.entries[index].title ?? '',
+                                  showDetails:
+                                      widget.video.shortChromeVisible.value &&
+                                      !compact,
                                 ),
                               ),
                           ],

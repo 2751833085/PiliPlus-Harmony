@@ -174,7 +174,7 @@ List<SettingsModel> get playbackExtraSettings => [
   ...playerAppearanceSettings,
   SwitchModel(
     section: '竖屏短视频',
-    title: '竖屏短视频模式',
+    title: '启用短视频模式（实验性）',
     subtitle: '竖屏视频默认进入，横屏视频默认普通详情；双击播放/暂停，单击切换简洁界面，上下切视频。可手动切换模式',
     leading: const Icon(Icons.stay_current_portrait_outlined),
     setKey: SettingBoxKey.shortVideoMode,

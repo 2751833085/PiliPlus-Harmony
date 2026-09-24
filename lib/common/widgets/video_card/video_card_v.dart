@@ -43,7 +43,7 @@ class VideoCardV extends StatelessWidget {
         var bvid = videoItem.bvid ?? IdUtils.av2bv(videoItem.aid!);
         var cid = videoItem.cid;
         bool isVertical = false;
-        Dimension? dimension;
+        Dimension? dimension = videoItem.dimension;
         if (videoItem is RcmdVideoItemAppModel) {
           if (videoItem.uri case final uri?) {
             isVertical = uri.isVerticalFromUri;
@@ -112,6 +112,7 @@ class VideoCardV extends StatelessWidget {
               child: _CoverBuilder(
                 cover: videoItem.cover,
                 duration: videoItem.duration,
+                shortVideo: Pref.shortVideoMode && videoItem.isPortraitVideo,
               ),
             ),
             content(context),
@@ -274,10 +275,12 @@ class _CoverBuilder extends StatelessWidget {
   const _CoverBuilder({
     required this.cover,
     required this.duration,
+    required this.shortVideo,
   });
 
   final String? cover;
   final int duration;
+  final bool shortVideo;
 
   // 缓存 builder 闭包，避免每次 rebuild 产生新实例触发 scheduleLayoutCallback
   static Widget _buildCover(
@@ -285,6 +288,7 @@ class _CoverBuilder extends StatelessWidget {
     BoxConstraints constraints,
     String? cover,
     int duration,
+    bool shortVideo,
   ) {
     final double maxWidth = constraints.maxWidth;
     final double maxHeight = constraints.maxHeight;
@@ -297,6 +301,28 @@ class _CoverBuilder extends StatelessWidget {
           height: maxHeight,
           borderRadius: BorderRadius.zero,
         ),
+        if (shortVideo)
+          const Positioned(
+            top: 7,
+            right: 7,
+            child: Tooltip(
+              message: '以短视频模式打开',
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                  child: Icon(
+                    Icons.stay_current_portrait_rounded,
+                    size: 17,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
         if (duration > 0)
           PBadge(
             bottom: 6,
@@ -314,6 +340,7 @@ class _CoverBuilder extends StatelessWidget {
     return _CachedLayoutBuilder(
       cover: cover,
       duration: duration,
+      shortVideo: shortVideo,
     );
   }
 }
@@ -322,10 +349,12 @@ class _CachedLayoutBuilder extends StatefulWidget {
   const _CachedLayoutBuilder({
     required this.cover,
     required this.duration,
+    required this.shortVideo,
   });
 
   final String? cover;
   final int duration;
+  final bool shortVideo;
 
   @override
   State<_CachedLayoutBuilder> createState() => _CachedLayoutBuilderState();
@@ -349,6 +378,7 @@ class _CachedLayoutBuilderState extends State<_CachedLayoutBuilder> {
       constraints,
       widget.cover,
       widget.duration,
+      widget.shortVideo,
     );
     return _cachedChild!;
   }
@@ -358,7 +388,8 @@ class _CachedLayoutBuilderState extends State<_CachedLayoutBuilder> {
     super.didUpdateWidget(oldWidget);
     // 数据源变化时清除缓存，强制下次重建
     if (oldWidget.cover != widget.cover ||
-        oldWidget.duration != widget.duration) {
+        oldWidget.duration != widget.duration ||
+        oldWidget.shortVideo != widget.shortVideo) {
       _cachedChild = null;
     }
   }

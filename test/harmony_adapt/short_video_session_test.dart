@@ -5,6 +5,24 @@ import 'package:PiliPlus/pages/video/shorts/session.dart';
 void main() {
   const a = ShortVideoEntry(bvid: 'a');
   const b = ShortVideoEntry(bvid: 'b');
+  test('personalized pagination does not fetch a related-video seed', () async {
+    var pages = 0;
+    final session = ShortVideoSession(
+      initial: a,
+      loadRelated: (_) async => throw StateError('must not use related feed'),
+      loadRecommendations: () async => [
+        ShortVideoEntry(bvid: 'feed-${++pages}'),
+      ],
+      play: (_) async => true,
+    );
+    await session.loadMore();
+    await session.loadMore();
+    expect(session.entries.map((e) => e.bvid), ['a', 'feed-1', 'feed-2']);
+    expect(await session.select(1), isTrue);
+    await session.loadMore();
+    expect(session.entries.last.bvid, 'feed-3');
+    session.dispose();
+  });
   test(
     'first-page refresh replaces the first video and discards stale metadata',
     () async {

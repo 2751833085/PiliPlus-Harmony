@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/whisper/message_route.dart';
+import 'package:PiliPlus/pages/whisper/view.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -107,7 +109,7 @@ class HomeController extends GetxController
         ..lastCheckUnreadAt = DateTime.now().millisecondsSinceEpoch;
       // 立即同步清空 ArkTS 原生顶栏红点
       HarmonyChannel.setHomeUnreadCount('');
-      Get.toNamed('/whisper');
+      openMessagePage('/whisper', () => const WhisperPage());
     };
     // ArkTS 头像点击 → 跳个人页
     HarmonyChannel.onTopMineTap = Get.find<MainController>().toMinePage;

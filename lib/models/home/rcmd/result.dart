@@ -12,6 +12,7 @@ class RcmdVideoItemAppModel extends BaseRcmdVideoItemModel {
   ThreePoint? threePoint;
 
   RcmdVideoItemAppModel.fromJson(Map<String, dynamic> json) {
+    readDimension(json);
     aid = json['player_args']?['aid'] ?? parseIntOrNull(json['param']);
     bvid = json['bvid'] ?? IdUtils.av2bv(aid!);
     cid = json['player_args']?['cid'];

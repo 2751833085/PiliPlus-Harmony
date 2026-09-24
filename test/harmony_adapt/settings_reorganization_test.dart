@@ -170,7 +170,7 @@ void main() {
       };
       final rows = SettingType.searchSettings;
       expect(catalog[SettingType.videoSetting]!.first.effectiveTitle, '默认画质');
-      expect(catalog[SettingType.playSetting]!.first.effectiveTitle, '自动播放');
+      expect(catalog[SettingType.playSetting]!.first.effectiveTitle, '启用短视频模式（实验性）');
       expect(
         catalog[SettingType.styleSetting]!
             .firstWhere((row) => row.section == '主题与显示')
@@ -198,7 +198,7 @@ void main() {
       );
       expect(
         catalog[SettingType.playSetting]!.map((e) => e.effectiveTitle),
-        containsAll(['竖屏短视频模式', '全屏跟随折叠形态', '空降助手', '弹幕行高']),
+        containsAll(['启用短视频模式（实验性）', '全屏跟随折叠形态', '空降助手', '弹幕行高']),
       );
       expect(
         catalog[SettingType.videoSetting]!.map((e) => e.effectiveTitle),
@@ -222,7 +222,7 @@ void main() {
       );
       expect(
         SettingType.featuredSetting.settings.map((e) => e.effectiveTitle),
-        containsAll(['空降助手', '海外模式', '竖屏短视频模式', '启用AI总结', '智感握姿', '沉浸光感']),
+        containsAll(['空降助手', '海外模式', '启用短视频模式（实验性）', '启用AI总结', '智感握姿', '沉浸光感']),
       );
       for (final type in [
         SettingType.playSetting,
@@ -240,10 +240,10 @@ void main() {
       );
       expect(
         extraSettings.map((e) => e.effectiveTitle),
-        isNot(contains('竖屏短视频模式')),
+        isNot(contains('启用短视频模式（实验性）')),
       );
       final short =
-          rows.singleWhere((e) => e.title == '竖屏短视频模式') as SwitchModel;
+          rows.singleWhere((e) => e.title == '启用短视频模式（实验性）') as SwitchModel;
       final overseas =
           rows.singleWhere((e) => e.title == '海外模式') as SwitchModel;
       expect(GStorage.setting.get(short.setKey), isTrue);
