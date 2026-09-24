@@ -1,18 +1,26 @@
 {
   "previous_version": "3.0.0",
   "installed_version": "3.0.0",
-  "installed_version_code": 6124,
+  "installed_version_code": 6125,
   "uid_preserved": true,
   "first_install_time_preserved": true,
   "overwrite_install": "passed",
   "uninstalled_or_cleared_data": false,
-  "source_commit": "fb9eada1f9d49c52fad7c0c9a47033f38da11e7c",
-  "launch_test": "blocked_by_device_lock",
+  "source_commit": "017b30c81f167b004dea3aa2641ea1be87bb6969",
+  "launch_test": "passed",
   "device_viewport": [
     3184,
     2232
   ],
-  "automated_tests_passed": 167,
+  "automated_tests_passed": 168,
   "physical_fold_test_this_round": false,
-  "quantitative_fps_comparison": false
+  "quantitative_fps_comparison": false,
+  "device_checks": [
+    "normal_video_frames_and_progress_advance",
+    "manual_short_mode_entry",
+    "swipe_to_next_video",
+    "next_video_author_details_actions_visible",
+    "next_video_frames_and_progress_advance"
+  ],
+  "continuous_drag_positions": "widget_regression_passed; device screenshots verify settled states only"
 }
