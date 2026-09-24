@@ -15,7 +15,7 @@ void main() {
   test('legacy custom pull threshold is ignored', () async {
     await GStorage.setting.put(SettingBoxKey.refreshDragPercentage, .5);
     await GStorage.setting.put(SettingBoxKey.refreshUseDefault, false);
-    expect(Pref.refreshDragPercentage, .25);
+    expect(Pref.refreshDragPercentage, .22);
   });
   for (final width in [1008.0, 2048.0, 3184.0]) {
     for (final physics in const [

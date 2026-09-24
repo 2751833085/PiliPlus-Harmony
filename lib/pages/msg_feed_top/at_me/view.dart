@@ -20,20 +20,38 @@ import 'package:material_ui/material_ui.dart' hide ListTile;
 import 'package:get/get.dart';
 
 class AtMePage extends StatefulWidget {
-  const AtMePage({super.key});
+  const AtMePage({super.key, this.onClose});
+  final VoidCallback? onClose;
 
   @override
   State<AtMePage> createState() => _AtMePageState();
 }
 
 class _AtMePageState extends State<AtMePage> {
-  final AtMeController _atMeController = Get.put(AtMeController());
+  late final _controllerTag = 'notification-${identityHashCode(this)}';
+  @override
+  void dispose() {
+    Get.delete<AtMeController>(tag: _controllerTag);
+    super.dispose();
+  }
+
+  late final AtMeController _atMeController = Get.put(
+    AtMeController(),
+    tag: _controllerTag,
+  );
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SimpleScaffold(
       appBar: AppBar(
+        leading: widget.onClose == null
+            ? null
+            : IconButton(
+                tooltip: '返回消息列表',
+                onPressed: widget.onClose,
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
         title: const Text('@我的'),
         actions: [
           IconButton(

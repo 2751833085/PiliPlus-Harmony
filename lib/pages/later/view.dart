@@ -94,16 +94,21 @@ class _LaterPageState extends State<LaterPage>
                               _baseCtr.setIsPlayAll(
                                 details.localPosition.dx < _baseCtr.dx,
                               ),
-                          child: FloatingActionButton.extended(
-                            onPressed: () {
-                              if (_baseCtr.isPlayAll.value) {
-                                currCtr().toViewPlayAll();
-                              } else {
-                                _baseCtr.setIsPlayAll(true);
-                              }
-                            },
-                            label: const Text('播放全部'),
-                            icon: const Icon(Icons.playlist_play),
+                          child: ImmersiveSurface(
+                            borderRadius: BorderRadius.circular(24),
+                            child: FloatingActionButton.extended(
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              onPressed: () {
+                                if (_baseCtr.isPlayAll.value) {
+                                  currCtr().toViewPlayAll();
+                                } else {
+                                  _baseCtr.setIsPlayAll(true);
+                                }
+                              },
+                              label: const Text('播放全部'),
+                              icon: const Icon(Icons.playlist_play),
+                            ),
                           ),
                         ),
                       )

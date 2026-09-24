@@ -51,7 +51,8 @@ class _ShortCommentsLayoutState extends State<ShortCommentsLayout>
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, size) => AnimatedBuilder(
       animation: _animation,
-      builder: (context, _) {
+      child: widget.builder(context, _panel != null),
+      builder: (context, video) {
         final side =
             size.maxWidth >= 700 ||
             (size.maxWidth >= 600 && size.maxWidth > size.maxHeight);
@@ -74,7 +75,7 @@ class _ShortCommentsLayoutState extends State<ShortCommentsLayout>
             Positioned.fill(
               right: side ? occupied : 0,
               bottom: side ? 0 : occupied,
-              child: widget.builder(context, _panel != null),
+              child: video!,
             ),
             if (_panel != null)
               Positioned(

@@ -32,9 +32,13 @@ class WhisperSessionItem extends StatelessWidget {
     required this.onSetTop,
     required this.onSetMute,
     required this.onRemove,
+    this.onOpen,
+    this.selected = false,
   });
 
+  final ValueChanged<Map<String, dynamic>>? onOpen;
   final Session item;
+  final bool selected;
   final Function(bool isTop, SessionId id) onSetTop;
   final Function(bool isMuted, Int64 talkerUid) onSetMute;
   final ValueChanged<int> onRemove;
@@ -78,7 +82,9 @@ class WhisperSessionItem extends StatelessWidget {
 
     return ListTile(
       safeArea: true,
-      tileColor: item.isPinned
+      tileColor: selected
+          ? theme.colorScheme.surfaceContainerHigh
+          : item.isPinned
           ? theme.colorScheme.onInverseSurface.withValues(
               alpha: theme.isDark ? 0.4 : 0.8,
             )
@@ -189,18 +195,23 @@ class WhisperSessionItem extends StatelessWidget {
           }
         }
         if (item.id.privateId.hasTalkerUid()) {
-          openMessagePage(
-            '/whisperDetail',
-            () => const WhisperDetailPage(),
-            arguments: {
-              'talkerId': item.id.privateId.talkerUid.toInt(),
-              'name': item.sessionInfo.sessionName,
-              'face': avatar,
-              if (item.sessionInfo.avatar.hasMid())
-                'mid': item.sessionInfo.avatar.mid.toInt(),
-              'isLive': item.sessionInfo.isLive,
-            },
-          );
+          final conversation = <String, dynamic>{
+            'talkerId': item.id.privateId.talkerUid.toInt(),
+            'name': item.sessionInfo.sessionName,
+            'face': avatar,
+            if (item.sessionInfo.avatar.hasMid())
+              'mid': item.sessionInfo.avatar.mid.toInt(),
+            'isLive': item.sessionInfo.isLive,
+          };
+          if (onOpen != null) {
+            onOpen!(conversation);
+          } else {
+            openMessagePage(
+              '/whisperDetail',
+              () => WhisperDetailPage(conversation: conversation),
+              arguments: conversation,
+            );
+          }
           return;
         }
 

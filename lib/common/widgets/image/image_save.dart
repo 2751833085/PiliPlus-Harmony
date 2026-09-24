@@ -28,94 +28,99 @@ void imageSaveDialog({
           transitionDuration: const Duration(milliseconds: 200),
           pageBuilder: (context, animation, secondaryAnimation) {
             final colorScheme = ColorScheme.of(context);
-            final imgWidth = MediaQuery.sizeOf(context).shortestSide - 16;
+            final imgWidth = (MediaQuery.sizeOf(context).shortestSide - 32)
+                .clamp(0.0, 560.0);
             final height = imgWidth / Style.aspectRatio16x9;
             return Center(
-              child: Container(
-                width: imgWidth,
-                margin: const .symmetric(horizontal: Style.safeSpace),
-                decoration: _ImageDecoration(
-                  imageHeight: height,
-                  color: colorScheme.surface,
-                  borderRadius: const .all(Style.imgRadius),
-                ),
-                child: Column(
-                  mainAxisSize: .min,
-                  children: [
-                    IgnorePointer(
-                      child: NetworkImgLayer(
-                        src: cover,
-                        quality: 100,
-                        width: imgWidth,
-                        height: height,
-                        borderRadius: const .vertical(top: Style.imgRadius),
+              child: ImmersiveInteraction(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: imgWidth,
+                  margin: const .symmetric(horizontal: Style.safeSpace),
+                  decoration: _ImageDecoration(
+                    imageHeight: height,
+                    color: colorScheme.surface,
+                    borderRadius: const .all(Style.imgRadius),
+                  ),
+                  child: Column(
+                    mainAxisSize: .min,
+                    children: [
+                      IgnorePointer(
+                        child: NetworkImgLayer(
+                          src: cover,
+                          quality: 100,
+                          width: imgWidth,
+                          height: height,
+                          borderRadius: const .vertical(top: Style.imgRadius),
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const .fromLTRB(12, 10, 8, 10),
-                      child: Row(
-                        children: [
-                          if (title != null)
-                            Expanded(
-                              child: SelectionText(
-                                title,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: colorScheme.onSurface,
+                      Padding(
+                        padding: const .fromLTRB(12, 10, 8, 10),
+                        child: Row(
+                          children: [
+                            if (title != null)
+                              Expanded(
+                                child: SelectionText(
+                                  title,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: colorScheme.onSurface,
+                                  ),
                                 ),
-                              ),
-                            )
-                          else
-                            const Spacer(),
-                          if (aid != null || bvid != null)
-                            iconButton(
-                              iconSize: _iconSize,
-                              tooltip: '稍后再看',
-                              onPressed: () => {
-                                Get.back(),
-                                UserHttp.toViewLater(aid: aid, bvid: bvid),
-                              },
-                              icon: const Icon(Icons.watch_later_outlined),
-                            ),
-                          if (cover != null && cover.isNotEmpty) ...[
-                            if (PlatformUtils.isMobile)
-                              iconButton(
-                                iconSize: _iconSize,
-                                tooltip: '分享',
-                                onPressed: () {
-                                  Get.back();
-                                  ImageUtils.onShareImg(cover);
-                                },
-                                icon: const Icon(Icons.share),
                               )
                             else
+                              const Spacer(),
+                            if (aid != null || bvid != null)
                               iconButton(
-                                iconSize: 18,
-                                tooltip: '复制链接',
-                                onPressed: () {
-                                  Get.back();
-                                  Utils.copyText(cover);
+                                iconSize: _iconSize,
+                                tooltip: '稍后再看',
+                                onPressed: () => {
+                                  Get.back(),
+                                  UserHttp.toViewLater(aid: aid, bvid: bvid),
                                 },
-                                icon: const Icon(Icons.copy),
+                                icon: const Icon(Icons.watch_later_outlined),
                               ),
-                            iconButton(
-                              iconSize: _iconSize,
-                              tooltip: '保存封面图',
-                              onPressed: () async {
-                                bool saveStatus = await ImageUtils.downloadImg([
-                                  cover,
-                                ]);
-                                if (saveStatus) {
-                                  Get.back();
-                                }
-                              },
-                              icon: const Icon(Icons.download),
-                            ),
+                            if (cover != null && cover.isNotEmpty) ...[
+                              if (PlatformUtils.isMobile)
+                                iconButton(
+                                  iconSize: _iconSize,
+                                  tooltip: '分享',
+                                  onPressed: () {
+                                    Get.back();
+                                    ImageUtils.onShareImg(cover);
+                                  },
+                                  icon: const Icon(Icons.share),
+                                )
+                              else
+                                iconButton(
+                                  iconSize: 18,
+                                  tooltip: '复制链接',
+                                  onPressed: () {
+                                    Get.back();
+                                    Utils.copyText(cover);
+                                  },
+                                  icon: const Icon(Icons.copy),
+                                ),
+                              iconButton(
+                                iconSize: _iconSize,
+                                tooltip: '保存封面图',
+                                onPressed: () async {
+                                  bool saveStatus =
+                                      await ImageUtils.downloadImg([
+                                        cover,
+                                      ]);
+                                  if (saveStatus) {
+                                    Get.back();
+                                  }
+                                },
+                                icon: const Icon(Icons.download),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );

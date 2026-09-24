@@ -30,16 +30,14 @@ class CustomToast extends StatelessWidget {
             scale: ScaledWidgetsFlutterBinding.effectiveScaleFactor,
           ),
         ),
-        padding: const .symmetric(horizontal: 17, vertical: 10),
-        decoration: BoxDecoration(
-          color: colorScheme.primaryContainer.withValues(alpha: toastOpacity),
-          borderRadius: const .all(.circular(20)),
-        ),
-        child: Text(
-          msg,
-          style: TextStyle(
-            fontSize: 13,
-            color: colorScheme.onPrimaryContainer,
+        child: ImmersiveSurface(
+          color: colorScheme.surface.withValues(alpha: toastOpacity),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 10),
+            child: Text(
+              msg,
+              style: TextStyle(fontSize: 13, color: colorScheme.onSurface),
+            ),
           ),
         ),
       ),

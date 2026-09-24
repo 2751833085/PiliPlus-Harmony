@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -28,18 +29,12 @@ class HarmonyMessageRoute<T> extends GetPageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    if (MediaQuery.disableAnimationsOf(context)) return child;
-    final motion = animation.drive(CurveTween(curve: Curves.easeOutCubic));
-    return FadeTransition(
-      opacity: motion,
-      child: AnimatedBuilder(
-        animation: motion,
-        child: child,
-        builder: (context, child) => Transform.translate(
-          offset: Offset(28 * (1 - motion.value), 0),
-          child: child,
-        ),
-      ),
+    return const HarmonyPageTransitionsBuilder().buildTransitions(
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
     );
   }
 }

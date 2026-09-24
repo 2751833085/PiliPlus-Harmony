@@ -38,7 +38,7 @@ class VideoCardH extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Material(
+    final surface = Material(
       type: .transparency,
       child: Stack(
         clipBehavior: .none,
@@ -72,8 +72,8 @@ class VideoCardH extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: 0,
-            right: 12,
+            bottom: 3,
+            right: 16,
             width: 29,
             height: 29,
             child: VideoPopupMenu(
@@ -83,6 +83,13 @@ class VideoCardH extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      child: ImmersiveSurface(
+        borderRadius: BorderRadius.circular(16),
+        child: surface,
       ),
     );
   }
@@ -225,7 +232,7 @@ class _CoverBuilderHState extends State<_CoverBuilderH> {
           ),
           Positioned(
             left: 0,
-            bottom: 0,
+            bottom: 3,
             right: 0,
             child: VideoProgressIndicator(
               color: widget.colorScheme.primary,

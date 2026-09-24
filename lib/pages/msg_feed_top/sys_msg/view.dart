@@ -18,14 +18,25 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class SysMsgPage extends StatefulWidget {
-  const SysMsgPage({super.key});
+  const SysMsgPage({super.key, this.onClose});
+  final VoidCallback? onClose;
 
   @override
   State<SysMsgPage> createState() => _SysMsgPageState();
 }
 
 class _SysMsgPageState extends State<SysMsgPage> {
-  final _sysMsgController = Get.put(SysMsgController());
+  late final _controllerTag = 'notification-${identityHashCode(this)}';
+  @override
+  void dispose() {
+    Get.delete<SysMsgController>(tag: _controllerTag);
+    super.dispose();
+  }
+
+  late final _sysMsgController = Get.put(
+    SysMsgController(),
+    tag: _controllerTag,
+  );
 
   static final RegExp _urlRegExp = RegExp(
     r'#\{([^}]*)\}\{([^}]*)\}|https?:\/\/[^\s/\$.?#].[^\s]*|www\.[^\s/\$.?#].[^\s]*|【(.*?)】|（(\d+)）',
@@ -35,7 +46,16 @@ class _SysMsgPageState extends State<SysMsgPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SimpleScaffold(
-      appBar: AppBar(title: const Text('系统通知')),
+      appBar: AppBar(
+        leading: widget.onClose == null
+            ? null
+            : IconButton(
+                tooltip: '返回消息列表',
+                onPressed: widget.onClose,
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
+        title: const Text('系统通知'),
+      ),
       body: refreshIndicator(
         onRefresh: _sysMsgController.onRefresh,
         child: CustomScrollView(

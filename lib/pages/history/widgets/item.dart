@@ -40,7 +40,7 @@ class HistoryItem extends StatelessWidget {
             ..enableMultiSelect.value = true
             ..onSelect(item);
 
-    return Material(
+    final surface = Material(
       type: MaterialType.transparency,
       child: InkWell(
         onTap: enableMultiSelect
@@ -201,6 +201,13 @@ class HistoryItem extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      child: ImmersiveSurface(
+        borderRadius: BorderRadius.circular(16),
+        child: surface,
       ),
     );
   }

@@ -251,3 +251,31 @@ class ShortVideoSession extends ChangeNotifier {
     super.dispose();
   }
 }
+
+/// Retain both neighbours, prioritizing the current swipe direction. The live
+/// source is already pinned separately and must not consume a preload slot.
+List<ShortVideoEntry> shortPreloadNeighbours(
+  List<ShortVideoEntry> entries,
+  int current,
+  int target,
+) {
+  if (entries.isEmpty) return const [];
+  target = target.clamp(0, entries.length - 1);
+  final direction = target < current ? -1 : 1;
+  final indices = [
+    target,
+    target + direction,
+    target - direction,
+    target + 2 * direction,
+    target - 2 * direction,
+    target + 3 * direction,
+  ];
+  final seen = <String>{
+    if (current >= 0 && current < entries.length) entries[current].bvid,
+  };
+  return [
+    for (final index in indices)
+      if (index >= 0 && index < entries.length && seen.add(entries[index].bvid))
+        entries[index],
+  ].take(3).toList(growable: false);
+}

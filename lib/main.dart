@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/performance_probe.dart';
 import 'dart:io';
 
 import 'package:PiliPlus/build_config.dart';
@@ -108,6 +109,7 @@ Future<void> _initAppPath() async {
 
 void main() async {
   ScaledWidgetsFlutterBinding.ensureInitialized();
+  HarmonyPerformanceProbe.start();
   MediaKit.ensureInitialized();
   if (OS.isHarmony) await OS.initHarmonyDeviceType();
   await _initAppPath();

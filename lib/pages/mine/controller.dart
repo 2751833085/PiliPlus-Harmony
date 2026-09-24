@@ -226,10 +226,10 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
         builder: (context) {
           final theme = Theme.of(context);
           final style = TextStyle(
-            color: theme.colorScheme.onSecondaryContainer,
+            color: theme.colorScheme.onSurface,
           );
-          return ColoredBox(
-            color: theme.colorScheme.secondaryContainer,
+          return ImmersiveSurface(
+            color: theme.colorScheme.surface,
             child: Padding(
               padding: EdgeInsets.only(
                 top: 15,
@@ -305,8 +305,8 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
         },
         builder: (context) {
           final theme = Theme.of(context);
-          return ColoredBox(
-            color: theme.colorScheme.secondaryContainer,
+          return ImmersiveSurface(
+            color: theme.colorScheme.surface,
             child: Padding(
               padding: EdgeInsets.only(
                 top: 15,

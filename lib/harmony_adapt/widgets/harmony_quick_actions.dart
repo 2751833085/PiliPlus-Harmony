@@ -20,31 +20,34 @@ class HarmonyQuickActions extends StatelessWidget {
           for (final action in actions)
             SizedBox(
               width: bounds.maxWidth / columns,
-              child: InkWell(
+              child: ImmersiveInteraction(
                 borderRadius: BorderRadius.circular(14),
-                onTap: action.onTap,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 10,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        action.icon,
-                        size: 25,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      const SizedBox(height: 7),
-                      Text(
-                        action.title,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.copyWith(fontSize: 12),
-                      ),
-                    ],
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: action.onTap,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 10,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          action.icon,
+                          size: 25,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        const SizedBox(height: 7),
+                        Text(
+                          action.title,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

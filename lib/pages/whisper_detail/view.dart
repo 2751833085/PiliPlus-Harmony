@@ -1,6 +1,8 @@
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/pages/whisper/widgets/message_surface.dart';
 import 'dart:async';
+import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart'
+    show RichTextItem;
 import 'dart:io' show File;
 
 import 'package:PiliPlus/common/assets.dart';
@@ -36,7 +38,14 @@ class WhisperDetailPage extends CommonRichTextPubPage {
   const WhisperDetailPage({
     super.key,
     super.autofocus = false,
+    super.items,
+    this.conversation,
+    this.onClose,
+    this.onDraftChanged,
   });
+  final Map<String, dynamic>? conversation;
+  final VoidCallback? onClose;
+  final ValueChanged<List<RichTextItem>>? onDraftChanged;
 
   @override
   State<WhisperDetailPage> createState() => _WhisperDetailPageState();
@@ -44,10 +53,28 @@ class WhisperDetailPage extends CommonRichTextPubPage {
 
 class _WhisperDetailPageState
     extends CommonRichTextPubPageState<WhisperDetailPage> {
-  final _whisperDetailController = Get.put(
-    WhisperDetailController(),
-    tag: Utils.makeHeroTag(Get.parameters['talkerId']),
+  late final _controllerTag = Utils.makeHeroTag('conversation');
+  late final _whisperDetailController = Get.put(
+    WhisperDetailController(conversation: widget.conversation),
+    tag: _controllerTag,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _whisperDetailController;
+    editController.addListener(_saveDraft);
+  }
+
+  void _saveDraft() =>
+      widget.onDraftChanged?.call(List.of(editController.items));
+
+  @override
+  void dispose() {
+    editController.removeListener(_saveDraft);
+    Get.delete<WhisperDetailController>(tag: _controllerTag);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +88,13 @@ class _WhisperDetailPageState
     return SimpleScaffold(
       backgroundColor: harmony ? theme.scaffoldBackgroundColor : null,
       appBar: AppBar(
+        leading: widget.onClose == null
+            ? null
+            : IconButton(
+                tooltip: '返回消息列表',
+                onPressed: widget.onClose,
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
         centerTitle: false,
         titleSpacing: 4,
         title: GestureDetector(

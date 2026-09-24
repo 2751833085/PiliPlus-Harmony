@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/widgets/avatars.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -123,6 +124,15 @@ class DynamicPanel extends StatelessWidget {
     );
     if (isSave || (isDetail && !isDetailPortraitW)) {
       return child;
+    }
+    if (HarmonyStyle.enabled(context) && !isDetail) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+        child: ImmersiveSurface(
+          borderRadius: HarmonyTheme.cardRadius,
+          child: child,
+        ),
+      );
     }
     return DecoratedBox(
       decoration: BoxDecoration(

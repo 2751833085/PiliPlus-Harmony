@@ -71,7 +71,6 @@ List<SettingsModel> get styleSettings => [
     ],
     titles: const ['颜色选择', '主题模式', '纯黑主题'],
   ),
-  ...harmonyStyleModeSettings,
 ];
 
 List<SettingsModel> get _appearanceSettings => [

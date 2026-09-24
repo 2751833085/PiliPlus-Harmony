@@ -20,20 +20,38 @@ import 'package:material_ui/material_ui.dart' hide ListTile;
 import 'package:get/get.dart';
 
 class ReplyMePage extends StatefulWidget {
-  const ReplyMePage({super.key});
+  const ReplyMePage({super.key, this.onClose});
+  final VoidCallback? onClose;
 
   @override
   State<ReplyMePage> createState() => _ReplyMePageState();
 }
 
 class _ReplyMePageState extends State<ReplyMePage> {
-  final _replyMeController = Get.put(ReplyMeController());
+  late final _controllerTag = 'notification-${identityHashCode(this)}';
+  @override
+  void dispose() {
+    Get.delete<ReplyMeController>(tag: _controllerTag);
+    super.dispose();
+  }
+
+  late final _replyMeController = Get.put(
+    ReplyMeController(),
+    tag: _controllerTag,
+  );
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SimpleScaffold(
       appBar: AppBar(
+        leading: widget.onClose == null
+            ? null
+            : IconButton(
+                tooltip: '返回消息列表',
+                onPressed: widget.onClose,
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
         title: const Text('回复我的'),
         actions: [
           IconButton(

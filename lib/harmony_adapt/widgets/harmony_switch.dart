@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart' show ImmersiveInteraction;
 import 'package:flutter/services.dart';
 
 /// Harmony proportions, with a full 52×48 hit area and keyboard/semantics support.
@@ -67,36 +68,40 @@ class _HarmonySwitchState extends State<HarmonySwitch> {
             width: 52,
             height: 48,
             child: Center(
-              child: AnimatedContainer(
-                duration: duration,
-                width: 52,
-                height: 32,
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  color: (widget.value ? scheme.primary : scheme.outlineVariant)
-                      .withValues(alpha: enabled ? 1 : 0.4),
-                  boxShadow: _focused
-                      ? [
-                          BoxShadow(
-                            color: scheme.primary.withValues(alpha: 0.3),
-                            spreadRadius: 3,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: AnimatedAlign(
+              child: ImmersiveInteraction(
+                borderRadius: BorderRadius.circular(18),
+                child: AnimatedContainer(
                   duration: duration,
-                  curve: Curves.easeOutCubic,
-                  alignment: widget.value
-                      ? AlignmentDirectional.centerEnd
-                      : AlignmentDirectional.centerStart,
-                  child: const SizedBox.square(
-                    dimension: 26,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                  width: 52,
+                  height: 32,
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    color:
+                        (widget.value ? scheme.primary : scheme.outlineVariant)
+                            .withValues(alpha: enabled ? 1 : 0.4),
+                    boxShadow: _focused
+                        ? [
+                            BoxShadow(
+                              color: scheme.primary.withValues(alpha: 0.3),
+                              spreadRadius: 3,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: AnimatedAlign(
+                    duration: duration,
+                    curve: Curves.easeOutCubic,
+                    alignment: widget.value
+                        ? AlignmentDirectional.centerEnd
+                        : AlignmentDirectional.centerStart,
+                    child: const SizedBox.square(
+                      dimension: 26,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
                   ),

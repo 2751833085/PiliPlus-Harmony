@@ -303,7 +303,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           find.byType(ImmersiveSurface),
-          harmony ? findsOneWidget : findsNothing,
+          harmony ? findsWidgets : findsNothing,
         );
         await tester.tap(find.text('不可用'));
         await tester.pumpAndSettle();

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/initial_feed_content.dart';
 import 'package:PiliPlus/pages/mine/widgets/recent_history.dart';
 import 'package:PiliPlus/pages/history/open_item.dart';
@@ -221,6 +222,54 @@ class _MediaPageState extends CommonPageState<MinePage>
                                 padding: EdgeInsets.zero,
                               ),
                       );
+                      final services = panel(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 6, 20, 4),
+                              child: Text(
+                                '我的服务',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            HarmonyQuickActions(
+                              actions: [
+                                HarmonyQuickAction(
+                                  '课程',
+                                  Icons.school_outlined,
+                                  () => PageUtils.inAppWebview(
+                                    'https://www.bilibili.com/cheese/',
+                                  ),
+                                ),
+                                HarmonyQuickAction(
+                                  '装扮',
+                                  Icons.palette_outlined,
+                                  () => PageUtils.inAppWebview(
+                                    'https://www.bilibili.com/h5/mall/home',
+                                  ),
+                                ),
+                                HarmonyQuickAction(
+                                  '会员购',
+                                  Icons.shopping_bag_outlined,
+                                  () => PageUtils.inAppWebview(
+                                    'https://mall.bilibili.com/',
+                                  ),
+                                ),
+                                HarmonyQuickAction(
+                                  '订单中心',
+                                  Icons.receipt_long_outlined,
+                                  () => PageUtils.inAppWebview(
+                                    'https://mall.bilibili.com/orderlist.html',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
                       return ListView(
                         padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
                         physics: const AlwaysScrollableScrollPhysics(),
@@ -238,6 +287,8 @@ class _MediaPageState extends CommonPageState<MinePage>
                                       actions,
                                       const SizedBox(height: 10),
                                       favorites,
+                                      const SizedBox(height: 10),
+                                      services,
                                     ],
                                   ),
                                 ),
@@ -261,6 +312,8 @@ class _MediaPageState extends CommonPageState<MinePage>
                             const SizedBox(height: 10),
                             _buildRecentHistory(harmony: true),
                             favorites,
+                            const SizedBox(height: 10),
+                            services,
                           ],
                         ],
                       );
@@ -338,10 +391,6 @@ class _MediaPageState extends CommonPageState<MinePage>
           .toList(),
     );
   }
-
-  Widget _headerSurface(Widget child) => HarmonyStyle.enabled(context)
-      ? ImmersiveSurface(borderRadius: BorderRadius.circular(24), child: child)
-      : child;
 
   Widget get _buildHeaderActions {
     const iconSize = 22.0;
@@ -720,15 +769,6 @@ class _MediaPageState extends CommonPageState<MinePage>
               ),
             ),
           ),
-          trailing: MediaQuery.sizeOf(context).width < 600
-              ? null
-              : _headerSurface(
-                  IconButton(
-                    tooltip: '刷新',
-                    onPressed: controller.onRefresh,
-                    icon: const Icon(Icons.refresh, size: 20),
-                  ),
-                ),
         ),
         _buildFavBody(theme, secondary, controller.loadingState.value),
       ],

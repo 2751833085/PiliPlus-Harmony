@@ -16,6 +16,7 @@ abstract class HarmonyChannel {
   static final nativeDockInset = ValueNotifier<double>(0);
   static final handSide = ValueNotifier(HarmonyHandSide.center);
   static final handAvailable = ValueNotifier(false);
+  static final handStatus = ValueNotifier<String>('waiting');
   static final foldExpanded = ValueNotifier(false);
   static DateTime _foldChangedAt = DateTime.fromMillisecondsSinceEpoch(0);
   static bool get foldTransitionActive =>
@@ -49,6 +50,7 @@ abstract class HarmonyChannel {
             ((call.arguments['bottom'] as num?)?.toDouble() ?? 0).clamp(0, 200);
         break;
       case 'onHoldingHandChanged':
+        handStatus.value = call.arguments['state'] as String? ?? 'waiting';
         handAvailable.value = call.arguments['available'] == true;
         handSide.value = switch (call.arguments['side']) {
           'left' => HarmonyHandSide.left,

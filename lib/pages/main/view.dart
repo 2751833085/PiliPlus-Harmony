@@ -1,5 +1,6 @@
-import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/appearance.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_hand_dock.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'dart:io';
 
@@ -123,11 +124,7 @@ class _MainAppState extends PopScopeState<MainApp>
     if (OS.isHarmony) {
       _mainController.useBottomNav = HarmonyWindowLayout.useBottomNavigation(
         size.width - _padding.horizontal,
-        keepDock:
-            Pref.harmonyUI &&
-            (Pref.harmonyNavigation == HarmonyNavigation.bottomBar ||
-                (Pref.harmonyNavigation == HarmonyNavigation.floatingDock &&
-                    Pref.harmonyKeepDock)),
+        keepDock: Pref.harmonyUI,
         sideBar: _mainController.useSideBar,
       );
     } else if (!_mainController.useSideBar) {
@@ -390,7 +387,50 @@ class _MainAppState extends PopScopeState<MainApp>
       if (_mainController.useNativeTabs.value) {
         return null;
       }
-      if (HarmonyStyle.enabled(context)) {
+      if (HarmonyStyle.enabled(context) &&
+          Pref.harmonyNavigation == HarmonyNavigation.floatingDock) {
+        bottomNav = SafeArea(
+          top: false,
+          minimum: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return HarmonyHandDock(
+                enabled: Pref.harmonyHandedness,
+                width: constraints.maxWidth,
+                builder: (_) => Align(
+                  heightFactor: 1,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    child: ImmersiveSurface(
+                      borderRadius: BorderRadius.circular(32),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Obx(
+                          () => Row(
+                            children: [
+                              for (
+                                var i = 0;
+                                i < _mainController.navigationBars.length;
+                                i++
+                              )
+                                Expanded(
+                                  child: _harmonyDestination(
+                                    i,
+                                    vertical: false,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      } else if (HarmonyStyle.enabled(context)) {
         bottomNav = Material(
           color: theme.colorScheme.surface,
           child: SafeArea(

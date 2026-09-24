@@ -1,4 +1,5 @@
 import display from '@ohos.display';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { motion } from '@kit.MultimodalAwarenessKit';
 import { MethodChannel } from '@ohos/flutter_ohos';
 
@@ -14,30 +15,52 @@ export class SystemPosture {
   private foldTimer: number = -1;
   private angles: number[] = [];
   private side: string = 'center';
+  private pendingSide: string = '';
+  private hasSample: boolean = false;
 
   private channel: MethodChannel;
   constructor(channel: MethodChannel) { this.channel = channel; }
 
   private holdingChanged = (status: motion.HoldingHandStatus): void => {
     if (!this.active || !this.handEnabled) return;
-    // Only explicit two-handed holding recenters the controls. Unknown/no-hand
-    // samples cancel a pending move and retain the last stable placement.
-    if (this.handTimer >= 0) clearTimeout(this.handTimer);
-    this.handTimer = -1;
     let side: string;
     switch (status) {
       case motion.HoldingHandStatus.LEFT_HAND_HELD: side = 'left'; break;
       case motion.HoldingHandStatus.RIGHT_HAND_HELD: side = 'right'; break;
       case motion.HoldingHandStatus.BOTH_HANDS_HELD: side = 'center'; break;
-      default: return;
+      default:
+        this.cancelPendingHand();
+        return;
     }
-    if (side === this.side) return;
+    // Repeated samples must not postpone an already pending stable transition.
+    if (side === this.pendingSide) return;
+    this.cancelPendingHand();
+    if (this.hasSample && side === this.side) return;
+    this.pendingSide = side;
     this.handTimer = setTimeout(() => {
       this.handTimer = -1;
+      this.pendingSide = '';
+      if (!this.active || !this.handEnabled) return;
       this.side = side;
-      this.channel.invokeMethod('onHoldingHandChanged', { side: side, available: true });
+      this.hasSample = true;
+      this.publishHand(true);
     }, 180);
   };
+
+  private cancelPendingHand(): void {
+    if (this.handTimer >= 0) clearTimeout(this.handTimer);
+    this.handTimer = -1;
+    this.pendingSide = '';
+  }
+
+  private publishHand(available: boolean, state: string = 'waiting'): void {
+    AppStorage.setOrCreate('systemHoldingSide', available ? this.side : 'center');
+    AppStorage.setOrCreate('systemHoldingAvailable', available);
+    this.channel.invokeMethod('onHoldingHandChanged', {
+      side: available ? this.side : 'center', available: available,
+      state: available ? this.side : state
+    });
+  }
 
   private foldChanged = (_status: display.FoldStatus): void => { this.pushFold(); this.scheduleFold(); };
   private modeChanged = (_mode: display.FoldDisplayMode): void => { this.scheduleFold(); };
@@ -79,7 +102,7 @@ export class SystemPosture {
     if (!enabled) {
       this.stopHand();
       this.side = 'center';
-      this.channel.invokeMethod('onHoldingHandChanged', { side: 'center', available: false });
+      this.publishHand(false, 'disabled');
     } else if (this.active) this.startHand();
   }
 
@@ -88,15 +111,18 @@ export class SystemPosture {
     try {
       motion.on('holdingHandChanged', this.holdingChanged);
       this.handListening = true;
-      this.channel.invokeMethod('onHoldingHandChanged', { side: this.side, available: true });
-    } catch (_) {
-      this.channel.invokeMethod('onHoldingHandChanged', { side: 'center', available: false });
+      this.hasSample = false;
+      this.publishHand(false);
+    } catch (error) {
+      const code = (error as BusinessError).code;
+      this.publishHand(false, code === 801 ? 'unsupported' : code === 201 ? 'denied' : 'unavailable');
     }
   }
 
   private stopHand(): void {
-    if (this.handTimer >= 0) clearTimeout(this.handTimer);
-    this.handTimer = -1;
+    this.cancelPendingHand();
+    this.hasSample = false;
+    this.publishHand(false);
     if (this.handListening) {
       try { motion.off('holdingHandChanged', this.holdingChanged); } catch (_) {}
       this.handListening = false;

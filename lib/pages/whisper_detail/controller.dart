@@ -17,6 +17,8 @@ import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
 class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
+  WhisperDetailController({this.conversation});
+  final Map<String, dynamic>? conversation;
   late final account = Accounts.main;
 
   late final int talkerId;
@@ -33,7 +35,7 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
   @override
   void onInit() {
     super.onInit();
-    final args = Get.arguments;
+    final args = conversation ?? Get.arguments;
     talkerId = args['talkerId'];
     name = args['name'];
     face = args['face'];
@@ -106,38 +108,44 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
     // return;
     assert((message != null) ^ (picMsg != null));
     if (_isSending) return;
-    _isSending = true;
     feedBack();
     SmartDialog.dismiss();
     if (!account.isLogin) {
       SmartDialog.showToast('请先登录');
       return;
     }
-    final res = await ImGrpc.sendMsg(
-      senderUid: account.mid,
-      receiverId: mid!,
-      content: msgType == .EN_MSG_TYPE_DRAW_BACK
-          ? message!
-          : jsonEncode(picMsg ?? {"content": message!}),
-      msgType:
-          msgType ?? (picMsg != null ? .EN_MSG_TYPE_PIC : .EN_MSG_TYPE_TEXT),
-    );
-    SmartDialog.dismiss();
-    if (res.isSuccess) {
-      if (msgType == .EN_MSG_TYPE_DRAW_BACK) {
-        loadingState
-          ..value.data![index!].msgStatus = 1
-          ..refresh();
-        SmartDialog.showToast('撤回成功');
+    _isSending = true;
+    try {
+      final res = await ImGrpc.sendMsg(
+        senderUid: account.mid,
+        receiverId: talkerId,
+        content: msgType == .EN_MSG_TYPE_DRAW_BACK
+            ? message!
+            : jsonEncode(picMsg ?? {"content": message!}),
+        msgType:
+            msgType ?? (picMsg != null ? .EN_MSG_TYPE_PIC : .EN_MSG_TYPE_TEXT),
+      );
+      if (isClosed) return;
+      SmartDialog.dismiss();
+      if (res.isSuccess) {
+        if (msgType == .EN_MSG_TYPE_DRAW_BACK) {
+          loadingState
+            ..value.data![index!].msgStatus = 1
+            ..refresh();
+          SmartDialog.showToast('撤回成功');
+        } else {
+          onRefresh();
+          onClearText();
+          SmartDialog.showToast('发送成功');
+        }
       } else {
-        onRefresh();
-        onClearText();
-        SmartDialog.showToast('发送成功');
+        res.toast();
       }
-    } else {
-      res.toast();
+    } catch (_) {
+      if (!isClosed) SmartDialog.showToast('发送失败，请稍后重试');
+    } finally {
+      _isSending = false;
     }
-    _isSending = false;
   }
 
   @override

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async' show Completer;
+import 'package:material_ui/material_ui.dart'
+    show ImmersiveSurface, PopupSurfaceStyle;
 
 import 'package:PiliPlus/common/widgets/refresh_layout.dart';
 import 'package:PiliPlus/common/widgets/scroll_behavior.dart';
@@ -576,13 +578,25 @@ class RefreshIndicatorState extends State<RefreshIndicator>
           ? null
           : AnimatedBuilder(
               animation: _positionController,
-              builder: (context, child) => RefreshProgressIndicator(
-                value: showIndeterminateIndicator ? null : _value.value,
-                valueColor: _valueColor,
-                backgroundColor: widget.backgroundColor,
-                strokeWidth: widget.strokeWidth,
-                elevation: widget.elevation,
-              ),
+              builder: (context, child) {
+                final immersive =
+                    Theme.of(context).extension<PopupSurfaceStyle>() != null;
+                final indicator = RefreshProgressIndicator(
+                  value: showIndeterminateIndicator ? null : _value.value,
+                  valueColor: _valueColor,
+                  backgroundColor: immersive
+                      ? Colors.transparent
+                      : widget.backgroundColor,
+                  strokeWidth: widget.strokeWidth,
+                  elevation: immersive ? 0 : widget.elevation,
+                );
+                return immersive
+                    ? ImmersiveSurface(
+                        borderRadius: BorderRadius.circular(32),
+                        child: indicator,
+                      )
+                    : indicator;
+              },
             ),
     );
 

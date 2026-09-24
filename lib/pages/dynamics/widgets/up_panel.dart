@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
@@ -46,7 +47,7 @@ class _UpPanelState extends State<UpPanel> {
         SliverToBoxAdapter(
           child: SizedBox(
             height: MediaQuery.paddingOf(context).top,
-          )
+          ),
         ),
         SliverToBoxAdapter(
           child: InkWell(
@@ -207,7 +208,7 @@ class _UpPanelState extends State<UpPanel> {
       }
     }
 
-    return SizedBox(
+    final result = SizedBox(
       height: 76,
       width: isTop ? 70 : null,
       child: InkWell(
@@ -247,6 +248,22 @@ class _UpPanelState extends State<UpPanel> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+    if (!HarmonyStyle.enabled(context)) return result;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
+      child: ImmersiveInteraction(
+        borderRadius: BorderRadius.circular(16),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: currentMid == item.mid
+                ? theme.colorScheme.onSurface.withValues(alpha: .07)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: result,
         ),
       ),
     );

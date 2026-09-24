@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -58,7 +59,7 @@ void main() {
   );
 
   test(
-    'Harmony defaults on; Material You changes only on next startup',
+    'Harmony remains active regardless of obsolete Material You settings',
     () async {
       await GStorage.setting.delete(SettingBoxKey.customColor);
       expect(Pref.customColor, 1);
@@ -75,9 +76,9 @@ void main() {
       expect(Pref.materialYouUI, isTrue);
       expect(Pref.harmonyUI, isTrue);
       Pref.captureAppearanceAtStartup();
-      expect(Pref.harmonyUI, isFalse);
+      expect(Pref.harmonyUI, isTrue);
       await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
-      expect(Pref.harmonyUI, isFalse);
+      expect(Pref.harmonyUI, isTrue);
       Pref.captureAppearanceAtStartup();
       expect(Pref.harmonyUI, isTrue);
     },
@@ -107,7 +108,7 @@ void main() {
     () {
       final rows = styleSettings;
       final titles = rows.map((e) => e.title).toList();
-      expect(titles.last, 'Material You 界面风格');
+      expect(titles, isNot(contains('Material You 界面风格')));
       for (final title in [
         '横屏适配',
         '页面过渡动画',
@@ -121,12 +122,12 @@ void main() {
       }
       expect(
         titles,
-        containsAll(['鸿蒙底栏与侧栏', '颜色选择', '纯黑主题', '底栏项目与顺序', '默认启动页', '首页标签页']),
+        containsAll(['底栏样式', '颜色选择', '纯黑主题', '底栏项目与顺序', '默认启动页', '首页标签页']),
       );
       expect(rows.singleWhere((e) => e.title == '纯黑主题').disabledReason, isNull);
       expect(
-        rows.singleWhere((e) => e.title == '鸿蒙底栏与侧栏').disabledReason!(),
-        isNotNull,
+        rows.singleWhere((e) => e.title == '底栏样式').disabledReason,
+        isNull,
       );
     },
   );
@@ -134,23 +135,28 @@ void main() {
   test(
     'appearance owns Harmony style with conditional rows and no duplicate navigation',
     () async {
-      expect(styleSettings.map((e) => e.title), contains('Material You 界面风格'));
-      expect(styleSettings.map((e) => e.title), isNot(contains('沉浸光感')));
+      expect(
+        styleSettings.map((e) => e.title),
+        isNot(contains('Material You 界面风格')),
+      );
+      expect(styleSettings.map((e) => e.title), contains('沉浸光感'));
       await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
       Pref.captureAppearanceAtStartup();
       expect(
         styleSettings.map((e) => e.title),
         containsAll(['沉浸光感', '智感握姿']),
       );
-      expect(extraSettings.map((e) => e.title), isNot(contains('鸿蒙底栏与侧栏')));
+      expect(extraSettings.map((e) => e.title), isNot(contains('底栏样式')));
       expect(
         harmonyNavigationSettings.map((e) => e.title),
-        contains('展开时也采用悬浮 Dock'),
+        isNot(contains('展开时也采用悬浮 Dock')),
       );
       await GStorage.setting.put(
         SettingBoxKey.harmonyNavigation,
-        HarmonyNavigation.sideBar.index,
+        2,
       );
+      expect(Pref.harmonyNavigation, HarmonyNavigation.bottomBar);
+      expect(HarmonyNavigation.values.length, 2);
       expect(
         harmonyNavigationSettings.map((e) => e.title),
         isNot(contains('展开时也采用悬浮 Dock')),
@@ -170,7 +176,10 @@ void main() {
       };
       final rows = SettingType.searchSettings;
       expect(catalog[SettingType.videoSetting]!.first.effectiveTitle, '默认画质');
-      expect(catalog[SettingType.playSetting]!.first.effectiveTitle, '启用短视频模式（实验性）');
+      expect(
+        catalog[SettingType.playSetting]!.first.effectiveTitle,
+        '启用短视频模式（实验性）',
+      );
       expect(
         catalog[SettingType.styleSetting]!
             .firstWhere((row) => row.section == '主题与显示')
@@ -194,7 +203,7 @@ void main() {
       expect(keys.toSet().length, keys.length);
       expect(
         catalog[SettingType.styleSetting]!.map((e) => e.effectiveTitle),
-        containsAll(['Material You 界面风格', '颜色选择', '沉浸光感', '在我的页面展示观看历史']),
+        containsAll(['颜色选择', '沉浸光感', '在我的页面展示观看历史']),
       );
       expect(
         catalog[SettingType.playSetting]!.map((e) => e.effectiveTitle),
@@ -337,7 +346,7 @@ void main() {
     expect(theme.scaffoldBackgroundColor, Colors.black);
     expect(
       theme.pageTransitionsTheme.builders[TargetPlatform.ohos],
-      isA<OpenRightwardsPageTransitionsBuilder>(),
+      isA<HarmonyPageTransitionsBuilder>(),
     );
   });
 
@@ -408,7 +417,10 @@ void main() {
       await tester.pumpWidget(
         GetMaterialApp(
           defaultTransition: Transition.native,
-          theme: ThemeData(platform: TargetPlatform.ohos),
+          theme: ThemeUtils.getThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
+            isDynamic: false,
+          ).copyWith(platform: TargetPlatform.ohos),
           home: const Scaffold(body: Text('previous')),
         ),
       );
@@ -417,7 +429,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 120));
       expect(
         find.byWidgetPredicate(
-          (w) => w.runtimeType.toString() == '_OpenRightwardsPageTransition',
+          (w) => w is FadeTransition,
         ),
         findsWidgets,
       );

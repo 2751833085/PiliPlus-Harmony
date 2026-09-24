@@ -91,9 +91,7 @@ class MainController extends GetxController
   }
 
   final floatingNavBar = Pref.floatingNavBar;
-  bool get useSideBar => Pref.harmonyUI
-      ? Pref.harmonyNavigation == HarmonyNavigation.sideBar
-      : Pref.useSideBar;
+  bool get useSideBar => Pref.harmonyUI ? false : Pref.useSideBar;
   final mainTabBarView = Pref.mainTabBarView;
   late final optTabletNav = Pref.optTabletNav;
 

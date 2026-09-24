@@ -31,7 +31,7 @@ class SubItem extends StatelessWidget {
       title: item.title,
       cover: item.cover,
     );
-    return Material(
+    final surface = Material(
       type: MaterialType.transparency,
       child: InkWell(
         onTap: () {
@@ -94,6 +94,13 @@ class SubItem extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      child: ImmersiveSurface(
+        borderRadius: BorderRadius.circular(16),
+        child: surface,
       ),
     );
   }

@@ -1,4 +1,3 @@
-import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:math' as math;
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models_new/history/list.dart';
@@ -59,22 +58,6 @@ class MineHistoryPreview extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (history.loggedIn && MediaQuery.sizeOf(context).width >= 600)
-                  Builder(
-                    builder: (context) {
-                      final button = IconButton(
-                        tooltip: '刷新观看历史',
-                        onPressed: history.loading ? null : history.refresh,
-                        icon: const Icon(Icons.refresh, size: 20),
-                      );
-                      return HarmonyStyle.enabled(context)
-                          ? ImmersiveSurface(
-                              borderRadius: BorderRadius.circular(24),
-                              child: button,
-                            )
-                          : button;
-                    },
-                  ),
               ],
             ),
           ),

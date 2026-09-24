@@ -11,13 +11,14 @@ const ts = require(path.join(home, 'hvigor/hvigor/node_modules/typescript'));
 const source = fs.readFileSync(path.join(__dirname, '../ohos/entry/src/main/ets/plugins/SystemPosture.ets'), 'utf8');
 const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
 
-function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {}) {
+function fixture({ unsupported = false, denied = false, foldable = true, initialStatus = 2 } = {}) {
   let status = initialStatus;
   let timerId = 0;
   const timers = new Map();
   const displayListeners = new Map();
   const motionListeners = new Map();
   const messages = [];
+  const storage = new Map();
   const display = {
     FoldStatus: { FOLD_STATUS_UNKNOWN: 0, FOLD_STATUS_FOLDED: 2 },
     isFoldable: () => foldable,
@@ -27,12 +28,13 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
   };
   const motion = {
     HoldingHandStatus: { NOT_HELD: 0, LEFT_HAND_HELD: 1, RIGHT_HAND_HELD: 2, BOTH_HANDS_HELD: 3, UNKNOWN_STATUS: 16 },
-    on: (event, cb) => { if (unsupported) throw new Error('801'); motionListeners.set(event, cb); },
+    on: (event, cb) => { if (unsupported || denied) throw { code: denied ? 201 : 801 }; motionListeners.set(event, cb); },
     off: (event, cb) => { assert.equal(motionListeners.get(event), cb); motionListeners.delete(event); },
   };
   const exports = {};
   vm.runInNewContext(code, {
     exports,
+    AppStorage: { setOrCreate: (key, value) => storage.set(key, value) },
     require: name => {
       if (name === '@ohos.display') return { default: display };
       if (name === '@kit.MultimodalAwarenessKit') return { motion };
@@ -44,7 +46,7 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
   const service = new exports.SystemPosture({ invokeMethod: (method, args) => messages.push({ method, ...args }) });
   const flush = () => { const pending = [...timers.values()]; timers.clear(); pending.forEach(fn => fn()); };
   return {
-    service, messages, timers, displayListeners, motionListeners, flush,
+    service, messages, storage, timers, displayListeners, motionListeners, flush,
     hand: status => motionListeners.get('holdingHandChanged')?.(status),
     fold: next => { status = next; displayListeners.get('foldStatusChange')?.(status); },
   };
@@ -56,8 +58,15 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
   assert.equal(f.motionListeners.size, 0, 'grip must be opt-in');
   assert.equal(f.displayListeners.size, 3);
   f.service.setHandEnabled(true);
-  f.hand(1); f.flush();
+  assert.equal(f.messages.at(-1).available, false, 'subscription is not a valid grip sample');
+  assert.equal(f.messages.at(-1).state, 'waiting');
+  f.hand(1);
+  const firstTimer = [...f.timers.keys()];
+  f.hand(1); f.hand(1);
+  assert.deepEqual([...f.timers.keys()], firstTimer, 'duplicate samples must not postpone the timer');
+  f.flush();
   assert.equal(f.messages.at(-1).side, 'left');
+  assert.equal(f.storage.get('systemHoldingSide'), 'left', 'native and Flutter dock share confirmed grip');
   f.hand(2); f.hand(1); f.flush();
   assert.equal(f.messages.at(-1).side, 'left', 'stale pending hand sample must be cancelled');
   f.hand(2); f.hand(16); f.flush();
@@ -107,6 +116,7 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
   f.service.start();
   f.service.setHandEnabled(true);
   assert.equal(f.messages.at(-1).available, false, 'unsupported hardware degrades without throwing');
+  assert.equal(f.messages.at(-1).state, 'unsupported');
   assert.equal(f.displayListeners.size, 0);
   f.service.stop();
 }
@@ -119,3 +129,11 @@ function fixture({ unsupported = false, foldable = true, initialStatus = 2 } = {
   f.service.stop();
 }
 console.log('SystemPosture: one/two-hand placement, debounce, unknown samples, opt-in, fold transitions, lifecycle and unsupported-device checks passed.');
+
+{
+  const f = fixture({ denied: true });
+  f.service.start(); f.service.setHandEnabled(true);
+  assert.equal(f.messages.at(-1).state, 'denied');
+  assert.equal(f.storage.get('systemHoldingAvailable'), false);
+  f.service.stop();
+}

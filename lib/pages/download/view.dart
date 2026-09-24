@@ -334,7 +334,7 @@ class _DownloadPageState extends State<DownloadPage> with GridMixin {
             ),
           );
     final first = pageInfo.entries.first;
-    return Material(
+    final surface = Material(
       type: MaterialType.transparency,
       child: InkWell(
         onTap: () {
@@ -439,6 +439,13 @@ class _DownloadPageState extends State<DownloadPage> with GridMixin {
             ],
           ),
         ),
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      child: ImmersiveSurface(
+        borderRadius: BorderRadius.circular(16),
+        child: surface,
       ),
     );
   }

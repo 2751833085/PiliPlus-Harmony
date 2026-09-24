@@ -1,5 +1,4 @@
 import 'dart:ui' show SemanticsRole;
-import 'dart:ui' show ImageFilter;
 import 'immersive_surface.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:flutter/material.dart' hide PopupMenuButton, showMenu;
@@ -126,28 +125,9 @@ class _SurfaceEntry<T> extends PopupMenuEntry<T> {
 class _SurfaceEntryState<T> extends State<_SurfaceEntry<T>> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final dark = theme.brightness == Brightness.dark;
-    if (MediaQuery.highContrastOf(context) ||
-        MediaQuery.disableAnimationsOf(context))
-      return ColoredBox(color: theme.colorScheme.surface, child: widget.entry);
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                theme.colorScheme.surface.withValues(alpha: dark ? .88 : .9),
-                theme.colorScheme.surface.withValues(alpha: dark ? .76 : .8),
-              ],
-            ),
-          ),
-          child: widget.entry,
-        ),
-      ),
+    return ImmersiveSurface(
+      borderRadius: BorderRadius.zero,
+      child: widget.entry,
     );
   }
 }

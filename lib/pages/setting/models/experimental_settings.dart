@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -20,18 +21,6 @@ void refreshHarmonySettings(bool _) {
   }
 }
 
-List<SettingsModel> get harmonyStyleModeSettings => [
-  SwitchModel(
-    title: 'Material You 界面风格',
-    section: '界面风格',
-    subtitle: '默认关闭，使用鸿蒙界面风格；开启后恢复原版 Material You 界面。开关此选项均需重启应用后生效。',
-    leading: const Icon(Icons.auto_awesome_outlined),
-    setKey: SettingBoxKey.materialYouUI,
-    defaultVal: false,
-    needReboot: true,
-  ),
-];
-
 List<SettingsModel> get harmonyAppearanceSettings => [
   if (Pref.harmonyUI) ...[
     SwitchModel(
@@ -52,6 +41,25 @@ List<SettingsModel> get harmonyAppearanceSettings => [
     setKey: SettingBoxKey.harmonyHandedness,
     onChanged: refreshHarmonySettings,
   ),
+  if (Pref.harmonyHandedness)
+    NormalModel(
+      section: '导航与首页',
+      title: '握姿识别状态',
+      subtitle: '仅根据系统识别结果移动，触摸左右侧不会改变位置',
+      getTrailing: (theme) => ValueListenableBuilder<String>(
+        valueListenable: HarmonyChannel.handStatus,
+        builder: (_, state, child) => Text(switch (state) {
+          'left' => '左手',
+          'right' => '右手',
+          'center' => '双手 · 居中',
+          'unsupported' => '设备暂不支持',
+          'denied' => '系统未授权',
+          'unavailable' => '系统暂不可用',
+          'disabled' => '已关闭',
+          _ => '等待识别',
+        }, style: theme.textTheme.bodySmall),
+      ),
+    ),
   const SwitchModel(
     section: '交互与动画',
     title: '点击系统状态栏快速返回顶部',
@@ -140,9 +148,7 @@ List<SettingsModel> get experimentalSettings => [
 List<SettingsModel> get harmonyNavigationSettings => [
   PopupModel(
     section: '导航与首页',
-    disabledReason: () =>
-        Pref.harmonyUI ? null : '请在外观设置中关闭 Material You 界面风格，并重启应用。',
-    title: '鸿蒙底栏与侧栏',
+    title: '底栏样式',
     leading: const Icon(Icons.space_dashboard_outlined),
     value: () => Pref.harmonyNavigation,
     items: HarmonyNavigation.values,
@@ -155,17 +161,4 @@ List<SettingsModel> get harmonyNavigationSettings => [
       setState();
     },
   ),
-  if (Pref.harmonyUI &&
-      Pref.harmonyNavigation == HarmonyNavigation.floatingDock)
-    SwitchModel(
-      section: '导航与首页',
-      disabledReason: () =>
-          Pref.harmonyUI ? null : '请在外观设置中关闭 Material You 界面风格，并重启应用。',
-      title: '展开时也采用悬浮 Dock',
-      subtitle: '开启后双折、三折展开保留底部悬浮 Dock；关闭后在宽屏使用鸿蒙侧栏',
-      leading: const Icon(Icons.tablet_mac_outlined),
-      setKey: SettingBoxKey.harmonyKeepDock,
-      defaultVal: true,
-      onChanged: refreshHarmonySettings,
-    ),
 ];

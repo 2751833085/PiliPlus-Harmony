@@ -121,7 +121,7 @@ class _SettingPageState extends State<SettingPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (HarmonyStyle.enabled(context))
-                    SizedBox(width: 300, child: _buildList(theme))
+                    SizedBox(width: 352, child: _buildList(theme))
                   else
                     Expanded(flex: 4, child: _buildList(theme)),
                   VerticalDivider(

@@ -327,7 +327,7 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.blockLimit, defaultValue: 0.0);
 
   static bool get refreshUseDefault => true;
-  static double get refreshDragPercentage => 0.25;
+  static double get refreshDragPercentage => 0.22;
   static double get refreshDisplacement => PlatformUtils.isMobile ? 20.0 : 40.0;
 
   static String get blockUserID {
@@ -810,24 +810,13 @@ abstract final class Pref {
   static bool get materialYouUI =>
       _setting.get(SettingBoxKey.materialYouUI, defaultValue: false);
 
-  static bool? _materialYouAtStartup;
-
-  /// Called after storage initialization, before themes/controllers are built.
-  /// A settings toggle only changes the persisted value for the next launch.
-  static void captureAppearanceAtStartup() {
-    _materialYouAtStartup = materialYouUI;
-  }
-
-  static bool get harmonyUI =>
-      OS.isHarmony && !(_materialYouAtStartup ?? materialYouUI);
+  static void captureAppearanceAtStartup() {}
+  static bool get harmonyUI => OS.isHarmony;
 
   static HarmonyNavigation get harmonyNavigation =>
-      HarmonyNavigation.values[(_setting.get(
-                SettingBoxKey.harmonyNavigation,
-                defaultValue: 0,
-              )
-              as int)
-          .clamp(0, HarmonyNavigation.values.length - 1)];
+      _setting.get(SettingBoxKey.harmonyNavigation, defaultValue: 0) == 0
+      ? HarmonyNavigation.floatingDock
+      : HarmonyNavigation.bottomBar;
 
   static bool get harmonyImmersive =>
       harmonyUI &&

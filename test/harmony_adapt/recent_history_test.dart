@@ -242,7 +242,7 @@ void main() {
               }
               expect(
                 find.byTooltip('刷新观看历史'),
-                size.width / 2.875 < 600 ? findsNothing : findsOneWidget,
+                findsNothing,
               );
               final card = find.textContaining('最近观看 0').first;
               await tester.tap(card);

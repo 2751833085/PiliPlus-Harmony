@@ -90,6 +90,21 @@ struct Index {
   @LocalStorageLink('viewId') viewId: string = "";
   @StorageLink('immersiveEnabled') immersiveEnabled: boolean = false;
   @StorageLink('handednessEnabled') handednessEnabled: boolean = false;
+  @StorageLink('systemHoldingSide') @Watch('holdingSideChanged') systemHoldingSide: string = 'center';
+  @State dockHoldingSide: string = 'center';
+  private dockTouching: boolean = false;
+
+  holdingSideChanged(): void {
+    if (!this.dockTouching) this.dockHoldingSide = this.systemHoldingSide;
+  }
+
+  dockOffset(): number {
+    if (!this.handednessEnabled || this.winWidth < 600) return 0;
+    const width = this.winWidth >= 840 ? 360 : 320;
+    const offset = Math.max(0, (this.winWidth - width) / 2 - 24);
+    return this.dockHoldingSide === 'left' ? -offset : this.dockHoldingSide === 'right' ? offset : 0;
+  }
+
   @StorageLink('useNativeTabs') @Watch('syncDockMetrics') useNativeTabs: boolean = false;
   @StorageLink('shellBarsHidden') @Watch('syncDockMetrics') shellBarsHidden: boolean = false;
   @StorageLink('__scrollHidden') @Watch('onScrollHiddenChanged') shellBarsScrollHidden: boolean = false;
@@ -842,14 +857,23 @@ struct Index {
     .barPosition(BarPosition.End)
     .vertical(false)
     .barHeight(56)
-    .barBackgroundColor(this.immersiveEnabled ? '#00000000' : $r('sys.color.comp_background_tertiary'))
+    .barBackgroundColor($r('sys.color.comp_background_tertiary'))
     .barFloatingStyle({
       barBottomMargin: this.bottomAvoidAreaHeight,
-      adaptToHandedness: this.handednessEnabled,
+      adaptToHandedness: false,
       barWidth: { smallWidth: Math.min(280, Math.max(160, this.winWidth - 32)), mediumWidth: 320, largeWidth: 360 },
       systemMaterialEffect: {
         materialType: this.immersiveEnabled ? hdsMaterial.MaterialType.IMMERSIVE : hdsMaterial.MaterialType.NONE,
         materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+      }
+    })
+    .translate({ x: this.dockOffset() })
+    .animation({ duration: 220, curve: Curve.EaseOut })
+    .onTouch((event: TouchEvent) => {
+      if (event.type === TouchType.Down) this.dockTouching = true;
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        this.dockTouching = false;
+        this.holdingSideChanged();
       }
     })
     .visibility(this.navTabs.length <= 1 || this.shellBarsHidden

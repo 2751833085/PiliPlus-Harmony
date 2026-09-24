@@ -1,5 +1,9 @@
 import 'package:material_ui/material_ui.dart'
-    show PopupSurfaceStyle, PopupSheetStyle;
+    show
+        PopupSheetStyle,
+        PopupSurfaceStyle,
+        ImmersiveSurface,
+        ImmersiveInteraction;
 import 'package:flutter/material.dart';
 
 /// A theme marker keeps the alternative appearance independent of persisted
@@ -78,6 +82,12 @@ abstract final class HarmonyTheme {
     final body = base.textTheme.bodyMedium!.copyWith(fontSize: 14, height: 1.4);
     final shape = RoundedRectangleBorder(borderRadius: cardRadius);
     final button = ButtonStyle(
+      backgroundBuilder: immersive
+          ? (context, states, child) => ImmersiveInteraction(
+              borderRadius: BorderRadius.circular(24),
+              child: child ?? const SizedBox.shrink(),
+            )
+          : null,
       minimumSize: const WidgetStatePropertyAll(Size(40, 40)),
       padding: const WidgetStatePropertyAll(
         EdgeInsets.symmetric(horizontal: 20),
@@ -98,7 +108,7 @@ abstract final class HarmonyTheme {
               extension is! PopupSheetStyle,
         ),
         const HarmonyStyle(),
-        const PopupSheetStyle(),
+
         if (immersive) const PopupSurfaceStyle(),
       ],
       colorScheme: scheme,
@@ -186,6 +196,16 @@ abstract final class HarmonyTheme {
         subtitleTextStyle: body.copyWith(color: scheme.onSurfaceVariant),
         iconColor: scheme.onSurfaceVariant,
       ),
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          backgroundBuilder: immersive
+              ? (context, states, child) => ImmersiveSurface(
+                  borderRadius: BorderRadius.circular(24),
+                  child: child ?? const SizedBox.shrink(),
+                )
+              : null,
+        ),
+      ),
       filledButtonTheme: FilledButtonThemeData(style: button),
       outlinedButtonTheme: OutlinedButtonThemeData(style: button),
       textButtonTheme: TextButtonThemeData(style: button),
@@ -238,6 +258,34 @@ abstract final class HarmonyTheme {
               : scheme.outlineVariant,
         ),
         thumbColor: const WidgetStatePropertyAll(Colors.white),
+      ),
+    );
+  }
+}
+
+/// A bounded entrance distance is consistent on phone and unfolded screens.
+/// The previous page stays cached rather than being scaled or blurred.
+class HarmonyPageTransitionsBuilder extends PageTransitionsBuilder {
+  const HarmonyPageTransitionsBuilder();
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    final motion = animation.drive(CurveTween(curve: Curves.easeOutCubic));
+    return FadeTransition(
+      opacity: motion,
+      child: AnimatedBuilder(
+        animation: motion,
+        child: child,
+        builder: (context, child) => Transform.translate(
+          offset: Offset(24 * (1 - motion.value), 0),
+          child: child,
+        ),
       ),
     );
   }
