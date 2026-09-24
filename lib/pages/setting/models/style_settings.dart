@@ -339,11 +339,11 @@ List<SettingsModel> get _appearanceSettings => [
     leading: const Icon(Icons.color_lens_outlined),
     title: '颜色选择',
     section: '主题与显示',
-    getSubtitle: () => Pref.harmonyNativeColors
-        ? '当前：鸿蒙默认粉色；可更换按钮与强调色'
+    getSubtitle: () => Pref.harmonyUI
+        ? '更换按钮与强调色，保留鸿蒙界面配色'
         : '当前：${Pref.dynamicColor ? '动态取色' : '指定颜色'}',
     getTrailing: (theme) {
-      if (Pref.harmonyUI || Pref.harmonyNativeColors) {
+      if (Pref.harmonyUI) {
         return Icon(Icons.circle, size: 20, color: theme.colorScheme.primary);
       }
       if (Pref.dynamicColor) {

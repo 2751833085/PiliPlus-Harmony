@@ -219,27 +219,55 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   final sourceFrameGate = SourceFrameGate();
 
-  Future<void> _watchSourceFrame(Player player, String uri) async {
+  Timer? _sourceFramePoll;
+
+  // Some OHOS decoders do not emit video-pts property-change notifications.
+  // Poll outside the native event callback and never hold the preview forever.
+  void _watchSourceFrame(Player player, String uri) {
+    _sourceFramePoll?.cancel();
     final native = player.platform!.maybeAsNativePlayer;
     final generation = sourceFrameGate.begin(uri);
-    if (native.observed.containsKey('video-pts')) {
-      await native.unobserveProperty('video-pts', waitForInitialization: false);
-    }
-    await native.observeProperty('video-pts', (_) async {
-      if (!sourceFrameGate.isCurrent(generation) || native.disposed) return;
-      // Dimensions / playing may be emitted before any new frame exists.
-      // Read both properties now, rather than trusting a queued old-source event.
+    var reading = false;
+    var movingSamples = 0;
+    var lastPosition = Duration.zero;
+    _sourceFramePoll = Timer.periodic(const Duration(milliseconds: 80), (
+      timer,
+    ) async {
+      if (!sourceFrameGate.isCurrent(generation) || native.disposed) {
+        timer.cancel();
+        return;
+      }
+      if (reading) return;
+      reading = true;
       try {
-        final source = await native.getProperty('path');
-        final pts = await native.getProperty('video-pts');
+        final source = await native.getProperty(
+          'path',
+          waitForInitialization: false,
+        );
+        final pts = await native.getProperty(
+          'video-pts',
+          waitForInitialization: false,
+        );
         if (sourceFrameGate.accept(generation, source: source, pts: pts)) {
-          await native.unobserveProperty(
-            'video-pts',
-            waitForInitialization: false,
-          );
+          timer.cancel();
+          return;
+        }
+        final state = player.state;
+        if (state.playing &&
+            !state.buffering &&
+            state.position > lastPosition) {
+          movingSamples++;
+        }
+        lastPosition = state.position;
+        // This is a bounded fallback for backends lacking the frame property,
+        // not a claim that an audio clock is a decoded-video event.
+        if (movingSamples >= 3 && sourceFrameGate.release(generation)) {
+          timer.cancel();
         }
       } catch (_) {
-        // The player may be disposed while a property read is in flight.
+        if (native.disposed) timer.cancel();
+      } finally {
+        reading = false;
       }
     });
   }
@@ -1138,7 +1166,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
 
     assert(!isLive || seekTo == null);
-    await _watchSourceFrame(player, Media(video).uri);
+    _watchSourceFrame(player, Media(video).uri);
     await player.open(
       Media(
         video,
@@ -1442,6 +1470,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   /// 移除事件监听
   void _removeListeners() {
+    _sourceFramePoll?.cancel();
     sourceFrameGate.invalidate();
     _stallWatchdog?.cancel();
     _stallWatchdog = null;

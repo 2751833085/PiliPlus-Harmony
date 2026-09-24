@@ -23,24 +23,38 @@ abstract final class HarmonyTheme {
   static const panelDark = Color(0xFF1C1D20);
   static const cardRadius = BorderRadius.all(Radius.circular(20));
 
-  static ColorScheme nativeColors(Brightness brightness) {
+  static ColorScheme nativeColors(
+    Brightness brightness, {
+    ColorScheme? accentColors,
+  }) {
     final dark = brightness == Brightness.dark;
-    final accent = dark ? const Color(0xFFFF85AC) : const Color(0xFFD93670);
-    return ColorScheme.fromSeed(
-      seedColor: const Color(0xFFFB7299),
-      brightness: brightness,
-    ).copyWith(
-      primary: accent,
-      secondary: accent,
-      tertiary: accent,
-      onPrimary: dark ? const Color(0xFF3D0019) : Colors.white,
-      onSecondary: dark ? const Color(0xFF3D0019) : Colors.white,
-      onSurface: dark ? const Color(0xFFF1F3F5) : const Color(0xFF191A1C),
-      onSurfaceVariant: dark
-          ? const Color(0xFFB9BBC1)
-          : const Color(0xFF62656B),
-      outline: dark ? const Color(0xFFA3A5AB) : const Color(0xFF74777D),
-    );
+    final accent =
+        accentColors?.primary ??
+        (dark ? const Color(0xFFFF85AC) : const Color(0xFFD93670));
+    return (accentColors ??
+            ColorScheme.fromSeed(
+              seedColor: const Color(0xFFFB7299),
+              brightness: brightness,
+            ))
+        .copyWith(
+          primary: accent,
+          secondary: accent,
+          tertiary: accent,
+          onPrimary:
+              accentColors?.onPrimary ??
+              (dark ? const Color(0xFF3D0019) : Colors.white),
+          onSecondary:
+              accentColors?.onPrimary ??
+              (dark ? const Color(0xFF3D0019) : Colors.white),
+          onTertiary:
+              accentColors?.onPrimary ??
+              (dark ? const Color(0xFF3D0019) : Colors.white),
+          onSurface: dark ? const Color(0xFFF1F3F5) : const Color(0xFF191A1C),
+          onSurfaceVariant: dark
+              ? const Color(0xFFB9BBC1)
+              : const Color(0xFF62656B),
+          outline: dark ? const Color(0xFFA3A5AB) : const Color(0xFF74777D),
+        );
   }
 
   static ThemeData apply(ThemeData base, {bool immersive = false}) {

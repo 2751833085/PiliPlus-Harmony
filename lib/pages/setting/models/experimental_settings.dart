@@ -36,14 +36,6 @@ List<SettingsModel> get harmonyAppearanceSettings => [
   if (Pref.harmonyUI) ...[
     SwitchModel(
       section: '鸿蒙界面风格',
-      title: '采用鸿蒙原生配色',
-      subtitle: '使用哔哩哔哩粉色作为默认强调色；在外观设置中选择其他颜色后改用自选强调色，保留鸿蒙界面与明暗底色',
-      leading: const Icon(Icons.palette_outlined),
-      setKey: SettingBoxKey.harmonyNativeColors,
-      onChanged: refreshHarmonySettings,
-    ),
-    SwitchModel(
-      section: '鸿蒙界面风格',
       title: '沉浸光感',
       subtitle: '为 Dock、顶栏、菜单、播放面板与账户卡片启用光感材质；关闭后使用实色背景',
       leading: const Icon(Icons.water_drop_outlined),

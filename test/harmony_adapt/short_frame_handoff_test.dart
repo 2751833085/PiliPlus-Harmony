@@ -19,6 +19,10 @@ void main() {
     expect(gate.accept(b, source: 'b', pts: '0.000000'), isTrue);
     gate.invalidate();
     expect(gate.accept(b, source: 'b', pts: '0.040000'), isFalse);
+    final fallback = gate.begin('backend-without-frame-events');
+    expect(gate.release(b), isFalse);
+    expect(gate.release(fallback), isTrue);
+    expect(gate.ready, isTrue);
     gate.dispose();
   });
 

@@ -140,7 +140,7 @@ void main() {
       Pref.captureAppearanceAtStartup();
       expect(
         styleSettings.map((e) => e.title),
-        containsAll(['沉浸光感', '采用鸿蒙原生配色', '智感握姿']),
+        containsAll(['沉浸光感', '智感握姿']),
       );
       expect(extraSettings.map((e) => e.title), isNot(contains('鸿蒙底栏与侧栏')));
       expect(
@@ -304,15 +304,17 @@ void main() {
         colorScheme: scheme,
         isDynamic: false,
       );
-      await HarmonyAppearance.selectCustomColors();
+      await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, false);
+      HarmonyAppearance.changed();
       expect(Pref.harmonyUI, isTrue);
-      expect(Pref.harmonyNativeColors, isFalse);
+      expect(styleSettings.map((e) => e.title), isNot(contains('采用鸿蒙原生配色')));
       final after = ThemeUtils.getThemeData(
         colorScheme: scheme,
         isDynamic: false,
       );
       expect(after.colorScheme.primary, scheme.primary);
-      expect(after.colorScheme.primary, isNot(before.colorScheme.primary));
+      expect(after.colorScheme.primary, before.colorScheme.primary);
+      expect(after.colorScheme.onSurface, const Color(0xFF191A1C));
       expect(after.scaffoldBackgroundColor, before.scaffoldBackgroundColor);
       expect(after.cardTheme, before.cardTheme);
       expect(after.colorScheme.surface, before.colorScheme.surface);

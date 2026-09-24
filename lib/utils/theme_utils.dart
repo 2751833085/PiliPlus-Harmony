@@ -54,9 +54,10 @@ abstract final class ThemeUtils {
     required bool isDynamic,
     bool isDark = false,
   }) {
-    if (Pref.harmonyNativeColors) {
+    if (Pref.harmonyUI) {
       colorScheme = HarmonyTheme.nativeColors(
         isDark ? Brightness.dark : Brightness.light,
+        accentColors: colorScheme,
       );
       isDynamic = false;
     }

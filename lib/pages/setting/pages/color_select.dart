@@ -62,7 +62,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
   }
 
   Future<void> _applyColors() async {
-    await HarmonyAppearance.selectCustomColors();
+    HarmonyAppearance.changed();
     Get.updateMyAppTheme();
   }
 
@@ -187,11 +187,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
                 child: Pref.harmonyUI
                     ? Obx(
                         () => HarmonyAccentChoices(
-                          selected:
-                              ctr.currentColor.value == 1 ||
-                                  Pref.harmonyNativeColors
-                              ? 1
-                              : ctr.currentColor.value,
+                          selected: ctr.currentColor.value,
                           onSelected: (index) async {
                             ctr.currentColor.value = index;
                             await GStorage.setting.put(
@@ -253,14 +249,11 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
           Builder(
             builder: (context) {
               final isCurr =
-                  !Pref.harmonyNativeColors &&
-                  (currentColor < 0 || currentColor >= colorThemeTypes.length);
+                  currentColor < 0 || currentColor >= colorThemeTypes.length;
               final storedColor =
                   colorThemeTypes.elementAtOrNull(currentColor)?.color ??
                   Color(currentColor);
-              final color = Pref.harmonyNativeColors
-                  ? theme.colorScheme.primary
-                  : storedColor;
+              final color = storedColor;
               return GestureDetector(
                 behavior: .opaque,
                 onTap: () {
@@ -312,7 +305,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
           ...colorThemeTypes.mapIndexed(
             (i, e) {
               final color = e.color;
-              final isCurr = !Pref.harmonyNativeColors && currentColor == i;
+              final isCurr = currentColor == i;
               return GestureDetector(
                 behavior: .opaque,
                 onTap: () {

@@ -833,10 +833,6 @@ abstract final class Pref {
       harmonyUI &&
       _setting.get(SettingBoxKey.harmonyImmersive, defaultValue: true);
 
-  static bool get harmonyNativeColors =>
-      harmonyUI &&
-      _setting.get(SettingBoxKey.harmonyNativeColors, defaultValue: false);
-
   static bool get harmonyKeepDock =>
       _setting.get(SettingBoxKey.harmonyKeepDock, defaultValue: true);
 

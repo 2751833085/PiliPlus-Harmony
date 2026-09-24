@@ -34,6 +34,11 @@ class SourceFrameGate extends ChangeNotifier {
         timestamp < 0) {
       return false;
     }
+    return release(generation);
+  }
+
+  bool release(int generation) {
+    if (!isCurrent(generation) || _ready || _source == null) return false;
     _ready = true;
     notifyListeners();
     return true;
