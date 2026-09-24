@@ -224,12 +224,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   double? _dragOffset;
   int? _dragPointer;
 
-  bool get _isArmed =>
-      _containerExtent > 0 &&
-      (_dragOffset ?? 0) >=
-          _containerExtent *
-              kDragContainerExtentPercentage /
-              _kDragSizeFactorLimit;
+  bool _isArmed = false;
 
   // 鸿蒙保留kDragContainerExtentPercentage= Pref.refreshDragPercentage所需
   double _containerExtent = 0.0;
@@ -319,7 +314,10 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         ((notification is ScrollStartNotification &&
                 notification.dragDetails != null) ||
             (notification is ScrollUpdateNotification &&
-                notification.dragDetails != null)) &&
+                notification.dragDetails != null) ||
+            (notification is OverscrollNotification &&
+                notification.dragDetails != null &&
+                notification.overscroll < 0)) &&
         notification.metrics.extentBefore == 0.0 &&
         _start();
   }
@@ -335,6 +333,13 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     if (_shouldStart(notification)) {
       setState(() {
         _status = RefreshIndicatorStatus.drag;
+        // A short, fast pull can start with its only scroll update. Keep it.
+        if (notification is ScrollUpdateNotification) {
+          _dragOffset = -notification.scrollDelta!;
+        } else if (notification is OverscrollNotification) {
+          _dragOffset = -notification.overscroll;
+        }
+        _checkDragOffset(notification.metrics.viewportDimension);
       });
       return false;
     }
@@ -394,6 +399,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   bool _start() {
     assert(_status == null);
     assert(_dragOffset == null);
+    _isArmed = false;
     _dragOffset = 0.0;
     _scaleController.value = 0.0;
     _positionController.value = 0.0;
@@ -404,6 +410,15 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     assert(
       _status == RefreshIndicatorStatus.drag,
     );
+    // Latch the threshold before release/bounce notifications reduce the
+    // overscroll. No hold duration or animation completion is required.
+    if (containerExtent > 0 &&
+        _dragOffset! >=
+            containerExtent *
+                kDragContainerExtentPercentage /
+                _kDragSizeFactorLimit) {
+      _isArmed = true;
+    }
     double newValue =
         _dragOffset! / (containerExtent * kDragContainerExtentPercentage);
     _positionController.value = clampDouble(

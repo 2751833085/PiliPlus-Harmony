@@ -91,10 +91,25 @@ void main() {
           expect(find.byType(HarmonyLoadingIndicator), findsNothing);
           expect(find.byType(RefreshProgressIndicator), findsNothing);
           done = Completer<void>();
+          final quick = await tester.startGesture(const Offset(120, 200));
+          await quick.moveBy(const Offset(0, 30));
+          await quick.moveBy(const Offset(0, 500));
+          await quick.up();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 200));
+          expect(
+            calls,
+            2,
+            reason:
+                'Crossing the threshold then releasing immediately refreshes.',
+          );
+          done.complete();
+          await tester.pumpAndSettle();
+          done = Completer<void>();
           final manual = key.currentState!.show();
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 200));
-          expect(calls, 2);
+          expect(calls, 3);
           expect(find.byType(RefreshProgressIndicator), findsOneWidget);
           done.complete();
           await manual;
