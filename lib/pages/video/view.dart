@@ -1,3 +1,6 @@
+import 'package:PiliPlus/models/model_owner.dart';
+import 'package:PiliPlus/models_new/video/video_detail/data.dart';
+import 'package:PiliPlus/models_new/video/video_detail/stat.dart';
 import 'package:PiliPlus/pages/video/widgets/playback_cover.dart';
 import 'package:PiliPlus/common/widgets/dialog/bottom_panel.dart';
 import 'package:PiliPlus/pages/video/widgets/player_menu.dart';
@@ -172,6 +175,18 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             cid: item.cid,
             cover: item.cover,
             title: item.title,
+            followed: item.isFollowed,
+            detail: VideoDetailData(
+              bvid: item.bvid,
+              title: item.title,
+              owner: item.owner is Owner
+                  ? item.owner as Owner
+                  : Owner(mid: item.owner.mid, name: item.owner.name),
+              stat: VideoStat.fromJson({
+                'view': item.stat.view,
+                'like': item.stat.like,
+              }),
+            ),
           ),
     ];
   }

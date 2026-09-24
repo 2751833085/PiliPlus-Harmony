@@ -1,3 +1,4 @@
+import 'package:PiliPlus/models_new/video/video_detail/data.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
@@ -9,12 +10,16 @@ class ShortVideoEntry {
     this.cid,
     this.cover,
     this.title,
+    this.detail,
+    this.followed,
   });
   final String bvid;
   final int? aid;
   final int? cid;
   final String? cover;
   final String? title;
+  final VideoDetailData? detail;
+  final bool? followed;
 }
 
 /// One playback owner, a lightweight metadata queue, and serialized switches.

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/models_new/video/video_detail/data.dart';
 import 'package:PiliPlus/pages/video/shorts/preview_chrome.dart';
 import 'package:PiliPlus/pages/video/shorts/episodes.dart';
 import 'dart:async';
@@ -210,9 +211,26 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
                               ),
                             if (!widget.fullscreen &&
                                 (index != session.index || session.switching))
+                              Positioned.fill(
+                                child: ExcludeSemantics(
+                                  child: IgnorePointer(
+                                    child: Stack(
+                                      children: [
+                                        _detailChrome(
+                                          pane,
+                                          session.entries[index],
+                                          compact: compact,
+                                          preview: true,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (!widget.fullscreen &&
+                                (index != session.index || session.switching))
                               Obx(
                                 () => ShortPreviewChrome(
-                                  title: session.entries[index].title ?? '',
                                   showDetails:
                                       widget.video.shortChromeVisible.value &&
                                       !compact,
@@ -227,6 +245,420 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  final _details = <String, VideoDetailData>{};
+  final _following = <String, bool>{};
+
+  VideoDetailData _pageDetail(ShortVideoEntry entry) {
+    final current = widget.intro.videoDetail.value;
+    final detail = current.bvid == entry.bvid
+        ? current
+        : widget.video.peekPreloadedIntro(entry.bvid) ??
+              _details[entry.bvid] ??
+              entry.detail;
+    if (detail != null) {
+      _details[entry.bvid] = detail;
+      while (_details.length > 7) {
+        _following.remove(_details.keys.first);
+        _details.remove(_details.keys.first);
+      }
+    }
+    return detail ?? VideoDetailData(bvid: entry.bvid, title: entry.title);
+  }
+
+  bool _pageFollowed(ShortVideoEntry entry, bool live) {
+    if (live) {
+      _following[entry.bvid] =
+          (widget.intro.followStatus.value.attribute ?? 0) != 0;
+    }
+    return _following[entry.bvid] ?? entry.followed ?? false;
+  }
+
+  Widget _detailChrome(
+    BoxConstraints pane,
+    ShortVideoEntry entry, {
+    required bool compact,
+    bool preview = false,
+  }) {
+    final player = plPlayerController;
+    final metrics = ShortVideoMetrics.of(context);
+    final bottomHeight = metrics.footerHeight;
+    final live = !preview && !session.switching;
+    return Positioned.fill(
+      child: Obx(
+        () => IgnorePointer(
+          ignoring: !live || widget.intro.videoDetail.value.bvid != entry.bvid,
+          child: ShortVideoChrome(
+            visible:
+                !player.isSeeking.value &&
+                widget.video.shortChromeVisible.value &&
+                !compact,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                const IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black54,
+                          Colors.transparent,
+                          Colors.transparent,
+                          Colors.black87,
+                        ],
+                        stops: [0, .2, .6, 1],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 4,
+                  right: 4,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        style: metrics.iconButtonStyle,
+                        tooltip: '返回',
+                        onPressed: Get.back,
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: metrics.icon,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Expanded(
+                        child: Obx(
+                          () => Text(
+                            widget.intro.total.value.isNotEmpty && live
+                                ? '${widget.intro.total.value} 人正在看'
+                                : '',
+                            style: ShortVideoMetrics.caption,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        style: metrics.iconButtonStyle,
+                        tooltip: '搜索',
+                        onPressed: () => Get.toNamed('/search'),
+                        icon: Icon(
+                          Icons.search,
+                          size: metrics.icon,
+                          color: Colors.white,
+                        ),
+                      ),
+                      widget.moreButton ??
+                          IconButton(
+                            style: metrics.iconButtonStyle,
+                            tooltip: '更多',
+                            onPressed: widget.onMore,
+                            icon: Icon(
+                              Icons.more_vert,
+                              size: metrics.icon,
+                              color: Colors.white,
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
+                if (session.refreshing ||
+                    (!session.hasNext &&
+                        (session.loading || session.error != null)))
+                  Positioned(
+                    top: 52,
+                    left: 16,
+                    right: 16,
+                    child: Center(
+                      child: TextButton(
+                        onPressed: session.loading || session.refreshing
+                            ? null
+                            : session.loadMore,
+                        child: Text(
+                          session.refreshing
+                              ? '正在刷新视频列表'
+                              : session.loading
+                              ? '正在获取更多视频'
+                              : session.error!,
+                          style: ShortVideoMetrics.caption,
+                        ),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  right: 4,
+                  bottom: bottomHeight + 20,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: math.max(
+                        80,
+                        pane.maxHeight - bottomHeight - 80,
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      child: Obx(() {
+                        final detail = _pageDetail(entry);
+                        final ready = detail.bvid == entry.bvid;
+                        final stat = ready ? detail.stat : null;
+                        String count(num? value) =>
+                            value == null ? '' : NumUtils.numFormat(value);
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _action(
+                              icon: Icons.thumb_up_rounded,
+                              action: '点赞',
+                              label: count(stat?.like),
+                              selected: live && widget.intro.hasLike.value,
+                              onTap: ready
+                                  ? () => session.interact(
+                                      () => widget.intro.handleAction(
+                                        widget.intro.actionLikeVideo,
+                                      ),
+                                    )
+                                  : null,
+                              onLongPress: ready
+                                  ? () => session.interact(
+                                      () => widget.intro.handleAction(
+                                        widget.intro.actionTriple,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            _action(
+                              icon: Icons.chat_bubble_rounded,
+                              action: '评论',
+                              label: count(stat?.reply),
+                              onTap: ready ? widget.onComments : null,
+                            ),
+                            _action(
+                              icon: Icons.monetization_on_outlined,
+                              action: '投币',
+                              label: count(stat?.coin),
+                              selected: live && widget.intro.coinNum.value > 0,
+                              onTap: ready
+                                  ? widget.intro.actionCoinVideo
+                                  : null,
+                            ),
+                            _action(
+                              icon: Icons.star_rounded,
+                              action: '收藏',
+                              label: count(stat?.favorite),
+                              selected: live && widget.intro.hasFav.value,
+                              onTap: ready
+                                  ? () => session.interact(() async {
+                                      if (widget.intro.enableQuickFav) {
+                                        await widget.intro.actionFavVideo(
+                                          isQuick: true,
+                                        );
+                                      } else {
+                                        widget.intro.showFavBottomSheet(
+                                          context,
+                                        );
+                                      }
+                                    })
+                                  : null,
+                              onLongPress: ready
+                                  ? () => widget.intro.showFavBottomSheet(
+                                      context,
+                                      isLongPress: true,
+                                    )
+                                  : null,
+                            ),
+                            _action(
+                              icon: Icons.reply_rounded,
+                              action: '分享',
+                              label: count(stat?.share),
+                              onTap: ready
+                                  ? () => widget.intro.actionShareVideo(context)
+                                  : null,
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: ShortVideoMetrics.gutter,
+                  right: ShortVideoMetrics.informationRight,
+                  bottom: bottomHeight + 12,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: math.max(60, pane.maxHeight * .42),
+                    ),
+                    child: SingleChildScrollView(
+                      child: Obx(() {
+                        final detail = _pageDetail(entry);
+                        final ready = detail.bvid == entry.bvid;
+                        final owner = ready ? detail.owner : null;
+                        final searchTerm = ready
+                            ? shortVideoSearchTerm(
+                                tags: live
+                                    ? widget.intro.videoTags.value
+                                    : null,
+                                title: detail.title,
+                              )
+                            : null;
+                        final hasEpisodes =
+                            ready && !ShortVideoEpisodes(detail).isEmpty;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (owner != null)
+                                  GestureDetector(
+                                    onTap: () => Get.toNamed(
+                                      '/member?mid=${owner.mid}',
+                                    ),
+                                    child: NetworkImgLayer(
+                                      key: const ValueKey(
+                                        'short-author-avatar',
+                                      ),
+                                      src: owner.face,
+                                      width: metrics.avatar,
+                                      height: metrics.avatar,
+                                      type: .avatar,
+                                    ),
+                                  ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: InkWell(
+                                    key: const ValueKey('short-author-info'),
+                                    onTap: owner?.mid == null
+                                        ? null
+                                        : () => Get.toNamed(
+                                            '/member?mid=${owner!.mid}',
+                                          ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          owner?.name ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: ShortVideoMetrics.author,
+                                        ),
+                                        Text(
+                                          live &&
+                                                  widget
+                                                          .intro
+                                                          .userStat
+                                                          .value
+                                                          .follower !=
+                                                      null
+                                              ? '${NumUtils.numFormat(widget.intro.userStat.value.follower!)} 粉丝'
+                                              : '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: ShortVideoMetrics.caption,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                if (ready && owner != null) ...[
+                                  const SizedBox(
+                                    width: ShortVideoMetrics.gap,
+                                  ),
+                                  ShortVideoPillButton(
+                                    key: const ValueKey('short-follow'),
+                                    color: !_pageFollowed(entry, live)
+                                        ? const Color(0xFFDB4C7F)
+                                        : const Color(0xFF303135),
+                                    foreground: Colors.white,
+                                    centered: true,
+                                    onPressed: () =>
+                                        widget.intro.actionRelationMod(context),
+                                    label: !_pageFollowed(entry, live)
+                                        ? '+ 关注'
+                                        : '已关注',
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            GestureDetector(
+                              onTap: widget.onDetails,
+                              child: Text(
+                                ready ? detail.title ?? '' : entry.title ?? '',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: ShortVideoMetrics.body.copyWith(
+                                  shadows: const [
+                                    Shadow(
+                                      color: Colors.black,
+                                      blurRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (ready)
+                              Text(
+                                '${NumUtils.numFormat(detail.stat?.view ?? 0)} 次播放',
+                                style: ShortVideoMetrics.caption,
+                              ),
+                            if (searchTerm != null || hasEpisodes) ...[
+                              const SizedBox(height: 10),
+                              ShortVideoContextRow(
+                                search: searchTerm == null
+                                    ? null
+                                    : ShortVideoContextLink(
+                                        key: const ValueKey(
+                                          'short-related-search',
+                                        ),
+                                        icon: Icons.search,
+                                        compact: hasEpisodes,
+                                        label: hasEpisodes
+                                            ? searchTerm
+                                            : '搜索 · $searchTerm',
+                                        onTap: () {
+                                          if (widget.onSearch
+                                              case final onSearch?) {
+                                            onSearch(searchTerm);
+                                          } else {
+                                            Get.toNamed(
+                                              '/searchResult',
+                                              parameters: {
+                                                'keyword': searchTerm,
+                                              },
+                                            );
+                                          }
+                                        },
+                                      ),
+                                episodes: !hasEpisodes
+                                    ? null
+                                    : ShortVideoContextLink(
+                                        key: const ValueKey('short-episodes'),
+                                        icon: Icons.video_library_outlined,
+                                        compact: searchTerm != null,
+                                        label: searchTerm != null
+                                            ? '合集/分P'
+                                            : '合集 / 分 P',
+                                        onTap: widget.onEpisodes,
+                                      ),
+                              ),
+                            ],
+                          ],
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -346,394 +778,7 @@ class _ShortVideoFeedState extends State<ShortVideoFeed>
             math.max(1, pane.maxHeight - bottomHeight),
           ),
         ),
-        Positioned.fill(
-          child: Obx(
-            () => ShortVideoChrome(
-              visible:
-                  !player.isSeeking.value &&
-                  widget.video.shortChromeVisible.value &&
-                  !compact,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  const IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black54,
-                            Colors.transparent,
-                            Colors.transparent,
-                            Colors.black87,
-                          ],
-                          stops: [0, .2, .6, 1],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    left: 4,
-                    right: 4,
-                    child: Row(
-                      children: [
-                        IconButton(
-                          style: metrics.iconButtonStyle,
-                          tooltip: '返回',
-                          onPressed: Get.back,
-                          icon: Icon(
-                            Icons.arrow_back,
-                            size: metrics.icon,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Expanded(
-                          child: Obx(
-                            () => Text(
-                              '${widget.intro.total.value} 人正在看',
-                              style: ShortVideoMetrics.caption,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          style: metrics.iconButtonStyle,
-                          tooltip: '搜索',
-                          onPressed: () => Get.toNamed('/search'),
-                          icon: Icon(
-                            Icons.search,
-                            size: metrics.icon,
-                            color: Colors.white,
-                          ),
-                        ),
-                        widget.moreButton ??
-                            IconButton(
-                              style: metrics.iconButtonStyle,
-                              tooltip: '更多',
-                              onPressed: widget.onMore,
-                              icon: Icon(
-                                Icons.more_vert,
-                                size: metrics.icon,
-                                color: Colors.white,
-                              ),
-                            ),
-                      ],
-                    ),
-                  ),
-                  if (session.refreshing ||
-                      (!session.hasNext &&
-                          (session.loading || session.error != null)))
-                    Positioned(
-                      top: 52,
-                      left: 16,
-                      right: 16,
-                      child: Center(
-                        child: TextButton(
-                          onPressed: session.loading || session.refreshing
-                              ? null
-                              : session.loadMore,
-                          child: Text(
-                            session.refreshing
-                                ? '正在刷新视频列表'
-                                : session.loading
-                                ? '正在获取更多视频'
-                                : session.error!,
-                            style: ShortVideoMetrics.caption,
-                          ),
-                        ),
-                      ),
-                    ),
-                  Positioned(
-                    right: 4,
-                    bottom: bottomHeight + 20,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: math.max(
-                          80,
-                          pane.maxHeight - bottomHeight - 80,
-                        ),
-                      ),
-                      child: SingleChildScrollView(
-                        child: Obx(() {
-                          final detail = widget.intro.videoDetail.value;
-                          final ready =
-                              detail.bvid == session.current.bvid &&
-                              !session.switching;
-                          final stat = ready ? detail.stat : null;
-                          String count(num? value) =>
-                              value == null ? '' : NumUtils.numFormat(value);
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _action(
-                                icon: Icons.thumb_up_rounded,
-                                action: '点赞',
-                                label: count(stat?.like),
-                                selected: ready && widget.intro.hasLike.value,
-                                onTap: ready
-                                    ? () => session.interact(
-                                        () => widget.intro.handleAction(
-                                          widget.intro.actionLikeVideo,
-                                        ),
-                                      )
-                                    : null,
-                                onLongPress: ready
-                                    ? () => session.interact(
-                                        () => widget.intro.handleAction(
-                                          widget.intro.actionTriple,
-                                        ),
-                                      )
-                                    : null,
-                              ),
-                              _action(
-                                icon: Icons.chat_bubble_rounded,
-                                action: '评论',
-                                label: count(stat?.reply),
-                                onTap: ready ? widget.onComments : null,
-                              ),
-                              _action(
-                                icon: Icons.monetization_on_outlined,
-                                action: '投币',
-                                label: count(stat?.coin),
-                                selected:
-                                    ready && widget.intro.coinNum.value > 0,
-                                onTap: ready
-                                    ? widget.intro.actionCoinVideo
-                                    : null,
-                              ),
-                              _action(
-                                icon: Icons.star_rounded,
-                                action: '收藏',
-                                label: count(stat?.favorite),
-                                selected: ready && widget.intro.hasFav.value,
-                                onTap: ready
-                                    ? () => session.interact(() async {
-                                        if (widget.intro.enableQuickFav) {
-                                          await widget.intro.actionFavVideo(
-                                            isQuick: true,
-                                          );
-                                        } else {
-                                          widget.intro.showFavBottomSheet(
-                                            context,
-                                          );
-                                        }
-                                      })
-                                    : null,
-                                onLongPress: ready
-                                    ? () => widget.intro.showFavBottomSheet(
-                                        context,
-                                        isLongPress: true,
-                                      )
-                                    : null,
-                              ),
-                              _action(
-                                icon: Icons.reply_rounded,
-                                action: '分享',
-                                label: count(stat?.share),
-                                onTap: ready
-                                    ? () =>
-                                          widget.intro.actionShareVideo(context)
-                                    : null,
-                              ),
-                            ],
-                          );
-                        }),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: ShortVideoMetrics.gutter,
-                    right: ShortVideoMetrics.informationRight,
-                    bottom: bottomHeight + 12,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: math.max(60, pane.maxHeight * .42),
-                      ),
-                      child: SingleChildScrollView(
-                        child: Obx(() {
-                          final detail = widget.intro.videoDetail.value;
-                          final ready =
-                              detail.bvid == session.current.bvid &&
-                              !session.switching;
-                          final owner = ready ? detail.owner : null;
-                          final searchTerm = ready
-                              ? shortVideoSearchTerm(
-                                  tags: widget.intro.videoTags.value,
-                                  title: detail.title,
-                                )
-                              : null;
-                          final hasEpisodes =
-                              ready && !ShortVideoEpisodes(detail).isEmpty;
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (owner != null)
-                                    GestureDetector(
-                                      onTap: () => Get.toNamed(
-                                        '/member?mid=${owner.mid}',
-                                      ),
-                                      child: NetworkImgLayer(
-                                        key: const ValueKey(
-                                          'short-author-avatar',
-                                        ),
-                                        src: owner.face,
-                                        width: metrics.avatar,
-                                        height: metrics.avatar,
-                                        type: .avatar,
-                                      ),
-                                    ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: InkWell(
-                                      key: const ValueKey('short-author-info'),
-                                      onTap: owner?.mid == null
-                                          ? null
-                                          : () => Get.toNamed(
-                                              '/member?mid=${owner!.mid}',
-                                            ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            owner?.name ?? '',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: ShortVideoMetrics.author,
-                                          ),
-                                          if (ready &&
-                                              widget
-                                                      .intro
-                                                      .userStat
-                                                      .value
-                                                      .follower !=
-                                                  null)
-                                            Text(
-                                              '${NumUtils.numFormat(widget.intro.userStat.value.follower!)} 粉丝',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: ShortVideoMetrics.caption,
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  if (ready && owner != null) ...[
-                                    const SizedBox(
-                                      width: ShortVideoMetrics.gap,
-                                    ),
-                                    ShortVideoPillButton(
-                                      key: const ValueKey('short-follow'),
-                                      color:
-                                          (widget
-                                                      .intro
-                                                      .followStatus
-                                                      .value
-                                                      .attribute ??
-                                                  0) ==
-                                              0
-                                          ? const Color(0xFFDB4C7F)
-                                          : const Color(0xFF303135),
-                                      foreground: Colors.white,
-                                      centered: true,
-                                      onPressed: () => widget.intro
-                                          .actionRelationMod(context),
-                                      label:
-                                          (widget
-                                                      .intro
-                                                      .followStatus
-                                                      .value
-                                                      .attribute ??
-                                                  0) ==
-                                              0
-                                          ? '+ 关注'
-                                          : '已关注',
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: widget.onDetails,
-                                child: Text(
-                                  ready
-                                      ? detail.title ?? ''
-                                      : session.current.title ?? '',
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: ShortVideoMetrics.body.copyWith(
-                                    shadows: const [
-                                      Shadow(
-                                        color: Colors.black,
-                                        blurRadius: 4,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              if (ready)
-                                Text(
-                                  '${NumUtils.numFormat(detail.stat?.view ?? 0)} 次播放',
-                                  style: ShortVideoMetrics.caption,
-                                ),
-                              if (searchTerm != null || hasEpisodes) ...[
-                                const SizedBox(height: 10),
-                                ShortVideoContextRow(
-                                  search: searchTerm == null
-                                      ? null
-                                      : ShortVideoContextLink(
-                                          key: const ValueKey(
-                                            'short-related-search',
-                                          ),
-                                          icon: Icons.search,
-                                          compact: hasEpisodes,
-                                          label: hasEpisodes
-                                              ? searchTerm
-                                              : '搜索 · $searchTerm',
-                                          onTap: () {
-                                            if (widget.onSearch
-                                                case final onSearch?) {
-                                              onSearch(searchTerm);
-                                            } else {
-                                              Get.toNamed(
-                                                '/searchResult',
-                                                parameters: {
-                                                  'keyword': searchTerm,
-                                                },
-                                              );
-                                            }
-                                          },
-                                        ),
-                                  episodes: !hasEpisodes
-                                      ? null
-                                      : ShortVideoContextLink(
-                                          key: const ValueKey('short-episodes'),
-                                          icon: Icons.video_library_outlined,
-                                          compact: searchTerm != null,
-                                          label: searchTerm != null
-                                              ? '合集/分P'
-                                              : '合集 / 分 P',
-                                          onTap: widget.onEpisodes,
-                                        ),
-                                ),
-                              ],
-                            ],
-                          );
-                        }),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        _detailChrome(pane, session.current, compact: compact),
         Positioned.fill(
           bottom: bottomHeight,
           child: Obx(() {

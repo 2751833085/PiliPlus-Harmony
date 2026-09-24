@@ -898,8 +898,8 @@ class VideoDetailController extends GetxController
           while (_shortFirstFrames.length > 5) {
             _shortFirstFrames.remove(_shortFirstFrames.keys.first);
           }
-          shortPreviewRevision.value++;
         }
+        shortPreviewRevision.value++;
         while (_preloadedIntros.length > 4) {
           _preloadedIntros.remove(_preloadedIntros.keys.first);
         }
@@ -911,6 +911,17 @@ class VideoDetailController extends GetxController
     final frame = _shortFirstFrames[bvid];
     if (frame?.$1 != Accounts.video.mid) return null;
     return cid == null ? frame?.$2.values.firstOrNull : frame?.$2[cid];
+  }
+
+  // Preview reads must not consume the detail needed by the playback handoff.
+  VideoDetailData? peekPreloadedIntro(String requestedBvid) {
+    final value = _preloadedIntros[requestedBvid];
+    if (value == null ||
+        value.$1 != Accounts.video.mid ||
+        DateTime.now().difference(value.$2) > const Duration(seconds: 45)) {
+      return null;
+    }
+    return value.$3;
   }
 
   VideoDetailData? takePreloadedIntro(String requestedBvid) {

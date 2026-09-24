@@ -70,6 +70,72 @@ void main() {
     await temp.delete(recursive: true);
   });
   testWidgets(
+    'neighbour author and actions travel with the page before playback handoff',
+    (tester) async {
+      final pending = Completer<bool>();
+      final intro = _FakeIntro();
+      final next = VideoDetailData(
+        bvid: 'b',
+        title: '下一条视频',
+        owner: Owner(mid: 2, name: '下一位创作者', face: ''),
+        stat: VideoStat.fromJson({'view': 20, 'like': 12, 'reply': 5}),
+      );
+      final session = ShortVideoSession(
+        initial: const ShortVideoEntry(bvid: 'a'),
+        loadRelated: (_) async => [
+          ShortVideoEntry(bvid: 'b', title: next.title, detail: next),
+        ],
+        play: (_) => pending.future,
+      );
+      final video = _FakeVideo(_FakePlayer());
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ShortVideoFeed(
+            session: session,
+            video: video,
+            intro: intro,
+            playerBuilder: (_, __) => const ColoredBox(color: Colors.black),
+            onDetails: () {},
+            onComments: () {},
+            onEpisodes: () {},
+            onMore: () {},
+            fullscreen: false,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final gesture = await tester.startGesture(const Offset(400, 200));
+      await gesture.moveBy(const Offset(0, -30));
+      await tester.pump();
+      await gesture.moveBy(const Offset(0, -280));
+      await tester.pump();
+      final name = find.text('下一位创作者');
+      expect(name, findsOneWidget);
+      final before = tester.getTopLeft(name).dy;
+      await gesture.moveBy(const Offset(0, -90));
+      await tester.pump();
+      expect(tester.getTopLeft(name).dy, lessThan(before - 50));
+      expect(find.byKey(const ValueKey('short-author-avatar')), findsWidgets);
+      expect(find.text('12'), findsOneWidget);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(session.switching, isTrue);
+      expect(
+        name,
+        findsOneWidget,
+        reason: 'Detail stays visible while the next source opens.',
+      );
+      final settled = tester.getTopLeft(name);
+      intro.videoDetail.value = next;
+      pending.complete(true);
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(name).dy, closeTo(settled.dy, 1));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      session.dispose();
+    },
+  );
+  testWidgets(
     'buffer prefetch completion leaves the playing surface unchanged while new previews update',
     (tester) async {
       final session = ShortVideoSession(
@@ -1258,6 +1324,8 @@ class _FakePlayer implements PlPlayerController {
 class _FakeVideo implements VideoDetailController {
   @override
   String? preloadedFirstFrame(String bvid, {int? cid}) => '';
+  @override
+  VideoDetailData? peekPreloadedIntro(String bvid) => null;
   @override
   final shortPreviewRevision = 0.obs;
   @override

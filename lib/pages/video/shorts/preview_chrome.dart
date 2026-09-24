@@ -8,10 +8,8 @@ import 'package:PiliPlus/pages/video/shorts/metrics.dart';
 class ShortPreviewChrome extends StatelessWidget {
   const ShortPreviewChrome({
     super.key,
-    required this.title,
     required this.showDetails,
   });
-  final String title;
   final bool showDetails;
   @override
   Widget build(BuildContext context) {
@@ -26,34 +24,6 @@ class ShortPreviewChrome extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (showDetails) ...[
-              Positioned(
-                top: 0,
-                left: 4,
-                right: 4,
-                child: Row(
-                  children: [
-                    icon(Icons.arrow_back),
-                    const Spacer(),
-                    icon(Icons.search),
-                    icon(Icons.more_vert),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: ShortVideoMetrics.gutter,
-                right: ShortVideoMetrics.informationRight,
-                bottom: metrics.footerHeight + 12,
-                child: Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: ShortVideoMetrics.body.copyWith(
-                    shadows: const [Shadow(color: Colors.black, blurRadius: 4)],
-                  ),
-                ),
-              ),
-            ],
             Positioned(
               left: ShortVideoMetrics.gutter,
               right: ShortVideoMetrics.gutter,
