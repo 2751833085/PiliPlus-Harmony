@@ -1,13 +1,24 @@
 {
   "previous_version": "3.0.0",
   "installed_version": "3.0.0",
-  "installed_version_code": 6118,
+  "installed_version_code": 6120,
   "uid_preserved": true,
   "first_install_time_preserved": true,
   "overwrite_install": "passed",
   "uninstalled_or_cleared_data": false,
-  "source_commit": "88bc9710e56c01d384e882b81d654b3825e97b25",
-  "launch_test": "blocked_by_device_lock",
-  "runtime_switching_test": "pending_unlock",
+  "source_commit": "4c1ef68fe8d6d861a181f12856f78f8e9dad18a0",
+  "launch_test": "passed",
+  "device_viewport": [
+    3184,
+    2232
+  ],
+  "final_build_checks": [
+    "mine_avatar_left_and_lower",
+    "favorites_left_history_right",
+    "settings_thin_group_dividers",
+    "history_last_row_above_dock"
+  ],
+  "automated_tests_passed": 156,
+  "physical_fold_test_this_round": false,
   "quantitative_fps_comparison": false
 }
