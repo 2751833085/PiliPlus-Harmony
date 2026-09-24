@@ -150,7 +150,10 @@ class _MediaPageState extends CommonPageState<MinePage>
                         borderRadius: HarmonyTheme.cardRadius,
                         child: Padding(padding: padding, child: child),
                       );
-                      final account = panel(_buildUserInfo(theme, accent));
+                      final account = panel(
+                        _buildUserInfo(theme, accent),
+                        padding: const EdgeInsets.only(top: 18, bottom: 10),
+                      );
                       final actions = panel(
                         HarmonyQuickActions(
                           actions: [
@@ -431,6 +434,7 @@ class _MediaPageState extends CommonPageState<MinePage>
       final userStat = controller.userStat.value;
       return Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
             behavior: .opaque,
@@ -443,9 +447,10 @@ class _MediaPageState extends CommonPageState<MinePage>
                 ? null
                 : () => controller.onLogin(true),
             child: Row(
-              mainAxisSize: .min,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 20),
+                SizedBox(width: HarmonyStyle.enabled(context) ? 14 : 20),
                 userInfo.face != null
                     ? Stack(
                         clipBehavior: .none,
@@ -477,7 +482,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                           semanticLabel: "默认头像",
                         ),
                       ),
-                const SizedBox(width: 16),
+                SizedBox(width: HarmonyStyle.enabled(context) ? 14 : 16),
                 Expanded(
                   child: Column(
                     mainAxisSize: .min,
@@ -672,13 +677,15 @@ class _MediaPageState extends CommonPageState<MinePage>
               ),
             ),
           ),
-          trailing: _headerSurface(
-            IconButton(
-              tooltip: '刷新',
-              onPressed: controller.onRefresh,
-              icon: const Icon(Icons.refresh, size: 20),
-            ),
-          ),
+          trailing: MediaQuery.sizeOf(context).width < 600
+              ? null
+              : _headerSurface(
+                  IconButton(
+                    tooltip: '刷新',
+                    onPressed: controller.onRefresh,
+                    icon: const Icon(Icons.refresh, size: 20),
+                  ),
+                ),
         ),
         _buildFavBody(theme, secondary, controller.loadingState.value),
       ],

@@ -59,7 +59,7 @@ class MineHistoryPreview extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (history.loggedIn)
+                if (history.loggedIn && MediaQuery.sizeOf(context).width >= 600)
                   Builder(
                     builder: (context) {
                       final button = IconButton(
