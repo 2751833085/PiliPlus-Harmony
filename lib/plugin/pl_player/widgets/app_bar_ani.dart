@@ -90,6 +90,27 @@ class AppBarAni extends StatelessWidget {
       // 仅顶部栏需要，底部栏不避让
       result = TopInsetPadding(inset: isTop ? top : null, child: result);
     }
+    if (isFullScreen && !isTop) {
+      // System gesture regions remain active when immersive playback hides
+      // the navigation bar. Keep controls outside them even when the video
+      // itself is allowed to fill the safe area.
+      final gestures = MediaQuery.systemGestureInsetsOf(context);
+      final safe = removeSafeArea
+          ? EdgeInsets.zero
+          : MediaQuery.viewPaddingOf(context);
+      result = Padding(
+        padding: EdgeInsets.only(
+          left: (gestures.left - safe.left).clamp(0.0, double.infinity),
+          right: (gestures.right - safe.right).clamp(0.0, double.infinity),
+          bottom:
+              (gestures.bottom - safe.bottom).clamp(0.0, double.infinity) + 8,
+        ),
+        child: result,
+      );
+      // Empty space between controls belongs to this bar, not to the video
+      // underneath (which handles volume, brightness and playback gestures).
+      result = Listener(behavior: HitTestBehavior.opaque, child: result);
+    }
     result = fadeOnly
         ? FadeTransition(opacity: controller, child: result)
         : SlideTransition(
