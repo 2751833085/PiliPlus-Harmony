@@ -40,7 +40,7 @@ void main() {
     await GStorage.setting.put(SettingBoxKey.materialYouUI, true);
     Pref.captureAppearanceAtStartup();
     await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, false);
-    await GStorage.setting.put(SettingBoxKey.isPureBlackTheme, false);
+    await GStorage.setting.put('isPureBlackTheme', false);
     await GStorage.setting.put(SettingBoxKey.harmonyNavigation, 0);
   });
   tearDown(() => debugDefaultTargetPlatformOverride = null);
@@ -122,9 +122,9 @@ void main() {
       }
       expect(
         titles,
-        containsAll(['颜色选择', '纯黑主题', '底栏项目与顺序', '默认启动页', '首页标签页']),
+        containsAll(['颜色选择', '底栏项目与顺序', '默认启动页', '首页标签页']),
       );
-      expect(rows.singleWhere((e) => e.title == '纯黑主题').disabledReason, isNull);
+      expect(titles, isNot(contains('纯黑主题')));
       expect(titles, isNot(contains('底栏样式')));
     },
   );
@@ -331,25 +331,28 @@ void main() {
     },
   );
 
-  test('pure black remains effective with Harmony native colors', () async {
-    await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
-    Pref.captureAppearanceAtStartup();
-    await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, true);
-    await GStorage.setting.put(SettingBoxKey.isPureBlackTheme, true);
-    final theme = ThemeUtils.getThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.pink,
-        brightness: Brightness.dark,
-      ),
-      isDynamic: false,
-      isDark: true,
-    );
-    expect(theme.scaffoldBackgroundColor, Colors.black);
-    expect(
-      theme.pageTransitionsTheme.builders[TargetPlatform.ohos],
-      isA<HarmonyPageTransitionsBuilder>(),
-    );
-  });
+  test(
+    'legacy pure black setting is ignored with Harmony native colors',
+    () async {
+      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
+      Pref.captureAppearanceAtStartup();
+      await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, true);
+      await GStorage.setting.put('isPureBlackTheme', true);
+      final theme = ThemeUtils.getThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.pink,
+          brightness: Brightness.dark,
+        ),
+        isDynamic: false,
+        isDark: true,
+      );
+      expect(theme.scaffoldBackgroundColor, isNot(Colors.black));
+      expect(
+        theme.pageTransitionsTheme.builders[TargetPlatform.ohos],
+        isA<HarmonyPageTransitionsBuilder>(),
+      );
+    },
+  );
 
   testWidgets(
     'all setting categories fit original-resolution fold profiles and large text',

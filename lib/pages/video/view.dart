@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/widgets/player_expansion.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 import 'package:PiliPlus/pages/video/widgets/collapsible_playlist.dart';
 import 'package:PiliPlus/models/model_owner.dart';
@@ -109,12 +110,27 @@ class VideoDetailPageV extends StatefulWidget {
 }
 
 class _VideoDetailPageVState extends State<VideoDetailPageV>
-    with RouteAware, RouteAwareMixin, WidgetsBindingObserver {
+    with
+        RouteAware,
+        RouteAwareMixin,
+        WidgetsBindingObserver,
+        SingleTickerProviderStateMixin {
   final heroTag = Get.arguments['heroTag'];
 
   late final VideoDetailController videoDetailController;
   late final VideoReplyController _videoReplyController;
   PlPlayerController? plPlayerController;
+
+  late final AnimationController _fullscreenAnimation;
+  final _fullscreenProgress = 0.0.obs;
+
+  double _expand(double inline, double full) =>
+      expandedPlayerExtent(inline, full, _fullscreenProgress.value);
+
+  bool _fullscreenMotionDisabled() =>
+      _shortMode ||
+      videoDetailController.plPlayerController.isPipMode ||
+      MediaQuery.disableAnimationsOf(context);
 
   bool _shortMode = false;
   bool _enteringShortMode = false;
@@ -708,9 +724,28 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoDetailController.scrollRatio,
       (_) => _syncDecorDark(),
     );
+    _fullscreenAnimation =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 280),
+          value: isFullScreen ? 1 : 0,
+        )..addListener(
+          () => _fullscreenProgress.value = _fullscreenAnimation.value,
+        );
+    _fullscreenProgress.value = _fullscreenAnimation.value;
     _decorFullScreenWorker = ever(
       videoDetailController.plPlayerController.isFullScreen,
-      (_) => _syncDecorDark(),
+      (bool fullscreen) {
+        _syncDecorDark();
+        if (_fullscreenMotionDisabled()) {
+          _fullscreenAnimation.value = fullscreen ? 1 : 0;
+        } else {
+          _fullscreenAnimation.animateTo(
+            fullscreen ? 1 : 0,
+            curve: Curves.easeInOutCubic,
+          );
+        }
+      },
     );
     // 画中画状态翻转时强制重建：PiP 结束时若窗口尺寸恰好没变（如画中画
     // 期间从智慧多窗应用栏以小窗打开 app），没有视口变化触发重建，页面
@@ -959,6 +994,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     _pipModeWorker?.dispose();
     _decorDarkWorker?.dispose();
     _decorFullScreenWorker?.dispose();
+    _fullscreenAnimation.dispose();
     _releaseDecorDark();
     plPlayerController
       ?..removeStatusLister(playerListener)
@@ -1227,6 +1263,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     return Obx(
       () {
         final isFullScreen = this.isFullScreen;
+        final expansionProgress = _fullscreenProgress.value;
         return SimpleScaffold(
           appBar: removeAppBar(isFullScreen)
               ? null
@@ -1266,7 +1303,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             controller: videoDetailController.scrollCtr,
             scrollBehavior: const NoOverscrollIndicator(),
             pinnedHeaderSliverHeightBuilder: () {
-              double pinnedHeight = this.isFullScreen || !isPortrait
+              double pinnedHeight = !isPortrait
                   ? maxHeight -
                         ((isWindowMode && !isPortrait) ||
                                 _harmonyFullscreenNoSafeArea
@@ -1279,6 +1316,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         (plPlayerController?.playerStatus.isPlaying ?? false)
                   ? videoDetailController.minVideoHeight
                   : kToolbarHeight;
+              if (isPortrait) {
+                pinnedHeight = expandedPlayerExtent(
+                  pinnedHeight,
+                  maxHeight - (_harmonyFullscreenNoSafeArea ? 0 : padding.top),
+                  expansionProgress,
+                );
+              }
               if (videoDetailController.isExpanding &&
                   videoDetailController.animationController.value == 1) {
                 videoDetailController.isExpanding = false;
@@ -1296,7 +1340,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               return pinnedHeight;
             },
             headerSliverBuilder: (context, innerBoxIsScrolled) {
-              final height = isFullScreen || !isPortrait
+              final inlineHeight = !isPortrait
                   ? maxHeight -
                         ((isWindowMode && !isPortrait) ||
                                 _harmonyFullscreenNoSafeArea
@@ -1306,6 +1350,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         videoDetailController.isCollapsing
                   ? videoDetailController.animHeight
                   : videoDetailController.videoHeight;
+              final height = isPortrait
+                  ? expandedPlayerExtent(
+                      inlineHeight,
+                      maxHeight -
+                          (_harmonyFullscreenNoSafeArea ? 0 : padding.top),
+                      expansionProgress,
+                    )
+                  : inlineHeight;
               return [
                 VideoHeader(
                   minExtent: kToolbarHeight,
@@ -1503,17 +1555,16 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             : AppBar(
                 backgroundColor: Colors.black,
                 automaticallyImplyLeading: false,
-                toolbarHeight: isFullScreen
-                    ? 0
-                    : (isPortrait
-                          ? (_fixedTopInset ?? padding.top)
-                          : padding.top),
+                toolbarHeight: _expand(
+                  isPortrait ? (_fixedTopInset ?? padding.top) : padding.top,
+                  0,
+                ),
                 primary: false,
               ),
         body: Padding(
-          padding: isFullScreen
-              ? EdgeInsets.zero
-              : padding.copyWith(top: 0, bottom: 0),
+          padding:
+              padding.copyWith(top: 0, bottom: 0) *
+              (1 - _fullscreenProgress.value),
           child: childWhenDisabledLandscapeInner(isFullScreen),
         ),
       );
@@ -1521,11 +1572,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   );
 
   Widget childSplit(double ratio) {
-    final double videoHeight = isFullScreen
-        ? maxHeight
-        : maxHeight - padding.vertical;
-    final double width = videoHeight * ratio;
-    final videoWidth = isFullScreen ? maxWidth : width;
+    final double videoHeight = _expand(maxHeight - padding.vertical, maxHeight);
+    final double width = (maxHeight - padding.vertical) * ratio;
+    final videoWidth = _expand(width, maxWidth);
     final introWidth = maxWidth - width - padding.horizontal;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1538,8 +1587,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             height: videoHeight,
           ),
         ),
-        Offstage(
-          offstage: isFullScreen,
+        PlayerExpansionPanel(
+          progress: _fullscreenProgress.value,
+          axis: Axis.horizontal,
           child: SizedBox(
             width: introWidth,
             height: maxHeight - padding.top,
@@ -1574,16 +1624,21 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     if (enableVerticalExpand) {
       return Obx(() {
         if (videoDetailController.isVertical.value && !isPortrait) {
-          final double videoHeight = maxHeight - padding.vertical;
-          final double width = videoHeight / Style.aspectRatio16x9;
-          final videoWidth = isFullScreen ? maxWidth : width;
+          final double videoHeight = _expand(
+            maxHeight - padding.vertical,
+            maxHeight,
+          );
+          final double width =
+              (maxHeight - padding.vertical) / Style.aspectRatio16x9;
+          final videoWidth = _expand(width, maxWidth);
           final introWidth = (maxWidth - padding.horizontal - width) / 2;
           final introHeight = maxHeight - padding.top;
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Offstage(
-                offstage: isFullScreen,
+              PlayerExpansionPanel(
+                progress: _fullscreenProgress.value,
+                axis: Axis.horizontal,
                 child: SizedBox(
                   width: introWidth,
                   height: introHeight,
@@ -1601,8 +1656,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   height: videoHeight,
                 ),
               ),
-              Offstage(
-                offstage: isFullScreen,
+              PlayerExpansionPanel(
+                progress: _fullscreenProgress.value,
+                axis: Axis.horizontal,
                 child: SizedBox(
                   width: introWidth,
                   height: introHeight,
@@ -1641,9 +1697,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     if (maxWidth >= 560) {
       width = maxWidth - clampDouble(maxWidth - width, 280, 425);
     }
-    final videoWidth = isFullScreen ? maxWidth : width;
+    final videoWidth = _expand(width, maxWidth);
     final double height = width / Style.aspectRatio16x9;
-    final videoHeight = isFullScreen ? maxHeight : height;
+    final videoHeight = _expand(height, maxHeight);
     if (height > maxHeight) {
       return childSplit(Style.aspectRatio16x9);
     }
@@ -1665,8 +1721,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               ),
             ),
             if (!videoDetailController.isFileSource)
-              Offstage(
-                offstage: isFullScreen,
+              PlayerExpansionPanel(
+                progress: _fullscreenProgress.value,
+                axis: Axis.vertical,
                 child: SizedBox(
                   width: width,
                   height: introHeight,
@@ -1680,8 +1737,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               ),
           ],
         ),
-        Offstage(
-          offstage: isFullScreen,
+        PlayerExpansionPanel(
+          progress: _fullscreenProgress.value,
+          axis: Axis.horizontal,
           child: SizedBox(
             width: maxWidth - width - padding.horizontal,
             height: maxHeight - padding.top,
@@ -1738,13 +1796,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           : AppBar(
               backgroundColor: Colors.black,
               automaticallyImplyLeading: false,
-              toolbarHeight: isFullScreen ? 0 : (_fixedTopInset ?? padding.top),
+              toolbarHeight: _expand(_fixedTopInset ?? padding.top, 0),
               primary: false,
             ),
       body: Padding(
-        padding: isFullScreen
-            ? EdgeInsets.zero
-            : padding.copyWith(top: 0, bottom: 0),
+        padding:
+            padding.copyWith(top: 0, bottom: 0) *
+            (1 - _fullscreenProgress.value),
         child: childWhenDisabledAlmostSquareInner(isFullScreen),
       ),
     );
@@ -1768,7 +1826,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   Widget _childWhenDisabledAlmostSquareInner(bool isFullScreen) {
     final double height = maxHeight / 2.5;
-    final videoHeight = isFullScreen ? maxHeight : height;
+    final videoHeight = _expand(height, maxHeight);
     final bottomHeight = maxHeight - height - padding.top;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1781,8 +1839,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             height: videoHeight,
           ),
         ),
-        Offstage(
-          offstage: isFullScreen,
+        PlayerExpansionPanel(
+          progress: _fullscreenProgress.value,
+          axis: Axis.vertical,
           child: SizedBox(
             width: maxWidth - padding.horizontal,
             height: bottomHeight,

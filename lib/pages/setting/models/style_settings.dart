@@ -28,7 +28,6 @@ import 'package:PiliPlus/pages/setting/widgets/multi_select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/select_dialog.dart';
 import 'package:PiliPlus/pages/setting/widgets/slider_dialog.dart';
 import 'package:PiliPlus/utils/extension/file_ext.dart';
-import 'package:PiliPlus/utils/extension/get_ext.dart';
 import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
@@ -68,7 +67,7 @@ List<SettingsModel> get styleSettings => [
       '交互与动画',
       '用户主页',
     ],
-    titles: const ['颜色选择', '主题模式', '纯黑主题'],
+    titles: const ['颜色选择', '主题模式'],
   ),
 ];
 
@@ -305,18 +304,6 @@ List<SettingsModel> get _appearanceSettings => [
     value: () => Pref.themeType,
     items: ThemeType.values,
     onSelected: _setThemeType,
-  ),
-  SwitchModel(
-    leading: const Icon(Icons.invert_colors),
-    title: '纯黑主题',
-    section: '主题与显示',
-    setKey: SettingBoxKey.isPureBlackTheme,
-    defaultVal: false,
-    onChanged: (value) {
-      if (ThemeUtils.isDarkMode || Pref.darkVideoPage) {
-        Get.updateMyAppTheme();
-      }
-    },
   ),
   NormalModel(
     onTap: (context, setState) => Get.toNamed('/colorSetting'),

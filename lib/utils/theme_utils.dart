@@ -243,60 +243,6 @@ abstract final class ThemeUtils {
     );
     if (OS.isHarmony && Pref.harmonyUI)
       theme = HarmonyTheme.apply(theme, immersive: Pref.harmonyImmersive);
-    if (isDark && Pref.isPureBlackTheme) {
-      return darkenTheme(theme);
-    }
     return theme;
-  }
-
-  static ThemeData darkenTheme(ThemeData theme) {
-    final colorScheme = theme.colorScheme;
-    final color = colorScheme.surfaceContainerHighest.darken(0.7);
-    return theme.copyWith(
-      canvasColor: Colors.black,
-      scaffoldBackgroundColor: Colors.black,
-      appBarTheme: theme.appBarTheme.copyWith(
-        backgroundColor: Colors.black,
-      ),
-      cardTheme: theme.cardTheme.copyWith(
-        color: colorScheme.surfaceContainer.darken(0.75),
-      ),
-      dialogTheme: theme.dialogTheme.copyWith(backgroundColor: color),
-      bottomSheetTheme: theme.bottomSheetTheme.copyWith(
-        backgroundColor: color,
-      ),
-      bottomNavigationBarTheme: theme.bottomNavigationBarTheme.copyWith(
-        backgroundColor: color,
-      ),
-      navigationBarTheme: theme.navigationBarTheme.copyWith(
-        backgroundColor: color,
-      ),
-      navigationRailTheme: theme.navigationRailTheme.copyWith(
-        backgroundColor: Colors.black,
-      ),
-      popupMenuTheme: theme.popupMenuTheme.copyWith(color: color),
-      colorScheme: colorScheme.copyWith(
-        primary: colorScheme.primary.darken(0.1),
-        onPrimary: colorScheme.onPrimary.darken(0.1),
-        primaryContainer: colorScheme.primaryContainer.darken(0.1),
-        onPrimaryContainer: colorScheme.onPrimaryContainer.darken(0.1),
-        inversePrimary: colorScheme.inversePrimary.darken(0.1),
-        secondary: colorScheme.secondary.darken(0.05),
-        onSecondary: colorScheme.onSecondary.darken(0.05),
-        secondaryContainer: colorScheme.secondaryContainer.darken(0.05),
-        onSecondaryContainer: colorScheme.onSecondaryContainer.darken(0.05),
-        error: colorScheme.error.darken(0.05),
-        surface: Colors.black,
-        onSurface: colorScheme.onSurface.darken(0.15),
-        surfaceTint: colorScheme.surfaceTint.darken(),
-        inverseSurface: colorScheme.inverseSurface.darken(),
-        onInverseSurface: colorScheme.onInverseSurface.darken(),
-        surfaceContainer: colorScheme.surfaceContainer.darken(),
-        surfaceContainerHigh: colorScheme.surfaceContainerHigh.darken(),
-        surfaceContainerHighest: colorScheme.surfaceContainerHighest.darken(
-          0.4,
-        ),
-      ),
-    );
   }
 }

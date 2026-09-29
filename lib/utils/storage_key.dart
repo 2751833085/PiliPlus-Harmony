@@ -137,7 +137,6 @@ abstract final class SettingBoxKey {
       biliSendCommAntifraud = 'biliSendCommAntifraud',
       enableCreateDynAntifraud = 'enableCreateDynAntifraud',
       coinWithLike = 'coinWithLike',
-      isPureBlackTheme = 'isPureBlackTheme',
       antiGoodsDyn = 'antiGoodsDyn',
       antiGoodsReply = 'antiGoodsReply',
       expandDynLivePanel = 'expandDynLivePanel',

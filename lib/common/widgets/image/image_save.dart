@@ -40,7 +40,7 @@ void imageSaveDialog({
           margin: const .symmetric(horizontal: Style.safeSpace),
           decoration: _ImageDecoration(
             imageHeight: height,
-            color: colorScheme.surface.withValues(alpha: .18),
+            color: colorScheme.surface,
             borderRadius: const .all(Style.imgRadius),
           ),
           child: Column(
@@ -129,10 +129,10 @@ void imageSaveDialog({
               maxWidth: panelWidth,
               maxHeight: screen.height - 96,
             ),
-            child: ImmersiveSurface(
-              interactive: false,
-              blurBackground: false,
+            child: Material(
+              color: colorScheme.surface.withValues(alpha: 1),
               borderRadius: BorderRadius.circular(16),
+              clipBehavior: Clip.antiAlias,
               child: wide
                   ? Row(
                       mainAxisSize: MainAxisSize.min,

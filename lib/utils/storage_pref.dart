@@ -531,9 +531,6 @@ abstract final class Pref {
   static bool get coinWithLike =>
       _setting.get(SettingBoxKey.coinWithLike, defaultValue: false);
 
-  static bool get isPureBlackTheme =>
-      _setting.get(SettingBoxKey.isPureBlackTheme, defaultValue: false);
-
   static bool get antiGoodsDyn =>
       _setting.get(SettingBoxKey.antiGoodsDyn, defaultValue: false);
 

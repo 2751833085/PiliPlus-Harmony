@@ -773,7 +773,21 @@ class ReplyItemGrpc extends StatelessWidget {
           text: isCv ? '[笔记] ' : url.title,
           style: TextStyle(color: colorScheme.primary),
           recognizer: NoDeadlineTapGestureRecognizer()
-            ..onTap = () {
+            ..onTap = () async {
+              if (url.extra.isWordSearch) {
+                final keyword = Uri.tryParse(
+                  url.appUrlSchema,
+                )?.queryParameters['keyword'];
+                Get.toNamed(
+                  '/searchResult',
+                  parameters: {
+                    'keyword': keyword?.isNotEmpty == true
+                        ? keyword!
+                        : (url.title.isNotEmpty ? url.title : matchStr),
+                  },
+                );
+                return;
+              }
               if (url.appUrlSchema.isEmpty) {
                 if (RegExp(
                   r'^(av|bv)',
@@ -800,14 +814,13 @@ class ReplyItemGrpc extends StatelessWidget {
                   PageUtils.handleWebview(matchStr);
                 }
               } else {
-                if (url.extra.isWordSearch) {
-                  Get.toNamed(
-                    '/searchResult',
-                    parameters: {'keyword': url.title},
-                  );
-                } else {
-                  PageUtils.handleWebview(matchStr);
-                }
+                // Prefer the server-supplied music/video destination. A label
+                // such as a song title is not itself a web address.
+                final handled = await PiliScheme.routePushFromUrl(
+                  url.appUrlSchema,
+                  selfHandle: true,
+                );
+                if (!handled) PageUtils.handleWebview(matchStr);
               }
             },
         ),
@@ -880,13 +893,19 @@ class ReplyItemGrpc extends StatelessWidget {
         } else if (_timeRegExp.hasMatch(matchStr)) {
           matchStr = matchStr.replaceAll('：', ':');
           bool isValid = false;
+          VideoDetailController? seekController;
+          final seconds = DurationUtils.parseDuration(matchStr);
           try {
-            final ctr = Get.find<VideoDetailController>(
-              tag: getTag?.call() ?? Get.arguments['heroTag'],
-            );
-            isValid =
-                DurationUtils.parseDuration(matchStr) * 1000 <=
-                ctr.data.timeLength!;
+            final arguments = Get.arguments;
+            final tag =
+                getTag?.call() ??
+                (arguments is Map ? arguments['heroTag'] : null);
+            final ctr = Get.find<VideoDetailController>(tag: tag);
+            seekController = ctr;
+            final duration = ctr.plPlayerController.durationInMilliseconds > 0
+                ? ctr.plPlayerController.durationInMilliseconds
+                : ctr.data.timeLength ?? 0;
+            isValid = duration > 0 && seconds * 1000 <= duration;
           } catch (e) {
             if (kDebugMode) debugPrint('failed to validate: $e');
           }
@@ -900,12 +919,8 @@ class ReplyItemGrpc extends StatelessWidget {
                         // 跳转到指定位置
                         try {
                           SmartDialog.showToast('跳转至：$matchStr');
-                          Get.find<VideoDetailController>(
-                            tag: Get.arguments['heroTag'],
-                          ).plPlayerController.seekTo(
-                            Duration(
-                              seconds: DurationUtils.parseDuration(matchStr),
-                            ),
+                          seekController!.plPlayerController.seekTo(
+                            Duration(seconds: seconds),
                             isSeek: false,
                           );
                         } catch (e) {
