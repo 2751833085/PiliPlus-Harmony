@@ -15,7 +15,6 @@ import 'package:PiliPlus/pages/common/common_data_controller.dart';
 import 'package:PiliPlus/services/account_service.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/accounts/account.dart';
-import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -390,26 +389,31 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
     }
   }
 
+  Future<void>? _refreshTask;
   @override
   Future<void> onRefresh({bool isManual = true}) {
-    if (!accountService.isLogin.value) {
-      return Future.value(null);
-    }
-    queryUserInfo();
+    if (!accountService.isLogin.value) return Future.value();
+    if (_refreshTask != null) return _refreshTask!;
+    late final Future<void> task;
+    task = _refreshMine().whenComplete(() {
+      if (identical(_refreshTask, task)) _refreshTask = null;
+    });
+    return _refreshTask = task;
+  }
+
+  Future<void> _refreshMine() async {
     syncHistoryPreview();
-    return Future.wait([
+    await Future.wait([
+      queryUserInfo(),
       super.onRefresh(),
       recentHistory.refresh(),
       refreshLaterPreview(),
-    ]).then((_) {}).whenComplete(() {
-      if (isManual) {
-        scrollController.jumpToTop();
-      }
-    });
+    ]);
   }
 
   @override
   void onChangeAccount(bool isLogin) {
+    _refreshTask = null;
     _favoritesGeneration++;
     _laterGeneration++;
     laterPreview.clear();

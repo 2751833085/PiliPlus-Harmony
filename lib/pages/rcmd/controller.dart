@@ -30,7 +30,8 @@ class RcmdController extends CommonListController {
     final target = recommendationBatchSize(visibleColumns);
     return collectRecommendationBatch<BaseRcmdVideoItemModel>(
       target: target,
-      parallelism: appRcmd ? 2 : 1,
+      maxRequests:
+          1, // Render the first page immediately; scrolling fetches more.
       keyOf: (item) => item.bvid ?? item.aid?.toString(),
       fetch: () {
         final index = _nextFreshIndex++;

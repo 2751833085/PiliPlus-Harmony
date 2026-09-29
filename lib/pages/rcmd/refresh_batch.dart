@@ -1,12 +1,13 @@
 import 'package:PiliPlus/http/loading_state.dart';
 
-int recommendationBatchSize(int columns) => (columns * 10).clamp(24, 60);
+int recommendationBatchSize(int columns) => (columns * 4).clamp(8, 20);
 
 Future<LoadingState<List<T>>> collectRecommendationBatch<T>({
   required int target,
   required Future<LoadingState<List<T>>> Function() fetch,
   required String? Function(T) keyOf,
   int parallelism = 1,
+  int maxRequests = 4,
 }) async {
   final items = <T>[];
   final seen = <String>{};
@@ -19,10 +20,11 @@ Future<LoadingState<List<T>>> collectRecommendationBatch<T>({
     }
   }
 
-  while (attempts < 4 && items.length < target) {
+  final limit = maxRequests.clamp(1, 4);
+  while (attempts < limit && items.length < target) {
     // App feeds return small pages. At most two independent requests overlap;
     // preserve request order even when network responses finish out of order.
-    final count = parallelism.clamp(1, 2).clamp(1, 4 - attempts);
+    final count = parallelism.clamp(1, 2).clamp(1, limit - attempts);
     attempts += count;
     final results = await Future.wait(List.generate(count, (_) => request()));
     final before = items.length;

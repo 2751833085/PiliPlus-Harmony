@@ -1,3 +1,5 @@
+import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
+    as refresh;
 import 'package:PiliPlus/models_new/later/list.dart';
 import 'package:PiliPlus/pages/mine/widgets/later_preview.dart';
 import 'package:PiliPlus/http/search.dart';
@@ -48,6 +50,36 @@ class _MediaPageState extends CommonPageState<MinePage>
     with AutomaticKeepAliveClientMixin {
   final MineController controller = Get.putOrFind(MineController.new);
   late final MainController _mainController = Get.find<MainController>();
+
+  Worker? _entryWorker;
+
+  @override
+  void initState() {
+    super.initState();
+    _entryWorker = ever(_mainController.selectedIndex, (_) {
+      if (_mainController.navigationBars[_mainController.selectedIndex.value] ==
+          NavigationBarType.mine) {
+        controller.onRefresh(isManual: false);
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) controller.onRefresh(isManual: false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _entryWorker?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget onBuild(Widget child) => super.onBuild(
+    refresh.refreshIndicator(
+      onRefresh: () => controller.onRefresh(isManual: false),
+      child: child,
+    ),
+  );
 
   @override
   bool get wantKeepAlive => true;
@@ -651,10 +683,7 @@ class _MediaPageState extends CommonPageState<MinePage>
     );
   }
 
-  void _autoRefresh() => Timer(
-    const Duration(milliseconds: 150),
-    () => controller.onRefresh(isManual: false),
-  );
+  void _autoRefresh() => controller.onRefresh(isManual: false);
 
   Widget _buildLaterPreview(ThemeData theme) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,

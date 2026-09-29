@@ -1,3 +1,4 @@
+import 'package:PiliPlus/plugin/pl_player/models/buffering_recovery.dart';
 import 'package:PiliPlus/plugin/pl_player/models/source_frame_gate.dart';
 import 'package:PiliPlus/plugin/pl_player/models/playback_owner.dart';
 import 'package:PiliPlus/pages/setting/models/play_settings.dart'
@@ -173,6 +174,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   // 鸿蒙：mpv 的 ohaudio 音频输出感知不到系统音频打断（如其他 app 抢占焦点），
   // 被打断后 mpv 仍自认为在播放，进度停滞、UI 按钮状态错误且无法点击恢复。
   // 用位置停滞检测兜底：播放中且非缓冲时位置连续数秒不前进，视为被系统打断。
+  final _bufferingRecovery = BufferingRecovery();
+  final _recoveryClock = Stopwatch()..start();
+  Future<bool?>? _refreshTask;
   Timer? _stallWatchdog;
   int? _stallLastPosition;
   int _stallTicks = 0;
@@ -1181,7 +1185,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     );
   }
 
-  Future<bool?> refreshPlayer() async {
+  Future<bool?> refreshPlayer() =>
+      _refreshTask ??= _refreshPlayer().whenComplete(() => _refreshTask = null);
+
+  Future<bool?> _refreshPlayer() async {
+    final player = _videoPlayerController;
+    final owner = sourceOwner;
+    final source = dataSource;
+
     if (dataSource is FileSource) {
       return null;
     }
@@ -1212,14 +1223,23 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         '',
       );
     }
-    await _videoPlayerController!.open(
+    if (!identical(player, _videoPlayerController) ||
+        !identical(owner, sourceOwner) ||
+        !identical(source, dataSource))
+      return false;
+    await player!.open(
       Media(
         dataSource.videoSource,
         start: isLive ? null : Duration(milliseconds: positionInMilliseconds),
         extras: audioUri == null ? null : {'audio-files': '"$audioUri"'},
       ),
-      play: true,
+      play: false,
     );
+    if (!identical(player, _videoPlayerController) ||
+        !identical(owner, sourceOwner) ||
+        !identical(source, dataSource))
+      return false;
+    if (intendsPlayback && !_pauseRequestedByApp) await play();
     return true;
     // seekTo(currentPos);
   }
@@ -1422,6 +1442,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             owner.retryNetworkRoute();
             return;
           }
+          final failedSource = dataSource;
+          final failedOwner = sourceOwner;
           EasyThrottle.throttle(
             'controllerStream.error.listen',
             const Duration(milliseconds: 10000),
@@ -1433,7 +1455,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
                 // if (kDebugMode) {
                 //   debugPrint("_buffered.value: ${_buffered.value}");
                 // }
-                if (isBuffering.value && buffered.value == 0) {
+                if (identical(dataSource, failedSource) &&
+                    identical(sourceOwner, failedOwner) &&
+                    identical(_videoPlayerController?.platform, player) &&
+                    isBuffering.value &&
+                    intendsPlayback &&
+                    buffered.value <= position.value + 1) {
                   SmartDialog.showToast(
                     '视频链接打开失败，重试中',
                     displayTime: const Duration(milliseconds: 500),
@@ -1505,7 +1532,34 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _stallWatchdog?.cancel();
     _stallLastPosition = null;
     _stallTicks = 0;
+    _bufferingRecovery.reset();
     _stallWatchdog = Timer.periodic(const Duration(milliseconds: 1200), (_) {
+      final recover = _bufferingRecovery.sample(
+        now: _recoveryClock.elapsed,
+        position: positionInMilliseconds,
+        buffering: isBuffering.value,
+        eligible:
+            intendsPlayback &&
+            !_pauseRequestedByApp &&
+            !isSeeking.value &&
+            !isLive &&
+            dataSource is! FileSource &&
+            _videoPlayerController != null &&
+            _refreshTask == null &&
+            !playerStatus.isCompleted &&
+            (WidgetsBinding.instance.lifecycleState ==
+                    AppLifecycleState.resumed ||
+                isPipMode),
+      );
+      if (recover) {
+        unawaited(
+          refreshPlayer().catchError((Object error) {
+            if (kDebugMode) debugPrint('buffering recovery failed: $error');
+            return false;
+          }),
+        );
+        return;
+      }
       if (!playerStatus.isPlaying ||
           isBuffering.value ||
           positionInMilliseconds == 0) {

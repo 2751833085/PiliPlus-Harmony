@@ -5,6 +5,25 @@ import 'package:PiliPlus/pages/rcmd/refresh_batch.dart';
 
 void main() {
   test(
+    'refresh returns the first page without waiting for supplemental data',
+    () async {
+      var calls = 0;
+      final result = await collectRecommendationBatch<int>(
+        target: 20,
+        maxRequests: 1,
+        keyOf: (v) => '$v',
+        fetch: () {
+          calls++;
+          return calls == 1
+              ? Future.value(const Success([1, 2]))
+              : Completer<LoadingState<List<int>>>().future;
+        },
+      );
+      expect(result.data, [1, 2]);
+      expect(calls, 1);
+    },
+  );
+  test(
     'parallel batches overlap, preserve order and respect the request limit',
     () async {
       final first = Completer<LoadingState<List<int>>>();
@@ -40,9 +59,9 @@ void main() {
   );
 
   test('batch size follows columns with a bounded maximum', () {
-    expect(recommendationBatchSize(2), 24);
-    expect(recommendationBatchSize(4), 40);
-    expect(recommendationBatchSize(12), 60);
+    expect(recommendationBatchSize(2), 8);
+    expect(recommendationBatchSize(4), 16);
+    expect(recommendationBatchSize(12), 20);
   });
   test(
     'fills a short response and removes overlapping recommendations',

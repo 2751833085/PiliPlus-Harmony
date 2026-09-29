@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/navigation_press_feedback.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/cached_navigation_view.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
@@ -169,6 +170,11 @@ class _MainAppState extends PopScopeState<MainApp>
       ..checkUnreadDynamic()
       ..checkDefaultSearch(true)
       ..checkUnread(_mainController.useBottomNav);
+    if (_mainController.navigationBars[_mainController.selectedIndex.value] ==
+            NavigationBarType.mine &&
+        Get.isRegistered<MineController>()) {
+      Get.find<MineController>().onRefresh(isManual: false);
+    }
     super.didPopNext();
   }
 

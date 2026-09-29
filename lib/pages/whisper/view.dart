@@ -154,6 +154,7 @@ class _WhisperPageState extends State<WhisperPage> {
         body: MessageSplit(
           split: split,
           hasSelection: hasSelection,
+          selectionKey: _notification ?? draftKey,
           list: refreshIndicator(
             onRefresh: _controller.onRefresh,
             child: CustomScrollView(

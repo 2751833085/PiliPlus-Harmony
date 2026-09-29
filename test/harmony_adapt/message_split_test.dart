@@ -4,6 +4,41 @@ import 'package:PiliPlus/pages/whisper/widgets/message_split.dart';
 
 void main() {
   testWidgets(
+    'conversation enters from the right and folding does not replay it',
+    (tester) async {
+      Widget app(bool selected, {bool split = false, String id = 'one'}) =>
+          MaterialApp(
+            home: Scaffold(
+              body: MessageSplit(
+                split: split,
+                hasSelection: selected,
+                selectionKey: id,
+                list: const ColoredBox(color: Colors.red),
+                detail: const ColoredBox(
+                  key: ValueKey('detail'),
+                  color: Colors.blue,
+                ),
+              ),
+            ),
+          );
+      await tester.pumpWidget(app(false));
+      await tester.pumpWidget(app(true));
+      expect(tester.getTopLeft(find.byKey(const ValueKey('detail'))).dx, 800);
+      await tester.pump(const Duration(milliseconds: 120));
+      final x = tester.getTopLeft(find.byKey(const ValueKey('detail'))).dx;
+      expect(x, greaterThan(0));
+      expect(x, lessThan(800));
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(find.byKey(const ValueKey('detail'))).dx, 0);
+      await tester.pumpWidget(app(true, split: true));
+      expect(tester.getTopLeft(find.byKey(const ValueKey('detail'))).dx, 353);
+      await tester.pumpWidget(app(true, split: true, id: 'two'));
+      expect(tester.getTopLeft(find.byKey(const ValueKey('detail'))).dx, 800);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
     'folding preserves detail draft, focus and list scroll without zero-width layout',
     (tester) async {
       tester.view.devicePixelRatio = 2.875;
