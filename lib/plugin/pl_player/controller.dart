@@ -1542,6 +1542,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
             intendsPlayback &&
             !_pauseRequestedByApp &&
             !isSeeking.value &&
+            dataStatus.value == DataStatus.loaded &&
             !isLive &&
             dataSource is! FileSource &&
             _videoPlayerController != null &&
