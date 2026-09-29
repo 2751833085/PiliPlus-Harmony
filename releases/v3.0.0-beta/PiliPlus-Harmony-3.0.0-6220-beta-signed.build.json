@@ -1,0 +1,18 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6220,
+  "releaseTag": "v3.0.0+6220",
+  "sha256": "de282c3509ac6ebb3ebac14ccc4792a70b18fcfe68c84cb5a1d90657a8f0b9ad",
+  "sizeBytes": 33072823,
+  "signatureVerified": true,
+  "sourceCommit": "38bdb695eb09d08ec95124ed849a750f61b037a6",
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "validation": "208 Harmony regression tests and 3 additional navigation/AI tests passed; changed files have no analyzer errors or warnings",
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "deviceOverwrite": {
+    "uidPreserved": true,
+    "firstInstallTimePreserved": true,
+    "launchSucceeded": true
+  }
+}
