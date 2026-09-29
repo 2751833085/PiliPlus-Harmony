@@ -33,7 +33,7 @@ void main() {
       await tester.pumpWidget(app(true, split: true));
       expect(tester.getTopLeft(find.byKey(const ValueKey('detail'))).dx, 353);
       await tester.pumpWidget(app(true, split: true, id: 'two'));
-      expect(tester.getTopLeft(find.byKey(const ValueKey('detail'))).dx, 800);
+      expect(tester.getTopLeft(find.byKey(const ValueKey('detail'))).dx, 353);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     },

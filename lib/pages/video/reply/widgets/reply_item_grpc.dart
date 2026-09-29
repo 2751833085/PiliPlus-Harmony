@@ -754,6 +754,11 @@ class ReplyItemGrpc extends StatelessWidget {
         }
         return;
       }
+      final linkColor = url.extra.isWordSearch
+          ? (colorScheme.brightness == Brightness.dark
+                ? const Color(0xFF80C8F4)
+                : const Color(0xFF008AC5))
+          : colorScheme.primary;
       final isCv = url.clickReport.startsWith('{"cvid');
       if (isCv) {
         hasNote = true;
@@ -764,14 +769,17 @@ class ReplyItemGrpc extends StatelessWidget {
             child: CachedNetworkImage(
               height: 19,
               memCacheHeight: 19.cacheSize(context),
-              color: colorScheme.primary,
+              color: linkColor,
               imageUrl: ImageUtils.thumbnailUrl(url.prefixIcon),
               placeholder: (_, _) => const SizedBox.shrink(),
             ),
           ),
         TextSpan(
-          text: isCv ? '[笔记] ' : url.title,
-          style: TextStyle(color: colorScheme.primary),
+          text: isCv ? '[笔记] ' : (url.title.isEmpty ? matchStr : url.title),
+          style: TextStyle(
+            color: linkColor,
+            fontWeight: url.extra.isWordSearch ? FontWeight.w500 : null,
+          ),
           recognizer: NoDeadlineTapGestureRecognizer()
             ..onTap = () async {
               if (url.extra.isWordSearch) {
@@ -932,7 +940,8 @@ class ReplyItemGrpc extends StatelessWidget {
           );
         } else {
           final url = content.urls[matchStr];
-          if (url != null && !matchedUrls.contains(matchStr)) {
+          if (url != null &&
+              (url.extra.isWordSearch || !matchedUrls.contains(matchStr))) {
             addUrl(matchStr, url, addPlainText: true);
             // 只显示一次
             matchedUrls.add(matchStr);

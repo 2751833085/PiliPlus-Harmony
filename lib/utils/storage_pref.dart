@@ -675,7 +675,7 @@ abstract final class Pref {
       _setting.get(SettingBoxKey.disableLikeMsg, defaultValue: false);
 
   static bool get enableWordRe =>
-      _setting.get(SettingBoxKey.enableWordRe, defaultValue: false);
+      _setting.get(SettingBoxKey.enableWordRe, defaultValue: true);
 
   static bool get autoExitFullscreen =>
       _setting.get(SettingBoxKey.enableAutoExit, defaultValue: true);

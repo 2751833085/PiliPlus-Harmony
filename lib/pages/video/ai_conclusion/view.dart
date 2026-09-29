@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/common/widgets/gesture/tap_gesture_recognizer.dart';
 import 'package:PiliPlus/models_new/video/video_ai_conclusion/model_result.dart';
 import 'package:PiliPlus/pages/common/slide/common_slide_page.dart';
@@ -24,110 +25,71 @@ class AiConclusionPanel extends CommonSlidePage {
     Key? key,
     bool tap = true,
   }) {
-    final outline = res.outline;
-    final hasOutline = outline != null && outline.isNotEmpty;
-    return SelectionArea(
-      child: CustomScrollView(
-        key: key,
-        shrinkWrap: !tap,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          if (res.summary?.isNotEmpty == true) ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Text(
-                  res.summary!,
-                  style: const TextStyle(fontSize: 15, height: 1.5),
-                ),
+    final spans = <InlineSpan>[];
+    if (res.summary?.isNotEmpty == true) {
+      spans.add(
+        TextSpan(text: res.summary, style: const TextStyle(fontSize: 15)),
+      );
+    }
+    for (final outline in res.outline ?? []) {
+      if (spans.isNotEmpty) spans.add(const TextSpan(text: '\n\n'));
+      spans.add(
+        TextSpan(
+          text: outline.title ?? '',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
+      for (final part in outline.partOutline ?? []) {
+        spans.add(const TextSpan(text: '\n'));
+        spans.add(
+          TextSpan(
+            text: DurationUtils.formatDuration(part.timestamp),
+            style: tap ? TextStyle(color: theme.colorScheme.primary) : null,
+            recognizer: tap
+                ? (NoDeadlineTapGestureRecognizer()
+                    ..onTap = () {
+                      try {
+                        Get.find<VideoDetailController>(
+                          tag: Get.arguments['heroTag'],
+                        ).plPlayerController.seekTo(
+                          Duration(seconds: part.timestamp!),
+                          isSeek: false,
+                        );
+                      } catch (_) {}
+                    })
+                : null,
+          ),
+        );
+        spans.add(TextSpan(text: ' ${part.content ?? ''}'));
+      }
+    }
+    // SelectionArea sends an unconditional selectionClick on long press.
+    // EditableText's selection path respects OHOS's silent long-press policy.
+    // Keep one selectable span so copying across sections continues to work.
+    return CustomScrollView(
+      key: key,
+      shrinkWrap: !tap,
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            14,
+            0,
+            14,
+            tap ? MediaQuery.viewPaddingOf(context).bottom + 100 : 0,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: SelectionText.rich(
+              TextSpan(children: spans),
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.5,
+                color: theme.colorScheme.onSurface,
               ),
             ),
-            if (hasOutline)
-              SliverToBoxAdapter(
-                child: Divider(
-                  height: 20,
-                  color: theme.dividerColor.withValues(alpha: 0.1),
-                  thickness: 6,
-                ),
-              ),
-          ],
-          if (hasOutline)
-            SliverPadding(
-              padding: EdgeInsets.only(
-                left: 14,
-                right: 14,
-                bottom: !tap
-                    ? 0
-                    : MediaQuery.viewPaddingOf(context).bottom + 100,
-              ),
-              sliver: SliverList.builder(
-                itemCount: outline.length,
-                itemBuilder: (context, index) {
-                  final item = outline[index];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (index != 0) const SizedBox(height: 10),
-                      Text(
-                        item.title!,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      ...?item.partOutline?.map(
-                        (item) => Wrap(
-                          children: [
-                            Text.rich(
-                              TextSpan(
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: theme.colorScheme.onSurface,
-                                  height: 1.5,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: DurationUtils.formatDuration(
-                                      item.timestamp,
-                                    ),
-                                    style: tap
-                                        ? TextStyle(
-                                            color: theme.colorScheme.primary,
-                                          )
-                                        : null,
-                                    recognizer: tap
-                                        ? (NoDeadlineTapGestureRecognizer()
-                                            ..onTap = () {
-                                              try {
-                                                Get.find<VideoDetailController>(
-                                                  tag: Get.arguments['heroTag'],
-                                                ).plPlayerController.seekTo(
-                                                  Duration(
-                                                    seconds: item.timestamp!,
-                                                  ),
-                                                  isSeek: false,
-                                                );
-                                              } catch (_) {}
-                                            })
-                                        : null,
-                                  ),
-                                  const TextSpan(text: ' '),
-                                  TextSpan(text: item.content!),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/whisper/widgets/message_back_scope.dart';
 import 'package:PiliPlus/pages/whisper/widgets/message_split.dart';
 import 'package:PiliPlus/pages/msg_feed_top/reply_me/view.dart';
 import 'package:PiliPlus/pages/msg_feed_top/at_me/view.dart';
@@ -68,11 +69,18 @@ class _WhisperPageState extends State<WhisperPage> {
     final selected = _selected;
     final hasSelection = selected != null || _notification != null;
     final draftKey = selected == null ? null : _draftKey(selected);
-    return PopScope(
-      canPop: !hasSelection,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && hasSelection) _closeConversation();
-      },
+    void closeDetail() {
+      if (split) {
+        Navigator.of(context).maybePop();
+      } else {
+        _closeConversation();
+      }
+    }
+
+    return MessageBackScope(
+      split: split,
+      hasSelection: hasSelection,
+      onCloseSelection: _closeConversation,
       child: SimpleScaffold(
         backgroundColor: harmony ? theme.scaffoldBackgroundColor : null,
         appBar: !split && hasSelection
@@ -173,7 +181,7 @@ class _WhisperPageState extends State<WhisperPage> {
             context: context,
             removeTop: split,
             child: _notification != null
-                ? _notificationPage(_notification!)
+                ? _notificationPage(_notification!, closeDetail)
                 : selected == null
                 ? (split
                       ? const Center(child: Text('选择一条消息，开始查看'))
@@ -182,7 +190,7 @@ class _WhisperPageState extends State<WhisperPage> {
                     key: ValueKey(draftKey),
                     conversation: selected,
                     items: _drafts[draftKey],
-                    onClose: _closeConversation,
+                    onClose: closeDetail,
                     onDraftChanged: (items) {
                       if (items.isEmpty) {
                         _drafts.remove(draftKey);
@@ -197,21 +205,22 @@ class _WhisperPageState extends State<WhisperPage> {
     );
   }
 
-  Widget _notificationPage(String route) => switch (route) {
-    '/replyMe' => ReplyMePage(
-      key: const ValueKey('replyMe'),
-      onClose: _closeConversation,
-    ),
-    '/atMe' => AtMePage(
-      key: const ValueKey('atMe'),
-      onClose: _closeConversation,
-    ),
-    '/likeMe' => LikeMePage(
-      key: const ValueKey('likeMe'),
-      onClose: _closeConversation,
-    ),
-    _ => SysMsgPage(key: const ValueKey('sysMsg'), onClose: _closeConversation),
-  };
+  Widget _notificationPage(String route, VoidCallback onClose) =>
+      switch (route) {
+        '/replyMe' => ReplyMePage(
+          key: const ValueKey('replyMe'),
+          onClose: onClose,
+        ),
+        '/atMe' => AtMePage(
+          key: const ValueKey('atMe'),
+          onClose: onClose,
+        ),
+        '/likeMe' => LikeMePage(
+          key: const ValueKey('likeMe'),
+          onClose: onClose,
+        ),
+        _ => SysMsgPage(key: const ValueKey('sysMsg'), onClose: onClose),
+      };
 
   Widget _buildBody(LoadingState<List<Session>?> loadingState) {
     switch (loadingState) {

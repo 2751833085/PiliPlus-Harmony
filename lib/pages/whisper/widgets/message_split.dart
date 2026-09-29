@@ -25,7 +25,7 @@ class _MessageSplitState extends State<MessageSplit>
   late final _animation = AnimationController(
     vsync: this,
     duration: HarmonyMotion.duration,
-    value: widget.hasSelection ? 0 : 1,
+    value: widget.hasSelection && !widget.split ? 0 : 1,
   );
   late final _position = _animation
       .drive(CurveTween(curve: HarmonyMotion.curve))
@@ -33,12 +33,16 @@ class _MessageSplitState extends State<MessageSplit>
   @override
   void initState() {
     super.initState();
-    if (widget.hasSelection) _animation.forward();
+    if (widget.hasSelection && !widget.split) _animation.forward();
   }
 
   @override
   void didUpdateWidget(MessageSplit oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.split) {
+      _animation.value = 1;
+      return;
+    }
     if (widget.hasSelection &&
         (!oldWidget.hasSelection ||
             oldWidget.selectionKey != widget.selectionKey)) {
@@ -98,7 +102,8 @@ class _MessageSplitState extends State<MessageSplit>
               offstage: !widget.split && !widget.hasSelection,
               child: ClipRect(
                 child: SlideTransition(
-                  position: MediaQuery.disableAnimationsOf(context)
+                  position:
+                      widget.split || MediaQuery.disableAnimationsOf(context)
                       ? const AlwaysStoppedAnimation(Offset.zero)
                       : _position,
                   child: RepaintBoundary(child: widget.detail),

@@ -583,7 +583,7 @@ List<SettingsModel> get personalizationExtraSettings => [
     subtitle: '展示评论区搜索关键词',
     leading: const Icon(Icons.search_outlined),
     setKey: SettingBoxKey.enableWordRe,
-    defaultVal: false,
+    defaultVal: true,
     onChanged: (value) => ReplyItemGrpc.enableWordRe = value,
   ),
   const SwitchModel(
