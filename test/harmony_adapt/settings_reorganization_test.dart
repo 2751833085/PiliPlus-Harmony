@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
@@ -23,6 +25,13 @@ import 'helpers/memory_box.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
+    final directory = Directory.systemTemp.createTempSync(
+      'piliplus-settings-test-',
+    );
+    appSupportDirPath = directory.path;
+    tmpDirPath = directory.path;
+    downloadPath = directory.path;
+    addTearDown(() => directory.deleteSync(recursive: true));
     GStorage.setting = MemoryBox();
     GStorage.video = MemoryBox();
     GStorage.localCache = MemoryBox();

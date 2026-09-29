@@ -10,43 +10,20 @@ jobs:
   release_ohos:
     name: Release for ohos
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: read
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Compress images in assets/images
-        run: |
-          npm install --no-save sharp glob
-          node -e '
-            const sharp = require("sharp");
-            const glob = require("glob");
-            const fs = require("fs");
-
-            (async () => {
-              const files = glob.sync("assets/images/**/*.@(png|jpg|jpeg)");
-              for (const f of files) {
-                const img = sharp(f);
-                const { format } = await img.metadata();
-
-                const buf = await (format === "jpeg"
-                  ? img.jpeg({ quality: 85, mozjpeg: true })
-                  : img.png({ compressionLevel: 9, palette: true })
-                ).toBuffer();
-
-                if (buf.length < fs.statSync(f).size) fs.writeFileSync(f, buf);
-              }
-            })();
-          '
-
       - name: Extract tag name
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             tag="${GITHUB_REF#refs/tags/}"
           else
-            tag="$(git describe --tags --abbrev=0 2>/dev/null || echo '')"
+            tag="v$(sed -n 's/^version: //p' pubspec.yaml | tr -d '\r')"
           fi
           # sanitize slashes in tag/branch name for filename use
           tag="${tag//\//-}"
@@ -95,13 +72,12 @@ jobs:
         run: flutter build hap --release --no-codesign --dart-define-from-file=.vscode/env.json
         shell: bash
 
-      - name: Package ohos build output
-        run: cp ./ohos/entry/build/default/outputs/default/entry-default-unsigned.hap PiliPlus_ohos_${{ env.tag }}_unsigned.hap
-        shell: bash
-
-      - name: Create release
-        uses: softprops/action-gh-release@v2
+      # Unsigned CI builds are diagnostics, not in-app updates. Never turn an
+      # already-published signed release into a draft or add an unsigned HAP to it.
+      - name: Upload unsigned build artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.tag }}
-          draft: true
-          files: PiliPlus_ohos_*.hap
+          name: PiliPlus-Harmony-${{ env.tag }}-unsigned
+          path: build/ohos/hap/entry-default-unsigned.hap
+          if-no-files-found: error
+          retention-days: 14
