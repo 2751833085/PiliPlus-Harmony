@@ -1,0 +1,18 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6217,
+  "releaseTag": "v3.0.0+6217",
+  "sha256": "9c03c5c66c141c52e68a563705baeb5bcdbff3de9704a6087fe028e003e06baa",
+  "sizeBytes": 33056437,
+  "signatureVerified": true,
+  "sourceCommit": "9de307fdebd882270f194e83482ba510f79eec9c",
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "validation": "6 fullscreen gesture, control hit-testing and cutout regression tests passed",
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "deviceOverwrite": {
+    "versionCode": 6217,
+    "uidPreserved": true,
+    "firstInstallTimePreserved": true
+  }
+}
