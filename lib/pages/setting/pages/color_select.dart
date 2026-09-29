@@ -302,8 +302,9 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
               );
             },
           ),
-          ...colorThemeTypes.mapIndexed(
-            (i, e) {
+          ...themeColorDisplayOrder.map(
+            (i) {
+              final e = colorThemeTypes[i];
               final color = e.color;
               final isCurr = currentColor == i;
               return GestureDetector(

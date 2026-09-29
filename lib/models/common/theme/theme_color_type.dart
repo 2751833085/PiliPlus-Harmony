@@ -1,8 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 
 const List<({Color color, String label})> colorThemeTypes = [
-  (color: Color(0xFF5CB67B), label: '默认绿'),
-  (color: Color(0xFFFF7299), label: '粉红色'),
+  (color: Color(0xFF5CB67B), label: '绿色'),
+  (color: Color(0xFFFF7299), label: '默认粉'),
   (color: Colors.red, label: '红色'),
   (color: Colors.orange, label: '橙色'),
   (color: Colors.amber, label: '琥珀色'),
@@ -20,4 +20,12 @@ const List<({Color color, String label})> colorThemeTypes = [
   (color: Colors.blueGrey, label: '蓝灰色'),
   (color: Colors.brown, label: '棕色'),
   (color: Colors.grey, label: '灰色'),
+];
+
+// Display order is independent from saved color IDs, so upgrades do not swap
+// an existing pink/green choice.
+final themeColorDisplayOrder = [
+  1,
+  0,
+  for (var i = 2; i < colorThemeTypes.length; i++) i,
 ];

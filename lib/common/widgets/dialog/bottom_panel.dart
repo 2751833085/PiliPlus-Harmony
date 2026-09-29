@@ -10,12 +10,14 @@ class BottomPanel extends StatelessWidget {
     required this.child,
     this.onClose,
     this.surface = true,
+    this.interactiveSurface = true,
     this.fitContent = false,
   });
   final String title;
   final Widget child;
   final VoidCallback? onClose;
   final bool surface;
+  final bool interactiveSurface;
   final bool fitContent;
   @override
   Widget build(BuildContext context) {
@@ -66,6 +68,7 @@ class BottomPanel extends StatelessWidget {
     );
     return surface
         ? ImmersiveSurface(
+            interactive: interactiveSurface,
             blurBackground: true,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             child: content,

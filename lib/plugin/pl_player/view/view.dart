@@ -1,3 +1,4 @@
+import 'package:PiliPlus/plugin/pl_player/widgets/danmaku_action_transition.dart';
 import 'package:PiliPlus/pages/video/shorts/frame_overlay.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/plugin/pl_player/widgets/control_bar.dart';
@@ -1626,14 +1627,21 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         if (plPlayerController.enableTapDm)
           Obx(
             () {
-              if (!plPlayerController.enableShowDanmaku.value) {
-                return const SizedBox.shrink();
-              }
               final dmOffset = _dmOffset.value;
-              if (dmOffset != null && _suspendedDm != null) {
-                return _buildDmAction(_suspendedDm!, dmOffset);
-              }
-              return const SizedBox.shrink();
+              final visible =
+                  plPlayerController.enableShowDanmaku.value &&
+                  dmOffset != null &&
+                  _suspendedDm != null;
+              return Positioned.fill(
+                child: DanmakuActionTransition(
+                  child: visible
+                      ? Stack(
+                          key: ValueKey((_suspendedDm, dmOffset)),
+                          children: [_buildDmAction(_suspendedDm!, dmOffset)],
+                        )
+                      : null,
+                ),
+              );
             },
           ),
 

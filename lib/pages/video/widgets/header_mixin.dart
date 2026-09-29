@@ -27,6 +27,7 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
     ValueGetter<EdgeInsets>? padding,
     String title = '播放设置',
     bool fitContent = false,
+    bool interactiveSurface = true,
   }) {
     return PageUtils.showVideoBottomSheet(
       context,
@@ -38,6 +39,7 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
         child: BottomPanel(
           title: title,
           fitContent: fitContent,
+          interactiveSurface: interactiveSurface,
           child: StatefulBuilder(
             builder: (context, setState) {
               final theme = this.theme;
@@ -85,6 +87,7 @@ mixin HeaderMixin<T extends StatefulWidget> on State<T> {
 
     showBottomSheet(
       title: '弹幕设置',
+      interactiveSurface: false,
       (context, setState) {
         final theme = Theme.of(context);
 

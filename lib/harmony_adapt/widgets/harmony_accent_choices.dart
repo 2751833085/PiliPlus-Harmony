@@ -28,7 +28,7 @@ class HarmonyAccentChoices extends StatelessWidget {
                 runSpacing: 12,
                 alignment: WrapAlignment.center,
                 children: [
-                  for (var i = 0; i < colorThemeTypes.length; i++)
+                  for (final i in themeColorDisplayOrder)
                     Semantics(
                       button: true,
                       selected: selected == i,

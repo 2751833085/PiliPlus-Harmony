@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/image/stable_image_size.dart';
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/models/common/image_type.dart';
@@ -24,6 +25,7 @@ class NetworkImgLayer extends StatelessWidget {
     this.alignment = Alignment.center,
     this.cacheWidth,
     this.maxDecodeDimension,
+    this.stableResize = false,
   });
 
   final String? src;
@@ -41,6 +43,7 @@ class NetworkImgLayer extends StatelessWidget {
 
   /// Cap transient previews without changing their layout size.
   final int? maxDecodeDimension;
+  final bool stableResize;
 
   static Color? reduceLuxColor = Pref.reduceLuxColor;
   static bool reduce = false;
@@ -84,7 +87,26 @@ class NetworkImgLayer extends StatelessWidget {
       memCacheWidth = memCacheWidth?.clamp(1, limit);
       memCacheHeight = memCacheHeight?.clamp(1, limit);
     }
+    final retainCover = !isAvatar && (!isEmote || stableResize);
+    if (retainCover) {
+      final requested = stableResize
+          ? 1280
+          : FeedImageBudget.cacheSize(context, width);
+      if (requested != null) {
+        final limit = maxDecodeDimension ?? (quality == 100 ? 4096 : 1280);
+        memCacheWidth = StableImageSize.resolve(
+          '$src|$type|$quality|$limit',
+          requested,
+          limit: limit,
+        );
+        memCacheHeight = null;
+      }
+    }
     return CachedNetworkImage(
+      // Preserve a cover during resolution upgrades, but never carry an old
+      // video's pixels into a newly assigned source.
+      key: ValueKey((src, type, quality)),
+      useOldImageOnUrlChange: retainCover,
       imageUrl: (isEmote)
           ? ImageUtils.thumbnailUrl(src, quality)
           : ImageUtils.thumbnailUrlWithSize(
