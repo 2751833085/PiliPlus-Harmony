@@ -480,15 +480,16 @@ class _SponsorBlockPageState extends State<SponsorBlockPage> {
 
     final divider = Divider(
       height: 1,
-      color: theme.colorScheme.outline.withValues(alpha: 0.1),
+      color: theme.colorScheme.outline.withValues(alpha: 0.08),
     );
 
     final sliverDivider = SliverToBoxAdapter(child: divider);
 
     final dividerL = SliverToBoxAdapter(
       child: Divider(
-        thickness: 16,
-        color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        height: 18,
+        thickness: 0.5,
+        color: theme.colorScheme.outline.withValues(alpha: 0.08),
       ),
     );
 

@@ -14,7 +14,6 @@ import 'package:PiliPlus/plugin/pl_player/models/bottom_progress_behavior.dart';
 import 'package:PiliPlus/plugin/pl_player/models/fullscreen_mode.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_repeat.dart';
 import 'package:PiliPlus/services/service_locator.dart';
-import 'package:PiliPlus/utils/extension/num_ext.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -143,22 +142,6 @@ List<SettingsModel> get _playSettings => [
     setKey: SettingBoxKey.enableSlideFS,
     defaultVal: true,
   ),
-  if (PlatformUtils.isMobile)
-    NormalModel(
-      section: '播放控制',
-      title: '播放器音量',
-      leading: const Icon(Icons.volume_up),
-      getSubtitle: () => '当前:「${Pref.playerVolume.toStringAsFixed(0)}%」',
-      onTap: showPlayerVolumeDialog,
-    )
-  else
-    NormalModel(
-      section: '播放控制',
-      title: '最高音量',
-      leading: const Icon(Icons.volume_up),
-      getSubtitle: () => '当前:「${(Pref.maxVolume * 100).toStringAsFixed(0)}%」',
-      onTap: _showMaxVolumeDialog,
-    ),
   getVideoFilterSelectModel(
     section: '播放手势',
     title: '双击快进/快退时长',
@@ -440,26 +423,6 @@ Future<void> showPlayerVolumeDialog(
           setState();
           onChanged?.call(value);
         }),
-  );
-}
-
-Future<void> _showMaxVolumeDialog(
-  BuildContext context,
-  VoidCallback setState,
-) {
-  return showVolumeDialog(
-    context,
-    title: const Text('最高音量'),
-    value: Pref.maxVolume * 100,
-    onChanged: (rawValue) {
-      final maxVolume = (rawValue / 100).toPrecision(2);
-      if (Pref.desktopVolume > maxVolume) {
-        GStorage.setting.put(SettingBoxKey.desktopVolume, maxVolume);
-      }
-      GStorage.setting
-          .put(SettingBoxKey.maxVolume, maxVolume)
-          .whenComplete(setState);
-    },
   );
 }
 

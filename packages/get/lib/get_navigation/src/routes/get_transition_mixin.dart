@@ -138,7 +138,7 @@ mixin GetPageRouteTransitionMixin<T> on PageRoute<T> {
       case Transition.native:
         if (Theme.of(context).platform == TargetPlatform.ohos) {
           if (MediaQuery.disableAnimationsOf(context)) return child;
-          return const OpenRightwardsPageTransitionsBuilder().buildTransitions(
+          return Theme.of(context).pageTransitionsTheme.buildTransitions(
             rawRoute,
             context,
             animation,

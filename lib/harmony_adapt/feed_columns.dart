@@ -13,6 +13,10 @@ abstract final class FeedColumns {
     return form * 2 + (window.width > window.height ? 1 : 0);
   }
 
+  // The same ratio is used by the grid, cover image and transition hero.
+  static double coverAspectRatio(Size window) =>
+      profile(window) < 2 ? 16 / 10 : 4 / 3;
+
   static const labels = ['单屏竖向', '单屏横向', '双屏竖向', '双屏横向', '三屏竖向', '三屏横向'];
   static const defaults = [2, 3, 3, 3, 3, 4];
 

@@ -115,7 +115,7 @@ class _HotPageState extends State<HotPage>
               ),
             ),
           SliverPadding(
-            padding: const EdgeInsets.only(top: 7, bottom: 100),
+            padding: const EdgeInsets.only(top: 7, bottom: 24),
             sliver: Obx(
               () => _buildBody(controller.loadingState.value),
             ),

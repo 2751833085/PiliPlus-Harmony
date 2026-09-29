@@ -11,14 +11,21 @@ class ImmersiveSurface extends StatelessWidget {
     required this.child,
     this.color,
     this.blurBackground = false,
+    this.interactive = true,
+    this.allowMovement = false,
+    this.showBorder = true,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
+  final bool interactive;
+  final bool allowMovement;
+  final bool showBorder;
   final Widget child;
   final Color? color;
 
   /// Page surfaces default to a cached finish. Opt in only for overlays
   /// that actually need to sample the content behind them.
   final bool blurBackground;
+
   final BorderRadius borderRadius;
   @override
   Widget build(BuildContext context) {
@@ -29,41 +36,49 @@ class ImmersiveSurface extends StatelessWidget {
         !MediaQuery.highContrastOf(context) &&
         !MediaQuery.disableAnimationsOf(context);
     final content = Material(type: MaterialType.transparency, child: child);
-    return ImmersiveInteraction(
+    final surface = ClipRRect(
       borderRadius: borderRadius,
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: immersive
-            ? _withBlur(
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: borderRadius,
-                    border: Border.all(
-                      color: Colors.white.withValues(
-                        alpha: theme.brightness == Brightness.dark ? .12 : .75,
-                      ),
-                    ),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        (theme.brightness == Brightness.dark
-                                ? const Color(0xFF25262A)
-                                : const Color(0xFFF7F8FA))
-                            .withValues(alpha: .82),
-                        (theme.brightness == Brightness.dark
-                                ? const Color(0xFF25262A)
-                                : const Color(0xFFF7F8FA))
-                            .withValues(alpha: .72),
-                      ],
-                    ),
+      child: immersive
+          ? _withBlur(
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius,
+                  border: !showBorder
+                      ? null
+                      : Border.all(
+                          color: Colors.white.withValues(
+                            alpha: theme.brightness == Brightness.dark
+                                ? .12
+                                : .75,
+                          ),
+                        ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      (theme.brightness == Brightness.dark
+                              ? const Color(0xFF25262A)
+                              : const Color(0xFFF7F8FA))
+                          .withValues(alpha: .82),
+                      (theme.brightness == Brightness.dark
+                              ? const Color(0xFF25262A)
+                              : const Color(0xFFF7F8FA))
+                          .withValues(alpha: .72),
+                    ],
                   ),
-                  child: content,
                 ),
-              )
-            : ColoredBox(color: base, child: content),
-      ),
+                child: content,
+              ),
+            )
+          : ColoredBox(color: base, child: content),
     );
+    return interactive
+        ? ImmersiveInteraction(
+            borderRadius: borderRadius,
+            allowMovement: allowMovement,
+            child: surface,
+          )
+        : surface;
   }
 
   Widget _withBlur(Widget child) => blurBackground
@@ -75,14 +90,18 @@ class ImmersiveSurface extends StatelessWidget {
 }
 
 /// Pointer feedback never joins the gesture arena: scrolling, sliders and
-/// button actions retain their own recognizers. Only the deepest surface moves.
+/// button actions retain their own recognizers. Only the deepest surface responds. Movement is opt-in for search fields.
 class ImmersiveInteraction extends StatefulWidget {
   const ImmersiveInteraction({
     super.key,
     required this.child,
+    this.allowMovement = false,
     this.borderRadius = const BorderRadius.all(Radius.circular(20)),
   });
   final Widget child;
+
+  /// Reserved for search fields. Panels and controls only track touch light.
+  final bool allowMovement;
   final BorderRadius borderRadius;
   @override
   State<ImmersiveInteraction> createState() => _ImmersiveInteractionState();
@@ -164,7 +183,9 @@ class _ImmersiveInteractionState extends State<ImmersiveInteraction>
       _release(e);
       return;
     }
-    _shift = Offset(delta.dx * .18, delta.dy * .18);
+    _shift = widget.allowMovement
+        ? Offset(delta.dx * .18, delta.dy * .18)
+        : Offset.zero;
     _revision.value++;
   }
 

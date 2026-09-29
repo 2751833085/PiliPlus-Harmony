@@ -1,5 +1,4 @@
 import 'package:PiliPlus/pages/setting/models/experimental_settings.dart';
-import 'package:PiliPlus/pages/video/shorts/gestures.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'dart:io' show Platform, Directory;
 import 'dart:math' show max;
@@ -65,14 +64,6 @@ List<SettingsModel> get appearanceExtraSettings => [
     setKey: SettingBoxKey.horizontalPreview,
     defaultVal: false,
     onChanged: (value) => ImageGridView.horizontalPreview = value,
-  ),
-  const SwitchModel(
-    section: '导航与首页',
-    title: '首页切换页面动画',
-    leading: Icon(Icons.home_outlined),
-    setKey: SettingBoxKey.mainTabBarView,
-    defaultVal: false,
-    needReboot: true,
   ),
   SwitchModel(
     section: '装饰与显示',
@@ -172,28 +163,6 @@ List<SettingsModel> get historyVisibilitySettings => [
 List<SettingsModel> get playbackExtraSettings => [
   ...preloadSettings,
   ...playerAppearanceSettings,
-  SwitchModel(
-    section: '竖屏短视频',
-    title: '启用短视频模式（实验性）',
-    subtitle: '竖屏视频默认进入，横屏视频默认普通详情；双击播放/暂停，单击切换简洁界面，上下切视频。可手动切换模式',
-    leading: const Icon(Icons.stay_current_portrait_outlined),
-    setKey: SettingBoxKey.shortVideoMode,
-    onChanged: (_) => HarmonyAppearance.changed(),
-  ),
-  for (final left in [true, false])
-    PopupModel<ShortSwipeAction>(
-      section: '竖屏短视频',
-      title: left ? '竖屏左滑动作' : '竖屏右滑动作',
-      leading: Icon(left ? Icons.swipe_left : Icons.swipe_right),
-      value: () => left ? Pref.shortSwipeLeft : Pref.shortSwipeRight,
-      items: ShortSwipeAction.values,
-      onSelected: (value, setState) => GStorage.setting
-          .put(
-            left ? SettingBoxKey.shortSwipeLeft : SettingBoxKey.shortSwipeRight,
-            value.index,
-          )
-          .whenComplete(setState),
-    ),
   SplitModel(
     section: '播放顺序与跳过',
     normalModel: const NormalModel.split(
@@ -384,28 +353,8 @@ List<SettingsModel> get playbackExtraSettings => [
   ),
 ];
 
-List<SettingsModel> get preloadSettings => [
-  SwitchModel(
-    section: '竖屏短视频',
-    title: '连续视频预加载',
-    subtitle: '提前准备后面三条的播放地址和音视频开头，以及相邻视频的评论首屏；滑动时优先准备目标视频，蜂窝网络也会消耗流量',
-    leading: const Icon(Icons.skip_next_outlined),
-    setKey: SettingBoxKey.shortPreload,
-    onChanged: (_) => HarmonyAppearance.changed(),
-    defaultVal: true,
-  ),
-];
-
-List<SettingsModel> get playerAppearanceSettings => [
-  SwitchModel(
-    section: '播放控制',
-    title: '哔哩哔哩式播放器控制栏',
-    subtitle: '更紧凑的播放、进度与全屏布局，控制栏渐显渐隐，四周渐变阴影；更多播放功能保留在控制栏菜单中',
-    leading: const Icon(Icons.smart_display_outlined),
-    setKey: SettingBoxKey.biliPlayerControls,
-    onChanged: (_) => HarmonyAppearance.changed(),
-  ),
-];
+List<SettingsModel> get preloadSettings => [];
+List<SettingsModel> get playerAppearanceSettings => [];
 
 List<SettingsModel> get audioVideoExtraSettings => [
   ...networkSecuritySettings,

@@ -1,6 +1,6 @@
+import 'package:PiliPlus/harmony_adapt/widgets/navigation_press_feedback.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/cached_navigation_view.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
-import 'package:PiliPlus/harmony_adapt/appearance.dart';
-import 'package:PiliPlus/harmony_adapt/widgets/harmony_hand_dock.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'dart:io';
 
@@ -387,66 +387,38 @@ class _MainAppState extends PopScopeState<MainApp>
       if (_mainController.useNativeTabs.value) {
         return null;
       }
-      if (HarmonyStyle.enabled(context) &&
-          Pref.harmonyNavigation == HarmonyNavigation.floatingDock) {
-        bottomNav = SafeArea(
-          top: false,
-          minimum: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return HarmonyHandDock(
-                enabled: Pref.harmonyHandedness,
-                width: constraints.maxWidth,
-                builder: (_) => Align(
-                  heightFactor: 1,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 440),
-                    child: ImmersiveSurface(
-                      borderRadius: BorderRadius.circular(32),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Obx(
-                          () => Row(
-                            children: [
-                              for (
-                                var i = 0;
-                                i < _mainController.navigationBars.length;
-                                i++
-                              )
-                                Expanded(
-                                  child: _harmonyDestination(
-                                    i,
-                                    vertical: false,
-                                  ),
-                                ),
-                            ],
+      if (HarmonyStyle.enabled(context)) {
+        bottomNav = ColoredBox(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF25262A)
+              : const Color(0xFFF7F8FA),
+          child: ImmersiveSurface(
+            interactive: false,
+            showBorder: false,
+            blurBackground: false,
+            borderRadius: BorderRadius.zero,
+            child: SafeArea(
+              top: false,
+              child: Align(
+                heightFactor: 1,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Obx(
+                    () => Row(
+                      children: [
+                        for (
+                          var i = 0;
+                          i < _mainController.navigationBars.length;
+                          i++
+                        )
+                          Expanded(
+                            child: NavigationPressFeedback(
+                              child: _harmonyDestination(i, vertical: false),
+                            ),
                           ),
-                        ),
-                      ),
+                      ],
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
-      } else if (HarmonyStyle.enabled(context)) {
-        bottomNav = Material(
-          color: theme.colorScheme.surface,
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Obx(
-                () => Row(
-                  children: [
-                    for (
-                      var i = 0;
-                      i < _mainController.navigationBars.length;
-                      i++
-                    )
-                      Expanded(child: _harmonyDestination(i, vertical: false)),
-                  ],
                 ),
               ),
             ),
@@ -527,10 +499,7 @@ class _MainAppState extends PopScopeState<MainApp>
         if (_mainController.barOffset case final barOffset?) {
           return Obx(
             () => FractionalTranslation(
-              translation: Offset(
-                0.0,
-                barOffset.value / Style.topBarHeight,
-              ),
+              translation: Offset(0.0, barOffset.value / Style.topBarHeight),
               child: bottomNav,
             ),
           );
@@ -577,12 +546,12 @@ class _MainAppState extends PopScopeState<MainApp>
         borderRadius: BorderRadius.circular(18),
         onTap: () => _mainController.setIndex(index),
         child: Container(
-          constraints: const BoxConstraints(minHeight: 56),
+          constraints: const BoxConstraints(minHeight: 48),
           margin: EdgeInsets.symmetric(
             horizontal: vertical ? 8 : 4,
             vertical: vertical ? 4 : 0,
           ),
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             color: selected && vertical
@@ -591,7 +560,7 @@ class _MainAppState extends PopScopeState<MainApp>
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            spacing: 4,
+            spacing: 2,
             children: children,
           ),
         ),
@@ -636,9 +605,7 @@ class _MainAppState extends PopScopeState<MainApp>
         ? context.isTablet && _mainController.optTabletNav
               ? Column(
                   children: [
-                    SizedBox(
-                      height: MediaQuery.paddingOf(context).top + 25,
-                    ),
+                    SizedBox(height: MediaQuery.paddingOf(context).top + 25),
                     userAndSearchVertical(theme),
                     const Spacer(flex: 2),
                     Expanded(
@@ -742,7 +709,15 @@ class _MainAppState extends PopScopeState<MainApp>
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (_mainController.mainTabBarView) {
+    if (OS.isHarmony) {
+      final pages = _navigationPages();
+      child = Obx(
+        () => CachedNavigationView(
+          index: _mainController.selectedIndex.value,
+          children: pages,
+        ),
+      );
+    } else if (_mainController.mainTabBarView) {
       child = CustomTabBarView(
         scrollDirection: _mainController.useBottomNav ? .horizontal : .vertical,
         physics: const NeverScrollableScrollPhysics(),
@@ -778,10 +753,7 @@ class _MainAppState extends PopScopeState<MainApp>
       extendBody: true,
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true, // 扩展安全区
-      appBar: AppBar(
-        toolbarHeight: 0,
-        backgroundColor: backgroundColor,
-      ),
+      appBar: AppBar(toolbarHeight: 0, backgroundColor: backgroundColor),
       body: Padding(
         padding: EdgeInsets.only(
           left: _mainController.useBottomNav ? _padding.left : 0.0,
@@ -808,19 +780,17 @@ class _MainAppState extends PopScopeState<MainApp>
   Widget _buildIcon({required NavigationBarType type, bool selected = false}) {
     final icon = selected ? type.selectIcon : type.icon;
     return type == .dynamics
-        ? Obx(
-            () {
-              final dynCount = _mainController.dynCount.value;
-              return Badge(
-                isLabelVisible: dynCount > 0,
-                label: _mainController.dynamicBadgeMode == .number
-                    ? Text(dynCount.toString())
-                    : null,
-                padding: const .symmetric(horizontal: 6),
-                child: icon,
-              );
-            },
-          )
+        ? Obx(() {
+            final dynCount = _mainController.dynCount.value;
+            return Badge(
+              isLabelVisible: dynCount > 0,
+              label: _mainController.dynamicBadgeMode == .number
+                  ? Text(dynCount.toString())
+                  : null,
+              padding: const .symmetric(horizontal: 6),
+              child: icon,
+            );
+          })
         : icon;
   }
 
@@ -832,10 +802,7 @@ class _MainAppState extends PopScopeState<MainApp>
         msgBadge(_mainController),
         IconButton(
           tooltip: '搜索',
-          icon: const Icon(
-            Icons.search_outlined,
-            semanticLabel: '搜索',
-          ),
+          icon: const Icon(Icons.search_outlined, semanticLabel: '搜索'),
           onPressed: () => Get.toNamed('/search'),
         ),
       ],

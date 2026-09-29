@@ -170,7 +170,12 @@ void main() {
                 expect(segment.left, track.left);
                 expect(segment.width, track.width);
                 expect(segment.center.dy, closeTo(track.center.dy, .001));
-                expect(segment.height, compact ? 2 : 3.5);
+                expect(
+                  segment.height,
+                  2,
+                  reason:
+                      'Compact controls are permanent, including legacy preferences',
+                );
                 expect(track.height, closeTo(28, .001));
                 expect(track.width, greaterThan(40));
                 if (compact) {

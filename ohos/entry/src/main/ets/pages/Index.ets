@@ -21,8 +21,6 @@ const EVENT_HOME_TAB_CHANGE = 'EVENT_HOME_TAB_CHANGE';
 const NAV_UNSELECTED = $r('sys.color.comp_focused_primary');
 const BOTTOM_NORMAL_AVOID_AREA_VALUE = 1;
 const BOTTOM_SPECIAL_AVOID_AREA_VALUE = 12;
-const TOP_BAR_BLUR_RADIUS = 15;
-const TOP_BAR_FRACTION_STOPS: [number, number][] = [[0, 0], [0.8, 0.2], [1, 0.4], [1, 1]];
 const TOP_BAR_COLLAPSED_HEIGHT = 80;
 const TOP_BAR_EXPANDED_HEIGHT = 144;
 /// 顶栏收缩曲线：重减速的三次贝塞尔，起步轻、尾段长距离滑停，
@@ -91,6 +89,8 @@ struct Index {
   @StorageLink('immersiveEnabled') immersiveEnabled: boolean = false;
   @StorageLink('handednessEnabled') handednessEnabled: boolean = false;
   @StorageLink('systemHoldingSide') @Watch('holdingSideChanged') systemHoldingSide: string = 'center';
+  @StorageLink('shellBarsObscured') shellBarsObscured: boolean = false;
+  @StorageLink('shellBarsBlurred') shellBarsBlurred: boolean = false;
   @State dockHoldingSide: string = 'center';
   private dockTouching: boolean = false;
 
@@ -476,11 +476,14 @@ struct Index {
         .tabBar(this.categoryTabBuilder(index, tab))
       }, (tab: string, index: number) => index + '_' + tab)
     }
-    .barMode(BarMode.Scrollable)
+    .barMode(this.winWidth >= 600 ? BarMode.Fixed : BarMode.Scrollable)
     .fadingEdge(false)
     .scrollable(false)
     .width('100%')
     .height(CATEGORY_TABS_HEIGHT)
+    // Share the parent top-bar material; do not add another live blur layer.
+    .backgroundColor(Color.Transparent)
+    .barBackgroundColor(Color.Transparent)
     .onTabBarClick((index: number) => {
       this.context.eventHub.emit(EVENT_HOME_TAB_CHANGE, index);
       this.categoryCurrentIndex = index;
@@ -490,7 +493,7 @@ struct Index {
   @Builder
   homeTopBar() {
     RelativeContainer() {
-      //渐变模糊底层
+      // A bounded, light native backdrop blur keeps scrolling composition cheap.
       Column() {
       }
       .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
@@ -503,16 +506,13 @@ struct Index {
                 [$r('app.color.top_bar_mask_end'), 1],
               ],
         })
-      .linearGradientBlur(TOP_BAR_BLUR_RADIUS, {
-        fractionStops: TOP_BAR_FRACTION_STOPS,
-        direction: GradientDirection.Top
-      })
       .alignRules({
         top: { anchor: 'topBarContent', align: VerticalAlign.Top },
         bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },
         left: { anchor: 'topBarContent', align: HorizontalAlign.Start },
         right: { anchor: 'topBarContent', align: HorizontalAlign.End }
       })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_THIN)
       .id('topBarBg')
       .hitTestBehavior(HitTestMode.Transparent)
       .align(Alignment.Top)
@@ -624,6 +624,8 @@ struct Index {
     .clip(true)
     .animation({ duration: TOP_BAR_MOTION_DURATION, curve: TOP_BAR_MOTION_CURVE })
     .visibility(this.topBarHidden ? Visibility.None : Visibility.Visible)
+    .blur(this.shellBarsBlurred ? 12 : 0)
+    .hitTestBehavior(this.shellBarsObscured ? HitTestMode.None : HitTestMode.Transparent)
     .align(Alignment.Top)
   }
 
@@ -716,7 +718,7 @@ struct Index {
   @Builder
   homeTopBarHds() {
     RelativeContainer() {
-      //渐变模糊底层
+      // A bounded, light native backdrop blur keeps scrolling composition cheap.
       Column() {
       }
       .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
@@ -729,16 +731,13 @@ struct Index {
                 [$r('app.color.top_bar_mask_end'), 1],
               ],
         })
-      .linearGradientBlur(TOP_BAR_BLUR_RADIUS, {
-        fractionStops: TOP_BAR_FRACTION_STOPS,
-        direction: GradientDirection.Top
-      })
       .alignRules({
         top: { anchor: 'topBarContent', align: VerticalAlign.Top },
         bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },
         left: { anchor: 'topBarContent', align: HorizontalAlign.Start },
         right: { anchor: 'topBarContent', align: HorizontalAlign.End }
       })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_THIN)
       .id('topBarBg')
       .hitTestBehavior(HitTestMode.Transparent)
       .align(Alignment.Top)
@@ -836,6 +835,8 @@ struct Index {
     .clip(true)
     .animation({ duration: TOP_BAR_MOTION_DURATION, curve: TOP_BAR_MOTION_CURVE })
     .visibility(this.topBarHidden ? Visibility.None : Visibility.Visible)
+    .blur(this.shellBarsBlurred ? 12 : 0)
+    .hitTestBehavior(this.shellBarsObscured ? HitTestMode.None : HitTestMode.Transparent)
     .align(Alignment.Top)
   }
 
@@ -861,14 +862,14 @@ struct Index {
     .barFloatingStyle({
       barBottomMargin: this.bottomAvoidAreaHeight,
       adaptToHandedness: false,
+      // Remove the viewport-wide bottom mask; only the Dock keeps its material.
+      gradientMask: { maskColor: '#00000000', maskHeight: 1 },
       barWidth: { smallWidth: Math.min(280, Math.max(160, this.winWidth - 32)), mediumWidth: 320, largeWidth: 360 },
       systemMaterialEffect: {
         materialType: this.immersiveEnabled ? hdsMaterial.MaterialType.IMMERSIVE : hdsMaterial.MaterialType.NONE,
         materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
       }
     })
-    .translate({ x: this.dockOffset() })
-    .animation({ duration: 220, curve: Curve.EaseOut })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) this.dockTouching = true;
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
@@ -876,6 +877,8 @@ struct Index {
         this.holdingSideChanged();
       }
     })
+    .opacity(this.shellBarsObscured ? 0.4 : 1)
+    .enabled(!this.shellBarsObscured)
     .visibility(this.navTabs.length <= 1 || this.shellBarsHidden
       ? Visibility.None
       : Visibility.Visible)
@@ -929,7 +932,14 @@ struct Index {
         .height('100%')
         .align(Alignment.Top)
       if (this.useNativeTabs && deviceInfo.sdkApiVersion >= 23) {
-        this.hdsMainTabs()
+        Stack() {
+          this.hdsMainTabs()
+        }
+        .width('100%')
+        .height('100%')
+        // Move only the stable host. Never animate HdsTabs' viewport/bar metrics.
+        .translate({ x: this.dockOffset(), y: 0 })
+        .hitTestBehavior(HitTestMode.Transparent)
       }
       // API 26+：Navigation 标题栏 + ArkUI systemMaterial（全部元素带材质）
       // API 23~25：自绘顶栏，仅消息按钮（HdsTabs 悬浮栏）带 HDS 材质

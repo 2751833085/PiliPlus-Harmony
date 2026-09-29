@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
+import 'package:PiliPlus/common/widgets/flutter/page/tabs.dart' as paging;
 import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -9,23 +11,13 @@ Widget tabBarView({
   required List<Widget> children,
   TabController? controller,
   HitTestBehavior hitTestBehavior = .opaque,
-}) => RawGestureDetector(
+}) => Listener(
   behavior: hitTestBehavior,
-  // CustomHorizontalDragGestureRecognizer 把 runtimeType 覆盖成了
-  // HorizontalDragGestureRecognizer（上游为了顶替 Scrollable 内置识别器），
-  // RawGestureDetector 在 debug 下断言「实例 runtimeType == map 的 key」，
-  // 因此这里必须以 HorizontalDragGestureRecognizer 为 key，否则 debug 包首页直接红屏
-  gestures: {
-    HorizontalDragGestureRecognizer:
-        GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-          CustomHorizontalDragGestureRecognizer.new,
-          (_) {},
-        ),
-  },
-  child: TabBarView(
+  child: paging.TabBarView<HorizontalDragGestureRecognizer>(
     controller: controller,
     physics: tabBarScrollPhysics,
-    children: children,
+    horizontalDragGestureRecognizer: CustomHorizontalDragGestureRecognizer.new,
+    children: [for (final child in children) RepaintBoundary(child: child)],
   ),
 );
 
@@ -51,7 +43,8 @@ class _TabBarViewScrollPhysics extends ClampingScrollPhysics {
   }
 
   @override
-  SpringDescription get spring => kSpringDescription;
+  SpringDescription get spring =>
+      OS.isHarmony ? HarmonyMotion.tabSpring : kSpringDescription;
 }
 
 mixin ReloadMixin {

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -238,7 +239,7 @@ class _TabBarViewState<T extends HorizontalDragGestureRecognizer>
       await _animateToPage(
         _currentIndex!,
         duration: duration,
-        curve: Curves.ease,
+        curve: HarmonyMotion.curve,
       );
     }
     if (mounted) {
@@ -277,7 +278,7 @@ class _TabBarViewState<T extends HorizontalDragGestureRecognizer>
       await _animateToPage(
         _currentIndex!,
         duration: duration,
-        curve: Curves.ease,
+        curve: HarmonyMotion.curve,
       );
     }
 

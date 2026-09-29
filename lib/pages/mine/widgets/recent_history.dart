@@ -28,37 +28,26 @@ class MineHistoryPreview extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 4, 8, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: history.loggedIn ? onViewAll : onLogin,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              '观看历史',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.chevron_right, size: 20),
-                        ],
+          InkWell(
+            onTap: history.loggedIn ? onViewAll : onLogin,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(26, 8, 16, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '观看历史',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
+                    const Icon(Icons.chevron_right, size: 20),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
           if (!history.loggedIn)
@@ -84,16 +73,19 @@ class MineHistoryPreview extends StatelessWidget {
                 final width = expanded
                     ? (constraints.maxWidth - 54) / 2
                     : math.min(
-                        192.0,
-                        math.max(120.0, constraints.maxWidth - 48),
+                        180.0,
+                        math.max(120.0, constraints.maxWidth - 40),
                       );
                 // Text layout rounds each line independently. Reserve whole
                 // line boxes so fractional font scales cannot overflow.
-                final height =
-                    width * 9 / 16 +
+                final coverHeight = expanded
+                    ? width * 9 / 16
+                    : width * 110 / 180;
+                final itemHeight =
+                    coverHeight +
                     (scale.scale(14) * 1.35).ceilToDouble() * 2 +
                     (scale.scale(12) * 1.35).ceilToDouble() +
-                    28;
+                    8;
                 Widget buildItem(BuildContext context, int index) {
                   final item = history.items[index];
                   final progress = item.progress == -1
@@ -119,7 +111,7 @@ class MineHistoryPreview extends StatelessWidget {
                                     ? item.cover
                                     : item.covers?.firstOrNull,
                                 width: width,
-                                height: width * 9 / 16,
+                                height: coverHeight,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -132,7 +124,7 @@ class MineHistoryPreview extends StatelessWidget {
                                 height: 1.35,
                               ),
                             ),
-                            const Spacer(),
+                            const SizedBox(height: 2),
                             Text(
                               progress,
                               maxLines: 1,
@@ -160,13 +152,13 @@ class MineHistoryPreview extends StatelessWidget {
                       crossAxisCount: 2,
                       crossAxisSpacing: 14,
                       mainAxisSpacing: 14,
-                      mainAxisExtent: height,
+                      mainAxisExtent: itemHeight,
                     ),
                     itemBuilder: buildItem,
                   );
                 }
                 return SizedBox(
-                  height: height,
+                  height: itemHeight + 18,
                   child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 6, 20, 12),
                     scrollDirection: Axis.horizontal,

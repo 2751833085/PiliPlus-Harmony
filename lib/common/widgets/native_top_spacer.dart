@@ -81,10 +81,7 @@ class NativeTopSpacer extends StatelessWidget {
   /// displacement 落在「可视顶边下方」，与非沉浸页面观感一致。
   static double refreshEdgeOffset(BuildContext context) {
     if (!_active) return 0;
-    final barHeight = _collapsed ? barCollapsedHeight : barExpandedHeight;
-    final statusBarHeight = HarmonyChannel.rootTopInset(context);
-    // 需要加上状态栏高度
-    return max(0.0, barHeight + statusBarHeight);
+    return staticHeight(context);
   }
 
   @override

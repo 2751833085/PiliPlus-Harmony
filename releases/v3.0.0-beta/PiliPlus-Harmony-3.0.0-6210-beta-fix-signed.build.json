@@ -1,0 +1,12 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6210,
+  "sha256": "0fb81a5e3870487558a28763f0373597dd9b3e8e54f5a4879752771f08fa10ea",
+  "sizeBytes": 33048507,
+  "signatureVerified": true,
+  "sourceCommitted": false,
+  "pushedToGithub": false,
+  "installedOnDevice": false,
+  "fullDeviceValidationComplete": false,
+  "focusedTestsPassed": 19
+}

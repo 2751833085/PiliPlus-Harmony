@@ -1,0 +1,25 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6209,
+  "sha256": "e291e28cbc68316501478bf68e9466e84f4e47dd6ad64b12525bf7b5aa4c89b5",
+  "sizeBytes": 33048506,
+  "signatureVerified": true,
+  "sourceCommitted": false,
+  "pushedToGithub": false,
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "focusedTestLogs": [
+    "beta6209-tests.log",
+    "beta6209-final-tests.log",
+    "beta6209-playlist-tests.log"
+  ],
+  "deviceOverwrite": {
+    "previous_version": "3.0.0",
+    "installed_version": "3.0.0",
+    "installed_version_code": 6209,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false
+  }
+}

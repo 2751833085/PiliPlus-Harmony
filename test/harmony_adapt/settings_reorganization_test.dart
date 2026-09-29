@@ -122,13 +122,10 @@ void main() {
       }
       expect(
         titles,
-        containsAll(['底栏样式', '颜色选择', '纯黑主题', '底栏项目与顺序', '默认启动页', '首页标签页']),
+        containsAll(['颜色选择', '纯黑主题', '底栏项目与顺序', '默认启动页', '首页标签页']),
       );
       expect(rows.singleWhere((e) => e.title == '纯黑主题').disabledReason, isNull);
-      expect(
-        rows.singleWhere((e) => e.title == '底栏样式').disabledReason,
-        isNull,
-      );
+      expect(titles, isNot(contains('底栏样式')));
     },
   );
 
@@ -144,7 +141,7 @@ void main() {
       Pref.captureAppearanceAtStartup();
       expect(
         styleSettings.map((e) => e.title),
-        containsAll(['沉浸光感', '智感握姿']),
+        contains('沉浸光感'),
       );
       expect(extraSettings.map((e) => e.title), isNot(contains('底栏样式')));
       expect(
@@ -178,7 +175,7 @@ void main() {
       expect(catalog[SettingType.videoSetting]!.first.effectiveTitle, '默认画质');
       expect(
         catalog[SettingType.playSetting]!.first.effectiveTitle,
-        '启用短视频模式（实验性）',
+        '自动播放',
       );
       expect(
         catalog[SettingType.styleSetting]!
@@ -207,7 +204,7 @@ void main() {
       );
       expect(
         catalog[SettingType.playSetting]!.map((e) => e.effectiveTitle),
-        containsAll(['启用短视频模式（实验性）', '全屏跟随折叠形态', '空降助手', '弹幕行高']),
+        containsAll(['全屏跟随折叠形态', '空降助手', '弹幕行高']),
       );
       expect(
         catalog[SettingType.videoSetting]!.map((e) => e.effectiveTitle),
@@ -231,7 +228,7 @@ void main() {
       );
       expect(
         SettingType.featuredSetting.settings.map((e) => e.effectiveTitle),
-        containsAll(['空降助手', '海外模式', '启用短视频模式（实验性）', '启用AI总结', '智感握姿', '沉浸光感']),
+        containsAll(['空降助手', '海外模式', '启用AI总结', '沉浸光感']),
       );
       for (final type in [
         SettingType.playSetting,
@@ -240,7 +237,7 @@ void main() {
       ]) {
         expect(
           type.settings.map((row) => row.effectiveTitle),
-          contains('连续视频预加载'),
+          isNot(contains('连续视频预加载')),
         );
       }
       expect(
@@ -251,11 +248,15 @@ void main() {
         extraSettings.map((e) => e.effectiveTitle),
         isNot(contains('启用短视频模式（实验性）')),
       );
-      final short =
-          rows.singleWhere((e) => e.title == '启用短视频模式（实验性）') as SwitchModel;
+      expect(titles, isNot(contains('智感握姿')));
+      expect(titles, isNot(contains('启用短视频模式（实验性）')));
+      expect(titles, isNot(contains('播放器音量')));
+      expect(titles, isNot(contains('哔哩哔哩式播放器控制栏')));
       final overseas =
           rows.singleWhere((e) => e.title == '海外模式') as SwitchModel;
-      expect(GStorage.setting.get(short.setKey), isTrue);
+      expect(Pref.shortVideoMode, isFalse);
+      expect(Pref.biliPlayerControls, isTrue);
+      expect(Pref.harmonyHandedness, isFalse);
       expect(GStorage.setting.get(overseas.setKey), isTrue);
     },
   );
@@ -429,7 +430,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 120));
       expect(
         find.byWidgetPredicate(
-          (w) => w is FadeTransition,
+          (w) => w is SlideTransition,
         ),
         findsWidgets,
       );

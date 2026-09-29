@@ -94,10 +94,9 @@ class HarmonyDevelopmentJourney extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (final step in const [
-              ('V1', '鸿蒙移植', '保留原有功能，适配手机、平板与折叠屏。'),
-              ('V2', '鸿蒙界面', '可选原生配色、沉浸光感与展开导航。'),
-              ('V2.5', '竖屏短视频', '在原有播放器上加入连续浏览与手势操作。'),
-              ('V2.6', '体验打磨', '优化预加载、播放控制、弹层与多屏布局。'),
+              ('V1', '初步移植', '完成鸿蒙端的初步移植，保留原有核心功能。'),
+              ('V2', '界面适配', '适配导航栏与沉浸光感，完善多屏布局。'),
+              ('V3', '全面优化', '全面优化系统体验、界面一致性与加载响应。'),
             ])
               Padding(
                 padding: const EdgeInsets.only(bottom: 14),

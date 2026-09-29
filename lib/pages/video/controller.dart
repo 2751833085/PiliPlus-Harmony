@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 import 'package:PiliPlus/pages/video/reply/controller.dart';
 import 'package:PiliPlus/pages/video/shorts/media_cache.dart';
 import 'package:PiliPlus/pages/video/shorts/preloader.dart';
@@ -415,6 +416,7 @@ class VideoDetailController extends GetxController
     }
 
     tabCtr = TabController(
+      animationDuration: HarmonyMotion.duration,
       length: 2,
       vsync: this,
       initialIndex: Pref.defaultShowComment ? 1 : 0,
@@ -1435,8 +1437,9 @@ class VideoDetailController extends GetxController
 
     if (result case Success(:final response)) {
       data = response;
+      // Start the available preferred quality immediately. Supplement other
+      // quality choices after player initialization, independent of region.
       final deferQualities =
-          (Pref.overseasMode || _usingWarmSelection) &&
           data.canDeferQualitySupplement(plPlayerController.cacheVideoQa!);
       if (data.dash != null && !deferQualities)
         await _supplementVideoQualities(ticket);

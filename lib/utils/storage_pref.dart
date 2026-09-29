@@ -708,10 +708,12 @@ abstract final class Pref {
     defaultValue: PlatformUtils.isMobile,
   );
 
-  static bool get hideBottomBar => _setting.get(
-    SettingBoxKey.hideBottomBar,
-    defaultValue: PlatformUtils.isMobile,
-  );
+  static bool get hideBottomBar =>
+      !OS.isHarmony &&
+      _setting.get(
+        SettingBoxKey.hideBottomBar,
+        defaultValue: PlatformUtils.isMobile,
+      );
 
   static BarHideType get barHideType =>
       BarHideType.values[_setting.get(
@@ -799,11 +801,9 @@ abstract final class Pref {
   static bool get showMineHistory =>
       _setting.get(SettingBoxKey.showMineHistory, defaultValue: false);
 
-  static bool get shortVideoMode =>
-      _setting.get(SettingBoxKey.shortVideoMode, defaultValue: false);
+  static bool get shortVideoMode => false;
 
-  static bool get biliPlayerControls =>
-      _setting.get(SettingBoxKey.biliPlayerControls, defaultValue: false);
+  static bool get biliPlayerControls => true;
 
   static bool get harmonyFoldOrientation =>
       _setting.get(SettingBoxKey.harmonyFoldOrientation, defaultValue: true);
@@ -813,10 +813,7 @@ abstract final class Pref {
   static void captureAppearanceAtStartup() {}
   static bool get harmonyUI => OS.isHarmony;
 
-  static HarmonyNavigation get harmonyNavigation =>
-      _setting.get(SettingBoxKey.harmonyNavigation, defaultValue: 0) == 0
-      ? HarmonyNavigation.floatingDock
-      : HarmonyNavigation.bottomBar;
+  static HarmonyNavigation get harmonyNavigation => HarmonyNavigation.bottomBar;
 
   static bool get harmonyImmersive =>
       harmonyUI &&
@@ -825,8 +822,7 @@ abstract final class Pref {
   static bool get harmonyKeepDock =>
       _setting.get(SettingBoxKey.harmonyKeepDock, defaultValue: true);
 
-  static bool get harmonyHandedness =>
-      _setting.get(SettingBoxKey.harmonyHandedness, defaultValue: false);
+  static bool get harmonyHandedness => false;
 
   static bool get enableHdsBar =>
       _setting.get(SettingBoxKey.enableHdsBar, defaultValue: false);
@@ -839,9 +835,6 @@ abstract final class Pref {
 
   static bool get showActualVolume =>
       _setting.get(SettingBoxKey.showActualVolume, defaultValue: false);
-
-  static bool get enableHeroCoverAnimation =>
-      _setting.get(SettingBoxKey.enableHeroCoverAnimation, defaultValue: false);
 
   static Transition get pageTransition => OS.isHarmony
       ? Transition.native

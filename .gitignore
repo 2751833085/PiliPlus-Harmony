@@ -179,3 +179,7 @@ ohos/.codegenie
 
 # Native posture regression harness.
 !/tool/test_harmony_posture.cjs
+
+# iCloud conflict copies are not source inputs.
+* 2.*
+* 2

@@ -67,7 +67,11 @@ class _DialogSurface extends StatelessWidget {
       alignment: built.alignment,
       constraints: built.constraints,
       semanticsRole: built.semanticsRole,
-      child: ImmersiveSurface(borderRadius: radius, child: built.child!),
+      child: ImmersiveSurface(
+        blurBackground: true,
+        borderRadius: radius,
+        child: built.child!,
+      ),
     );
   }
 }

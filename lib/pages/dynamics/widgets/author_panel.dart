@@ -154,8 +154,7 @@ class AuthorPanel extends StatelessWidget {
             ),
           );
     if (moreBtn != null && HarmonyStyle.enabled(context)) {
-      moreBtn = ImmersiveSurface(
-        blurBackground: false,
+      moreBtn = ImmersiveInteraction(
         borderRadius: BorderRadius.circular(24),
         child: moreBtn,
       );

@@ -50,7 +50,6 @@ enum SettingType {
     'setting:${SettingBoxKey.harmonyHandedness}',
     'setting:${SettingBoxKey.harmonyFoldOrientation}',
     'setting:${SettingBoxKey.harmonyImmersive}',
-    'setting:${SettingBoxKey.enableHeroCoverAnimation}',
     'title:应用接续',
     'title:后台下载离线缓存视频',
   };

@@ -119,6 +119,7 @@ class HarmonySettingsSearch extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: ImmersiveSurface(
+        allowMovement: true,
         blurBackground: false,
         color: theme.colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(28),

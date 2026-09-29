@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 import 'package:PiliPlus/pages/whisper/message_route.dart';
 import 'package:PiliPlus/pages/whisper/view.dart';
 import 'dart:async';
@@ -32,6 +33,7 @@ class HomeController extends GetxController
   }();
 
   late final TabController tabController = TabController(
+    animationDuration: HarmonyMotion.duration,
     initialIndex: max(0, tabs.indexOf(HomeTabType.rcmd)),
     length: tabs.length,
     vsync: this,
@@ -148,7 +150,8 @@ class HomeController extends GetxController
   /// 同步顶栏收起状态：本地 RxBool（Flutter 顶部安全边距跟随）
   /// + 通知 ArkTS 原生顶栏收起（隐藏大搜索栏）。仅在原生顶栏启用时生效。
   void _syncCollapsed(MainController mainCtr, {required bool collapsed}) {
-    if (!mainCtr.useNativeTopBar.value) return;
+    if (!mainCtr.useNativeTopBar.value || topBarCollapsed.value == collapsed)
+      return;
     topBarCollapsed.value = collapsed;
     HarmonyChannel.setTopBarCollapsed(collapsed);
   }
@@ -167,11 +170,15 @@ class HomeController extends GetxController
     }
   }
 
+  Future<void>? _pendingRefresh;
   @override
   Future<void> onRefresh() {
-    return controller.onRefresh().catchError((e) {
-      if (kDebugMode) debugPrint(e.toString());
-    });
+    return _pendingRefresh ??= controller
+        .onRefresh()
+        .catchError((e) {
+          if (kDebugMode) debugPrint(e.toString());
+        })
+        .whenComplete(() => _pendingRefresh = null);
   }
 
   @override

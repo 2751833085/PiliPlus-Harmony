@@ -1,5 +1,3 @@
-import 'package:PiliPlus/harmony_adapt/widgets/cover_hero.dart';
-import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -7,7 +5,6 @@ import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models_new/fav/fav_pgc/list.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:material_ui/material_ui.dart';
 
 // 视频卡片 - 垂直布局
@@ -25,57 +22,53 @@ class PgcCardV extends StatelessWidget {
       title: item.title,
       cover: item.cover,
     );
-    final heroTag = Pref.enableHeroCoverAnimation
-        ? 'pgc_hero_${item.seasonId ?? item.cover}'
-        : null;
     Widget card = Card(
-      shape: const RoundedRectangleBorder(borderRadius: Style.mdRadius),
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.hardEdge,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(4)),
+      ),
       child: InkWell(
-        borderRadius: Style.mdRadius,
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
         onLongPress: onLongPress,
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
-        onTap: () =>
-            PageUtils.viewPgc(seasonId: item.seasonId, heroTag: heroTag),
+        onTap: () => PageUtils.viewPgc(seasonId: item.seasonId),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CoverHero(
-              tag: heroTag,
-              cover: item.cover,
+            AspectRatio(
               aspectRatio: 0.75,
-              child: AspectRatio(
-                aspectRatio: 0.75,
-                child: LayoutBuilder(
-                  builder: (context, boxConstraints) {
-                    final double maxWidth = boxConstraints.maxWidth;
-                    final double maxHeight = boxConstraints.maxHeight;
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        NetworkImgLayer(
-                          src: item.cover,
-                          width: maxWidth,
-                          height: maxHeight,
-                        ),
+              child: LayoutBuilder(
+                builder: (context, boxConstraints) {
+                  final double maxWidth = boxConstraints.maxWidth;
+                  final double maxHeight = boxConstraints.maxHeight;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      NetworkImgLayer(
+                        src: item.cover,
+                        width: maxWidth,
+                        height: maxHeight,
+                        borderRadius: BorderRadius.zero,
+                      ),
+                      PBadge(
+                        text: item.badge,
+                        top: 6,
+                        right: 6,
+                        bottom: null,
+                        left: null,
+                      ),
+                      if (item.isFinish == 0 &&
+                          item.renewalTime?.isNotEmpty == true)
                         PBadge(
-                          text: item.badge,
-                          top: 6,
-                          right: 6,
-                          bottom: null,
-                          left: null,
+                          text: item.renewalTime,
+                          bottom: 6,
+                          left: 6,
+                          type: PBadgeType.gray,
                         ),
-                        if (item.isFinish == 0 &&
-                            item.renewalTime?.isNotEmpty == true)
-                          PBadge(
-                            text: item.renewalTime,
-                            bottom: 6,
-                            left: 6,
-                            type: PBadgeType.gray,
-                          ),
-                      ],
-                    );
-                  },
-                ),
+                    ],
+                  );
+                },
               ),
             ),
             content(context),
@@ -94,7 +87,7 @@ class PgcCardV extends StatelessWidget {
     );
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(4, 5, 0, 3),
+        padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

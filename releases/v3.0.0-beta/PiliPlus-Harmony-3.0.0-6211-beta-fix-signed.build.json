@@ -1,0 +1,25 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6211,
+  "sha256": "a1c78891b181e50a8830748286dbe8cb80afa207846e7b2bfa627b13beb9b6dd",
+  "sizeBytes": 33052601,
+  "signatureVerified": true,
+  "sourceCommitted": false,
+  "pushedToGithub": false,
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "focusedTestLogs": [
+    "beta6211-tests.log",
+    "beta6210-tests.log",
+    "beta6210-history-tests.log"
+  ],
+  "deviceOverwrite": {
+    "previous_version": "3.0.0",
+    "installed_version": "3.0.0",
+    "installed_version_code": 6211,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6204,
+  "sha256": "bfb9a3d9c6f53f0191ebeb7838b9c0657b548d1d668046f9852ceb6adfeceadb",
+  "sizeBytes": 33039266,
+  "signatureVerified": true,
+  "sourceCommitted": false,
+  "pushedToGithub": false,
+  "flutterRegressionTestsPassed": 170,
+  "additionalNativePixelLayoutTestsPassed": 3,
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "deviceTesting": "6204 overwrite installed at user request; interactive regression remains deferred.",
+  "performanceMeasuredOnDevice": false,
+  "deviceOverwrite": {
+    "previous_version": "3.0.0",
+    "installed_version": "3.0.0",
+    "installed_version_code": 6204,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false
+  }
+}

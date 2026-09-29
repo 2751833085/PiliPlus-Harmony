@@ -127,8 +127,9 @@ class DynamicPanel extends StatelessWidget {
     }
     if (HarmonyStyle.enabled(context) && !isDetail) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+        padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
         child: ImmersiveSurface(
+          interactive: false,
           borderRadius: HarmonyTheme.cardRadius,
           child: child,
         ),

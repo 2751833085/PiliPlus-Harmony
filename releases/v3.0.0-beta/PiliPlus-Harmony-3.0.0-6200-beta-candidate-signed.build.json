@@ -1,0 +1,23 @@
+{
+  "version": "3.0.0+6200",
+  "status": "candidate-pending-device-validation",
+  "source_commit": "52c498ecb734b99c2b8199face5f2b16148cdeae",
+  "hap": "PiliPlus-Harmony-3.0.0-6200-beta-candidate-signed.hap",
+  "sha256": "1068292d9b3cfdd1b5bf7c38c64cc7ceb2d49a485eeeaa49cfd5a9117d360c24",
+  "bytes": 33142543,
+  "signed": true,
+  "mode": "release",
+  "regression_tests_passed": 174,
+  "native_resolution_render_tests_passed": 22,
+  "device_validation_completed": false,
+  "diagnostic_flags_enabled": false,
+  "device_overwrite_install": {
+    "previous_version": "3.0.0",
+    "installed_version": "3.0.0",
+    "installed_version_code": 6200,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false
+  }
+}

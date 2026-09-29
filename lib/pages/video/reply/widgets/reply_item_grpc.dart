@@ -732,7 +732,7 @@ class ReplyItemGrpc extends StatelessWidget {
       ...content.topics.keys.map((e) => '#$e#'),
       ...content.atNameToMid.keys.map((e) => '@$e'),
       ...urlKeys,
-    ];
+    ]..sort((a, b) => b.length.compareTo(a.length));
     String patternStr = [
       ...specialTokens.map(RegExp.escape),
       r'(?:\d+[:：])?\d+[:：]\d+',
@@ -858,7 +858,10 @@ class ReplyItemGrpc extends StatelessWidget {
           spanChildren.add(
             TextSpan(
               text: matchStr,
-              style: TextStyle(color: colorScheme.primary),
+              style: TextStyle(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
               recognizer: NoDeadlineTapGestureRecognizer()
                 ..onTap = () =>
                     Get.toNamed('/member?mid=${content.atNameToMid[name]}'),

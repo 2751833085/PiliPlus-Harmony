@@ -545,6 +545,12 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "setShellBarsObscured": {
+        AppStorage.setOrCreate('shellBarsObscured', call.argument('obscured') ?? false);
+        AppStorage.setOrCreate('shellBarsBlurred', call.argument('blur') ?? false);
+        result.success(true);
+        break;
+      }
       case "setShellBarsHidden": {
         if (deviceInfo.sdkApiVersion < 23) {
           result.success(true);

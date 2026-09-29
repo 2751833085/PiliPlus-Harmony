@@ -1,6 +1,8 @@
 import 'dart:io' show Platform;
 
 import 'package:PiliPlus/build_config.dart';
+import 'package:PiliPlus/utils/release_version.dart';
+import 'package:os_type/os_type.dart';
 import 'package:PiliPlus/common/constants.dart';
 import 'package:PiliPlus/http/api.dart';
 import 'package:PiliPlus/http/browser_ua.dart';
@@ -18,10 +20,11 @@ import 'package:material_ui/material_ui.dart';
 abstract final class Update {
   // 检查更新
   static Future<void> checkUpdate([bool isAuto = true]) async {
-    // if (kDebugMode) return;
-    // 获取到默认值，没有构建时间信息
-    if (BuildConfig.buildTime == 0) {
-      SmartDialog.showToast('未知Build Time，可前往源码仓库检查更新');
+    final current = ReleaseVersion.parse(
+      '${BuildConfig.versionName.replaceFirst(RegExp(r'-ohos$'), '')}+${BuildConfig.versionCode}',
+    );
+    if (current == null) {
+      if (!isAuto) SmartDialog.showToast('无法识别当前版本，请前往项目发布页检查更新');
       return;
     }
     SmartDialog.dismiss();
@@ -33,21 +36,13 @@ abstract final class Update {
           extra: {'account': const NoAccount()},
         ),
       );
-      if (res.data is Map || res.data.isEmpty) {
-        if (!isAuto) {
-          SmartDialog.showToast('检查更新失败，GitHub接口未返回数据，请检查网络');
-        }
+      final data = latestHarmonyRelease(res.data);
+      if (data == null) {
+        if (!isAuto) SmartDialog.showToast('暂无可用安装包，请稍后重试或查看项目发布页');
         return;
       }
-      final data = res.data[0];
-      final int latest =
-          DateTime.parse(data['created_at']).millisecondsSinceEpoch ~/ 1000;
-      final latestTag = data['tag_name'];
-      final latestHash = (await Request().get(
-        'https://api.github.com/repos/dev4harmony/PiliPlus/git/refs/tags/$latestTag',
-      )).data['object']['sha'];
-      if (BuildConfig.buildTime >= latest ||
-          BuildConfig.commitHash == latestHash) {
+      final latest = ReleaseVersion.parse(data['tag_name'])!;
+      if (current.compareTo(latest) >= 0) {
         if (!isAuto) {
           SmartDialog.showToast('已是最新版本');
         }
@@ -76,10 +71,10 @@ abstract final class Update {
                       Text('${data['body']}'),
                       TextButton(
                         onPressed: () => PageUtils.launchURL(
-                          '${Constants.sourceCodeUrl}/commits/ohos', // 鸿蒙版ohos分支
+                          '${Constants.sourceCodeUrl}/releases/tag/${Uri.encodeComponent(data['tag_name'])}',
                         ),
                         child: Text(
-                          "点此查看完整更新(即commit)内容",
+                          "查看此版本发布说明",
                           style: TextStyle(color: colorScheme.primary),
                         ),
                       ),
@@ -114,7 +109,7 @@ abstract final class Update {
                   downloadBtn('deb', ext: 'deb'),
                   downloadBtn('targz', ext: 'tar.gz'),
                 ] else
-                  downloadBtn('Github'),
+                  downloadBtn(OS.isHarmony ? '下载 HAP' : '下载'),
               ],
             );
           },
@@ -122,6 +117,7 @@ abstract final class Update {
       }
     } catch (e) {
       if (kDebugMode) debugPrint('failed to check update: $e');
+      if (!isAuto) SmartDialog.showToast('检查更新失败，请检查网络后重试');
     }
   }
 
@@ -143,7 +139,11 @@ abstract final class Update {
         }
       }
 
-      if (Platform.isAndroid) {
+      if (OS.isHarmony) {
+        final url = harmonyHapUrl(data);
+        if (url == null) throw StateError('No HarmonyOS HAP');
+        await PageUtils.launchURL(url);
+      } else if (Platform.isAndroid) {
         // 获取设备信息
         AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
         // [arm64-v8a]
@@ -153,7 +153,9 @@ abstract final class Update {
       }
     } catch (e) {
       if (kDebugMode) debugPrint('download error: $e');
-      PageUtils.launchURL('${Constants.sourceCodeUrl}/releases/latest');
+      PageUtils.launchURL(
+        '${Constants.sourceCodeUrl}/releases/tag/${Uri.encodeComponent(data['tag_name'])}',
+      );
     }
   }
 }

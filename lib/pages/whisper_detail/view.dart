@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/pages/whisper/widgets/message_surface.dart';
 import 'dart:async';
@@ -79,120 +80,137 @@ class _WhisperDetailPageState
   @override
   Widget build(BuildContext context) {
     final padding = MediaQuery.viewPaddingOf(context);
-    late final containerColor = ElevationOverlay.colorWithOverlay(
-      theme.colorScheme.surface,
-      theme.hoverColor,
-      1,
-    );
     final harmony = HarmonyStyle.enabled(context);
-    return SimpleScaffold(
-      backgroundColor: harmony ? theme.scaffoldBackgroundColor : null,
-      appBar: AppBar(
-        leading: widget.onClose == null
-            ? null
-            : IconButton(
-                tooltip: '返回消息列表',
-                onPressed: widget.onClose,
-                icon: const Icon(Icons.arrow_back_rounded),
-              ),
-        centerTitle: false,
-        titleSpacing: 4,
-        title: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {
-            if (_whisperDetailController.mid != null) {
-              feedBack();
-              Get.toNamed('/member?mid=${_whisperDetailController.mid}');
-            }
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              NetworkImgLayer(
-                width: 34,
-                height: 34,
-                type: ImageType.avatar,
-                src: _whisperDetailController.face,
-              ),
-              const SizedBox(width: 12),
-              Flexible(
-                child: Text(
-                  _whisperDetailController.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(height: 1, fontSize: 16),
-                  strutStyle: const StrutStyle(
-                    leading: 0,
-                    height: 1,
-                    fontSize: 16,
+    final chatBackground = harmony
+        ? theme.colorScheme.surface
+        : theme.scaffoldBackgroundColor;
+    late final containerColor = harmony
+        ? chatBackground
+        : ElevationOverlay.colorWithOverlay(
+            theme.colorScheme.surface,
+            theme.hoverColor,
+            1,
+          );
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        systemNavigationBarColor: chatBackground,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: theme.brightness == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark,
+      ),
+      child: SimpleScaffold(
+        backgroundColor: chatBackground,
+        appBar: AppBar(
+          leading: widget.onClose == null
+              ? null
+              : IconButton(
+                  tooltip: '返回消息列表',
+                  onPressed: widget.onClose,
+                  icon: const Icon(Icons.arrow_back_rounded),
+                ),
+          centerTitle: false,
+          titleSpacing: 4,
+          title: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (_whisperDetailController.mid != null) {
+                feedBack();
+                Get.toNamed('/member?mid=${_whisperDetailController.mid}');
+              }
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                NetworkImgLayer(
+                  width: 34,
+                  height: 34,
+                  type: ImageType.avatar,
+                  src: _whisperDetailController.face,
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    _whisperDetailController.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(height: 1, fontSize: 16),
+                    strutStyle: const StrutStyle(
+                      leading: 0,
+                      height: 1,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                if (_whisperDetailController.isLive) ...[
+                  const SizedBox(width: 10),
+                  Image.asset(
+                    Assets.livingRect,
+                    height: 16,
+                    cacheHeight: 16.cacheSize(context),
+                    filterQuality: FilterQuality.low,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            messageActionSurface(
+              context,
+              IconButton(
+                tooltip: '聊天设置',
+                onPressed: () => Get.to(
+                  WhisperLinkSettingPage(
+                    talkerUid: _whisperDetailController.talkerId,
+                  ),
+                ),
+                icon: Icon(
+                  size: 22,
+                  Icons.settings,
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.8,
                   ),
                 ),
               ),
-              if (_whisperDetailController.isLive) ...[
-                const SizedBox(width: 10),
-                Image.asset(
-                  Assets.livingRect,
-                  height: 16,
-                  cacheHeight: 16.cacheSize(context),
-                  filterQuality: FilterQuality.low,
-                ),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          messageActionSurface(
-            context,
-            IconButton(
-              tooltip: '聊天设置',
-              onPressed: () => Get.to(
-                WhisperLinkSettingPage(
-                  talkerUid: _whisperDetailController.talkerId,
-                ),
-              ),
-              icon: Icon(
-                size: 22,
-                Icons.settings,
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.8,
-                ),
-              ),
             ),
-          ),
-          const SizedBox(width: 10),
-        ],
-      ),
-      body:
-          Padding(
-            padding: EdgeInsets.only(left: padding.left, right: padding.right),
-            child: Column(
-              children: [
-                Expanded(
-                  child: Listener(
-                    onPointerDown: hidePanel,
-                    behavior: HitTestBehavior.opaque,
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: Obx(
-                        () => _buildBody(
-                          _whisperDetailController.loadingState.value,
+            const SizedBox(width: 10),
+          ],
+        ),
+        body:
+            Padding(
+              padding: EdgeInsets.only(
+                left: padding.left,
+                right: padding.right,
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Listener(
+                      onPointerDown: hidePanel,
+                      behavior: HitTestBehavior.opaque,
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Obx(
+                          () => _buildBody(
+                            _whisperDetailController.loadingState.value,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                if (_whisperDetailController.mid != null) ...[
-                  _buildInputView(containerColor),
-                  buildPanelContainer(
-                    containerColor,
-                  ),
-                ] else
-                  SizedBox(height: padding.bottom),
-              ],
+                  if (_whisperDetailController.mid != null) ...[
+                    _buildInputView(containerColor),
+                    buildPanelContainer(
+                      containerColor,
+                    ),
+                  ] else
+                    SizedBox(height: padding.bottom),
+                ],
+              ),
+            ).constraintWidth(
+              constraints: BoxConstraints(maxWidth: harmony ? 840 : 625),
             ),
-          ).constraintWidth(
-            constraints: BoxConstraints(maxWidth: harmony ? 840 : 625),
-          ),
+      ),
     );
   }
 
@@ -441,10 +459,7 @@ class _WhisperDetailPageState
     return harmony
         ? Padding(
             padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
-            child: ImmersiveSurface(
-              borderRadius: BorderRadius.circular(24),
-              child: input,
-            ),
+            child: input,
           )
         : input;
   }

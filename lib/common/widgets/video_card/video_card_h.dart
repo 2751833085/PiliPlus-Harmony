@@ -85,13 +85,7 @@ class VideoCardH extends StatelessWidget {
         ],
       ),
     );
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      child: ImmersiveSurface(
-        borderRadius: BorderRadius.circular(16),
-        child: surface,
-      ),
-    );
+    return surface;
   }
 
   Widget content(ThemeData theme) {

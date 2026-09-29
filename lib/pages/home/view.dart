@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/image/feed_image_budget.dart';
 import 'package:PiliPlus/pages/whisper/message_route.dart';
 import 'package:PiliPlus/pages/whisper/view.dart';
 import 'package:PiliPlus/common/style.dart';
@@ -69,11 +70,13 @@ class _HomePageState extends CommonPageState<HomePage>
           child: TabBar(
             controller: _homeController.tabController,
             tabs: _homeController.tabs.map((e) => Tab(text: e.label)).toList(),
-            isScrollable: true,
+            isScrollable: MediaQuery.sizeOf(context).width < 600,
             dividerColor: Colors.transparent,
             dividerHeight: 0,
             splashBorderRadius: Style.mdRadius,
-            tabAlignment: TabAlignment.center,
+            tabAlignment: MediaQuery.sizeOf(context).width < 600
+                ? TabAlignment.center
+                : TabAlignment.fill,
             onTap: (_) {
               feedBack();
               if (!_homeController.tabController.indexIsChanging) {
@@ -102,9 +105,11 @@ class _HomePageState extends CommonPageState<HomePage>
         if (!useNativeTopBar) tabBar,
         Expanded(
           child: onBuild(
-            tabBarView(
-              controller: _homeController.tabController,
-              children: _homeController.tabs.map((e) => e.page).toList(),
+            FeedImageBudget(
+              child: tabBarView(
+                controller: _homeController.tabController,
+                children: _homeController.tabs.map((e) => e.page).toList(),
+              ),
             ),
           ),
         ),

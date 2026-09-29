@@ -22,8 +22,7 @@ abstract final class SettingBoxKey {
       enableStatusBarTapToTop = 'enableStatusBarTapToTop',
       showActualVolume = 'showActualVolume',
       enableHdsBar = 'enableHdsBar',
-      enableHdsTopBar = 'enableHdsTopBar',
-      enableHeroCoverAnimation = 'enableHeroCoverAnimation';
+      enableHdsTopBar = 'enableHdsTopBar';
 
   static const String btmProgressBehavior = 'btmProgressBehavior',
       defaultVideoQa = 'defaultVideoQa',

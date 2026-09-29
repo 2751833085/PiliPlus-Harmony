@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
+import 'package:PiliPlus/pages/video/widgets/collapsible_playlist.dart';
 import 'package:PiliPlus/models/model_owner.dart';
 import 'package:PiliPlus/models_new/video/video_detail/data.dart';
 import 'package:PiliPlus/models_new/video/video_detail/stat.dart';
@@ -15,7 +17,6 @@ import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/pages/video/shorts/session.dart';
 import 'package:PiliPlus/pages/video/shorts/view.dart';
 import 'package:PiliPlus/http/video.dart';
-import 'package:PiliPlus/harmony_adapt/widgets/cover_hero.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -126,6 +127,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   bool _shortPreference = Pref.shortVideoMode;
   Worker? _shortEpisodeWorker;
   bool get _supportsShortMode =>
+      Pref.shortVideoMode &&
       videoDetailController.isUgc &&
       !videoDetailController.isFileSource &&
       !videoDetailController.isPlayAll;
@@ -382,6 +384,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               height: MediaQuery.sizeOf(sheetContext).height * .72,
               child: both
                   ? DefaultTabController(
+                      animationDuration: HarmonyMotion.duration,
                       length: 2,
                       child: Column(
                         children: [
@@ -572,7 +575,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   bool get _shouldShowSeasonPanel {
     if (videoDetailController.isFileSource ||
-        isPortrait ||
         !videoDetailController.isUgc ||
         !videoDetailController.plPlayerController.horizontalSeasonPanel) {
       return false;
@@ -654,11 +656,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   /// 当前应用生命周期状态
   AppLifecycleState _lifecycleState = AppLifecycleState.resumed;
 
-  late final _enableHero =
-      Pref.enableHeroCoverAnimation &&
-      heroTag is String &&
-      ((heroTag as String).startsWith('video_hero_') ||
-          (heroTag as String).startsWith('pgc_hero_'));
   @override
   void initState() {
     super.initState();
@@ -755,7 +752,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       pgcIntroController = Get.put(PgcIntroController(), tag: heroTag);
     }
 
-    // The hero needs its final player rectangle in the very first frame.
+    // Keep the player layout ready in the very first frame.
     // Defer only playback/network work, never the destination layout.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) videoSourceInit();
@@ -815,14 +812,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         !(videoDetailController.isVertical.value && !isPortrait);
     final tabIndex = videoDetailController.tabCtr.index;
     final replyIndex = hasIntroTab ? 1 : 0;
-    final seasonIndex = replyIndex + (videoDetailController.showReply ? 1 : 0);
     if (hasIntroTab && tabIndex == 0) {
       videoDetailController.introScrollCtr?.animToTop();
     } else if (tabIndex == replyIndex && videoDetailController.showReply) {
       _videoReplyController.animateToTop();
-    } else if (tabIndex == seasonIndex && _shouldShowSeasonPanel) {
-      _seasonPartPanelKey.currentState?.animToTop();
-      _seasonPanelKey.currentState?.animToTop();
     }
   }
 
@@ -1109,7 +1102,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     super.didChangeDependencies();
     // 布局/方向状态必须在这里同步计算：旋转（MediaQuery 变化）时本方法先于
     // build 执行，保证 build 读到的 isPortrait/maxWidth/maxHeight 永远是当前值。
-    // 若像 Hero 优化那样延迟到 Future.delayed 里再算，旋转后 build 会读到过期
+    // 若延迟到 Future.delayed 里再算，旋转后 build 会读到过期
     // 的 isPortrait，childWhenDisabled 的自动进/退全屏逻辑就会在错误方向上触发。
     if (videoDetailController.removeSafeArea) {
       padding = .zero;
@@ -1346,7 +1339,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         videoIntro(isHorizontal: false, needCtr: false),
                         if (videoDetailController.showReply)
                           videoReplyPanel(isNested: true),
-                        if (_shouldShowSeasonPanel) seasonPanel,
                       ],
                     ),
                   ),
@@ -1566,7 +1558,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                           height: maxHeight,
                         ),
                         if (videoDetailController.showReply) videoReplyPanel(),
-                        if (_shouldShowSeasonPanel) seasonPanel,
                       ],
                     ),
                   ),
@@ -1626,7 +1617,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                             children: [
                               if (videoDetailController.showReply)
                                 videoReplyPanel(),
-                              if (_shouldShowSeasonPanel) seasonPanel,
                             ],
                           ),
                         ),
@@ -1719,6 +1709,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                               controller:
                                   videoDetailController.effectiveIntroScrollCtr,
                               slivers: [
+                                if (_shouldShowSeasonPanel) _playlistSliver,
                                 RelatedVideoPanel(
                                   key: videoRelatedKey,
                                   heroTag: heroTag,
@@ -1727,7 +1718,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                             ),
                           ),
                         if (videoDetailController.showReply) videoReplyPanel(),
-                        if (_shouldShowSeasonPanel) seasonPanel,
                       ],
                     ),
                   ),
@@ -1777,7 +1767,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Widget _childWhenDisabledAlmostSquareInner(bool isFullScreen) {
-    final shouldShowSeasonPanel = _shouldShowSeasonPanel;
     final double height = maxHeight / 2.5;
     final videoHeight = isFullScreen ? maxHeight : height;
     final bottomHeight = maxHeight - height - padding.top;
@@ -1812,7 +1801,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                             width: () {
                               double flex = 1;
                               if (videoDetailController.showReply) flex++;
-                              if (shouldShowSeasonPanel) flex++;
                               return maxWidth / flex;
                             }(),
                             height: bottomHeight,
@@ -1820,7 +1808,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                         ),
                         if (videoDetailController.showReply)
                           Expanded(child: videoReplyPanel()),
-                        if (shouldShowSeasonPanel) Expanded(child: seasonPanel),
                       ],
                     ),
                   ),
@@ -2193,13 +2180,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }) {
     List<String> tabs = [
       if (showIntro)
-        videoDetailController.isFileSource ? '离线视频' : introText ?? '简介',
+        videoDetailController.isFileSource ? '离线视频' : introText ?? '相关视频',
       if (videoDetailController.showReply) '评论',
-      if (_shouldShowSeasonPanel) '播放列表',
     ];
     if (videoDetailController.tabCtr.length != tabs.length) {
       videoDetailController.tabCtr.dispose();
       videoDetailController.tabCtr = TabController(
+        animationDuration: HarmonyMotion.duration,
         vsync: videoDetailController,
         length: tabs.length,
         initialIndex: tabs.isEmpty
@@ -2210,6 +2197,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
     final flag = !needIndicator || tabs.length == 1;
     Widget tabBar() => TabBar(
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
       labelColor: flag ? colorScheme.onSurface : null,
       indicator: flag ? const BoxDecoration() : null,
       padding: EdgeInsets.zero,
@@ -2274,10 +2263,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               Expanded(
                 child: Align(
                   alignment: .centerLeft,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 96.0 * tabs.length),
-                    child: tabBar(),
-                  ),
+                  child: tabBar(),
                 ),
               ),
             SizedBox(
@@ -2507,19 +2493,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         ),
       ],
     );
-    if (_shortMode ||
-        videoDetailController.isVertical.value ||
-        !_enableHero ||
-        MediaQuery.disableAnimationsOf(context))
-      return player;
-    return Hero(
-      tag: heroTag,
-      createRectTween: CoverHero.rectTween,
-      placeholderBuilder: CoverHero.playerPlaceholder,
-      child: RepaintBoundary(
-        child: SizedBox(width: width, height: height, child: player),
-      ),
-    );
+    return player;
   }
 
   Widget localIntroPanel({
@@ -2587,6 +2561,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   ),
                 ),
               ),
+              if (_shouldShowSeasonPanel) _playlistSliver,
               RelatedVideoPanel(key: videoRelatedKey, heroTag: heroTag),
             ],
           ] else
@@ -2661,6 +2636,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     }
     return introPanel();
   }
+
+  Widget get _playlistSliver => SliverToBoxAdapter(
+    child: CollapsiblePlaylist(
+      key: ValueKey('playlist-${videoDetailController.bvid}'),
+      builder: (_) => seasonPanel,
+    ),
+  );
 
   Widget get seasonPanel {
     final videoDetail = ugcIntroController.videoDetail.value;

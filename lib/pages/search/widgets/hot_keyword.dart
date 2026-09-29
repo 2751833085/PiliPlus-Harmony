@@ -14,10 +14,12 @@ import 'package:material_ui/material_ui.dart';
 class SliverHotKeyword extends StatelessWidget {
   final List<SearchTrendingItemModel> hotSearchList;
   final Function? onClick;
+  final bool filled;
   const SliverHotKeyword({
     super.key,
     required this.hotSearchList,
     this.onClick,
+    this.filled = false,
   });
 
   @override
@@ -32,13 +34,16 @@ class SliverHotKeyword extends StatelessWidget {
 
     return SliverToBoxAdapter(
       child: _HotKeywordGrid(
-        mainAxisSpacing: 5,
-        crossAxisSpacing: 0.4,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: filled ? 8 : 4,
         crossAxisCount: 2,
         children: hotSearchList
             .map(
               (i) => Material(
-                type: .transparency,
+                type: filled ? MaterialType.canvas : MaterialType.transparency,
+                color: filled
+                    ? Theme.of(context).colorScheme.surfaceContainerHigh
+                    : null,
                 borderRadius: const .all(.circular(3)),
                 child: InkWell(
                   borderRadius: const .all(.circular(3)),
@@ -51,7 +56,7 @@ class SliverHotKeyword extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Padding(
-                              padding: const .fromLTRB(6, 5, 0, 5),
+                              padding: const .fromLTRB(6, 8, 0, 8),
                               child: Text(
                                 i.showName,
                                 overflow: TextOverflow.ellipsis,
@@ -200,7 +205,7 @@ class _RenderHotKeywordGrid extends RenderBox
     final row = (index / crossAxisCount).ceil();
     size = constraints.constrainDimensions(
       constraints.maxWidth,
-      row * childHeight! + crossAxisSpacing * (row - 1),
+      row == 0 ? 0 : row * childHeight! + crossAxisSpacing * (row - 1),
     );
   }
 

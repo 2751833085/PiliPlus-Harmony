@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/image/feed_image_budget.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -55,7 +56,7 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
           right: isRight ? 16 : 0,
         ),
         child: harmony
-            ? ImmersiveSurface(
+            ? ImmersiveInteraction(
                 borderRadius: BorderRadius.circular(24),
                 child: button,
               )
@@ -68,8 +69,7 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
       ? Align(
           alignment: Alignment.centerLeft,
           widthFactor: 1,
-          child: ImmersiveSurface(
-            blurBackground: false,
+          child: ImmersiveInteraction(
             borderRadius: BorderRadius.circular(24),
             child: child,
           ),
@@ -227,7 +227,7 @@ class _DynamicsPageState extends CommonPageState<DynamicsPage>
       ),
       drawer: drawer,
       endDrawer: endDrawer,
-      body: onBuild(child),
+      body: FeedImageBudget(child: onBuild(child)),
     );
   }
 }

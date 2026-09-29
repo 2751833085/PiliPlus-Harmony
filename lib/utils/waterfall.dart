@@ -12,7 +12,7 @@ mixin DynMixin {
   late final dynGridDelegate =
       SliverWaterfallFlowDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: Grid.smallCardWidth * 2,
-        crossAxisSpacing: 4,
+        crossAxisSpacing: 0,
       );
 
   Widget buildPage(Widget child) {

@@ -110,13 +110,20 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                   ],
                 ),
               ),
-              ShortReplyComposer(
-                onReply: _onReply,
-                onEmoji: () => _onReply(emoji: true),
-              ),
             ],
           ),
-          fab: null,
+          fab: SlideTransition(
+            position: fabAnimation,
+            child: Padding(
+              padding: EdgeInsets.only(right: 16, bottom: 16 + bottom),
+              child: FloatingActionButton.small(
+                heroTag: null,
+                tooltip: '写评论',
+                onPressed: _onReply,
+                child: const Icon(Icons.edit_outlined),
+              ),
+            ),
+          ),
         ),
       ),
     );

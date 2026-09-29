@@ -14,6 +14,12 @@ abstract class CommonPageState<T extends StatefulWidget> extends State<T> {
   final _mainController = Get.find<MainController>();
 
   bool get needsCorrection => false;
+  static bool? _lastNativeScrollHidden;
+  void _syncNativeScrollHidden(bool hidden) {
+    if (_lastNativeScrollHidden == hidden) return;
+    _lastNativeScrollHidden = hidden;
+    HarmonyChannel.setShellBarsScrollHidden(hidden);
+  }
 
   @override
   void initState() {
@@ -49,13 +55,13 @@ abstract class CommonPageState<T extends StatefulWidget> extends State<T> {
         _showTopBar?.value = true;
         _showBottomBar?.value = true;
         if (_mainController.useNativeTabs.value && Pref.hideBottomBar) {
-          HarmonyChannel.setShellBarsScrollHidden(false);
+          _syncNativeScrollHidden(false);
         }
       case .reverse:
         _showTopBar?.value = false;
         _showBottomBar?.value = false;
         if (_mainController.useNativeTabs.value && Pref.hideBottomBar) {
-          HarmonyChannel.setShellBarsScrollHidden(true);
+          _syncNativeScrollHidden(true);
         }
       case _:
     }
@@ -83,11 +89,11 @@ abstract class CommonPageState<T extends StatefulWidget> extends State<T> {
       if (pixel < 0.0 && scrollDelta > 0) return false;
       // 同步原生 HDS 底栏滚动显隐
       if (_mainController.useNativeTabs.value && Pref.hideBottomBar) {
-        HarmonyChannel.setShellBarsScrollHidden(
+        _syncNativeScrollHidden(
           _barOffset!.value > Style.topBarHeight / 2,
         );
       }
-      if (needsCorrection) {
+      if (needsCorrection && !_mainController.nativeTopBarActive.value) {
         final value = _barOffset!.value;
         final newValue = clampDouble(
           value + scrollDelta,

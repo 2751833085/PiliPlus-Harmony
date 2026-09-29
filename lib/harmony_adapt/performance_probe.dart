@@ -32,7 +32,12 @@ abstract final class HarmonyPerformanceProbe {
         debugPrint(
           'PiliPlusFrameTiming ${jsonEncode({
             'frames': _build.length,
+            'reported_refresh_rate_hz': rate,
             'budget_ms': budget,
+            // OH display reporting can differ from RenderService; these are
+            // rendering-budget counts, not presented-frame/FPS measurements.
+            'raster_over_90hz_budget': _raster.where((ms) => ms > 1000 / 90).length,
+            'raster_over_120hz_budget': _raster.where((ms) => ms > 1000 / 120).length,
             'build_p50_ms': percentile(_build, .5),
             'build_p95_ms': percentile(_build, .95),
             'raster_p50_ms': percentile(_raster, .5),

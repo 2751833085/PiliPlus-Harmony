@@ -73,9 +73,9 @@ class _InitialFeedContentState extends State<InitialFeedContent>
                   child: SafeArea(
                     child: Align(
                       alignment: const Alignment(0, -0.1),
-                      child: Opacity(
+                      child: HarmonyLoadingIndicator(
+                        size: 32,
                         opacity: (1 - progress / .35).clamp(0.0, 1.0),
-                        child: const HarmonyLoadingIndicator(size: 32),
                       ),
                     ),
                   ),

@@ -108,11 +108,23 @@ List<PopupMenuEntry<T>> _surfaceItems<T>(
   if (Theme.of(context).extension<PopupSurfaceStyle>() == null ||
       (!anchored && Theme.of(context).extension<PopupSheetStyle>() != null))
     return items;
-  return [for (final entry in items) _SurfaceEntry<T>(entry)];
+  return [
+    for (var i = 0; i < items.length; i++)
+      _SurfaceEntry<T>(
+        items[i],
+        BorderRadius.vertical(
+          top: i == 0 ? const Radius.circular(20) : Radius.zero,
+          bottom: i == items.length - 1
+              ? const Radius.circular(20)
+              : Radius.zero,
+        ),
+      ),
+  ];
 }
 
 class _SurfaceEntry<T> extends PopupMenuEntry<T> {
-  const _SurfaceEntry(this.entry);
+  const _SurfaceEntry(this.entry, this.radius);
+  final BorderRadius radius;
   final PopupMenuEntry<T> entry;
   @override
   double get height => entry.height;
@@ -126,7 +138,10 @@ class _SurfaceEntryState<T> extends State<_SurfaceEntry<T>> {
   @override
   Widget build(BuildContext context) {
     return ImmersiveSurface(
-      borderRadius: BorderRadius.zero,
+      blurBackground: true,
+      interactive: false,
+      showBorder: false,
+      borderRadius: widget.radius,
       child: widget.entry,
     );
   }

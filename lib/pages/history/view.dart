@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/initial_feed_content.dart';
 import 'package:PiliPlus/common/widgets/appbar/appbar.dart';
 import 'package:PiliPlus/common/widgets/flutter/page/tabs.dart';
 import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
@@ -79,6 +80,13 @@ class _HistoryPageState extends State<HistoryPage>
         ],
       ),
     );
+    final scrollContent = child;
+    child = Obx(
+      () => InitialFeedContent(
+        loading: _historyController.loadingState.value is Loading,
+        builder: (_) => scrollContent,
+      ),
+    );
     if (widget.type != null) {
       return child;
     }
@@ -113,6 +121,8 @@ class _HistoryPageState extends State<HistoryPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TabBar(
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
                       controller: _historyController.tabController,
                       onTap: (index) {
                         if (!_historyController

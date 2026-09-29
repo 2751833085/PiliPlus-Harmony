@@ -213,7 +213,7 @@ class _PgcPageState extends State<PgcPage> with AutomaticKeepAliveClientMixin {
       padding: const EdgeInsets.only(
         left: Style.safeSpace,
         right: Style.safeSpace,
-        bottom: 100,
+        bottom: 24,
       ),
       sliver: Obx(
         () => _buildRcmdBody(controller.loadingState.value),
@@ -302,13 +302,14 @@ class _PgcPageState extends State<PgcPage> with AutomaticKeepAliveClientMixin {
     ),
   );
 
-  late final gridDelegate = SliverGridDelegateWithExtentAndRatio(
-    mainAxisSpacing: Style.cardSpace,
-    crossAxisSpacing: Style.cardSpace,
-    maxCrossAxisExtent: Grid.smallCardWidth * 0.6,
-    childAspectRatio: 0.75,
-    mainAxisExtent: MediaQuery.textScalerOf(context).scale(50),
-  );
+  SliverGridDelegateWithExtentAndRatio get gridDelegate =>
+      SliverGridDelegateWithExtentAndRatio(
+        mainAxisSpacing: 6,
+        crossAxisSpacing: 6,
+        maxCrossAxisExtent: Grid.smallCardWidth * 0.6,
+        childAspectRatio: 0.75,
+        mainAxisExtent: MediaQuery.textScalerOf(context).scale(50),
+      );
 
   Widget _buildRcmdBody(LoadingState<List<PgcIndexItem>?> loadingState) {
     return switch (loadingState) {

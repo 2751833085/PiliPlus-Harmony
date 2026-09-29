@@ -1,3 +1,7 @@
+import 'package:PiliPlus/harmony_adapt/widgets/elastic_refresh_sliver.dart';
+import 'dart:math' as math;
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -15,6 +19,7 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:extended_nested_scroll_view/refresh.dart';
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/material.dart' hide RefreshIndicator;
+import 'package:flutter/physics.dart';
 import 'package:os_type/os_type.dart';
 
 const kIndicatorSize = 49.0;
@@ -214,6 +219,14 @@ class RefreshIndicator extends StatefulWidget {
 /// programmatically show the refresh indicator, see the [show] method.
 class RefreshIndicatorState extends State<RefreshIndicator>
     with TickerProviderStateMixin<RefreshIndicator> {
+  final _elasticKey = GlobalKey<ElasticRefreshSliverState>();
+  bool get _usesElasticSliver =>
+      _harmony &&
+      widget.child is CustomScrollView &&
+      !(widget.child as CustomScrollView).reverse &&
+      (widget.child as CustomScrollView).scrollDirection == Axis.vertical &&
+      (widget.child as CustomScrollView).center == null;
+
   late AnimationController _positionController;
   late AnimationController _scaleController;
   late Animation<double> _positionFactor;
@@ -408,7 +421,41 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     return true;
   }
 
+  bool get _harmony => OS.isHarmony || HarmonyStyle.enabled(context);
+
+  // Continuous resistance: no hard 96vp stop while the finger keeps pulling.
+  static const double _harmonyTravel = 320;
+  double get _harmonyPull =>
+      _harmonyTravel * (1 - math.exp(-math.max(0, _dragOffset ?? 0) / 320));
+
+  Future<void> _springTo(double destination) async {
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _positionController.value = destination;
+      return;
+    }
+    await _positionController.animateWith(
+      SpringSimulation(
+        SpringDescription.withDampingRatio(
+          mass: .5,
+          stiffness: 100,
+          ratio: .85,
+        ),
+        _positionController.value,
+        destination,
+        0,
+        tolerance: const Tolerance(distance: .0003, velocity: .003),
+      ),
+    );
+    if (mounted) _positionController.value = destination;
+  }
+
   void _checkDragOffset(double containerExtent) {
+    if (_harmony) {
+      final offset = _harmonyPull;
+      _isArmed = offset >= 64;
+      _positionController.value = (offset / _harmonyTravel).clamp(0.0, 1.0);
+      return;
+    }
     assert(
       _status == RefreshIndicatorStatus.drag,
     );
@@ -448,13 +495,27 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       case RefreshIndicatorStatus.done:
         await _scaleController.animateTo(
           1.0,
-          duration: _kIndicatorScaleDuration,
+          duration: _harmony
+              ? const Duration(milliseconds: 280)
+              : _kIndicatorScaleDuration,
+          curve: _harmony ? Curves.easeInOut : Curves.linear,
         );
+        if (_harmony && mounted) {
+          await _positionController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+          );
+        }
       case RefreshIndicatorStatus.canceled:
-        await _positionController.animateTo(
-          0.0,
-          duration: _kIndicatorScaleDuration,
-        );
+        if (_harmony) {
+          await _springTo(0);
+        } else {
+          await _positionController.animateTo(
+            0.0,
+            duration: _kIndicatorScaleDuration,
+          );
+        }
       case RefreshIndicatorStatus.drag:
       case RefreshIndicatorStatus.refresh:
       case RefreshIndicatorStatus.snap:
@@ -468,32 +529,51 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     }
   }
 
+  Future<void> _settleForRefresh(bool releasedPull) async {
+    if (_harmony && releasedPull) {
+      await _springTo(64 / _harmonyTravel);
+      return;
+    }
+    await _positionController.animateTo(
+      _harmony ? 64 / _harmonyTravel : 1.0 / _kDragSizeFactorLimit,
+      duration: _harmony && MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : _kIndicatorSnapDuration,
+      curve: _harmony ? Curves.easeOutCubic : Curves.linear,
+    );
+  }
+
   void _show() {
     assert(_status != RefreshIndicatorStatus.refresh);
     assert(_status != RefreshIndicatorStatus.snap);
     final Completer<void> completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
+    final releasedPull = _dragOffset != null && _positionController.value > 0;
     setState(() => _status = RefreshIndicatorStatus.snap);
-    _positionController
-        .animateTo(
-          1.0 / _kDragSizeFactorLimit,
-          duration: _kIndicatorSnapDuration,
-        )
-        .whenComplete(() {
-          if (mounted && _status == RefreshIndicatorStatus.snap) {
-            setState(() {
-              // Show the indeterminate progress indicator.
-              _status = RefreshIndicatorStatus.refresh;
-            });
+    _settleForRefresh(releasedPull).whenComplete(() {
+      if (mounted && _status == RefreshIndicatorStatus.snap) {
+        setState(() {
+          // Show the indeterminate progress indicator.
+          _status = RefreshIndicatorStatus.refresh;
+        });
 
-            widget.onRefresh().whenComplete(() {
+        Future<void>.sync(widget.onRefresh)
+            .then<void>(
+              (_) {},
+              onError: (Object error, StackTrace stack) {
+                // Controllers own their error UI. Always release the gesture
+                // and allow retry, including synchronous callback failures.
+                debugPrint('Refresh failed: $error');
+              },
+            )
+            .whenComplete(() {
+              if (!completer.isCompleted) completer.complete();
               if (mounted && _status == RefreshIndicatorStatus.refresh) {
-                completer.complete();
                 _dismiss(RefreshIndicatorStatus.done);
               }
             });
-          }
-        });
+      }
+    });
   }
 
   /// Show the refresh indicator and run the refresh callback as if it had
@@ -513,6 +593,9 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   /// actual scroll view. It defaults to showing the indicator at the top. To
   /// show it at the bottom, set `atTop` to false.
   Future<void> show() {
+    if (_usesElasticSliver && _elasticKey.currentState != null) {
+      return _elasticKey.currentState!.show(reveal: true);
+    }
     if (_status != RefreshIndicatorStatus.refresh &&
         _status != RefreshIndicatorStatus.snap) {
       if (_status == null) {
@@ -527,6 +610,40 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    if (_usesElasticSliver) {
+      final scroll = widget.child as CustomScrollView;
+      return Listener(
+        onPointerDown: (event) => _elasticKey.currentState?.pointerDown(event),
+        onPointerUp: (event) => _elasticKey.currentState?.pointerUp(event),
+        onPointerCancel: (event) =>
+            _elasticKey.currentState?.pointerCancel(event),
+        child: CustomScrollView(
+          key: scroll.key,
+          controller: scroll.controller,
+          primary: scroll.primary,
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          scrollBehavior: scroll.scrollBehavior,
+          scrollCacheExtent: scroll.scrollCacheExtent,
+          shrinkWrap: scroll.shrinkWrap,
+          anchor: scroll.anchor,
+          restorationId: scroll.restorationId,
+          keyboardDismissBehavior: scroll.keyboardDismissBehavior,
+          dragStartBehavior: scroll.dragStartBehavior,
+          clipBehavior: scroll.clipBehavior,
+          semanticChildCount: scroll.semanticChildCount,
+          slivers: [
+            ElasticRefreshSliver(
+              key: _elasticKey,
+              onRefresh: widget.onRefresh,
+              edgeOffset: widget.edgeOffset,
+            ),
+            ...scroll.slivers,
+          ],
+        ),
+      );
+    }
     Widget child = NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(
@@ -568,6 +685,78 @@ class RefreshIndicatorState extends State<RefreshIndicator>
     final bool showIndeterminateIndicator =
         _status == RefreshIndicatorStatus.refresh ||
         _status == RefreshIndicatorStatus.done;
+
+    if (_harmony) {
+      // Keep the list subtree cached: only its paint transform and the native
+      // loading indicator change during a pull. Clamping avoids double bounce.
+      final body = ScrollConfiguration(
+        behavior: const ScrollBehavior().copyWith(
+          physics: const ClampingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+        ),
+        child: RepaintBoundary(child: child),
+      );
+      // Keep one native loading view alive from pull through completion.
+      // Its visibility changes; its platform-view key must not change on release.
+      return AnimatedBuilder(
+        animation: Listenable.merge([_positionController, _scaleController]),
+        child: body,
+        builder: (context, body) {
+          final offset = _positionController.value * _harmonyTravel;
+          return ClipRect(
+            child: Stack(
+              children: [
+                Transform.translate(offset: Offset(0, offset), child: body),
+                if (_status != null && offset > 0)
+                  Positioned(
+                    top: widget.edgeOffset,
+                    left: 0,
+                    right: 0,
+                    height: offset,
+                    child: IgnorePointer(
+                      child: ClipRect(
+                        key: const ValueKey('harmony-refresh-reveal'),
+                        clipBehavior: Clip.hardEdge,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Positioned(
+                              // The native view stays 24vp; the header reveals
+                              // it from behind the upper edge, without scaling.
+                              top: math.min((offset - 24) / 2, offset - 44),
+                              left: 0,
+                              right: 0,
+                              height: 24,
+                              child: Center(
+                                child: HarmonyLoadingIndicator(
+                                  size: 24,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  key: const ValueKey(
+                                    'harmony-refresh-opacity',
+                                  ),
+                                  opacity:
+                                      (_scaleFactor.value *
+                                              Curves.easeInOut.transform(
+                                                (offset / 64).clamp(0.0, 1.0),
+                                              ))
+                                          .clamp(0.0, 1.0),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      );
+    }
 
     child = RefreshLayout(
       body: child,

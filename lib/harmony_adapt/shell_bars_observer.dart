@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/widgets/image_viewer/hero_dialog_route.dart';
+import 'package:PiliPlus/pages/common/publish/publish_route.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/fullscreen.dart';
 import 'package:flutter/material.dart';
@@ -45,8 +46,23 @@ class ShellBarsObserver extends NavigatorObserver {
     // 底栏隐藏条件：页面覆盖（无弹层）或弹层覆盖（PopupRoute 计入）或横屏。
     // 底栏 + 顶栏宽高比分流共用此信号：dialog/bottomSheet/popupmenu 弹出时
     // 也触发，顶栏按「首页 + 宽高比」由 ArkTS syncTopBarVisibility 收起/隐藏。
-    final hasOverlay = _activeRoutes.length > 1 || _orientationHidden;
-    HarmonyChannel.setShellBarsHidden(hasOverlay, force:true);
+    final hasPage = _activeRoutes.whereType<PageRoute>().length > 1;
+    final hasBlockingPanel = _activeRoutes.any(
+      (route) =>
+          route is ModalBottomSheetRoute ||
+          (route is PublishRoute &&
+              route.settings.name != 'harmony:coverPreview'),
+    );
+    final hasOverlay = hasPage || hasBlockingPanel || _orientationHidden;
+    final obscured =
+        !hasOverlay && _activeRoutes.any((route) => route is PopupRoute);
+    HarmonyChannel.setShellBarsObscured(
+      obscured,
+      blur: !_activeRoutes.any(
+        (route) => route.settings.name == 'harmony:coverPreview',
+      ),
+    );
+    HarmonyChannel.setShellBarsHidden(hasOverlay, force: true);
     // 顶栏「强制隐藏」仅针对页面覆盖（PageRoute：如视频页/设置页）与横屏；
     // 弹层（PopupRoute：dialog/bottomSheet/popupmenu）不计入，避免顶栏被
     // 直接隐藏而绕过宽高比分流。
@@ -59,7 +75,8 @@ class ShellBarsObserver extends NavigatorObserver {
     // - 图片查看器（HeroDialogRoute）自带状态栏逻辑，跳过
     final pageRoutes = _activeRoutes.whereType<PageRoute>().toList();
     final topPage = pageRoutes.isEmpty ? null : pageRoutes.last;
-    final topIsPlayer = topPage != null &&
+    final topIsPlayer =
+        topPage != null &&
         (topPage.settings.name == '/videoV' ||
             topPage.settings.name == '/liveRoom');
     // 这里不能带上 _orientationHidden：它表示「横屏（侧栏布局）下原生 HDS 栏不

@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/rcmd/refresh_batch.dart';
+import 'package:PiliPlus/models/model_rec_video_item.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/pages/common/common_list_controller.dart';
@@ -6,6 +8,9 @@ import 'package:PiliPlus/utils/storage_pref.dart';
 class RcmdController extends CommonListController {
   late bool enableSaveLastData = Pref.enableSaveLastData;
   final bool appRcmd = Pref.appRcmd;
+
+  int visibleColumns = 2;
+  int _nextFreshIndex = 0;
 
   int? lastRefreshAt;
   late bool savedRcmdTip = Pref.savedRcmdTip;
@@ -22,9 +27,18 @@ class RcmdController extends CommonListController {
 
   @override
   Future<LoadingState> customGetData() {
-    return appRcmd
-        ? VideoHttp.rcmdVideoListApp(freshIdx: page)
-        : VideoHttp.rcmdVideoList(freshIdx: page, ps: 20);
+    final target = recommendationBatchSize(visibleColumns);
+    return collectRecommendationBatch<BaseRcmdVideoItemModel>(
+      target: target,
+      parallelism: appRcmd ? 2 : 1,
+      keyOf: (item) => item.bvid ?? item.aid?.toString(),
+      fetch: () {
+        final index = _nextFreshIndex++;
+        return appRcmd
+            ? VideoHttp.rcmdVideoListApp(freshIdx: index)
+            : VideoHttp.rcmdVideoList(freshIdx: index, ps: target);
+      },
+    );
   }
 
   @override
@@ -53,6 +67,9 @@ class RcmdController extends CommonListController {
 
   @override
   Future<void> onRefresh() {
+    if (isLoading) return Future<void>.value();
+    _nextFreshIndex = 0;
+    lastRefreshAt = null;
     page = 0;
     isEnd = false;
     return queryData();

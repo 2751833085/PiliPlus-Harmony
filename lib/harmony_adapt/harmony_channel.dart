@@ -43,7 +43,19 @@ abstract class HarmonyChannel {
   static final MethodChannel _channel = const MethodChannel('harmonyChannel')
     ..setMethodCallHandler(handler);
 
+  static bool _shellBarsObscured = false;
+
   static Future<dynamic> handler(MethodCall call) async {
+    // Native touch events already in flight must not change the page behind a modal.
+    if (_shellBarsObscured &&
+        const {
+          'showTab',
+          'onTopSearchTap',
+          'onTopMsgTap',
+          'onTopMineTap',
+          'onHomeTabChange',
+        }.contains(call.method))
+      return;
     switch (call.method) {
       case 'onDockMetrics':
         nativeDockInset.value =
@@ -176,6 +188,14 @@ abstract class HarmonyChannel {
     required int count,
     required int mode,
   }) => _invoke('setDynamicBadge', {'count': count, 'mode': mode});
+
+  static Future<void> setShellBarsObscured(bool obscured, {bool blur = true}) {
+    _shellBarsObscured = obscured;
+    return _invoke('setShellBarsObscured', {
+      'obscured': obscured,
+      'blur': obscured && blur,
+    });
+  }
 
   /// HDS 底栏当前是否为显示状态
   static bool _hiddenByPage = false;

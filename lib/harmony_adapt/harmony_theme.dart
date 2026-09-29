@@ -1,9 +1,6 @@
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 import 'package:material_ui/material_ui.dart'
-    show
-        PopupSheetStyle,
-        PopupSurfaceStyle,
-        ImmersiveSurface,
-        ImmersiveInteraction;
+    show PopupSheetStyle, PopupSurfaceStyle, ImmersiveInteraction;
 import 'package:flutter/material.dart';
 
 /// A theme marker keeps the alternative appearance independent of persisted
@@ -199,7 +196,7 @@ abstract final class HarmonyTheme {
       iconButtonTheme: IconButtonThemeData(
         style: ButtonStyle(
           backgroundBuilder: immersive
-              ? (context, states, child) => ImmersiveSurface(
+              ? (context, states, child) => ImmersiveInteraction(
                   borderRadius: BorderRadius.circular(24),
                   child: child ?? const SizedBox.shrink(),
                 )
@@ -276,17 +273,15 @@ class HarmonyPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     if (MediaQuery.disableAnimationsOf(context)) return child;
-    final motion = animation.drive(CurveTween(curve: Curves.easeOutCubic));
-    return FadeTransition(
-      opacity: motion,
-      child: AnimatedBuilder(
-        animation: motion,
-        child: child,
-        builder: (context, child) => Transform.translate(
-          offset: Offset(24 * (1 - motion.value), 0),
-          child: child,
+    final motion = animation.drive(CurveTween(curve: HarmonyMotion.curve));
+    return SlideTransition(
+      position: motion.drive(
+        Tween<Offset>(
+          begin: const Offset(1, 0),
+          end: Offset.zero,
         ),
       ),
+      child: RepaintBoundary(child: child),
     );
   }
 }

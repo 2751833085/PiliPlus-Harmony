@@ -1,3 +1,6 @@
+import 'package:PiliPlus/models_new/later/list.dart';
+import 'package:PiliPlus/pages/mine/widgets/later_preview.dart';
+import 'package:PiliPlus/http/search.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/initial_feed_content.dart';
 import 'package:PiliPlus/pages/mine/widgets/recent_history.dart';
@@ -5,12 +8,10 @@ import 'package:PiliPlus/pages/history/open_item.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_quick_actions.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
-import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/player_bar.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -96,23 +97,22 @@ class _MediaPageState extends CommonPageState<MinePage>
           Expanded(
             child: Material(
               type: .transparency,
-              child: refreshIndicator(
-                onRefresh: controller.onRefresh,
-                child: onBuild(
-                  ListView(
-                    padding: const .only(bottom: 100),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      _buildUserInfo(theme, secondary),
-                      _buildActions(secondary),
-                      _buildRecentHistory(),
-                      Obx(
-                        () => controller.loadingState.value is Loading
-                            ? const SizedBox.shrink()
-                            : _buildFav(theme, secondary),
-                      ),
-                    ],
+              child: onBuild(
+                ListView(
+                  padding: const .only(bottom: 100),
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
                   ),
+                  children: [
+                    _buildUserInfo(theme, secondary),
+                    _buildActions(secondary),
+                    _buildRecentHistory(),
+                    Obx(
+                      () => controller.loadingState.value is Loading
+                          ? const SizedBox.shrink()
+                          : _buildFav(theme, secondary),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -124,46 +124,12 @@ class _MediaPageState extends CommonPageState<MinePage>
 
   Widget _buildHarmonyPage(ThemeData theme, Color accent) => ColoredBox(
     color: theme.scaffoldBackgroundColor,
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        _buildHarmonyContent(theme, accent),
-        if (MediaQuery.sizeOf(context).width < 600)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: IgnorePointer(
-              child: ClipRect(
-                child: ShaderMask(
-                  blendMode: BlendMode.dstIn,
-                  shaderCallback: (bounds) => const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.white],
-                  ).createShader(bounds),
-                  child: BackdropFilter(
-                    filter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                    child: ColoredBox(
-                      color: theme.scaffoldBackgroundColor.withValues(
-                        alpha: .55,
-                      ),
-                      child: SizedBox(
-                        height: 48 + MediaQuery.viewPaddingOf(context).bottom,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
-    ),
+    child: _buildHarmonyContent(theme, accent),
   );
 
   Widget _buildHarmonyContent(ThemeData theme, Color accent) => SafeArea(
-    // Paint and scroll behind the floating Dock instead of cutting the page
-    // off at Scaffold's synthetic bottom navigation inset.
+    // Paint behind the translucent bar, but reserve its actual Scaffold inset
+    // at the end of the scroll view (viewPadding only contains system insets).
     bottom: false,
     child: Align(
       alignment: Alignment.topCenter,
@@ -176,149 +142,109 @@ class _MediaPageState extends CommonPageState<MinePage>
               child: _buildHeaderActions,
             ),
             Expanded(
-              child: refreshIndicator(
-                onRefresh: controller.onRefresh,
-                child: onBuild(
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final split =
-                          constraints.maxWidth >=
-                          840 * MediaQuery.textScalerOf(context).scale(16) / 16;
-                      Widget panel(
-                        Widget child, {
-                        EdgeInsets padding = const EdgeInsets.symmetric(
-                          vertical: 10,
-                        ),
-                      }) => ImmersiveSurface(
-                        blurBackground: false,
-                        borderRadius: HarmonyTheme.cardRadius,
-                        child: Padding(padding: padding, child: child),
-                      );
-                      final account = panel(
-                        _buildUserInfo(theme, accent),
-                        padding: const EdgeInsets.only(top: 18, bottom: 10),
-                      );
-                      final actions = panel(
-                        HarmonyQuickActions(
-                          actions: [
-                            for (final action in controller.list)
-                              HarmonyQuickAction(
-                                action.title,
-                                action.icon,
-                                action.onTap,
-                              ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 6,
-                        ),
-                      );
-                      final favorites = Obx(
-                        () => controller.loadingState.value is Loading
-                            ? const SizedBox.shrink()
-                            : panel(
-                                _buildFav(theme, accent),
-                                padding: EdgeInsets.zero,
-                              ),
-                      );
-                      final services = panel(
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 6, 20, 4),
-                              child: Text(
-                                '我的服务',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+              child: onBuild(
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final split =
+                        constraints.maxWidth >=
+                        840 * MediaQuery.textScalerOf(context).scale(16) / 16;
+                    Widget panel(
+                      Widget child, {
+                      EdgeInsets padding = const EdgeInsets.symmetric(
+                        vertical: 10,
+                      ),
+                    }) => ImmersiveSurface(
+                      blurBackground: false,
+                      borderRadius: HarmonyTheme.cardRadius,
+                      child: Padding(padding: padding, child: child),
+                    );
+                    final account = panel(
+                      _buildUserInfo(theme, accent),
+                      padding: const EdgeInsets.only(top: 18, bottom: 10),
+                    );
+                    final actions = panel(
+                      HarmonyQuickActions(
+                        actions: [
+                          for (final action in controller.list)
+                            HarmonyQuickAction(
+                              action.title,
+                              action.icon,
+                              action.onTap,
                             ),
-                            HarmonyQuickActions(
-                              actions: [
-                                HarmonyQuickAction(
-                                  '课程',
-                                  Icons.school_outlined,
-                                  () => PageUtils.inAppWebview(
-                                    'https://www.bilibili.com/cheese/',
-                                  ),
-                                ),
-                                HarmonyQuickAction(
-                                  '装扮',
-                                  Icons.palette_outlined,
-                                  () => PageUtils.inAppWebview(
-                                    'https://www.bilibili.com/h5/mall/home',
-                                  ),
-                                ),
-                                HarmonyQuickAction(
-                                  '会员购',
-                                  Icons.shopping_bag_outlined,
-                                  () => PageUtils.inAppWebview(
-                                    'https://mall.bilibili.com/',
-                                  ),
-                                ),
-                                HarmonyQuickAction(
-                                  '订单中心',
-                                  Icons.receipt_long_outlined,
-                                  () => PageUtils.inAppWebview(
-                                    'https://mall.bilibili.com/orderlist.html',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                      return ListView(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          if (split)
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  width: (constraints.maxWidth - 46) * .43,
-                                  child: Column(
-                                    children: [
-                                      account,
-                                      const SizedBox(height: 10),
-                                      actions,
-                                      const SizedBox(height: 10),
-                                      favorites,
-                                      const SizedBox(height: 10),
-                                      services,
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      _buildRecentHistory(
-                                        harmony: true,
-                                        expanded: true,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            )
-                          else ...[
-                            account,
-                            const SizedBox(height: 10),
-                            actions,
-                            const SizedBox(height: 10),
-                            _buildRecentHistory(harmony: true),
-                            favorites,
-                            const SizedBox(height: 10),
-                            services,
-                          ],
                         ],
-                      );
-                    },
-                  ),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 6,
+                      ),
+                    );
+                    final favorites = Obx(
+                      () => controller.loadingState.value is Loading
+                          ? const SizedBox.shrink()
+                          : panel(
+                              _buildFav(theme, accent),
+                              padding: EdgeInsets.zero,
+                            ),
+                    );
+                    final services = panel(
+                      _buildLaterPreview(theme),
+                      padding: EdgeInsets.zero,
+                    );
+                    return ListView(
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        4,
+                        16,
+                        24 + MediaQuery.paddingOf(context).bottom,
+                      ),
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      children: [
+                        if (split)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: (constraints.maxWidth - 46) * .43,
+                                child: Column(
+                                  children: [
+                                    account,
+                                    const SizedBox(height: 10),
+                                    actions,
+                                    const SizedBox(height: 10),
+                                    favorites,
+                                    const SizedBox(height: 10),
+                                    services,
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    _buildRecentHistory(
+                                      harmony: true,
+                                      expanded: true,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        else ...[
+                          account,
+                          const SizedBox(height: 10),
+                          actions,
+                          const SizedBox(height: 10),
+                          _buildRecentHistory(harmony: true),
+                          favorites,
+                          const SizedBox(height: 10),
+                          services,
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -348,10 +274,13 @@ class _MediaPageState extends CommonPageState<MinePage>
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: harmony
-                ? ImmersiveSurface(
-                    blurBackground: false,
-                    borderRadius: HarmonyTheme.cardRadius,
-                    child: child,
+                ? SizedBox(
+                    width: double.infinity,
+                    child: ImmersiveSurface(
+                      blurBackground: false,
+                      borderRadius: HarmonyTheme.cardRadius,
+                      child: child,
+                    ),
                   )
                 : child,
           );
@@ -489,7 +418,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                   ]
                   .map(
                     (child) => harmony && child is! SizedBox
-                        ? ImmersiveSurface(
+                        ? ImmersiveInteraction(
                             borderRadius: BorderRadius.circular(24),
                             child: child,
                           )
@@ -726,6 +655,71 @@ class _MediaPageState extends CommonPageState<MinePage>
     const Duration(milliseconds: 150),
     () => controller.onRefresh(isManual: false),
   );
+
+  Widget _buildLaterPreview(ThemeData theme) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      ListTile(
+        dense: true,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: Text(
+            '稍后再看',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_right, size: 20),
+        onTap: () {
+          if (controller.isLogin)
+            Get.toNamed('/later')?.whenComplete(controller.refreshLaterPreview);
+        },
+      ),
+      Obx(() {
+        final items = controller.laterPreview;
+        if (items.isEmpty)
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(26, 4, 20, 16),
+            child: Text(
+              controller.laterError.value ??
+                  (controller.laterLoading.value ? '正在加载…' : '暂无稍后再看的视频'),
+              style: theme.textTheme.bodySmall,
+            ),
+          );
+        return MineLaterPreviewList(items: items, onOpen: _openLaterItem);
+      }),
+    ],
+  );
+
+  Future<void> _openLaterItem(LaterItemModel item) async {
+    if (item.isPugv == true) {
+      PageUtils.viewPugv(seasonId: item.aid);
+      return;
+    }
+    if (item.isPgc == true) {
+      if (item.bangumi?.epId != null)
+        PageUtils.viewPgc(epId: item.bangumi!.epId);
+      else if (item.redirectUrl?.isNotEmpty == true)
+        PageUtils.viewPgcFromUri(item.redirectUrl!);
+      return;
+    }
+    final cid =
+        item.cid ??
+        await SearchHttp.ab2c(
+          aid: item.aid,
+          bvid: item.bvid,
+        ).catchError((_) => null);
+    if (!mounted || cid == null) return;
+    PageUtils.toVideoPage(
+      bvid: item.bvid,
+      cid: cid,
+      cover: item.pic,
+      title: item.title,
+      dimension: item.dimension,
+      extraArguments: const {'viewLater': true},
+    );
+  }
 
   Widget _buildFav(ThemeData theme, Color secondary) {
     return Column(

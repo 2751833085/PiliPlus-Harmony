@@ -77,7 +77,7 @@ void main() {
             );
             expect(
               find.byType(BackdropFilter),
-              findsNothing,
+              immersive ? findsNWidgets(3) : findsNothing,
             );
             await tester.tap(find.text('Option 2'));
             await tester.pumpAndSettle();

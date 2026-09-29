@@ -25,7 +25,12 @@ class HistoryController
 
   final String? type;
   TabController? tabController;
-  late RxList<HistoryTab> tabs = <HistoryTab>[].obs;
+  // Keep navigation available before the first network response.
+  final RxList<HistoryTab> tabs = <HistoryTab>[
+    HistoryTab(type: 'archive', name: '视频'),
+    HistoryTab(type: 'live', name: '直播'),
+    HistoryTab(type: 'article', name: '专栏'),
+  ].obs;
 
   int? max;
   int? viewAt;
@@ -39,6 +44,9 @@ class HistoryController
   @override
   void onInit() {
     super.onInit();
+    if (type == null) {
+      tabController = TabController(length: tabs.length + 1, vsync: this);
+    }
     historyStatus();
     queryData();
   }
@@ -66,14 +74,6 @@ class HistoryController
       isEnd = false;
       max = last.history.oid;
       viewAt = last.viewAt;
-    }
-
-    if (isRefresh && type == null) {
-      final tab = data.tab;
-      if (tabs.isEmpty && tab != null && tab.isNotEmpty) {
-        tabs.value = tab;
-        tabController = TabController(length: tab.length + 1, vsync: this);
-      }
     }
 
     return false;

@@ -102,7 +102,8 @@ class MainController extends GetxController
   late bool isPlaying = false;
 
   static const _period = 5 * 60 * 1000;
-  late int _lastSelectTime = 0;
+  int _lastSelectTime = 0;
+  int _lastTappedNav = -1;
 
   @override
   void onInit() {
@@ -426,15 +427,22 @@ class MainController extends GetxController
   }
 
   void setIndex(int value) {
+    if (value < 0 || value >= navigationBars.length) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final doubleTap = value == _lastTappedNav && now - _lastSelectTime <= 350;
+    _lastTappedNav = doubleTap ? -1 : value;
+    _lastSelectTime = now;
     feedBack();
 
     final currentNav = navigationBars[value];
     if (value != selectedIndex.value) {
       selectedIndex.value = value;
-      if (mainTabBarView) {
-        controller.animateTo(value);
-      } else {
-        controller.jumpToPage(value);
+      if (!OS.isHarmony) {
+        if (mainTabBarView) {
+          controller.animateTo(value);
+        } else {
+          controller.jumpToPage(value);
+        }
       }
       // Flutter 发起的切换同步到 ArkTS HdsTabs
       if (!_fromArkTS) {
@@ -447,8 +455,7 @@ class MainController extends GetxController
         setDynCount();
       }
     } else {
-      int now = DateTime.now().millisecondsSinceEpoch;
-      if (now - _lastSelectTime < 500) {
+      if (doubleTap) {
         EasyThrottle.throttle(
           'topOrRefresh',
           const Duration(milliseconds: 500),
@@ -462,7 +469,7 @@ class MainController extends GetxController
         );
       } else {
         if (currentNav == NavigationBarType.home) {
-          homeController.toTopOrRefresh();
+          homeController.animateToTop();
         } else if (currentNav == NavigationBarType.dynamics) {
           dynamicController.toTopOrRefresh();
         }

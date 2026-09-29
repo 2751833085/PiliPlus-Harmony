@@ -48,7 +48,7 @@ class _ZonePageState extends State<ZonePage>
           // 顶栏收起/展开联动）
           const NativeTopSpacer(),
           SliverPadding(
-            padding: const EdgeInsets.only(top: 7, bottom: 100),
+            padding: const EdgeInsets.only(top: 7, bottom: 24),
             sliver: Obx(() => _buildBody(controller.loadingState.value)),
           ),
         ],

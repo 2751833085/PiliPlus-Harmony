@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:get/get.dart';
@@ -17,11 +18,11 @@ Future<T?>? openMessagePage<T>(
   );
 }
 
-/// A short, fixed-distance entrance avoids sweeping an entire unfolded screen.
+/// Uses the same opaque horizontal push transition as other Harmony pages.
 class HarmonyMessageRoute<T> extends GetPageRoute<T> {
   HarmonyMessageRoute({required super.page, super.settings});
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 260);
+  Duration get transitionDuration => HarmonyMotion.duration;
   @override
   Widget buildTransitions(
     BuildContext context,

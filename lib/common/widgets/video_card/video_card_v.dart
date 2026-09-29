@@ -1,4 +1,4 @@
-import 'package:PiliPlus/harmony_adapt/widgets/cover_hero.dart';
+import 'package:PiliPlus/harmony_adapt/feed_columns.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
@@ -27,17 +27,19 @@ import 'package:intl/intl.dart';
 class VideoCardV extends StatelessWidget {
   final BaseRcmdVideoItemModel videoItem;
   final VoidCallback? onRemove;
+  final bool homeLayout;
 
   const VideoCardV({
     super.key,
     required this.videoItem,
     this.onRemove,
+    this.homeLayout = false,
   });
 
-  Future<void> onPushDetail(String? heroTag) async {
+  Future<void> onPushDetail() async {
     switch (videoItem.goto) {
       case 'bangumi':
-        PageUtils.viewPgc(epId: videoItem.param!, heroTag: heroTag);
+        PageUtils.viewPgc(epId: videoItem.param!);
         break;
       case 'av':
         var bvid = videoItem.bvid ?? IdUtils.av2bv(videoItem.aid!);
@@ -65,7 +67,6 @@ class VideoCardV extends StatelessWidget {
             title: videoItem.title,
             isVertical: isVertical,
             dimension: dimension,
-            heroTag: heroTag,
           );
         }
         break;
@@ -90,30 +91,95 @@ class VideoCardV extends StatelessWidget {
       title: videoItem.title,
       cover: videoItem.cover,
       bvid: videoItem.bvid,
+      actionsBuilder: homeLayout
+          ? (_) => Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: VideoPopupMenu(
+                iconSize: 17,
+                videoItem: videoItem,
+                onRemove: onRemove,
+              ).buildItems(context),
+            )
+          : null,
     );
-    final heroTag = Pref.enableHeroCoverAnimation
-        ? videoItem.goto == 'bangumi'
-              ? 'pgc_hero_${videoItem.param}'
-              : 'video_hero_${videoItem.cid ?? videoItem.aid ?? videoItem.param}'
-        : null;
     Widget card = Card(
+      shape: homeLayout
+          ? const RoundedRectangleBorder(borderRadius: Style.mdRadius)
+          : null,
+      margin: homeLayout ? EdgeInsets.zero : null,
       clipBehavior: Clip.hardEdge,
       child: InkWell(
-        onTap: () => onPushDetail(heroTag),
+        onTap: () => onPushDetail(),
         onLongPress: onLongPress,
         onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CoverHero(
-              tag: heroTag,
-              cover: videoItem.cover,
-              aspectRatio: Style.aspectRatio,
-              child: _CoverBuilder(
-                cover: videoItem.cover,
-                duration: videoItem.duration,
-                shortVideo: Pref.shortVideoMode && videoItem.isPortraitVideo,
-              ),
+            Stack(
+              children: [
+                _CoverBuilder(
+                  aspectRatio: homeLayout
+                      ? FeedColumns.coverAspectRatio(
+                          MediaQuery.sizeOf(context),
+                        )
+                      : Style.aspectRatio,
+                  cover: videoItem.cover,
+                  duration: videoItem.duration,
+                  shortVideo: Pref.shortVideoMode && videoItem.isPortraitVideo,
+                ),
+                if (homeLayout)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: IgnorePointer(
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(8, 16, 62, 5),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.transparent, Colors.black54],
+                          ),
+                        ),
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: Theme.of(
+                              context,
+                            ).colorScheme.copyWith(outline: Colors.white),
+                          ),
+                          child: LayoutBuilder(
+                            builder: (context, bounds) => FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  StatWidget(
+                                    type: StatType.play,
+                                    value: videoItem.stat.view,
+                                  ),
+                                  if (bounds.maxWidth >=
+                                      140 *
+                                          MediaQuery.textScalerOf(
+                                            context,
+                                          ).scale(1)) ...[
+                                    const SizedBox(width: 6),
+                                    StatWidget(
+                                      type: StatType.danmaku,
+                                      value: videoItem.stat.danmu,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             content(context),
           ],
@@ -126,8 +192,8 @@ class VideoCardV extends StatelessWidget {
         card,
         if (videoItem.goto == 'av')
           Positioned(
-            right: -5,
-            bottom: -2,
+            right: homeLayout ? 2 : -5,
+            bottom: homeLayout ? 2 : -2,
             width: 29,
             height: 29,
             child: VideoPopupMenu(
@@ -144,7 +210,12 @@ class VideoCardV extends StatelessWidget {
     final theme = Theme.of(context);
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
+        padding: EdgeInsets.fromLTRB(
+          homeLayout ? 8 : 6,
+          homeLayout ? 4 : 7,
+          homeLayout ? 8 : 6,
+          homeLayout ? 4 : 7,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -158,7 +229,7 @@ class VideoCardV extends StatelessWidget {
                 ),
               ),
             ),
-            videoStat(context, theme),
+            if (!homeLayout) videoStat(context, theme),
             Row(
               spacing: 2,
               children: [
@@ -206,7 +277,8 @@ class VideoCardV extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (videoItem.goto == 'av') const SizedBox(width: 10),
+                if (videoItem.goto == 'av')
+                  SizedBox(width: homeLayout ? 24 : 10),
               ],
             ),
           ],
@@ -232,7 +304,7 @@ class VideoCardV extends StatelessWidget {
             value: videoItem.stat.danmu,
           ),
         ],
-        if (videoItem is RcmdVideoItemModel) ...[
+        if (!homeLayout && videoItem is RcmdVideoItemModel) ...[
           const Spacer(),
           Text(
             DateFormatUtils.dateFormat(
@@ -276,11 +348,13 @@ class _CoverBuilder extends StatelessWidget {
     required this.cover,
     required this.duration,
     required this.shortVideo,
+    required this.aspectRatio,
   });
 
   final String? cover;
   final int duration;
   final bool shortVideo;
+  final double aspectRatio;
 
   // 缓存 builder 闭包，避免每次 rebuild 产生新实例触发 scheduleLayoutCallback
   static Widget _buildCover(
@@ -341,6 +415,7 @@ class _CoverBuilder extends StatelessWidget {
       cover: cover,
       duration: duration,
       shortVideo: shortVideo,
+      aspectRatio: aspectRatio,
     );
   }
 }
@@ -350,11 +425,13 @@ class _CachedLayoutBuilder extends StatefulWidget {
     required this.cover,
     required this.duration,
     required this.shortVideo,
+    required this.aspectRatio,
   });
 
   final String? cover;
   final int duration;
   final bool shortVideo;
+  final double aspectRatio;
 
   @override
   State<_CachedLayoutBuilder> createState() => _CachedLayoutBuilderState();
@@ -397,7 +474,7 @@ class _CachedLayoutBuilderState extends State<_CachedLayoutBuilder> {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: Style.aspectRatio,
+      aspectRatio: widget.aspectRatio,
       child: LayoutBuilder(builder: _builder),
     );
   }

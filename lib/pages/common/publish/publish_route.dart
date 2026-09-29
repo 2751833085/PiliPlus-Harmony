@@ -10,6 +10,7 @@ class PublishRoute<T> extends PopupRoute<T> {
     Duration? transitionDuration,
     RouteTransitionsBuilder? transitionBuilder,
     super.settings,
+    super.filter,
   }) : _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
        _barrierColor = barrierColor,

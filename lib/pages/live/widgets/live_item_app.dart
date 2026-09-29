@@ -1,4 +1,3 @@
-import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/http/live.dart';
@@ -33,6 +32,10 @@ class LiveCardVApp extends StatelessWidget {
     return Stack(
       children: [
         Card(
+          margin: EdgeInsets.zero,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(4)),
+          ),
           clipBehavior: Clip.hardEdge,
           child: InkWell(
             onTap: () => PageUtils.toLiveRoom(item.roomid),
@@ -41,7 +44,7 @@ class LiveCardVApp extends StatelessWidget {
             child: Column(
               children: [
                 AspectRatio(
-                  aspectRatio: Style.aspectRatio,
+                  aspectRatio: 4 / 3,
                   child: LayoutBuilder(
                     builder: (context, boxConstraints) => Stack(
                       clipBehavior: Clip.none,
@@ -73,8 +76,8 @@ class LiveCardVApp extends StatelessWidget {
         ),
         if (!item.feedback.isNullOrEmpty)
           Positioned(
-            right: -5,
-            bottom: -2,
+            right: 2,
+            bottom: 2,
             width: 29,
             height: 29,
             child: IconButton(
@@ -161,7 +164,7 @@ class LiveCardVApp extends StatelessWidget {
     return Expanded(
       flex: 1,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(5, 8, 5, 4),
+        padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

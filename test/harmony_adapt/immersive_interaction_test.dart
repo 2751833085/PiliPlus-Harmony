@@ -56,7 +56,7 @@ void main() {
   });
 
   testWidgets(
-    'nested surfaces animate only deepest target and clear after cancellation',
+    'nested surfaces stay fixed while touch feedback clears after cancellation',
     (tester) async {
       const outer = ValueKey('outer');
       const inner = ValueKey('inner');
@@ -97,7 +97,7 @@ void main() {
           )
           .toList();
       expect(transforms.first.transform.storage[12], 0);
-      expect(transforms.last.transform.storage[12], greaterThan(0));
+      expect(transforms.last.transform.storage[12], 0);
       await gesture.cancel();
       await tester.pumpAndSettle();
       for (final t in tester.widgetList<Transform>(
@@ -111,4 +111,56 @@ void main() {
       expect(tester.binding.transientCallbackCount, 0);
     },
   );
+  testWidgets('search movement is opt-in and sliders do not move their panel', (
+    tester,
+  ) async {
+    var value = .5;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: HarmonyTheme.apply(ThemeData.dark(), immersive: true),
+        home: Scaffold(
+          body: Column(
+            children: [
+              const ImmersiveSurface(
+                allowMovement: true,
+                child: SizedBox(
+                  key: ValueKey('search'),
+                  width: 220,
+                  height: 50,
+                ),
+              ),
+              ImmersiveSurface(
+                child: StatefulBuilder(
+                  builder: (context, setState) => Slider(
+                    value: value,
+                    onChanged: (v) => setState(() => value = v),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final search = find.byKey(const ValueKey('search'));
+    final original = tester.getTopLeft(search);
+    final finger = await tester.startGesture(tester.getCenter(search));
+    await finger.moveBy(const Offset(10, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(search).dx, greaterThan(original.dx));
+    await finger.up();
+    await tester.pumpAndSettle();
+    final slider = find.byType(Slider);
+    final position = tester.getTopLeft(slider);
+    final drag = await tester.startGesture(tester.getCenter(slider));
+    await drag.moveBy(const Offset(12, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(slider), position);
+    await drag.moveBy(const Offset(90, 0));
+    await tester.pump();
+    expect(tester.getTopLeft(slider), position);
+    expect(value, greaterThan(.5));
+    await drag.up();
+    await tester.pumpAndSettle();
+  });
 }

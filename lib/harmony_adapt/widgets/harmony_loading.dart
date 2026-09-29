@@ -1,3 +1,4 @@
+import 'native_loading_opacity.dart';
 import 'package:flutter/services.dart';
 import 'package:os_type/os_type.dart';
 import 'dart:math' as math;
@@ -12,10 +13,12 @@ class HarmonyLoadingIndicator extends StatefulWidget {
     this.size = 40,
     this.color,
     this.value,
+    this.opacity = 1,
   });
   final double size;
   final Color? color;
   final double? value;
+  final double opacity;
 
   @override
   State<HarmonyLoadingIndicator> createState() =>
@@ -23,11 +26,33 @@ class HarmonyLoadingIndicator extends StatefulWidget {
 }
 
 class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
+  final _nativeOpacity = NativeLoadingOpacity();
+
   late final _orbit = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1200),
   );
+
+  bool _entryStarted = false;
+  late final _entry = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+  )..addListener(_sendOpacity);
+
+  double get _alpha =>
+      widget.opacity.clamp(0.0, 1.0) * Curves.easeInOut.transform(_entry.value);
+
+  void _sendOpacity() => _nativeOpacity.update(_alpha);
+
+  void _startEntry() {
+    _entryStarted = true;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _entry.value = 1;
+    } else {
+      _entry.forward(from: 0);
+    }
+  }
 
   void _syncAnimation() {
     if (!OS.isHarmony &&
@@ -44,17 +69,24 @@ class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _syncAnimation();
+    if (!OS.isHarmony && !_entryStarted) _startEntry();
+    if (_entryStarted && MediaQuery.disableAnimationsOf(context)) {
+      _entry.value = 1;
+    }
   }
 
   @override
   void didUpdateWidget(HarmonyLoadingIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncAnimation();
+    _sendOpacity();
   }
 
   @override
   void dispose() {
+    _nativeOpacity.dispose();
     _orbit.dispose();
+    _entry.dispose();
     super.dispose();
   }
 
@@ -84,16 +116,34 @@ class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
                       key: ValueKey((color, animate)),
                       viewType: 'piliplus/native-loading',
                       creationParamsCodec: const StandardMessageCodec(),
-                      creationParams: {'color': color, 'animate': animate},
+                      creationParams: {
+                        'color': color,
+                        'animate': animate,
+                        'opacity': 0.0,
+                      },
+                      onPlatformViewCreated: (id) {
+                        if (!mounted) return;
+                        // Native creation may finish after the pull is armed.
+                        // Begin at zero only once the actual surface is ready.
+                        _entry.value = 0;
+                        _sendOpacity();
+                        _nativeOpacity.attach(id);
+                        _startEntry();
+                      },
                     ),
                   );
                 },
               )
-            : CustomPaint(
-                painter: _PlanetPainter(
-                  _orbit,
-                  widget.color ?? Theme.of(context).colorScheme.primary,
-                  widget.value,
+            : AnimatedBuilder(
+                animation: _entry,
+                builder: (context, child) =>
+                    Opacity(opacity: _alpha, child: child),
+                child: CustomPaint(
+                  painter: _PlanetPainter(
+                    _orbit,
+                    widget.color ?? Theme.of(context).colorScheme.primary,
+                    widget.value,
+                  ),
                 ),
               ),
       ),

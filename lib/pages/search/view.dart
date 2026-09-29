@@ -1,4 +1,5 @@
-﻿import 'dart:convert';
+import 'package:PiliPlus/pages/search/widgets/search_split_sliver.dart';
+import 'dart:convert';
 
 import 'package:PiliPlus/common/widgets/dialog/export_import.dart';
 import 'package:PiliPlus/common/widgets/disabled_icon.dart';
@@ -58,23 +59,26 @@ class _SearchPageState extends State<SearchPage> {
     return SimpleScaffold(
       appBar: _buildAppBar,
       body: Padding(
-        padding: .only(left: padding.left, right: padding.right),
+        padding: EdgeInsets.only(
+          left:
+              padding.left + (MediaQuery.sizeOf(context).width >= 840 ? 68 : 0),
+          right:
+              padding.right +
+              (MediaQuery.sizeOf(context).width >= 840 ? 68 : 0),
+        ),
         child: CustomScrollView(
           slivers: [
             if (_searchController.searchSuggestion) _buildSearchSuggest(),
-            if (isPortrait) ...[
+            if (MediaQuery.sizeOf(context).width >= 840)
+              SearchSplitSliver(
+                left: SliverMainAxisGroup(slivers: [?trending, ?rcmd]),
+                right: _buildHistory,
+              )
+            else ...[
               ?trending,
               _buildHistory,
               ?rcmd,
-            ] else if (trending != null || rcmd != null)
-              SliverCrossAxisGroup(
-                slivers: [
-                  SliverMainAxisGroup(slivers: [?trending, ?rcmd]),
-                  _buildHistory,
-                ],
-              )
-            else
-              _buildHistory,
+            ],
             SliverPadding(padding: .only(bottom: padding.bottom)),
           ],
         ),
@@ -175,7 +179,7 @@ class _SearchPageState extends State<SearchPage> {
     bool isTrending = true,
   }) {
     final text = Text(
-      isTrending ? '大家都在搜' : '搜索发现',
+      isTrending ? 'bilibili热搜' : '搜索发现',
       strutStyle: const StrutStyle(leading: 0, height: 1),
       style: theme.textTheme.titleMedium!.copyWith(
         height: 1,
@@ -191,7 +195,7 @@ class _SearchPageState extends State<SearchPage> {
     );
     return SliverPadding(
       padding: .fromLTRB(
-        10,
+        MediaQuery.sizeOf(context).width >= 840 ? 0 : 10,
         !isTrending && (isPortrait || _searchController.enableTrending)
             ? 4
             : 25,
@@ -206,64 +210,67 @@ class _SearchPageState extends State<SearchPage> {
               child: Row(
                 mainAxisAlignment: .spaceBetween,
                 children: [
-                  isTrending
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            text,
-                            const SizedBox(width: 14),
-                            TextButton(
-                              style: const ButtonStyle(
-                                visualDensity: .compact,
-                                tapTargetSize: .shrinkWrap,
-                                padding: WidgetStatePropertyAll(
-                                  .symmetric(horizontal: 10),
+                  Expanded(
+                    child: isTrending
+                        ? Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              text,
+                              const Spacer(),
+                              TextButton(
+                                style: const ButtonStyle(
+                                  visualDensity: .compact,
+                                  tapTargetSize: .shrinkWrap,
+                                  padding: WidgetStatePropertyAll(
+                                    .symmetric(horizontal: 10),
+                                  ),
+                                ),
+                                onPressed: () => Get.toNamed('/searchTrending'),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      '完整榜单',
+                                      strutStyle: const StrutStyle(
+                                        leading: 0,
+                                        height: 1,
+                                      ),
+                                      style: style,
+                                    ),
+                                    Icon(
+                                      size: 18,
+                                      Icons.keyboard_arrow_right,
+                                      color: outline,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              onPressed: () => Get.toNamed('/searchTrending'),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    '完整榜单',
-                                    strutStyle: const StrutStyle(
-                                      leading: 0,
-                                      height: 1,
-                                    ),
-                                    style: style,
-                                  ),
-                                  Icon(
-                                    size: 18,
-                                    Icons.keyboard_arrow_right,
-                                    color: outline,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        )
-                      : text,
-                  TextButton.icon(
-                    style: const ButtonStyle(
-                      visualDensity: .compact,
-                      tapTargetSize: .shrinkWrap,
-                      padding: WidgetStatePropertyAll(
-                        .symmetric(horizontal: 10),
+                            ],
+                          )
+                        : text,
+                  ),
+                  if (!isTrending)
+                    TextButton.icon(
+                      style: const ButtonStyle(
+                        visualDensity: .compact,
+                        tapTargetSize: .shrinkWrap,
+                        padding: WidgetStatePropertyAll(
+                          .symmetric(horizontal: 10),
+                        ),
+                      ),
+                      onPressed: isTrending
+                          ? _searchController.queryTrendingList
+                          : _searchController.queryRecommendList,
+                      icon: Icon(
+                        Icons.refresh_outlined,
+                        size: 18,
+                        color: secondary,
+                      ),
+                      label: Text(
+                        '刷新',
+                        strutStyle: const StrutStyle(leading: 0, height: 1),
+                        style: TextStyle(height: 1, color: secondary),
                       ),
                     ),
-                    onPressed: isTrending
-                        ? _searchController.queryTrendingList
-                        : _searchController.queryRecommendList,
-                    icon: Icon(
-                      Icons.refresh_outlined,
-                      size: 18,
-                      color: secondary,
-                    ),
-                    label: Text(
-                      '刷新',
-                      strutStyle: const StrutStyle(leading: 0, height: 1),
-                      style: TextStyle(height: 1, color: secondary),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -353,6 +360,7 @@ class _SearchPageState extends State<SearchPage> {
                   childCount: list.length,
                   (context, index) => SearchText(
                     text: list[index],
+                    bgColor: Colors.transparent,
                     onTap: _searchController.onClickKeyword,
                     onLongPress: _searchController.onLongSelect,
                     height: 1,
@@ -433,6 +441,7 @@ class _SearchPageState extends State<SearchPage> {
       Success(:final response) when (response.list?.isNotEmpty ?? false) =>
         SliverHotKeyword(
           hotSearchList: response.list!,
+          filled: !isTrending,
           onClick: _searchController.onClickKeyword,
         ),
       Error(:final errMsg) => HttpError(

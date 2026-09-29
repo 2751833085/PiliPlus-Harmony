@@ -1,0 +1,22 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6207,
+  "sha256": "b0271697e0725f5e8a096d4fbe5426c90ebc10ac9e246823ba998da92a16419e",
+  "sizeBytes": 33044638,
+  "signatureVerified": true,
+  "sourceCommitted": false,
+  "pushedToGithub": false,
+  "focusedTestsPassed": 12,
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "nativeOpacityVisualVerified": false,
+  "deviceOverwrite": {
+    "previous_version": "3.0.0",
+    "installed_version": "3.0.0",
+    "installed_version_code": 6207,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false
+  }
+}

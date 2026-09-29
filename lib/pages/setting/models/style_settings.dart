@@ -11,7 +11,6 @@ import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/scale_app.dart';
 import 'package:PiliPlus/common/widgets/stateful_builder.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/models/common/bar_hide_type.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
@@ -213,7 +212,7 @@ List<SettingsModel> get _appearanceSettings => [
         '当前消息类型：${Pref.msgUnReadTypeV2.map((item) => item.title).join('、')}',
   ),
   PopupModel(
-    title: '顶/底栏收起类型',
+    title: '顶栏收起类型',
     section: '导航与首页',
     leading: const Icon(MdiIcons.arrowExpandVertical),
     value: () => Pref.barHideType,
@@ -233,20 +232,6 @@ List<SettingsModel> get _appearanceSettings => [
     setKey: SettingBoxKey.hideTopBar,
     defaultVal: PlatformUtils.isMobile,
     needReboot: true,
-  ),
-  SwitchModel(
-    title: '首页底栏收起',
-    section: '导航与首页',
-    subtitle: '首页列表滑动时，收起底栏',
-    leading: const Icon(Icons.vertical_align_bottom_outlined),
-    setKey: SettingBoxKey.hideBottomBar,
-    defaultVal: PlatformUtils.isMobile,
-    needReboot: true,
-    onChanged: (value) {
-      if (!value) {
-        HarmonyChannel.setShellBarsScrollHidden(false);
-      }
-    },
   ),
   NormalModel(
     onTap: (context, setState) => _showQualityDialog(

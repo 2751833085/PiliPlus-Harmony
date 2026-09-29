@@ -1,6 +1,4 @@
-import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
-import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
@@ -11,7 +9,6 @@ import 'package:get/get.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 
 void refreshHarmonySettings(bool _) {
   HarmonyAppearance.changed();
@@ -26,40 +23,13 @@ List<SettingsModel> get harmonyAppearanceSettings => [
     SwitchModel(
       section: '鸿蒙界面风格',
       title: '沉浸光感',
-      subtitle: '为 Dock、顶栏、菜单、播放面板与账户卡片启用光感材质；关闭后使用实色背景',
+      subtitle: '为底栏、顶栏、菜单、播放面板与账户卡片启用光感材质；关闭后使用实色背景',
       leading: const Icon(Icons.water_drop_outlined),
       setKey: SettingBoxKey.harmonyImmersive,
       defaultVal: true,
       onChanged: refreshHarmonySettings,
     ),
   ],
-  SwitchModel(
-    section: '导航与首页',
-    title: '智感握姿',
-    subtitle: '接入系统握持识别：单手时 Dock 靠近握持侧，双手时居中；全屏进度条保持全宽，不支持的设备保持居中',
-    leading: const Icon(Icons.back_hand_outlined),
-    setKey: SettingBoxKey.harmonyHandedness,
-    onChanged: refreshHarmonySettings,
-  ),
-  if (Pref.harmonyHandedness)
-    NormalModel(
-      section: '导航与首页',
-      title: '握姿识别状态',
-      subtitle: '仅根据系统识别结果移动，触摸左右侧不会改变位置',
-      getTrailing: (theme) => ValueListenableBuilder<String>(
-        valueListenable: HarmonyChannel.handStatus,
-        builder: (_, state, child) => Text(switch (state) {
-          'left' => '左手',
-          'right' => '右手',
-          'center' => '双手 · 居中',
-          'unsupported' => '设备暂不支持',
-          'denied' => '系统未授权',
-          'unavailable' => '系统暂不可用',
-          'disabled' => '已关闭',
-          _ => '等待识别',
-        }, style: theme.textTheme.bodySmall),
-      ),
-    ),
   const SwitchModel(
     section: '交互与动画',
     title: '点击系统状态栏快速返回顶部',
@@ -67,15 +37,6 @@ List<SettingsModel> get harmonyAppearanceSettings => [
     leading: Icon(Icons.vertical_align_top_outlined),
     setKey: SettingBoxKey.enableStatusBarTapToTop,
     defaultVal: false,
-  ),
-  SwitchModel(
-    section: '交互与动画',
-    title: '视频封面一镜到底动画（测试版）',
-    subtitle: '点击视频卡片时封面平滑展开，返回时飞回原位\n仅支持首页的部分视频卡片和番剧/影视卡片',
-    leading: const Icon(Icons.motion_photos_on_outlined),
-    setKey: SettingBoxKey.enableHeroCoverAnimation,
-    defaultVal: false,
-    onChanged: (_) => SmartDialog.showToast("建议重启以应用更改"),
   ),
 ];
 
@@ -144,21 +105,4 @@ List<SettingsModel> get experimentalSettings => [
   ),
 ];
 
-// Shared navigation rows live in Appearance; keys remain unchanged.
-List<SettingsModel> get harmonyNavigationSettings => [
-  PopupModel(
-    section: '导航与首页',
-    title: '底栏样式',
-    leading: const Icon(Icons.space_dashboard_outlined),
-    value: () => Pref.harmonyNavigation,
-    items: HarmonyNavigation.values,
-    onSelected: (value, setState) async {
-      await GStorage.setting.put(
-        SettingBoxKey.harmonyNavigation,
-        value.index,
-      );
-      refreshHarmonySettings(true);
-      setState();
-    },
-  ),
-];
+List<SettingsModel> get harmonyNavigationSettings => [];

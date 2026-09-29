@@ -66,7 +66,7 @@ class _LivePageState extends State<LivePage>
             SliverPadding(
               padding: const EdgeInsets.only(
                 top: Style.cardSpace,
-                bottom: 100,
+                bottom: 24,
               ),
               sliver: SliverMainAxisGroup(
                 slivers: [
@@ -179,13 +179,14 @@ class _LivePageState extends State<LivePage>
     );
   }
 
-  late final gridDelegate = SliverGridDelegateWithExtentAndRatio(
-    mainAxisSpacing: Style.cardSpace,
-    crossAxisSpacing: Style.cardSpace,
-    maxCrossAxisExtent: Grid.smallCardWidth,
-    childAspectRatio: Style.aspectRatio,
-    mainAxisExtent: textScaler.scale(90),
-  );
+  SliverGridDelegateWithExtentAndRatio get gridDelegate =>
+      SliverGridDelegateWithExtentAndRatio(
+        mainAxisSpacing: 6,
+        crossAxisSpacing: 6,
+        maxCrossAxisExtent: Grid.smallCardWidth,
+        childAspectRatio: 4 / 3,
+        mainAxisExtent: textScaler.scale(66),
+      );
 
   Widget _buildBody(ThemeData theme, LoadingState<List?> loadingState) {
     return switch (loadingState) {

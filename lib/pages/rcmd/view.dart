@@ -32,6 +32,7 @@ class _RcmdPageState extends State<RcmdPage>
   StreamSubscription<dynamic>? _layoutSettings;
   final _refreshKey = GlobalKey<refresh.RefreshIndicatorState>();
   bool _returningToRefresh = false;
+  bool _loadMoreScheduled = false;
 
   Future<void> _refreshFromHistory() async {
     if (_returningToRefresh || controller.isLoading) return;
@@ -88,10 +89,19 @@ class _RcmdPageState extends State<RcmdPage>
   void _onScroll() {
     if (!controller.scrollController.hasClients || controller.isLoading) return;
     final position = controller.scrollController.position;
-    if (position.pixels >= position.maxScrollExtent - 1000) {
-      SchedulerBinding.instance.addPostFrameCallback(
-        (_) => controller.onLoadMore(),
-      );
+    if (!_loadMoreScheduled &&
+        position.pixels >= position.maxScrollExtent - 1000) {
+      _loadMoreScheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _loadMoreScheduled = false;
+        if (!mounted ||
+            controller.isLoading ||
+            !controller.scrollController.hasClients)
+          return;
+        final current = controller.scrollController.position;
+        if (current.pixels >= current.maxScrollExtent - 1000)
+          controller.onLoadMore();
+      });
     }
   }
 
@@ -117,6 +127,12 @@ class _RcmdPageState extends State<RcmdPage>
       child: LayoutBuilder(
         builder: (context, constraints) {
           _gridWidth = constraints.maxWidth;
+          controller.visibleColumns =
+              gridDelegate.columns ??
+              ((_gridWidth - 6) / (Pref.recommendCardWidth + 6)).ceil().clamp(
+                1,
+                12,
+              );
           return Obx(
             () => InitialFeedContent(
               loading: controller.loadingState.value is Loading,
@@ -131,7 +147,7 @@ class _RcmdPageState extends State<RcmdPage>
                     // 原生顶栏启用时顶部的可滚动留白（内容可滑入顶栏下方重合）
                     const NativeTopSpacer(),
                     SliverPadding(
-                      padding: const .only(top: Style.cardSpace, bottom: 100),
+                      padding: const .only(top: Style.cardSpace, bottom: 16),
                       sliver: Obx(
                         () => _buildBody(
                           colorScheme,
@@ -159,11 +175,13 @@ class _RcmdPageState extends State<RcmdPage>
                 _gridWidth,
                 Pref.feedColumns,
               ),
-        mainAxisSpacing: Style.cardSpace,
-        crossAxisSpacing: Style.cardSpace,
+        mainAxisSpacing: 6,
+        crossAxisSpacing: 6,
         maxCrossAxisExtent: Pref.recommendCardWidth,
-        childAspectRatio: Style.aspectRatio,
-        mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
+        childAspectRatio: FeedColumns.coverAspectRatio(
+          MediaQuery.sizeOf(context),
+        ),
+        mainAxisExtent: MediaQuery.textScalerOf(context).scale(66),
       );
 
   Widget _buildBody(
@@ -201,6 +219,7 @@ class _RcmdPageState extends State<RcmdPage>
                         : index;
                     final item = response[actualIndex];
                     return VideoCardV(
+                      homeLayout: true,
                       key: ValueKey(
                         '${item.goto}_${item.bvid ?? item.param ?? item.uri}',
                       ),
@@ -219,6 +238,7 @@ class _RcmdPageState extends State<RcmdPage>
                   } else {
                     final item = response[index];
                     return VideoCardV(
+                      homeLayout: true,
                       key: ValueKey(
                         '${item.goto}_${item.bvid ?? item.param ?? item.uri}',
                       ),

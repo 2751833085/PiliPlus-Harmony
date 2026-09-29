@@ -135,7 +135,7 @@ void main() {
       );
       await tester.tap(find.byType(ui.PopupMenuButton<int>));
       await tester.pumpAndSettle();
-      expect(find.byType(BackdropFilter), findsNothing);
+      expect(find.byType(BackdropFilter), findsNWidgets(2));
       await tester.tap(find.text('不可用选项'));
       await tester.pumpAndSettle();
       expect(selected, isNull);
@@ -233,7 +233,7 @@ void main() {
   );
 
   testWidgets(
-    'original programmatic refresh keeps content fixed throughout the request',
+    'Harmony programmatic refresh holds 64vp until the indicator fades',
     (tester) async {
       final complete = Completer<void>();
       final refreshKey = GlobalKey<refresh.RefreshIndicatorState>();
@@ -259,7 +259,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
       final held = tester.getTopLeft(find.byKey(itemKey)).dy;
-      expect(held, closeTo(top, .1));
+      expect(held, closeTo(top + 64, .1));
       await tester.pump(const Duration(seconds: 2));
       expect(tester.getTopLeft(find.byKey(itemKey)).dy, held);
       complete.complete();
@@ -267,7 +267,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 150));
       expect(tester.getTopLeft(find.byKey(itemKey)).dy, closeTo(held, .1));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
       await tester.pump(const Duration(milliseconds: 250));
       await tester.pump();
       expect(tester.getTopLeft(find.byKey(itemKey)).dy, closeTo(top, .1));

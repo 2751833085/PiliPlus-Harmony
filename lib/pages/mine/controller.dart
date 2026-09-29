@@ -1,3 +1,4 @@
+import 'package:PiliPlus/models_new/later/list.dart';
 import 'dart:async';
 import 'package:PiliPlus/pages/mine/recent_history.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
@@ -28,6 +29,41 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
     with AccountMixin {
   @override
   AccountService accountService = Get.find<AccountService>();
+
+  final laterPreview = <LaterItemModel>[].obs;
+  final laterLoading = false.obs;
+  final laterError = RxnString();
+  int _laterGeneration = 0;
+  Future<void> refreshLaterPreview() async {
+    final generation = ++_laterGeneration;
+    final account = Accounts.main;
+    if (!account.isLogin) {
+      laterPreview.clear();
+      laterLoading.value = false;
+      laterError.value = null;
+      return;
+    }
+    laterLoading.value = true;
+    laterError.value = null;
+    try {
+      final result = await UserHttp.seeYouLater(page: 1);
+      if (isClosed ||
+          generation != _laterGeneration ||
+          !identical(account, Accounts.main))
+        return;
+      if (result case Success(:final response)) {
+        laterPreview.assignAll((response.list ?? <LaterItemModel>[]).take(8));
+      } else {
+        laterError.value = '稍后再看暂时无法加载';
+      }
+    } catch (_) {
+      if (!isClosed && generation == _laterGeneration)
+        laterError.value = '稍后再看暂时无法加载';
+    } finally {
+      if (!isClosed && generation == _laterGeneration)
+        laterLoading.value = false;
+    }
+  }
 
   int? favFolderCount;
   int _favoritesGeneration = 0;
@@ -95,6 +131,7 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
   @override
   void onInit() {
     super.onInit();
+    refreshLaterPreview();
     syncHistoryPreview();
     _historyAccountChanges = Accounts.account.watch().listen(
       (_) => syncHistoryPreview(),
@@ -229,6 +266,7 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
             color: theme.colorScheme.onSurface,
           );
           return ImmersiveSurface(
+            blurBackground: true,
             color: theme.colorScheme.surface,
             child: Padding(
               padding: EdgeInsets.only(
@@ -306,6 +344,7 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
         builder: (context) {
           final theme = Theme.of(context);
           return ImmersiveSurface(
+            blurBackground: true,
             color: theme.colorScheme.surface,
             child: Padding(
               padding: EdgeInsets.only(
@@ -361,6 +400,7 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
     return Future.wait([
       super.onRefresh(),
       recentHistory.refresh(),
+      refreshLaterPreview(),
     ]).then((_) {}).whenComplete(() {
       if (isManual) {
         scrollController.jumpToTop();
@@ -371,6 +411,10 @@ class MineController extends CommonDataController<FavFolderData, FavFolderData>
   @override
   void onChangeAccount(bool isLogin) {
     _favoritesGeneration++;
+    _laterGeneration++;
+    laterPreview.clear();
+    laterError.value = null;
+    laterLoading.value = false;
     isLoading = false;
     favFolderCount = null;
     loadingState.value = LoadingState.loading();

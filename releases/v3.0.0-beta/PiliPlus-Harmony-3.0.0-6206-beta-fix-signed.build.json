@@ -1,0 +1,21 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6206,
+  "sha256": "b43685e556263aa88c3a72a2961e0bc14327e5262aaa1d547c815de627a3f4a5",
+  "sizeBytes": 33043362,
+  "signatureVerified": true,
+  "sourceCommitted": false,
+  "pushedToGithub": false,
+  "focusedTestsPassed": 3,
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "deviceOverwrite": {
+    "previous_version": "3.0.0",
+    "installed_version": "3.0.0",
+    "installed_version_code": 6206,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "overwrite_install": "passed",
+    "uninstalled_or_cleared_data": false
+  }
+}
