@@ -15,5 +15,11 @@
     "firstInstallTimePreserved": true,
     "launchSucceeded": false,
     "launchBlockedByLockScreen": true
+  },
+  "cloudValidation": {
+    "run": "https://github.com/2751833085/PiliPlus-Harmony/actions/runs/36543703891",
+    "regressionTests": "success",
+    "hapBuild": "success",
+    "artifactUpload": "success"
   }
 }
