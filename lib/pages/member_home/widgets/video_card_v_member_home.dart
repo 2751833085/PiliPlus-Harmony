@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
@@ -79,7 +80,14 @@ class VideoCardVMemberHome extends StatelessWidget {
       aid: videoItem.param,
       bvid: videoItem.bvid,
     );
+    final harmony = HarmonyStyle.enabled(context);
     return Card(
+      margin: harmony ? EdgeInsets.zero : null,
+      elevation: harmony ? 0 : null,
+      color: harmony ? Theme.of(context).colorScheme.surface : null,
+      shape: harmony
+          ? const RoundedRectangleBorder(borderRadius: HarmonyTheme.cardRadius)
+          : null,
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onPushDetail,

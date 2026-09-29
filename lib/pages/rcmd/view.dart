@@ -35,7 +35,7 @@ class _RcmdPageState extends State<RcmdPage>
   bool _loadMoreScheduled = false;
 
   Future<void> _refreshFromHistory() async {
-    if (_returningToRefresh || controller.isLoading) return;
+    if (_returningToRefresh) return;
     _returningToRefresh = true;
     try {
       final scroll = controller.scrollController;
@@ -90,6 +90,7 @@ class _RcmdPageState extends State<RcmdPage>
     if (!controller.scrollController.hasClients || controller.isLoading) return;
     final position = controller.scrollController.position;
     if (!_loadMoreScheduled &&
+        position.pixels > position.minScrollExtent &&
         position.pixels >= position.maxScrollExtent - 1000) {
       _loadMoreScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -99,7 +100,8 @@ class _RcmdPageState extends State<RcmdPage>
             !controller.scrollController.hasClients)
           return;
         final current = controller.scrollController.position;
-        if (current.pixels >= current.maxScrollExtent - 1000)
+        if (current.pixels > current.minScrollExtent &&
+            current.pixels >= current.maxScrollExtent - 1000)
           controller.onLoadMore();
       });
     }

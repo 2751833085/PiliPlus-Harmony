@@ -28,7 +28,9 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class WhisperPage extends StatefulWidget {
-  const WhisperPage({super.key});
+  const WhisperPage({super.key, this.initialConversation});
+
+  final Map<String, dynamic>? initialConversation;
 
   @override
   State<WhisperPage> createState() => _WhisperPageState();
@@ -41,6 +43,12 @@ class _WhisperPageState extends State<WhisperPage> {
   final _drafts = <String, List<RichTextItem>>{};
   String _draftKey(Map<String, dynamic> conversation) =>
       '${Accounts.main.mid}:${conversation['talkerId']}';
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.initialConversation;
+  }
 
   void _openConversation(Map<String, dynamic> conversation) {
     if (_selected?['talkerId'] == conversation['talkerId']) return;
@@ -70,7 +78,7 @@ class _WhisperPageState extends State<WhisperPage> {
     final hasSelection = selected != null || _notification != null;
     final draftKey = selected == null ? null : _draftKey(selected);
     void closeDetail() {
-      if (split) {
+      if (split || widget.initialConversation != null) {
         Navigator.of(context).maybePop();
       } else {
         _closeConversation();
@@ -78,7 +86,7 @@ class _WhisperPageState extends State<WhisperPage> {
     }
 
     return MessageBackScope(
-      split: split,
+      split: split || widget.initialConversation != null,
       hasSelection: hasSelection,
       onCloseSelection: _closeConversation,
       child: SimpleScaffold(

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/assets.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/avatars.dart';
@@ -79,13 +80,23 @@ class UserInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isLight = colorScheme.isLight;
-    final width = ContextExtensions(context).width;
-    final isPortrait = width < 600;
-    return ViewSafeArea(
+    final availableWidth = ContextExtensions(context).width;
+    final width = availableWidth - (HarmonyStyle.enabled(context) ? 24 : 0);
+    final isPortrait = availableWidth < 600;
+    final content = ViewSafeArea(
       top: !isPortrait,
       child: isPortrait
           ? _buildV(context, colorScheme, isLight, width)
           : _buildH(context, colorScheme, isLight),
+    );
+    if (!HarmonyStyle.enabled(context)) return content;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 10),
+      child: ImmersiveSurface(
+        interactive: false,
+        borderRadius: HarmonyTheme.cardRadius,
+        child: content,
+      ),
     );
   }
 

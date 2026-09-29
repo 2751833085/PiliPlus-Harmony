@@ -12,6 +12,8 @@ class RcmdController extends CommonListController {
   int visibleColumns = 2;
   int _nextFreshIndex = 0;
 
+  Future<void>? _refreshTask;
+
   int? lastRefreshAt;
   late bool savedRcmdTip = Pref.savedRcmdTip;
 
@@ -68,11 +70,14 @@ class RcmdController extends CommonListController {
 
   @override
   Future<void> onRefresh() {
-    if (isLoading) return Future<void>.value();
+    if (_refreshTask case final task?) return task;
+    // A user's refresh takes priority over initial fill/pagination. Revision
+    // checking in CommonListController discards the obsolete response.
+    invalidateRequests();
     _nextFreshIndex = 0;
     lastRefreshAt = null;
     page = 0;
     isEnd = false;
-    return queryData();
+    return _refreshTask = queryData().whenComplete(() => _refreshTask = null);
   }
 }

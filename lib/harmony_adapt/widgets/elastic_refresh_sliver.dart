@@ -49,7 +49,13 @@ class ElasticRefreshSliverState extends State<ElasticRefreshSliver>
   void pointerUp(PointerUpEvent event) {
     if (_pointer != event.pointer) return;
     _pointer = null;
-    if (_extent >= trigger && !_holding && _task == null) show();
+    // Pointer events can arrive before the first layout after a fast pull.
+    // Read the live scroll position instead of the last painted header extent.
+    final position = Scrollable.maybeOf(context)?.position;
+    final pull = position != null && position.hasContentDimensions
+        ? position.minScrollExtent - position.pixels
+        : _extent;
+    if (pull >= trigger && !_holding && _task == null) show();
   }
 
   Future<void> show({bool reveal = false}) {

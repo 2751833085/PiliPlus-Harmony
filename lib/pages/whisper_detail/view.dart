@@ -82,7 +82,7 @@ class _WhisperDetailPageState
     final padding = MediaQuery.viewPaddingOf(context);
     final harmony = HarmonyStyle.enabled(context);
     final chatBackground = harmony
-        ? theme.colorScheme.surface
+        ? theme.colorScheme.surfaceContainer
         : theme.scaffoldBackgroundColor;
     late final containerColor = harmony
         ? chatBackground
@@ -367,9 +367,7 @@ class _WhisperDetailPageState
                 decoration: InputDecoration(
                   filled: true,
                   hintText: '发个消息聊聊呗~',
-                  fillColor: harmony
-                      ? theme.colorScheme.surfaceContainerLow
-                      : theme.colorScheme.surface,
+                  fillColor: theme.colorScheme.surface,
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(harmony ? 20 : 6),

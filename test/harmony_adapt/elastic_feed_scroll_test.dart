@@ -10,6 +10,35 @@ import 'helpers/memory_box.dart';
 
 void main() {
   setUpAll(() => GStorage.setting = MemoryBox());
+  testWidgets(
+    'first fast pull releases before layout and still refreshes once',
+    (tester) async {
+      var calls = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: const [HarmonyStyle()]),
+          home: Scaffold(
+            body: refresh.RefreshIndicator(
+              onRefresh: () async {
+                calls++;
+              },
+              child: const CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(child: SizedBox(height: 1200)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      final finger = await tester.startGesture(const Offset(150, 180));
+      await finger.moveBy(const Offset(0, 240));
+      // No pump between the move and release: scroll metrics are ahead of paint.
+      await finger.up();
+      await tester.pumpAndSettle();
+      expect(calls, 1);
+    },
+  );
   for (final width in [350.0, 712.0, 1108.0]) {
     testWidgets(
       'feed uses normal bounce, holds refresh and preserves bottom bounce at $width',

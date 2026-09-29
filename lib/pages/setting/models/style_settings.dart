@@ -841,6 +841,7 @@ NormalModel _useSSDModel() {
 
   return NormalModel(
     title: '使用SSD（Server-Side Decoration）',
+    section: '窗口与显示',
     leading: const Icon(Icons.web_asset),
     onTap: onChanged,
     getTrailing: (theme) => Builder(

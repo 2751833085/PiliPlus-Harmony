@@ -67,7 +67,6 @@ import 'package:PiliPlus/pages/subscription_detail/view.dart';
 import 'package:PiliPlus/pages/video/view.dart';
 import 'package:PiliPlus/pages/webview/view.dart';
 import 'package:PiliPlus/pages/whisper/view.dart';
-import 'package:PiliPlus/pages/whisper_detail/view.dart';
 import 'package:get/get.dart';
 
 class Routes {
@@ -127,7 +126,12 @@ class Routes {
     // 消息页面
     GetPage(name: '/whisper', page: () => const WhisperPage()),
     // 私信详情
-    GetPage(name: '/whisperDetail', page: () => const WhisperDetailPage()),
+    GetPage(
+      name: '/whisperDetail',
+      page: () => WhisperPage(
+        initialConversation: Map<String, dynamic>.from(Get.arguments as Map),
+      ),
+    ),
     // 回复我的
     GetPage(name: '/replyMe', page: () => const ReplyMePage()),
     // @我的

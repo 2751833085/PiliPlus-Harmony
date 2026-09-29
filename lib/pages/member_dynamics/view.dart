@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
@@ -56,7 +57,12 @@ class _MemberDynamicsPageState extends State<MemberDynamicsPage>
               child: _buildBody(padding),
             ),
           )
-        : _buildBody(padding);
+        : ColoredBox(
+            color: HarmonyStyle.enabled(context)
+                ? Theme.of(context).scaffoldBackgroundColor
+                : Theme.of(context).colorScheme.surface,
+            child: _buildBody(padding),
+          );
   }
 
   Widget _buildBody(EdgeInsets padding) => refreshIndicator(

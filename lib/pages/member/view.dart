@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'dart:io' show Platform;
 import 'dart:math' as math;
 
@@ -95,6 +96,7 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
     _headerController = null;
     _cacheFollowTime = null;
     _cacheMedalData = null;
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -115,8 +117,9 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
     final padding = MediaQuery.viewPaddingOf(context);
+    final harmony = HarmonyStyle.enabled(context);
     return Material(
-      color: theme.surface,
+      color: harmony ? theme.surfaceContainer : theme.surface,
       child: Obx(
         () => switch (_userController.loadingState.value) {
           Loading() => m3eLoading,
@@ -129,6 +132,8 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
               if (response != null) {
                 return [
                   DynamicSliverAppBar.medium(
+                    backgroundColor: harmony ? theme.surfaceContainer : null,
+                    surfaceTintColor: harmony ? Colors.transparent : null,
                     actions: _actions(theme),
                     title: Text(_userController.username ?? ''),
                     flexibleSpace: Obx(
@@ -170,14 +175,26 @@ class _MemberPageState extends State<MemberPage> with WidgetsBindingObserver {
                     child: Column(
                       children: [
                         if ((_userController.tab2?.length ?? 0) > 1)
-                          SizedBox(
-                            height: 45,
-                            child: TabBar(
-                              controller: _userController.tabController,
-                              tabs: _userController.tabs,
-                              onTap: _userController.onTapTab,
-                              dividerColor: theme.outline.withValues(
-                                alpha: 0.2,
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: harmony ? 12 : 0,
+                              vertical: harmony ? 6 : 0,
+                            ),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: harmony ? theme.surface : null,
+                                borderRadius: HarmonyTheme.cardRadius,
+                              ),
+                              child: SizedBox(
+                                height: 45,
+                                child: TabBar(
+                                  controller: _userController.tabController,
+                                  tabs: _userController.tabs,
+                                  onTap: _userController.onTapTab,
+                                  dividerColor: harmony
+                                      ? Colors.transparent
+                                      : theme.outline.withValues(alpha: 0.2),
+                                ),
                               ),
                             ),
                           ),

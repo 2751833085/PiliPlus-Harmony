@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/button/more_btn.dart';
@@ -277,7 +278,15 @@ class _MemberHomeState extends State<MemberHome>
             Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(text: '$title '),
+                  TextSpan(
+                    text: '$title ',
+                    style: HarmonyStyle.enabled(context)
+                        ? const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          )
+                        : null,
+                  ),
                   TextSpan(
                     text: count.toString(),
                     style: TextStyle(fontSize: 13, color: color),
