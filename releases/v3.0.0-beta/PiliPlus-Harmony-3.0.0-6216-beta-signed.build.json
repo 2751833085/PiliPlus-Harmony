@@ -1,0 +1,13 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6216,
+  "releaseTag": "v3.0.0+6216",
+  "sha256": "2fb3be21f7cb48468fb9d40dbe9847a0bd67fc3946eb3fddd7adb38dc266b286",
+  "sizeBytes": 33056438,
+  "signatureVerified": true,
+  "sourceCommit": "4dda0c6f7ce4c258460d15531155d1b21a742581",
+  "installedOnDevice": false,
+  "fullDeviceValidationComplete": false,
+  "validation": "197 passed in full regression; obsolete animation assertion corrected, its 11-test suite passed; final targeted 18 passed",
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6"
+}

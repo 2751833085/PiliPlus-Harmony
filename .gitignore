@@ -183,3 +183,6 @@ ohos/.codegenie
 # iCloud conflict copies are not source inputs.
 * 2.*
 * 2
+
+# Keep Finder metadata ignored even inside regression test exceptions.
+**/.DS_Store
