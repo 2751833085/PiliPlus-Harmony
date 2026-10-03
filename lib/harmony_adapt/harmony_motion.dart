@@ -3,8 +3,9 @@ import 'package:flutter/physics.dart';
 
 /// Shared rhythm for page entrances and tab settling, without moving the shell.
 abstract final class HarmonyMotion {
-  // Matches the OpenHarmony SDK's OpenRightwards page transition.
-  static const pageCurve = Cubic(.2, 0, 0, 1);
+  // Symmetric timing keeps entrance and exit equally legible. The native
+  // shell uses the same curve; interactive back remains finger-driven.
+  static const pageCurve = Cubic(.4, 0, .6, 1);
   static double pageCoverage(
     double value, {
     required bool interactive,

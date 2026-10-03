@@ -434,10 +434,21 @@ void main() {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
             isDynamic: false,
           ).copyWith(platform: TargetPlatform.ohos),
-          home: const Scaffold(body: Text('previous')),
+          initialRoute: '/',
+          getPages: [
+            GetPage(
+              name: '/',
+              page: () => const Scaffold(
+                key: ValueKey('previous-page'),
+                body: Text('previous'),
+              ),
+            ),
+          ],
         ),
       );
-      Get.to(() => const Scaffold(body: Text('next')));
+      Get.to(
+        () => const Scaffold(key: ValueKey('next-page'), body: Text('next')),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));
       expect(
@@ -446,9 +457,23 @@ void main() {
         ),
         findsWidgets,
       );
+      expect(
+        tester.getTopLeft(find.byKey(const ValueKey('previous-page'))).dx,
+        lessThan(0),
+        reason: 'Previous Get route must move with the native shell',
+      );
+      final enteringX = tester
+          .getTopLeft(find.byKey(const ValueKey('next-page')))
+          .dx;
       await tester.pumpAndSettle();
       expect(find.text('next'), findsOneWidget);
       Get.back();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 120));
+      final exitingX = tester
+          .getTopLeft(find.byKey(const ValueKey('next-page')))
+          .dx;
+      expect(enteringX + exitingX, closeTo(800, 2));
       await tester.pumpAndSettle();
       expect(find.text('previous'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());

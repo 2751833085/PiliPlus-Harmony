@@ -16,6 +16,9 @@ mixin GetPageRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
+  @override
+  Duration get reverseTransitionDuration => transitionDuration;
+
   // The transitionDuration is used to create the AnimationController which is only
   // built once, so when page transition builder is updated and transitionDuration
   // has a new value, the AnimationController cannot be updated automatically. So we
@@ -76,7 +79,8 @@ mixin GetPageRouteTransitionMixin<T> on PageRoute<T> {
     // Otherwise if the next route has the same route transition mixin as this
     // one, then this route will already be synced with its transition.
     return nextRouteIsNotFullscreen &&
-        ((nextRoute is MaterialRouteTransitionMixin) ||
+        ((nextRoute is GetPageRouteTransitionMixin) ||
+            (nextRoute is MaterialRouteTransitionMixin) ||
             nextRouteHasDelegatedTransition);
   }
 
