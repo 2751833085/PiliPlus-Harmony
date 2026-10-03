@@ -12,7 +12,7 @@ void main() {
     expect(HarmonyMotion.pageCoverage(1, interactive: false), 1);
   });
   testWidgets(
-    'native header receives bounded animation targets rather than per-frame calls',
+    'native header tracks actual route progress in both directions',
     (tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.values.firstWhere(
         (p) => p.name == 'ohos',
@@ -52,27 +52,27 @@ void main() {
       key.currentState!.push(page);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));
-      expect(exposure(), 0);
-      final pushCalls = calls
-          .where((c) => c.method == 'setTopBarExposure')
-          .length;
+      expect(
+        exposure(),
+        closeTo(1 - HarmonyMotion.pageCoverage(.4, interactive: false), .002),
+      );
       expect(
         calls
             .lastWhere((c) => c.method == 'setTopBarExposure')
             .arguments['durationMs'],
-        greaterThan(0),
+        0,
       );
       await tester.pump(const Duration(milliseconds: 30));
-      expect(
-        calls.where((c) => c.method == 'setTopBarExposure').length,
-        pushCalls,
-      );
+      expect(exposure(), closeTo(.5, .002));
       await tester.pumpAndSettle();
       expect(exposure(), 0);
       key.currentState!.pop();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));
-      expect(exposure(), 1);
+      expect(
+        exposure(),
+        closeTo(HarmonyMotion.pageCoverage(.4, interactive: false), .002),
+      );
       await tester.pumpAndSettle();
       expect(exposure(), 1);
       showModalBottomSheet<void>(
