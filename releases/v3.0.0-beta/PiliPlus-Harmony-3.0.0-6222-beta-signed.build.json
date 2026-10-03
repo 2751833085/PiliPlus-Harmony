@@ -6,8 +6,13 @@
   "sizeBytes": 33077314,
   "signatureVerified": true,
   "sourceCommit": "6a6b65f4bc97f6b7eef390beb1e73e80286e7ed6",
-  "installedOnDevice": false,
+  "installedOnDevice": true,
   "fullDeviceValidationComplete": false,
   "validation": "225 regression tests passed; changed production files have no analyzer errors or warnings; signed HAP signature, ZIP CRC, version and native MPV hash verified",
-  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6"
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "deviceOverwrite": {
+    "uidPreserved": true,
+    "firstInstallTimePreserved": true,
+    "launchSucceeded": true
+  }
 }
