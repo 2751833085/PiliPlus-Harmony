@@ -26,6 +26,7 @@ class VideoReplyPanel extends StatefulWidget {
     required this.heroTag,
     required this.isNested,
     this.onClose,
+    this.onShowReplyDetails,
     this.headerSlivers = const [],
   });
 
@@ -33,6 +34,7 @@ class VideoReplyPanel extends StatefulWidget {
   final String heroTag;
   final bool isNested;
   final VoidCallback? onClose;
+  final ValueChanged<WidgetBuilder>? onShowReplyDetails;
   final List<Widget> headerSlivers;
 
   @override
@@ -233,19 +235,25 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
     EasyThrottle.throttle('replyReply', const Duration(milliseconds: 500), () {
       int oid = replyItem.oid.toInt();
       int rpid = replyItem.id.toInt();
-      MiniScaffold.of(context).showBottomSheet(
-        constraints: const BoxConstraints(),
-        (context) => VideoReplyReplyPanel(
-          id: id,
-          oid: oid,
-          rpid: rpid,
-          firstFloor: replyItem.replyControl.isNote ? null : replyItem,
-          replyType: _videoReplyController.videoType.replyType,
-          isVideoDetail: true,
-          isNested: widget.isNested,
-          upMid: _videoReplyController.upMid,
-        ),
+      Widget builder(BuildContext context) => VideoReplyReplyPanel(
+        enableSlide: widget.onShowReplyDetails == null,
+        id: id,
+        oid: oid,
+        rpid: rpid,
+        firstFloor: replyItem.replyControl.isNote ? null : replyItem,
+        replyType: _videoReplyController.videoType.replyType,
+        isVideoDetail: true,
+        isNested: widget.isNested,
+        upMid: _videoReplyController.upMid,
       );
+      final showInSidebar = widget.onShowReplyDetails;
+      if (showInSidebar != null) {
+        showInSidebar(builder);
+      } else {
+        MiniScaffold.of(
+          context,
+        ).showBottomSheet(builder, constraints: const BoxConstraints());
+      }
     });
   }
 }

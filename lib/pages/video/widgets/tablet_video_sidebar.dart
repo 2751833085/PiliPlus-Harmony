@@ -34,80 +34,88 @@ class TabletVideoSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ColoredBox(
     color: Theme.of(context).colorScheme.surface,
-    child: ValueListenableBuilder<bool>(
-      valueListenable: expanded,
-      builder: (context, open, _) => Column(
-        children: [
-          if (hasPlaylist || playlistPending)
-            SizedBox(
-              height: _headerHeight(context),
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: hasPlaylist ? 1 : 0),
-                duration: MediaQuery.disableAnimationsOf(context)
-                    ? Duration.zero
-                    : const Duration(milliseconds: 160),
-                curve: Curves.easeOut,
-                builder: (_, opacity, child) =>
-                    Opacity(opacity: opacity, child: child),
-                child: !hasPlaylist
-                    ? const SizedBox.expand()
-                    : Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => expanded.value = !open,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 48),
-                            child: Row(
-                              children: [
-                                Expanded(child: IgnorePointer(child: header)),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
+    // Do not show an invented collection slot while its existence is unknown.
+    // Decide the column layout once, before mounting the related list.
+    child: playlistPending
+        ? const SizedBox.expand()
+        : ValueListenableBuilder<bool>(
+            valueListenable: expanded,
+            builder: (context, open, _) => Column(
+              children: [
+                if (hasPlaylist)
+                  SizedBox(
+                    height: _headerHeight(context),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: hasPlaylist ? 1 : 0),
+                      duration: MediaQuery.disableAnimationsOf(context)
+                          ? Duration.zero
+                          : const Duration(milliseconds: 160),
+                      curve: Curves.easeOut,
+                      builder: (_, opacity, child) =>
+                          Opacity(opacity: opacity, child: child),
+                      child: !hasPlaylist
+                          ? const SizedBox.expand()
+                          : Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => expanded.value = !open,
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minHeight: 48,
                                   ),
-                                  child: Icon(
-                                    open
-                                        ? Icons.expand_less
-                                        : Icons.expand_more,
-                                    semanticLabel: open ? '收起合集' : '查看全部',
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: IgnorePointer(child: header),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                        ),
+                                        child: Icon(
+                                          open
+                                              ? Icons.expand_less
+                                              : Icons.expand_more,
+                                          semanticLabel: open ? '收起合集' : '查看全部',
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
-              ),
-            ),
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: MediaQuery.disableAnimationsOf(context)
-                  ? Duration.zero
-                  : const Duration(milliseconds: 100),
-              layoutBuilder: (current, previous) =>
-                  current ?? const SizedBox.shrink(),
-              transitionBuilder: (child, animation) => FadeTransition(
-                opacity: animation.drive(Tween(begin: .8, end: 1.0)),
-                child: child,
-              ),
-              child: open && hasPlaylist
-                  ? KeyedSubtree(
-                      key: const ValueKey('playlist'),
-                      child: playlistBuilder(context),
-                    )
-                  : KeyedSubtree(
-                      key: const ValueKey('related'),
-                      child: related,
                     ),
+                  ),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: MediaQuery.disableAnimationsOf(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 100),
+                    layoutBuilder: (current, previous) =>
+                        current ?? const SizedBox.shrink(),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation.drive(Tween(begin: .8, end: 1.0)),
+                      child: child,
+                    ),
+                    child: open && hasPlaylist
+                        ? KeyedSubtree(
+                            key: const ValueKey('playlist'),
+                            child: playlistBuilder(context),
+                          )
+                        : KeyedSubtree(
+                            key: const ValueKey('related'),
+                            child: related,
+                          ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    ),
   );
 }
 
 abstract final class TabletVideoLayout {
   static bool enabled(Size window) =>
       window.width >= 680 && window.height >= 560;
-  static double sidebarWidth(double width) => (width * .365).clamp(260, 440);
+  static double sidebarWidth(double width) => (width * .365).clamp(240, 440);
 }

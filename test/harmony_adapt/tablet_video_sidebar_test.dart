@@ -9,7 +9,8 @@ void main() {
     for (final size in [const Size(712, 776), const Size(1108, 776)]) {
       expect(TabletVideoLayout.enabled(size), isTrue);
       final side = TabletVideoLayout.sidebarWidth(size.width);
-      expect(side, inInclusiveRange(260, 440));
+      expect(side / size.width, closeTo(.365, .001));
+      expect(side, inInclusiveRange(240, 440));
       expect(size.width - side, greaterThanOrEqualTo(450));
     }
   });
@@ -60,7 +61,7 @@ void main() {
     },
   );
   testWidgets(
-    'late collection fades into reserved space without moving related videos',
+    'metadata resolves before layout; collection fade never moves related videos',
     (tester) async {
       final expanded = ValueNotifier(false);
       addTearDown(expanded.dispose);
@@ -86,12 +87,13 @@ void main() {
             );
         await tester.pumpWidget(page(pending: true, available: false));
         await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('related-content')), findsNothing);
+        expect(find.text('合集标题'), findsNothing);
+        await tester.pumpWidget(page(pending: false, available: true));
         final before = tester.getTopLeft(
           find.byKey(const ValueKey('related-content')),
         );
         expect(before.dy, greaterThanOrEqualTo(48));
-        expect(find.text('合集标题'), findsNothing);
-        await tester.pumpWidget(page(pending: false, available: true));
         expect(
           tester.getTopLeft(find.byKey(const ValueKey('related-content'))),
           before,
@@ -116,6 +118,9 @@ void main() {
           tester.getTopLeft(find.byKey(const ValueKey('related-content'))),
           before,
         );
+        await tester.pumpWidget(page(pending: true, available: false));
+        expect(find.text('合集标题'), findsNothing);
+        expect(find.byKey(const ValueKey('related-content')), findsNothing);
         await tester.pumpWidget(page(pending: false, available: false));
         await tester.pumpAndSettle();
         expect(

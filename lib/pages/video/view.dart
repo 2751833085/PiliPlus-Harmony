@@ -630,6 +630,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   final _seasonPartPanelKey = GlobalKey<EpisodePanelState>();
   final _seasonPanelKey = GlobalKey<EpisodePanelState>();
   final _tabletPlaylistExpanded = ValueNotifier(false);
+  final _tabletSidebarKey = GlobalKey<MiniScaffoldState>();
+
+  void _showTabletReplyDetails(WidgetBuilder builder) {
+    _tabletSidebarKey.currentState?.showBottomSheet(
+      builder, constraints: const BoxConstraints(), enableDrag: false,
+    );
+  }
   bool get _usesTabletVideoLayout => !_shortMode && videoDetailController.isUgc &&
       !videoDetailController.isFileSource &&
       TabletVideoLayout.enabled(Size(maxWidth, maxHeight));
@@ -1758,31 +1765,47 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             child: SizedBox(
               width: sideWidth,
               height: maxHeight - padding.top,
-              child: TabletVideoSidebar(
-                expanded: _tabletPlaylistExpanded,
-                hasPlaylist: _shouldShowSeasonPanel,
-                playlistPending: videoDetailController.plPlayerController.horizontalSeasonPanel &&
-                    ugcIntroController.videoDetail.value.bvid == null &&
-                    ugcIntroController.status.value,
-                header: Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: ugcIntroController.videoDetail.value.ugcSeason != null
-                      ? SeasonPanel(
-                          key: ValueKey(ugcIntroController.videoDetail.value),
-                          heroTag: heroTag,
-                          showEpisodes: showEpisodes,
-                          ugcIntroController: ugcIntroController,
-                        )
-                      : const Text('分集'),
-                ),
-                playlistBuilder: (_) => _buildSeasonPanel(showHeader: false),
-                related: CustomScrollView(
-                  key: const PageStorageKey('tablet-related'),
-                  controller: videoDetailController.effectiveIntroScrollCtr,
-                  slivers: [
-                    if (videoDetailController.showRelatedVideo)
-                      RelatedVideoPanel(key: videoRelatedKey, heroTag: heroTag, sidebar: true),
-                  ],
+              child: ClipRect(
+                child: MiniScaffold(
+                  key: _tabletSidebarKey,
+                  body: TabletVideoSidebar(
+                    expanded: _tabletPlaylistExpanded,
+                    hasPlaylist: _shouldShowSeasonPanel,
+                    playlistPending:
+                        videoDetailController
+                            .plPlayerController
+                            .horizontalSeasonPanel &&
+                        ugcIntroController.videoDetail.value.bvid == null &&
+                        ugcIntroController.status.value,
+                    header: Padding(
+                      padding: const EdgeInsets.only(left: 12),
+                      child:
+                          ugcIntroController.videoDetail.value.ugcSeason != null
+                          ? SeasonPanel(
+                              key: ValueKey(
+                                ugcIntroController.videoDetail.value,
+                              ),
+                              heroTag: heroTag,
+                              showEpisodes: showEpisodes,
+                              ugcIntroController: ugcIntroController,
+                            )
+                          : const Text('分集'),
+                    ),
+                    playlistBuilder: (_) =>
+                        _buildSeasonPanel(showHeader: false),
+                    related: CustomScrollView(
+                      key: const PageStorageKey('tablet-related'),
+                      controller: videoDetailController.effectiveIntroScrollCtr,
+                      slivers: [
+                        if (videoDetailController.showRelatedVideo)
+                          RelatedVideoPanel(
+                            key: videoRelatedKey,
+                            heroTag: heroTag,
+                            sidebar: true,
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -2917,6 +2940,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         onClose: onClose,
         isNested: isNested,
         headerSlivers: headerSlivers,
+        onShowReplyDetails: _usesTabletVideoLayout && !isFullScreen
+            ? _showTabletReplyDetails : null,
         heroTag: heroTag,
       );
 
