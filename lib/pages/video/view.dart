@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/widgets/tablet_video_sidebar.dart';
 import 'package:PiliPlus/pages/video/widgets/player_expansion.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 import 'package:PiliPlus/pages/video/widgets/collapsible_playlist.dart';
@@ -626,6 +627,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   final videoIntroKey = GlobalKey();
   final _seasonPartPanelKey = GlobalKey<EpisodePanelState>();
   final _seasonPanelKey = GlobalKey<EpisodePanelState>();
+  final _tabletPlaylistExpanded = ValueNotifier(false);
+  bool get _usesTabletVideoLayout => !_shortMode && videoDetailController.isUgc &&
+      !videoDetailController.isFileSource &&
+      TabletVideoLayout.enabled(Size(maxWidth, maxHeight));
 
   Worker? _pipModeWorker;
   Worker? _decorDarkWorker;
@@ -995,6 +1000,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     _decorDarkWorker?.dispose();
     _decorFullScreenWorker?.dispose();
     _fullscreenAnimation.dispose();
+    _tabletPlaylistExpanded.dispose();
     _releaseDecorDark();
     plPlayerController
       ?..removeStatusLister(playerListener)
@@ -1621,6 +1627,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Widget childWhenDisabledLandscapeInner(bool isFullScreen) {
+    if (_usesTabletVideoLayout) return _tabletVideoBody();
     if (enableVerticalExpand) {
       return Obx(() {
         if (videoDetailController.isVertical.value && !isPortrait) {
@@ -1689,6 +1696,86 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       });
     }
     return _childWhenDisabledLandscapeInner(isFullScreen);
+  }
+
+  Widget _tabletVideoBody() {
+    final availableWidth = maxWidth - padding.horizontal;
+    final sideWidth = TabletVideoLayout.sidebarWidth(availableWidth);
+    final leftWidth = availableWidth - sideWidth;
+    final height = leftWidth / Style.aspectRatio16x9;
+    final detailsHeight = max(0.0, maxHeight - padding.top - height);
+    final playerWidth = _expand(leftWidth, maxWidth);
+    final playerHeight = _expand(height, maxHeight);
+    final intro = UgcIntroPanel(
+      key: videoIntroKey,
+      heroTag: heroTag,
+      showAiBottomSheet: showAiBottomSheet,
+      showEpisodes: showEpisodes,
+      onShowMemberPage: onShowMemberPage,
+      isPortrait: isPortrait,
+      isHorizontal: true,
+      showCollection: !_shouldShowSeasonPanel,
+    );
+    return MiniScaffold(
+      key: videoDetailController.childKey,
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              SizedBox(
+                width: playerWidth,
+                height: playerHeight,
+                child: videoPlayer(width: playerWidth, height: playerHeight),
+              ),
+              PlayerExpansionPanel(
+                progress: _fullscreenProgress.value,
+                axis: Axis.vertical,
+                child: SizedBox(
+                  width: leftWidth,
+                  height: detailsHeight,
+                  child: videoDetailController.showReply
+                      ? videoReplyPanel(headerSlivers: [intro])
+                      : CustomScrollView(slivers: [intro]),
+                ),
+              ),
+            ],
+          ),
+          PlayerExpansionPanel(
+            progress: _fullscreenProgress.value,
+            axis: Axis.horizontal,
+            child: SizedBox(
+              width: sideWidth,
+              height: maxHeight - padding.top,
+              child: TabletVideoSidebar(
+                expanded: _tabletPlaylistExpanded,
+                hasPlaylist: _shouldShowSeasonPanel,
+                header: Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: ugcIntroController.videoDetail.value.ugcSeason != null
+                      ? SeasonPanel(
+                          key: ValueKey(ugcIntroController.videoDetail.value),
+                          heroTag: heroTag,
+                          showEpisodes: showEpisodes,
+                          ugcIntroController: ugcIntroController,
+                        )
+                      : const Text('分集'),
+                ),
+                playlistBuilder: (_) => _buildSeasonPanel(showHeader: false),
+                related: CustomScrollView(
+                  key: const PageStorageKey('tablet-related'),
+                  controller: videoDetailController.effectiveIntroScrollCtr,
+                  slivers: [
+                    if (videoDetailController.showRelatedVideo)
+                      RelatedVideoPanel(key: videoRelatedKey, heroTag: heroTag, sidebar: true),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _childWhenDisabledLandscapeInner(bool isFullScreen) {
@@ -1809,6 +1896,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   });
 
   Widget childWhenDisabledAlmostSquareInner(bool isFullScreen) {
+    if (_usesTabletVideoLayout) return _tabletVideoBody();
     if (enableVerticalExpand) {
       return Obx(
         () {
@@ -2179,8 +2267,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   /// 「左视频 + 右侧栏」的横屏布局（childWhenDisabledLandscape）是否生效。
   bool get _usesLandscapeLayout =>
-      videoDetailController.horizontalScreen &&
-      maxWidth / maxHeight >= kScreenRatio;
+      _usesTabletVideoLayout ||
+      (videoDetailController.horizontalScreen &&
+      maxWidth / maxHeight >= kScreenRatio);
 
   /// 「顶部视频 + 下方 Tab」的竖屏布局（childWhenDisabled）是否生效。
   /// 两者都不成立时为近方形布局（childWhenDisabledAlmostSquare）。
@@ -2198,7 +2287,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       child = plPlayer(width: maxWidth, height: maxHeight, isPipMode: true);
     } else if (_shortMode) {
       child = _shortVideoPage();
-    } else if (_usesLandscapeLayout) {
+    } else if (_usesTabletVideoLayout || _usesLandscapeLayout) {
       child = childWhenDisabledLandscape;
     } else if (_usesPortraitLayout) {
       child = childWhenDisabled;
@@ -2703,7 +2792,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     ),
   );
 
-  Widget get seasonPanel {
+  Widget get seasonPanel => _buildSeasonPanel();
+
+  Widget _buildSeasonPanel({bool showHeader = true}) {
     final videoDetail = ugcIntroController.videoDetail.value;
     // 与 _shouldShowSeasonPanel 用同一判据，避免"入口显示了但内容取不到"
     final sections = videoDetail.ugcSeason?.sections ?? const <SectionItem>[];
@@ -2756,7 +2847,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 color: colorScheme.outline.withValues(alpha: 0.1),
               ),
             ],
-            Padding(
+            if (showHeader) Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               // key 必须在闭包内读取 videoDetail：SeasonPanel 的构造参数全是普通
               // 字段，闭包不读任何 Rx 时 GetX 会抛「improper use of a GetX」，
@@ -2806,11 +2897,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   }
 
-  Widget videoReplyPanel({bool isNested = false, VoidCallback? onClose}) =>
+  Widget videoReplyPanel({bool isNested = false, VoidCallback? onClose, List<Widget> headerSlivers = const []}) =>
       VideoReplyPanel(
         key: videoReplyPanelKey,
         onClose: onClose,
         isNested: isNested,
+        headerSlivers: headerSlivers,
         heroTag: heroTag,
       );
 
@@ -2847,6 +2939,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     assert((cid == null) == (bvid == null));
     if (cid == null) {
       videoDetailController.showMediaListPanel(context);
+      return;
+    }
+    if (_usesTabletVideoLayout && !isFullScreen && _shouldShowSeasonPanel) {
+      _tabletPlaylistExpanded.value = true;
       return;
     }
     Widget listSheetContent({bool enableSlide = true}) => EpisodePanel(

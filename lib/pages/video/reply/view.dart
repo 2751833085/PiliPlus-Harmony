@@ -26,12 +26,14 @@ class VideoReplyPanel extends StatefulWidget {
     required this.heroTag,
     required this.isNested,
     this.onClose,
+    this.headerSlivers = const [],
   });
 
   final int replyLevel;
   final String heroTag;
   final bool isNested;
   final VoidCallback? onClose;
+  final List<Widget> headerSlivers;
 
   @override
   State<VideoReplyPanel> createState() => _VideoReplyPanelState();
@@ -87,6 +89,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                   physics: const AlwaysScrollableScrollPhysics(),
                   key: const PageStorageKey(_VideoReplyPanelState),
                   slivers: [
+                    ...widget.headerSlivers,
                     SliverFloatingHeaderWidget(
                       backgroundColor: Theme.of(
                         context,

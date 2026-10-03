@@ -23,8 +23,10 @@ class VideoCardH extends StatelessWidget {
     this.onTap,
     this.onViewLater,
     this.onRemove,
+    this.adaptiveCover = false,
   });
   final HorizontalVideoModel videoItem;
+  final bool adaptiveCover;
   final VoidCallback? onTap;
   final ValueChanged<int>? onViewLater;
   final VoidCallback? onRemove;
@@ -52,22 +54,29 @@ class VideoCardH extends StatelessWidget {
                 horizontal: Style.safeSpace,
                 vertical: 5,
               ),
-              child: Row(
-                crossAxisAlignment: .start,
-                children: [
-                  AspectRatio(
-                    aspectRatio: Style.aspectRatio,
-                    child: _CoverBuilderH(
-                      cover: videoItem.cover,
-                      badge: videoItem.badge,
-                      duration: videoItem.duration,
-                      progress: videoItem.progress,
-                      colorScheme: theme.colorScheme,
+              child: LayoutBuilder(
+                builder: (context, bounds) => Row(
+                  crossAxisAlignment: .start,
+                  children: [
+                    SizedBox(
+                      width: adaptiveCover
+                          ? (bounds.maxWidth * .4).clamp(88.0, 168.0)
+                          : null,
+                      child: AspectRatio(
+                        aspectRatio: Style.aspectRatio,
+                        child: _CoverBuilderH(
+                          cover: videoItem.cover,
+                          badge: videoItem.badge,
+                          duration: videoItem.duration,
+                          progress: videoItem.progress,
+                          colorScheme: theme.colorScheme,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  content(theme),
-                ],
+                    const SizedBox(width: 10),
+                    content(theme),
+                  ],
+                ),
               ),
             ),
           ),

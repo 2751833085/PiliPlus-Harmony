@@ -58,6 +58,7 @@ class UgcIntroPanel extends StatefulWidget {
     required this.onShowMemberPage,
     required this.isPortrait,
     required this.isHorizontal,
+    this.showCollection = true,
   });
   final String heroTag;
   final Function showAiBottomSheet;
@@ -65,6 +66,7 @@ class UgcIntroPanel extends StatefulWidget {
   final ValueChanged<int?> onShowMemberPage;
   final bool isPortrait;
   final bool isHorizontal;
+  final bool showCollection;
 
   @override
   State<UgcIntroPanel> createState() => _UgcIntroPanelState();
@@ -105,7 +107,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
     if (!tabletLandscape && _wasTabletLandscape && _automaticallyExpanded) {
       _automaticallyExpanded = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && !_wasTabletLandscape) introController.expand.value = false;
+        if (mounted && !_wasTabletLandscape)
+          introController.expand.value = false;
       });
     }
     _wasTabletLandscape = tabletLandscape;
@@ -204,7 +207,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                     ),
                   ],
                   // 合集
-                  if (!isLoading &&
+                  if (widget.showCollection &&
+                      !isLoading &&
                       videoDetail.ugcSeason != null &&
                       (isPortrait ||
                           !videoDetailCtr
@@ -218,7 +222,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                         ugcIntroController: introController,
                       ),
                     ),
-                  if (!isLoading &&
+                  if (widget.showCollection &&
+                      !isLoading &&
                       videoDetail.pages != null &&
                       videoDetail.pages!.length > 1 &&
                       (isPortrait ||

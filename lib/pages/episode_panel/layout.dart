@@ -2,7 +2,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 
 abstract final class EpisodeLayout {
-  static double coverWidth(double width) => (width * .34).clamp(80.0, 136.0);
+  static double coverWidth(double width) => (width * .40).clamp(88.0, 168.0);
   static double playlistHeight(Size window, double width) =>
       (width * 1.05).clamp(220.0, 360.0).clamp(0.0, window.height * .55);
   static double bottomPadding(double safeInset, {required bool overlay}) =>

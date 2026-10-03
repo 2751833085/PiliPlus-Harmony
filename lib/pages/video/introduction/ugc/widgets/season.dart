@@ -98,10 +98,10 @@ class _SeasonPanelState extends State<SeasonPanel> {
         right: 2,
       ),
       child: ImmersiveSurface(
-        color: theme.colorScheme.onInverseSurface,
-        borderRadius: const BorderRadius.all(Radius.circular(6)),
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
         child: InkWell(
-          borderRadius: const BorderRadius.all(Radius.circular(6)),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           onTap: widget.canTap
               ? () => widget.showEpisodes(
                   _videoDetailController.seasonIndex.value,
@@ -118,12 +118,12 @@ class _SeasonPanelState extends State<SeasonPanel> {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    '合集：${videoDetail.ugcSeason!.title!}',
-                    style: theme.textTheme.labelMedium,
+                    videoDetail.ugcSeason!.title ?? '合集',
+                    style: theme.textTheme.bodyMedium,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: 8),
                 Image.asset(
                   Assets.livingStatic,
                   color: theme.colorScheme.primary,
@@ -131,11 +131,11 @@ class _SeasonPanelState extends State<SeasonPanel> {
                   cacheHeight: 12.cacheSize(context),
                   semanticLabel: "正在播放：",
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 6),
                 Obx(
                   () => Text(
                     '${currentIndex.value + 1}/${episodes.length}',
-                    style: theme.textTheme.labelMedium,
+                    style: theme.textTheme.bodyMedium,
                     semanticsLabel:
                         '第${currentIndex.value + 1}集，共${episodes.length}集',
                   ),

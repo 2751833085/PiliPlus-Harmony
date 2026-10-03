@@ -9,8 +9,13 @@ import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
 class RelatedVideoPanel extends StatefulWidget {
-  const RelatedVideoPanel({super.key, required this.heroTag});
+  const RelatedVideoPanel({
+    super.key,
+    required this.heroTag,
+    this.sidebar = false,
+  });
   final String heroTag;
+  final bool sidebar;
   @override
   State<RelatedVideoPanel> createState() => _RelatedVideoPanelState();
 }
@@ -30,7 +35,7 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-      padding: const EdgeInsets.only(top: 7, bottom: 100),
+      padding: EdgeInsets.only(top: 7, bottom: widget.sidebar ? 16 : 100),
       sliver: Obx(() => _buildBody(_relatedController.loadingState.value)),
     );
   }
@@ -41,10 +46,17 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
       Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
-                gridDelegate: gridDelegate,
+                gridDelegate: widget.sidebar
+                    ? const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 1,
+                        mainAxisExtent: 110,
+                        mainAxisSpacing: 2,
+                      )
+                    : gridDelegate,
                 itemBuilder: (context, index) {
                   return VideoCardH(
                     videoItem: response[index],
+                    adaptiveCover: widget.sidebar,
                     onRemove: () => _relatedController.loadingState
                       ..value.data!.removeAt(index)
                       ..refresh(),
