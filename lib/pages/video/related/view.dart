@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/widgets/route_content_reveal.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -36,7 +37,14 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
   Widget build(BuildContext context) {
     return SliverPadding(
       padding: EdgeInsets.only(top: 7, bottom: widget.sidebar ? 16 : 100),
-      sliver: Obx(() => _buildBody(_relatedController.loadingState.value)),
+      sliver: Obx(() {
+        final state = _relatedController.loadingState.value;
+        return RouteContentReveal(
+          sliver: true,
+          ready: state is! Loading,
+          builder: (_) => _buildBody(state),
+        );
+      }),
     );
   }
 

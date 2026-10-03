@@ -62,6 +62,11 @@ void main() {
             .arguments['durationMs'],
         0,
       );
+      final beforeMeasurement = exposure();
+      page.offstage = true;
+      await tester.pump();
+      expect(exposure(), beforeMeasurement);
+      page.offstage = false;
       await tester.pump(const Duration(milliseconds: 30));
       expect(exposure(), closeTo(.5, .002));
       await tester.pumpAndSettle();

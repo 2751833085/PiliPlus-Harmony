@@ -30,6 +30,9 @@ class ShellBarsObserver extends NavigatorObserver {
 
   void _syncTopBarExposure() {
     final cover = _homeCover;
+    // Hero pre-layout temporarily exposes an always-completed animation while
+    // the destination is offstage. It must not hide the visible home header.
+    if (cover?.offstage == true) return;
     final animation = cover?.animation;
     // Native UI and Flutter cannot run independent clocks: a slow video frame
     // otherwise leaves a blank strip after the native header has moved away.

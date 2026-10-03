@@ -1,3 +1,5 @@
+import 'package:PiliPlus/pages/video/widgets/route_content_reveal.dart';
+import 'package:PiliPlus/pages/video/related/controller.dart';
 import 'package:PiliPlus/pages/video/widgets/tablet_video_sidebar.dart';
 import 'package:PiliPlus/pages/video/widgets/player_expansion.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
@@ -792,10 +794,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       pgcIntroController = Get.put(PgcIntroController(), tag: heroTag);
     }
 
+    // Fetch related data alongside playback, without building the sidebar yet.
+    if (videoDetailController.isUgc && videoDetailController.showRelatedVideo &&
+        !Get.isRegistered<RelatedController>(tag: heroTag)) {
+      Get.put(RelatedController(), tag: heroTag);
+    }
+
     // Keep the player layout ready in the very first frame.
     // Defer only playback/network work, never the destination layout.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) videoSourceInit();
+      if (mounted) {
+        videoDetailController.entranceReady = waitForVideoEntrance(context);
+        videoSourceInit();
+      }
     });
     addObserverMobile(this);
   }
@@ -1734,9 +1745,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 child: SizedBox(
                   width: leftWidth,
                   height: detailsHeight,
-                  child: videoDetailController.showReply
-                      ? videoReplyPanel(headerSlivers: [intro])
-                      : CustomScrollView(slivers: [intro]),
+                  child: RouteContentReveal(
+                    ready: ugcIntroController.videoDetail.value.bvid != null ||
+                        !ugcIntroController.status.value,
+                    builder: (_) => videoDetailController.showReply
+                        ? videoReplyPanel(headerSlivers: [intro])
+                        : CustomScrollView(slivers: [intro]),
+                  ),
                 ),
               ),
             ],

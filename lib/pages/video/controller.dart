@@ -1202,6 +1202,8 @@ class VideoDetailController extends GetxController
     });
   }
 
+  Future<bool>? entranceReady;
+
   Future<void> playerInit({
     bool? autoplay,
     bool autoFullScreenFlag = false,
@@ -1262,6 +1264,10 @@ class VideoDetailController extends GetxController
           source != (bvid, cid.value) ||
           !_playerRequests.isCurrent(ticket))
         return;
+      final entrance = entranceReady;
+      if (entrance != null && !await entrance) return;
+      if (isClosed || !_playerRequests.isCurrent(ticket) ||
+          source != (bvid, cid.value)) return;
       await plPlayerController.setDataSource(
         isFileSource
             ? FileSource(
