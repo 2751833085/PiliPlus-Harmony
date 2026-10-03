@@ -10,7 +10,7 @@ Future<bool> waitForVideoEntrance(BuildContext context) {
     final pending = Completer<bool>();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       pending.complete(
-        context.mounted && route!.isCurrent
+        context.mounted && route!.isActive
             ? await waitForVideoEntrance(context)
             : false,
       );
@@ -22,7 +22,7 @@ Future<bool> waitForVideoEntrance(BuildContext context) {
       animation == null ||
       MediaQuery.disableAnimationsOf(context) ||
       (!route.offstage && animation.status == AnimationStatus.completed)) {
-    return Future.value(route?.isCurrent ?? true);
+    return Future.value(route?.isActive ?? true);
   }
   final result = Completer<bool>();
   late AnimationStatusListener listener;
@@ -34,7 +34,7 @@ Future<bool> waitForVideoEntrance(BuildContext context) {
 
   listener = (status) {
     if (status == AnimationStatus.completed && !route.offstage)
-      finish(route.isCurrent);
+      finish(route.isActive);
     if (status == AnimationStatus.dismissed) finish(false);
   };
   animation.addStatusListener(listener);
