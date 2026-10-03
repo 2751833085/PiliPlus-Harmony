@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/video_card/video_card_h_layout.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
@@ -60,7 +61,7 @@ class VideoCardH extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: adaptiveCover
-                          ? (bounds.maxWidth * .4).clamp(88.0, 168.0)
+                          ? VideoCardHLayout.coverWidth(bounds.maxWidth, bounds.maxHeight)
                           : null,
                       child: AspectRatio(
                         aspectRatio: Style.aspectRatio,

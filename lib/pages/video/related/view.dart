@@ -1,4 +1,5 @@
-import 'package:PiliPlus/pages/video/widgets/route_content_reveal.dart';
+import 'package:PiliPlus/common/skeleton/video_card_h.dart';
+import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -37,30 +38,32 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
   Widget build(BuildContext context) {
     return SliverPadding(
       padding: EdgeInsets.only(top: 7, bottom: widget.sidebar ? 16 : 100),
-      sliver: Obx(() {
-        final state = _relatedController.loadingState.value;
-        return RouteContentReveal(
-          sliver: true,
-          ready: state is! Loading,
-          builder: (_) => _buildBody(state),
-        );
-      }),
+      sliver: Obx(() => _buildBody(_relatedController.loadingState.value)),
     );
   }
 
+  static const _sidebarDelegate = SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 1,
+    mainAxisExtent: 110,
+    mainAxisSpacing: 2,
+  );
+
   Widget _buildBody(LoadingState<List<HotVideoItemModel>?> loadingState) {
     return switch (loadingState) {
-      Loading() => gridSkeleton,
+      Loading() =>
+        widget.sidebar
+            ? const SliverGrid(
+                gridDelegate: _sidebarDelegate,
+                delegate: SliverSingleChildDelegate(
+                  count: 10,
+                  child: VideoCardHSkeleton(adaptiveCover: true),
+                ),
+              )
+            : gridSkeleton,
       Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
-                gridDelegate: widget.sidebar
-                    ? const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 1,
-                        mainAxisExtent: 110,
-                        mainAxisSpacing: 2,
-                      )
-                    : gridDelegate,
+                gridDelegate: widget.sidebar ? _sidebarDelegate : gridDelegate,
                 itemBuilder: (context, index) {
                   return VideoCardH(
                     videoItem: response[index],

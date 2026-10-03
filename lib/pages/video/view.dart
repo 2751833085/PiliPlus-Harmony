@@ -1,4 +1,4 @@
-import 'package:PiliPlus/pages/video/widgets/route_content_reveal.dart';
+import 'package:PiliPlus/pages/video/widgets/video_entrance.dart';
 import 'package:PiliPlus/pages/video/related/controller.dart';
 import 'package:PiliPlus/pages/video/widgets/tablet_video_sidebar.dart';
 import 'package:PiliPlus/pages/video/widgets/player_expansion.dart';
@@ -1745,13 +1745,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 child: SizedBox(
                   width: leftWidth,
                   height: detailsHeight,
-                  child: RouteContentReveal(
-                    ready: ugcIntroController.videoDetail.value.bvid != null ||
-                        !ugcIntroController.status.value,
-                    builder: (_) => videoDetailController.showReply
-                        ? videoReplyPanel(headerSlivers: [intro])
-                        : CustomScrollView(slivers: [intro]),
-                  ),
+                  child: videoDetailController.showReply
+                      ? videoReplyPanel(headerSlivers: [intro])
+                      : CustomScrollView(slivers: [intro]),
                 ),
               ),
             ],
