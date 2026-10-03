@@ -272,19 +272,26 @@ abstract class HarmonyChannel {
   static Future<void> setTopBarIsHome(bool isHome) =>
       _invoke('setTopBarIsHome', {'isHome': isHome});
 
-  static double? _pendingTopBarExposure;
+  static (double, int)? _pendingTopBarExposure;
   static bool _sendingTopBarExposure = false;
+
   /// Coalesce native clipping updates instead of queuing stale gesture frames.
-  static Future<void> setTopBarExposure(double fraction) async {
+  static Future<void> setTopBarExposure(
+    double fraction, {
+    int durationMs = 0,
+  }) async {
     if (!OS.isHarmony) return;
-    _pendingTopBarExposure = fraction.clamp(0.0, 1.0);
+    _pendingTopBarExposure = (fraction.clamp(0.0, 1.0), durationMs);
     if (_sendingTopBarExposure) return;
     _sendingTopBarExposure = true;
     try {
       while (_pendingTopBarExposure != null) {
         final value = _pendingTopBarExposure!;
         _pendingTopBarExposure = null;
-        await _invoke('setTopBarExposure', {'fraction': value});
+        await _invoke('setTopBarExposure', {
+          'fraction': value.$1,
+          'durationMs': value.$2,
+        });
       }
     } finally {
       _sendingTopBarExposure = false;

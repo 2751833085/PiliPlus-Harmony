@@ -273,18 +273,34 @@ class HarmonyPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     if (MediaQuery.disableAnimationsOf(context)) return child;
-    final motion = animation.drive(CurveTween(
-      curve: route.navigator?.userGestureInProgress == true
-          ? Curves.linear : HarmonyMotion.curve,
-    ));
-    return SlideTransition(
-      position: motion.drive(
-        Tween<Offset>(
-          begin: const Offset(1, 0),
-          end: Offset.zero,
-        ),
-      ),
+    // Cache the page's paint, and update only its translation. The SDK's
+    // OpenRightwards implementation samples a cached primary child only once;
+    // listening to both animations here keeps push/pop moving on every frame.
+    return AnimatedBuilder(
+      animation: Listenable.merge([
+        animation,
+        secondaryAnimation,
+        if (route.navigator != null)
+          route.navigator!.userGestureInProgressNotifier,
+      ]),
       child: RepaintBoundary(child: child),
+      builder: (context, child) {
+        final interactive = route.navigator?.userGestureInProgress == true;
+        final primary = HarmonyMotion.pageCoverage(
+          animation.value,
+          interactive: interactive,
+          reverse: animation.status == AnimationStatus.reverse,
+        );
+        final secondary = HarmonyMotion.pageCoverage(
+          secondaryAnimation.value,
+          interactive: interactive,
+          reverse: secondaryAnimation.status == AnimationStatus.reverse,
+        );
+        return FractionalTranslation(
+          translation: Offset(1 - primary - .2 * secondary, 0),
+          child: child,
+        );
+      },
     );
   }
 }

@@ -442,7 +442,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 120));
       expect(
         find.byWidgetPredicate(
-          (w) => w is SlideTransition,
+          (w) => w is FractionalTranslation,
         ),
         findsWidgets,
       );

@@ -662,6 +662,8 @@ export default class HarmonyChannel implements FlutterPlugin {
       }
       case "setTopBarExposure": {
         const fraction: number = call.argument('fraction') ?? 1;
+        const duration: number = call.argument('durationMs') ?? 0;
+        AppStorage.setOrCreate('topBarExposureDuration', Math.max(0, duration));
         AppStorage.setOrCreate('topBarExposure', Math.max(0, Math.min(1, fraction)));
         result.success(true);
         break;
@@ -864,8 +866,9 @@ export default class HarmonyChannel implements FlutterPlugin {
    * - 显示 + 宽高比 9/16 ~ 1:1 以外：仅显示顶栏
    */
   private syncTopBarVisibility(hidden: boolean, force: boolean): void {
-    // 顶栏未启用或不处于首页时不处理
-    if (AppStorage.get('useNativeTopBar') !== true || !this.topBarIsHome) {
+    // Forced shell visibility is a route signal. The top bar has its own
+    // coverage/visibility updates; writing it here races the first route frame.
+    if (force || AppStorage.get('useNativeTopBar') !== true || !this.topBarIsHome) {
       return;
     }
     const width = AppStorage.get('winWidth') as number ?? 0;
@@ -876,10 +879,6 @@ export default class HarmonyChannel implements FlutterPlugin {
     const aspect = width / height;
     const portrait = aspect < 1.0;
     const tall = aspect < 9 / 16; // 竖长屏
-    if (force) {
-      AppStorage.setOrCreate('topBarHidden', hidden);
-      return;
-    }
     if (hidden) {
       if (tall) {
         return;

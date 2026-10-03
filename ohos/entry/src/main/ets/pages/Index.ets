@@ -111,6 +111,7 @@ struct Index {
   @StorageLink('tabSelectedColor') navSelected: string = '#3367D6';
   @StorageLink('tabSelectedSubColor') navSelectedSub: string = '#503367D6';
   @StorageLink('useNativeTopBar') useNativeTopBar: boolean = false;
+  @StorageLink('topBarExposureDuration') topBarExposureDuration: number = 0;
   @StorageLink('topBarExposure') topBarExposure: number = 1;
   @StorageLink('topBarHidden') topBarHidden: boolean = false;
   @StorageLink('topBarCollapsed') topBarCollapsed: boolean = false;
@@ -624,7 +625,9 @@ struct Index {
     .height(this.topBarHeight())
     .clip(true)
     .animation({ duration: TOP_BAR_MOTION_DURATION, curve: TOP_BAR_MOTION_CURVE })
-    .clipShape(new Rect({ width: Math.max(0, this.winWidth * this.topBarExposure), height: this.topBarHeight() }))
+    .clipShape(new Rect({ width: Math.max(0, this.winWidth * (0.2 + 0.8 * this.topBarExposure)), height: this.topBarHeight() }))
+    .translate({ x: -0.2 * this.winWidth * (1 - this.topBarExposure), y: 0 })
+    .animation({ duration: this.topBarExposureDuration, curve: curves.cubicBezierCurve(0.2, 0, 0, 1) })
     .visibility(this.topBarHidden ? Visibility.Hidden : Visibility.Visible)
     .blur(this.shellBarsBlurred ? 12 : 0)
     .hitTestBehavior(this.shellBarsObscured || this.topBarExposure < 1 ? HitTestMode.None : HitTestMode.Transparent)
@@ -836,7 +839,9 @@ struct Index {
     .height(this.topBarHeight())
     .clip(true)
     .animation({ duration: TOP_BAR_MOTION_DURATION, curve: TOP_BAR_MOTION_CURVE })
-    .clipShape(new Rect({ width: Math.max(0, this.winWidth * this.topBarExposure), height: this.topBarHeight() }))
+    .clipShape(new Rect({ width: Math.max(0, this.winWidth * (0.2 + 0.8 * this.topBarExposure)), height: this.topBarHeight() }))
+    .translate({ x: -0.2 * this.winWidth * (1 - this.topBarExposure), y: 0 })
+    .animation({ duration: this.topBarExposureDuration, curve: curves.cubicBezierCurve(0.2, 0, 0, 1) })
     .visibility(this.topBarHidden ? Visibility.Hidden : Visibility.Visible)
     .blur(this.shellBarsBlurred ? 12 : 0)
     .hitTestBehavior(this.shellBarsObscured || this.topBarExposure < 1 ? HitTestMode.None : HitTestMode.Transparent)

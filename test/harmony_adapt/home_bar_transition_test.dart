@@ -12,7 +12,7 @@ void main() {
     expect(HarmonyMotion.pageCoverage(1, interactive: false), 1);
   });
   testWidgets(
-    'native home header remains clipped until the returning page leaves',
+    'native header receives bounded animation targets rather than per-frame calls',
     (tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.values.firstWhere(
         (p) => p.name == 'ohos',
@@ -51,19 +51,37 @@ void main() {
       );
       key.currentState!.push(page);
       await tester.pump();
-      expect(exposure(), 1);
       await tester.pump(const Duration(milliseconds: 120));
-      expect(exposure(), inExclusiveRange(0, 1));
+      expect(exposure(), 0);
+      final pushCalls = calls
+          .where((c) => c.method == 'setTopBarExposure')
+          .length;
+      expect(
+        calls
+            .lastWhere((c) => c.method == 'setTopBarExposure')
+            .arguments['durationMs'],
+        greaterThan(0),
+      );
+      await tester.pump(const Duration(milliseconds: 30));
+      expect(
+        calls.where((c) => c.method == 'setTopBarExposure').length,
+        pushCalls,
+      );
       await tester.pumpAndSettle();
       expect(exposure(), 0);
       key.currentState!.pop();
       await tester.pump();
-      expect(
-        exposure(),
-        0,
-      ); // didPop must not reveal the whole header over the video.
       await tester.pump(const Duration(milliseconds: 120));
-      expect(exposure(), inExclusiveRange(0, 1));
+      expect(exposure(), 1);
+      await tester.pumpAndSettle();
+      expect(exposure(), 1);
+      showModalBottomSheet<void>(
+        context: key.currentContext!,
+        builder: (_) => const Text('sheet'),
+      );
+      await tester.pumpAndSettle();
+      expect(exposure(), 0);
+      key.currentState!.pop();
       await tester.pumpAndSettle();
       expect(exposure(), 1);
       expect(tester.takeException(), isNull);

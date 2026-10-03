@@ -10,14 +10,17 @@ import 'package:flutter/material.dart';
 class ShellBarsObserver extends NavigatorObserver {
   final Set<Route<dynamic>> _activeRoutes = {};
   bool _orientationHidden = false;
+  bool _blockingPanelHidden = false;
   PageRoute<dynamic>? _homeCover;
   bool? _topBarHidden;
   double? _exposure;
+  AnimationStatus? _nativeMotionStatus;
 
   void _trackHomeCover(PageRoute<dynamic>? route) {
     if (identical(route, _homeCover)) return;
     _homeCover?.animation?.removeListener(_syncTopBarExposure);
     _homeCover = route;
+    _nativeMotionStatus = null;
     route?.animation?.addListener(_syncTopBarExposure);
     route?.completed.then((_) {
       if (identical(_homeCover, route)) {
@@ -29,13 +32,44 @@ class ShellBarsObserver extends NavigatorObserver {
 
   void _syncTopBarExposure() {
     final cover = _homeCover;
+    final animation = cover?.animation;
+    final interactive = navigator?.userGestureInProgress == true;
+    final status = animation?.status;
+    if (!_orientationHidden &&
+        !_blockingPanelHidden &&
+        !interactive &&
+        cover != null &&
+        animation != null &&
+        (status == AnimationStatus.forward ||
+            status == AnimationStatus.reverse)) {
+      if (_nativeMotionStatus == status) return;
+      _nativeMotionStatus = status;
+      final entering = status == AnimationStatus.forward;
+      final target = entering ? 0.0 : 1.0;
+      final remaining = entering ? 1 - animation.value : animation.value;
+      final duration = entering
+          ? cover.transitionDuration
+          : cover.reverseTransitionDuration;
+      _exposure = target;
+      _topBarHidden = false;
+      HarmonyChannel.setTopBarHidden(false);
+      HarmonyChannel.setTopBarExposure(
+        target,
+        durationMs: (duration.inMilliseconds * remaining).round(),
+      );
+      return;
+    }
+    _nativeMotionStatus = null;
     final coverage = cover == null
         ? 0.0
         : HarmonyMotion.pageCoverage(
             cover.animation?.value ?? 1,
             interactive: navigator?.userGestureInProgress == true,
+            reverse: animation?.status == AnimationStatus.reverse,
           );
-    final exposure = _orientationHidden ? 0.0 : 1 - coverage;
+    final exposure = _orientationHidden || _blockingPanelHidden
+        ? 0.0
+        : 1 - coverage;
     if (_exposure != exposure) {
       _exposure = exposure;
       HarmonyChannel.setTopBarExposure(exposure);
@@ -90,6 +124,7 @@ class ShellBarsObserver extends NavigatorObserver {
           (route is PublishRoute &&
               route.settings.name != 'harmony:coverPreview'),
     );
+    _blockingPanelHidden = hasBlockingPanel;
     final hasOverlay = hasPage || hasBlockingPanel || _orientationHidden;
     final obscured =
         !hasOverlay && _activeRoutes.any((route) => route is PopupRoute);
