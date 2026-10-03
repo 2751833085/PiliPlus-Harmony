@@ -1,0 +1,19 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6227,
+  "releaseTag": "v3.0.0+6227",
+  "sha256": "1bd71aeefaf3986920cac8e50dde95b120c4660430da3866bf0e1a024fe5df1a",
+  "sizeBytes": 33087618,
+  "signatureVerified": true,
+  "sourceCommit": "1e00394124b6308aba3c7a5cfddc3f239590e251",
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "validation": "234 Harmony regression tests passed; analyzer: no errors, 3 pre-existing warnings in video/controller.dart; signed HAP signature, ZIP CRC, version and native MPV hash verified. Final device smoke test pending unlock; not published.",
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "deviceOverwrite": {
+    "uidPreserved": true,
+    "firstInstallTimePreserved": true,
+    "launchSucceeded": false,
+    "launchBlockedByLockScreen": true
+  }
+}
