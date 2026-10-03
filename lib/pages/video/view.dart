@@ -1761,6 +1761,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               child: TabletVideoSidebar(
                 expanded: _tabletPlaylistExpanded,
                 hasPlaylist: _shouldShowSeasonPanel,
+                playlistPending: videoDetailController.plPlayerController.horizontalSeasonPanel &&
+                    ugcIntroController.videoDetail.value.bvid == null &&
+                    ugcIntroController.status.value,
                 header: Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: ugcIntroController.videoDetail.value.ugcSeason != null
