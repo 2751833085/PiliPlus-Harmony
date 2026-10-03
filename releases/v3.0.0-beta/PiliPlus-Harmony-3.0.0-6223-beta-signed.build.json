@@ -1,0 +1,19 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6223,
+  "releaseTag": "v3.0.0+6223",
+  "sha256": "701dba297cee6133b5dcf2a1d5550aaabf9b309018aa22df51bd85f8503c6679",
+  "sizeBytes": 33073217,
+  "signatureVerified": true,
+  "sourceCommit": "86a99b7bd5f26ffb96b39bba5c60188aa8e223f5",
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "validation": "228 regression tests passed; changed production files have no analyzer errors or warnings; signed HAP signature, ZIP CRC, version and native MPV hash verified",
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "deviceOverwrite": {
+    "uidPreserved": true,
+    "firstInstallTimePreserved": true,
+    "launchSucceeded": false,
+    "launchBlockedByLockScreen": true
+  }
+}
