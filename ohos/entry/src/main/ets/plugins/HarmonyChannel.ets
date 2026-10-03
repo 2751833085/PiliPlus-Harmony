@@ -660,6 +660,12 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(true);
         break;
       }
+      case "setTopBarExposure": {
+        const fraction: number = call.argument('fraction') ?? 1;
+        AppStorage.setOrCreate('topBarExposure', Math.max(0, Math.min(1, fraction)));
+        result.success(true);
+        break;
+      }
       case "setTopBarHidden": {
         const hidden: boolean = call.argument('hidden') ?? false;
         AppStorage.setOrCreate('topBarHidden', hidden);

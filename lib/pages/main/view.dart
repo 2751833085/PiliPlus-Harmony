@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/navigation_press_feedback.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/cached_navigation_view.dart';
@@ -163,9 +164,31 @@ class _MainAppState extends PopScopeState<MainApp>
     _syncPrimaryColor();
   }
 
-  @override
-  void didPopNext() {
-    addObserverMobile(this);
+  int _resumeGeneration = 0;
+
+  Future<void> _refreshAfterReturn(int generation) async {
+    // The home route's secondary animation covers the departing video page.
+    final animation = ModalRoute.of(context)?.secondaryAnimation;
+    if (animation != null && animation.status != AnimationStatus.dismissed) {
+      final done = Completer<void>();
+      void listener(AnimationStatus status) {
+        if (status == AnimationStatus.dismissed ||
+            status == AnimationStatus.completed) {
+          if (!done.isCompleted) done.complete();
+        }
+      }
+
+      animation.addStatusListener(listener);
+      try {
+        await done.future.timeout(const Duration(seconds: 1), onTimeout: () {});
+      } finally {
+        animation.removeStatusListener(listener);
+      }
+    }
+    if (!mounted ||
+        generation != _resumeGeneration ||
+        ModalRoute.of(context)?.isCurrent != true)
+      return;
     _mainController
       ..checkUnreadDynamic()
       ..checkDefaultSearch(true)
@@ -175,11 +198,18 @@ class _MainAppState extends PopScopeState<MainApp>
         Get.isRegistered<MineController>()) {
       Get.find<MineController>().onRefresh(isManual: false);
     }
+  }
+
+  @override
+  void didPopNext() {
+    addObserverMobile(this);
+    _refreshAfterReturn(++_resumeGeneration);
     super.didPopNext();
   }
 
   @override
   void didPushNext() {
+    _resumeGeneration++;
     removeObserverMobile(this);
     super.didPushNext();
   }

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 import 'package:PiliPlus/common/widgets/image_viewer/hero_dialog_route.dart';
 import 'package:PiliPlus/pages/common/publish/publish_route.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
@@ -9,6 +10,42 @@ import 'package:flutter/material.dart';
 class ShellBarsObserver extends NavigatorObserver {
   final Set<Route<dynamic>> _activeRoutes = {};
   bool _orientationHidden = false;
+  PageRoute<dynamic>? _homeCover;
+  bool? _topBarHidden;
+  double? _exposure;
+
+  void _trackHomeCover(PageRoute<dynamic>? route) {
+    if (identical(route, _homeCover)) return;
+    _homeCover?.animation?.removeListener(_syncTopBarExposure);
+    _homeCover = route;
+    route?.animation?.addListener(_syncTopBarExposure);
+    route?.completed.then((_) {
+      if (identical(_homeCover, route)) {
+        _trackHomeCover(null);
+        _sync();
+      }
+    });
+  }
+
+  void _syncTopBarExposure() {
+    final cover = _homeCover;
+    final coverage = cover == null
+        ? 0.0
+        : HarmonyMotion.pageCoverage(
+            cover.animation?.value ?? 1,
+            interactive: navigator?.userGestureInProgress == true,
+          );
+    final exposure = _orientationHidden ? 0.0 : 1 - coverage;
+    if (_exposure != exposure) {
+      _exposure = exposure;
+      HarmonyChannel.setTopBarExposure(exposure);
+    }
+    final hidden = exposure <= 0;
+    if (_topBarHidden != hidden) {
+      _topBarHidden = hidden;
+      HarmonyChannel.setTopBarHidden(hidden);
+    }
+  }
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
@@ -66,8 +103,10 @@ class ShellBarsObserver extends NavigatorObserver {
     // 顶栏「强制隐藏」仅针对页面覆盖（PageRoute：如视频页/设置页）与横屏；
     // 弹层（PopupRoute：dialog/bottomSheet/popupmenu）不计入，避免顶栏被
     // 直接隐藏而绕过宽高比分流。
-    final hasPageOverlay = _activeRoutes.whereType<PageRoute>().length > 1;
-    HarmonyChannel.setTopBarHidden(hasPageOverlay || _orientationHidden);
+    final pages = _activeRoutes.whereType<PageRoute>().toList();
+    if (pages.length > 1) _trackHomeCover(pages[1]);
+    // Keep a popped route until its reverse transition removes the overlay.
+    _syncTopBarExposure();
     // 系统状态栏跟随「最上层页面是否仍是沉浸播放页」，与原生顶栏同频：
     // - 最上层是视频/直播播放页（/videoV、/liveRoom）：保持沉浸，不干预
     // - 最上层是普通整页（含播放页 → UP 主主页 → 再进播放页 → 返回等嵌套

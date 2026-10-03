@@ -13,49 +13,52 @@ void main() {
       expect(size.width - side, greaterThanOrEqualTo(450));
     }
   });
-  testWidgets('header toggles playlist immediately without a close button', (
-    tester,
-  ) async {
-    final expanded = ValueNotifier(false);
-    addTearDown(expanded.dispose);
-    final relatedKey = GlobalKey();
-    final playlistKey = GlobalKey();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            width: 280,
-            child: TabletVideoSidebar(
-              expanded: expanded,
-              header: InkWell(
-                onTap: () => fail('nested header must not consume taps'),
-                child: const Text('合集'),
+  testWidgets(
+    'header toggles visible playlist with a brief transition and no close button',
+    (
+      tester,
+    ) async {
+      final expanded = ValueNotifier(false);
+      addTearDown(expanded.dispose);
+      final relatedKey = GlobalKey();
+      final playlistKey = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 280,
+              child: TabletVideoSidebar(
+                expanded: expanded,
+                header: InkWell(
+                  onTap: () => fail('nested header must not consume taps'),
+                  child: const Text('合集'),
+                ),
+                hasPlaylist: true,
+                related: ListView(
+                  key: relatedKey,
+                  children: const [Text('推荐视频')],
+                ),
+                playlistBuilder: (_) =>
+                    ListView(key: playlistKey, children: const [Text('选集')]),
               ),
-              hasPlaylist: true,
-              related: ListView(
-                key: relatedKey,
-                children: const [Text('推荐视频')],
-              ),
-              playlistBuilder: (_) =>
-                  ListView(key: playlistKey, children: const [Text('选集')]),
             ),
           ),
         ),
-      ),
-    );
-    for (var i = 0; i < 8; i++) {
-      await tester.tap(find.text('合集'));
-      await tester.pump();
-      expect(expanded.value, i.isEven);
-      expect(find.text(i.isEven ? '选集' : '推荐视频'), findsOneWidget);
-      expect(find.text(i.isEven ? '推荐视频' : '选集'), findsNothing);
-      expect(find.byType(AnimatedSwitcher), findsNothing);
-      expect(find.byIcon(Icons.close), findsNothing);
-      expect(tester.takeException(), isNull);
-    }
-    await tester.pumpAndSettle();
-    expect(find.text('推荐视频'), findsOneWidget);
-  });
+      );
+      for (var i = 0; i < 8; i++) {
+        await tester.tapAt(tester.getCenter(find.text('合集')));
+        await tester.pump();
+        expect(expanded.value, i.isEven);
+        expect(find.text(i.isEven ? '选集' : '推荐视频'), findsOneWidget);
+        expect(find.text(i.isEven ? '推荐视频' : '选集'), findsNothing);
+        expect(find.byType(AnimatedSwitcher), findsOneWidget);
+        expect(find.byIcon(Icons.close), findsNothing);
+        expect(tester.takeException(), isNull);
+      }
+      await tester.pumpAndSettle();
+      expect(find.text('推荐视频'), findsOneWidget);
+    },
+  );
   testWidgets('collapse retains content while height smoothly decreases', (
     tester,
   ) async {

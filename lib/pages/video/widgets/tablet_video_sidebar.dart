@@ -46,15 +46,26 @@ class TabletVideoSidebar extends StatelessWidget {
               ),
             ),
           Expanded(
-            child: open && hasPlaylist
-                ? KeyedSubtree(
-                    key: const ValueKey('playlist'),
-                    child: playlistBuilder(context),
-                  )
-                : KeyedSubtree(
-                    key: const ValueKey('related'),
-                    child: related,
-                  ),
+            child: AnimatedSwitcher(
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 100),
+              layoutBuilder: (current, previous) =>
+                  current ?? const SizedBox.shrink(),
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation.drive(Tween(begin: .8, end: 1.0)),
+                child: child,
+              ),
+              child: open && hasPlaylist
+                  ? KeyedSubtree(
+                      key: const ValueKey('playlist'),
+                      child: playlistBuilder(context),
+                    )
+                  : KeyedSubtree(
+                      key: const ValueKey('related'),
+                      child: related,
+                    ),
+            ),
           ),
         ],
       ),

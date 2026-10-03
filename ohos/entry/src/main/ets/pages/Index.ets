@@ -111,6 +111,7 @@ struct Index {
   @StorageLink('tabSelectedColor') navSelected: string = '#3367D6';
   @StorageLink('tabSelectedSubColor') navSelectedSub: string = '#503367D6';
   @StorageLink('useNativeTopBar') useNativeTopBar: boolean = false;
+  @StorageLink('topBarExposure') topBarExposure: number = 1;
   @StorageLink('topBarHidden') topBarHidden: boolean = false;
   @StorageLink('topBarCollapsed') topBarCollapsed: boolean = false;
   @StorageLink('homeHideTopBar') homeHideTopBar: boolean = false;
@@ -623,9 +624,10 @@ struct Index {
     .height(this.topBarHeight())
     .clip(true)
     .animation({ duration: TOP_BAR_MOTION_DURATION, curve: TOP_BAR_MOTION_CURVE })
-    .visibility(this.topBarHidden ? Visibility.None : Visibility.Visible)
+    .clipShape(new Rect({ width: Math.max(0, this.winWidth * this.topBarExposure), height: this.topBarHeight() }))
+    .visibility(this.topBarHidden ? Visibility.Hidden : Visibility.Visible)
     .blur(this.shellBarsBlurred ? 12 : 0)
-    .hitTestBehavior(this.shellBarsObscured ? HitTestMode.None : HitTestMode.Transparent)
+    .hitTestBehavior(this.shellBarsObscured || this.topBarExposure < 1 ? HitTestMode.None : HitTestMode.Transparent)
     .align(Alignment.Top)
   }
 
@@ -834,9 +836,10 @@ struct Index {
     .height(this.topBarHeight())
     .clip(true)
     .animation({ duration: TOP_BAR_MOTION_DURATION, curve: TOP_BAR_MOTION_CURVE })
-    .visibility(this.topBarHidden ? Visibility.None : Visibility.Visible)
+    .clipShape(new Rect({ width: Math.max(0, this.winWidth * this.topBarExposure), height: this.topBarHeight() }))
+    .visibility(this.topBarHidden ? Visibility.Hidden : Visibility.Visible)
     .blur(this.shellBarsBlurred ? 12 : 0)
-    .hitTestBehavior(this.shellBarsObscured ? HitTestMode.None : HitTestMode.Transparent)
+    .hitTestBehavior(this.shellBarsObscured || this.topBarExposure < 1 ? HitTestMode.None : HitTestMode.Transparent)
     .align(Alignment.Top)
   }
 

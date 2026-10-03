@@ -273,7 +273,10 @@ class HarmonyPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     if (MediaQuery.disableAnimationsOf(context)) return child;
-    final motion = animation.drive(CurveTween(curve: HarmonyMotion.curve));
+    final motion = animation.drive(CurveTween(
+      curve: route.navigator?.userGestureInProgress == true
+          ? Curves.linear : HarmonyMotion.curve,
+    ));
     return SlideTransition(
       position: motion.drive(
         Tween<Offset>(

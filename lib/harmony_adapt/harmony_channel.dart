@@ -272,6 +272,25 @@ abstract class HarmonyChannel {
   static Future<void> setTopBarIsHome(bool isHome) =>
       _invoke('setTopBarIsHome', {'isHome': isHome});
 
+  static double? _pendingTopBarExposure;
+  static bool _sendingTopBarExposure = false;
+  /// Coalesce native clipping updates instead of queuing stale gesture frames.
+  static Future<void> setTopBarExposure(double fraction) async {
+    if (!OS.isHarmony) return;
+    _pendingTopBarExposure = fraction.clamp(0.0, 1.0);
+    if (_sendingTopBarExposure) return;
+    _sendingTopBarExposure = true;
+    try {
+      while (_pendingTopBarExposure != null) {
+        final value = _pendingTopBarExposure!;
+        _pendingTopBarExposure = null;
+        await _invoke('setTopBarExposure', {'fraction': value});
+      }
+    } finally {
+      _sendingTopBarExposure = false;
+    }
+  }
+
   /// 顶栏隐藏状态合并：路由/横屏 or 非首页页签
   static bool _topBarHiddenByRoute = false;
   static bool _topBarHiddenByTab = false;
