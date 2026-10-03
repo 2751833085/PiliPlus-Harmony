@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart' show Size;
 /// Use the current app window so split screen and all fold positions work alike.
 abstract final class HarmonyWindowLayout {
   static bool autoExpandIntroduction(Size size) =>
-      size.shortestSide >= 600 && size.width > size.height;
+      size.shortestSide >= 600 && size.width / size.height >= 1.3;
 
   static const double navigationRailMinWidth = 600;
 

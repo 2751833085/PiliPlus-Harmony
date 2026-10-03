@@ -1850,7 +1850,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               body: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  buildTabBar(needIndicator: false),
                   Expanded(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2846,7 +2845,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     int? cid,
   ]) {
     assert((cid == null) == (bvid == null));
-    final isFullScreen = this.isFullScreen;
     if (cid == null) {
       videoDetailController.showMediaListPanel(context);
       return;
@@ -2889,20 +2887,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         onReversePlay(isSeason: season != null);
       },
     );
-    if (isFullScreen || videoDetailController.showVideoSheet) {
-      final child = listSheetContent(enableSlide: false);
-      PageUtils.showVideoBottomSheet(
-        context,
-        child: videoDetailController.plPlayerController.darkVideoPage
-            ? Theme(data: theme, child: child)
-            : child,
-      );
-    } else {
-      videoDetailController.childKey.currentState?.showBottomSheet(
-        constraints: const BoxConstraints(),
-        (context) => listSheetContent(),
-      );
-    }
+    final child = listSheetContent(enableSlide: false);
+    PageUtils.showVideoBottomSheet(
+      context,
+      maxWidth: 560,
+      child: videoDetailController.plPlayerController.darkVideoPage
+          ? Theme(data: theme, child: child)
+          : child,
+    );
   }
 
   void onReversePlay({required bool isSeason}) {

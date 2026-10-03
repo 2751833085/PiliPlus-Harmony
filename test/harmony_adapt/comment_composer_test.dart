@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('auto intro expansion applies to tablet landscape, not phone or portrait', () {
+    expect(HarmonyWindowLayout.autoExpandIntroduction(const Size(712, 776)), isFalse);
+    expect(HarmonyWindowLayout.autoExpandIntroduction(const Size(776, 712)), isFalse);
     expect(HarmonyWindowLayout.autoExpandIntroduction(const Size(1107, 776)), isTrue);
     expect(HarmonyWindowLayout.autoExpandIntroduction(const Size(1024, 768)), isTrue);
     expect(HarmonyWindowLayout.autoExpandIntroduction(const Size(776, 350)), isFalse);

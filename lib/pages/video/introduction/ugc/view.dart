@@ -73,6 +73,7 @@ class UgcIntroPanel extends StatefulWidget {
 class _UgcIntroPanelState extends State<UgcIntroPanel> {
   late ColorScheme colorScheme;
   bool _wasTabletLandscape = false;
+  bool _automaticallyExpanded = false;
   late final UgcIntroController introController;
   late final VideoDetailController videoDetailCtr =
       Get.find<VideoDetailController>(tag: widget.heroTag);
@@ -96,8 +97,15 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
     if (tabletLandscape && !_wasTabletLandscape && Pref.expandIntroPanelH) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _wasTabletLandscape && !videoDetailCtr.isFullScreen) {
+          _automaticallyExpanded = true;
           introController.expand.value = true;
         }
+      });
+    }
+    if (!tabletLandscape && _wasTabletLandscape && _automaticallyExpanded) {
+      _automaticallyExpanded = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_wasTabletLandscape) introController.expand.value = false;
       });
     }
     _wasTabletLandscape = tabletLandscape;
@@ -122,6 +130,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
               onTap: () {
                 if (isLoading) return;
                 feedBack();
+                _automaticallyExpanded = false;
                 introController.expand.toggle();
               },
               child: TranslucentColumn(

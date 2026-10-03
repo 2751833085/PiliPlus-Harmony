@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/episode_panel/layout.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -110,10 +111,8 @@ class EpisodePanelState extends State<EpisodePanel>
 
   // item
   late int _currentItemIndex;
-  int get _findCurrentItemIndex => max(
-    0,
-    _getCurrEpisodes.indexWhere((item) => item.cid == widget.cid),
-  );
+  int get _findCurrentItemIndex =>
+      max(0, _getCurrEpisodes.indexWhere((item) => item.cid == widget.cid));
 
   late final List<bool> _isReversed;
   late final List<ScrollController> _itemScrollController;
@@ -194,17 +193,15 @@ class EpisodePanelState extends State<EpisodePanel>
         _favState = Success(favState).obs;
       } else {
         _favState = LoadingState<bool>.loading().obs;
-        VideoHttp.videoRelation(bvid: widget.bvid).then(
-          (result) {
-            if (!mounted) return;
-            if (result case Success(:final response)) {
-              final seasonFav = response.seasonFav ?? false;
-              _favState!.value = Success(seasonFav);
-              widget.ugcIntroController?.seasonFavState[widget.seasonId] =
-                  seasonFav;
-            }
-          },
-        );
+        VideoHttp.videoRelation(bvid: widget.bvid).then((result) {
+          if (!mounted) return;
+          if (result case Success(:final response)) {
+            final seasonFav = response.seasonFav ?? false;
+            _favState!.value = Success(seasonFav);
+            widget.ugcIntroController?.seasonFavState[widget.seasonId] =
+                seasonFav;
+          }
+        });
       }
     }
   }
@@ -226,10 +223,8 @@ class EpisodePanelState extends State<EpisodePanel>
 
   @override
   Widget buildPage(ThemeData theme) {
-    return ImmersiveSurface(
-      borderRadius: showTitle
-          ? const BorderRadius.vertical(top: Radius.circular(24))
-          : BorderRadius.zero,
+    return EpisodePanelSurface(
+      overlay: showTitle,
       child: Column(
         children: [
           _buildToolbar(theme),
@@ -263,11 +258,7 @@ class EpisodePanelState extends State<EpisodePanel>
             TabBarDragGestureRecognizer(isDxAllowed: isDxAllowed),
         children: List.generate(
           widget.list.length,
-          (index) => _buildBody(
-            theme,
-            index,
-            widget.list[index].episodes,
-          ),
+          (index) => _buildBody(theme, index, widget.list[index].episodes),
         ),
       );
     }
@@ -321,7 +312,10 @@ class EpisodePanelState extends State<EpisodePanel>
           SliverPadding(
             padding: EdgeInsets.only(
               top: 7,
-              bottom: MediaQuery.viewPaddingOf(context).bottom + 100,
+              bottom: EpisodeLayout.bottomPadding(
+                MediaQuery.viewPaddingOf(context).bottom,
+                overlay: showTitle,
+              ),
             ),
             sliver: showTitle
                 ? SliverVariedExtentList.builder(
@@ -499,130 +493,134 @@ class EpisodePanelState extends State<EpisodePanel>
                 horizontal: Style.safeSpace,
                 vertical: 5,
               ),
-              child: Row(
-                spacing: 10,
-                children: [
-                  if (cover?.isNotEmpty == true)
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        NetworkImgLayer(
-                          src: cover,
-                          width: 160,
-                          height: 100,
-                          cacheWidth: cacheWidth,
-                        ),
-                        if (duration != null && duration > 0)
-                          PBadge(
-                            text: DurationUtils.formatDuration(duration),
-                            right: 6.0,
-                            bottom: 6.0,
-                            type: .gray,
-                          ),
-                        if (widget.type == .part)
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Container(
-                              padding: const .symmetric(horizontal: 4),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.secondaryContainer,
-                                borderRadius: const .only(
-                                  bottomLeft: .circular(4),
-                                  topRight: Style.imgRadius,
-                                ),
+              child: LayoutBuilder(
+                builder: (context, bounds) {
+                  final coverWidth = EpisodeLayout.coverWidth(bounds.maxWidth);
+                  return Row(
+                    spacing: 10,
+                    children: [
+                      if (cover?.isNotEmpty == true)
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            NetworkImgLayer(
+                              src: cover,
+                              width: coverWidth,
+                              height: coverWidth * 9 / 16,
+                              cacheWidth: cacheWidth,
+                            ),
+                            if (duration != null && duration > 0)
+                              PBadge(
+                                text: DurationUtils.formatDuration(duration),
+                                right: 6.0,
+                                bottom: 6.0,
+                                type: .gray,
                               ),
-                              child: Text(
-                                (index + 1).toString(),
+                            if (widget.type == .part)
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const .symmetric(horizontal: 4),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.secondaryContainer,
+                                    borderRadius: const .only(
+                                      bottomLeft: .circular(4),
+                                      topRight: Style.imgRadius,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    (index + 1).toString(),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: theme
+                                          .colorScheme
+                                          .onSecondaryContainer,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else if (isCharging == true)
+                              const PBadge(
+                                text: '充电专属',
+                                top: 6,
+                                right: 6,
+                                type: .error,
+                              )
+                            else if (episode.badge != null)
+                              PBadge(
+                                text: episode.badge,
+                                top: 6,
+                                right: 6,
+                                type: switch (episode.badge) {
+                                  '预告' => .gray,
+                                  '限免' => .free,
+                                  _ => .primary,
+                                },
+                              ),
+                          ],
+                        )
+                      else if (isCurrentIndex)
+                        Image.asset(
+                          Assets.livingStatic,
+                          color: primary,
+                          height: 12,
+                          cacheHeight: 12.cacheSize(context),
+                          semanticLabel: "正在播放：",
+                        ),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                fontSize: theme.textTheme.bodyMedium!.fontSize,
+                                height: 1.42,
+                                letterSpacing: 0.3,
+                                fontWeight: isCurrentIndex
+                                    ? FontWeight.bold
+                                    : null,
+                                color: isCurrentIndex ? primary : null,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 6),
+                            if (pubdate != null)
+                              Text(
+                                DateFormatUtils.format(pubdate),
+                                maxLines: 1,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: theme.colorScheme.onSecondaryContainer,
+                                  height: 1,
+                                  color: theme.colorScheme.outline,
+                                  overflow: TextOverflow.clip,
                                 ),
                               ),
-                            ),
-                          )
-                        else if (isCharging == true)
-                          const PBadge(
-                            text: '充电专属',
-                            top: 6,
-                            right: 6,
-                            type: .error,
-                          )
-                        else if (episode.badge != null)
-                          PBadge(
-                            text: episode.badge,
-                            top: 6,
-                            right: 6,
-                            type: switch (episode.badge) {
-                              '预告' => .gray,
-                              '限免' => .free,
-                              _ => .primary,
-                            },
-                          ),
-                      ],
-                    )
-                  else if (isCurrentIndex)
-                    Image.asset(
-                      Assets.livingStatic,
-                      color: primary,
-                      height: 12,
-                      cacheHeight: 12.cacheSize(context),
-                      semanticLabel: "正在播放：",
-                    ),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                              fontSize: theme.textTheme.bodyMedium!.fontSize,
-                              height: 1.42,
-                              letterSpacing: 0.3,
-                              fontWeight: isCurrentIndex
-                                  ? FontWeight.bold
-                                  : null,
-                              color: isCurrentIndex ? primary : null,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (pubdate != null)
-                          Text(
-                            DateFormatUtils.format(pubdate),
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontSize: 12,
-                              height: 1,
-                              color: theme.colorScheme.outline,
-                              overflow: TextOverflow.clip,
-                            ),
-                          ),
-                        if (view != null) ...[
-                          const SizedBox(height: 2),
-                          Row(
-                            spacing: 8,
-                            children: [
-                              StatWidget(
-                                value: view,
-                                type: StatType.play,
+                            if (view != null) ...[
+                              const SizedBox(height: 2),
+                              Row(
+                                spacing: 8,
+                                children: [
+                                  StatWidget(value: view, type: StatType.play),
+                                  if (danmaku != null)
+                                    StatWidget(
+                                      value: danmaku,
+                                      type: StatType.danmaku,
+                                    ),
+                                ],
                               ),
-                              if (danmaku != null)
-                                StatWidget(
-                                  value: danmaku,
-                                  type: StatType.danmaku,
-                                ),
                             ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -682,18 +680,13 @@ class EpisodePanelState extends State<EpisodePanel>
     padding: EdgeInsets.symmetric(horizontal: showTitle ? 14 : 6),
     decoration: BoxDecoration(
       border: Border(
-        bottom: BorderSide(
-          color: theme.dividerColor.withValues(alpha: 0.1),
-        ),
+        bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1)),
       ),
     ),
     child: Row(
       children: [
         if (showTitle)
-          Text(
-            widget.type.title,
-            style: theme.textTheme.titleMedium,
-          ),
+          Text(widget.type.title, style: theme.textTheme.titleMedium),
         if (_favState != null) Obx(() => _buildFavBtn(_favState!.value)),
         iconButton(
           iconSize: 22,
@@ -726,29 +719,25 @@ class EpisodePanelState extends State<EpisodePanel>
           },
         ),
         if (widget.isSupportReverse == true)
-          Obx(
-            () {
-              return _currentTabIndex.value == _initialTabIndex
-                  ? _buildReverseBtn
-                  : const SizedBox.shrink();
-            },
-          ),
+          Obx(() {
+            return _currentTabIndex.value == _initialTabIndex
+                ? _buildReverseBtn
+                : const SizedBox.shrink();
+          }),
         const Spacer(),
-        Obx(
-          () {
-            final currentTabIndex = _currentTabIndex.value;
-            return iconButton(
-              iconSize: 22,
-              tooltip: _isReversed[currentTabIndex] ? '顺序' : '倒序',
-              icon: !_isReversed[currentTabIndex]
-                  ? const Icon(MdiIcons.sortNumericAscending)
-                  : const Icon(MdiIcons.sortNumericDescending),
-              onPressed: () => setState(() {
-                _isReversed[currentTabIndex] = !_isReversed[currentTabIndex];
-              }),
-            );
-          },
-        ),
+        Obx(() {
+          final currentTabIndex = _currentTabIndex.value;
+          return iconButton(
+            iconSize: 22,
+            tooltip: _isReversed[currentTabIndex] ? '顺序' : '倒序',
+            icon: !_isReversed[currentTabIndex]
+                ? const Icon(MdiIcons.sortNumericAscending)
+                : const Icon(MdiIcons.sortNumericDescending),
+            onPressed: () => setState(() {
+              _isReversed[currentTabIndex] = !_isReversed[currentTabIndex];
+            }),
+          );
+        }),
         if (widget.onClose != null)
           iconButton(
             iconSize: 22,

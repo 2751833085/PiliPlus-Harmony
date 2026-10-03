@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:PiliPlus/pages/episode_panel/layout.dart';
 
 /// Build the expensive episode list only while it is open, with bounded height.
 class CollapsiblePlaylist extends StatefulWidget {
@@ -11,19 +12,32 @@ class CollapsiblePlaylist extends StatefulWidget {
 class _CollapsiblePlaylistState extends State<CollapsiblePlaylist> {
   bool _expanded = false;
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      ListTile(
-        title: const Text('播放列表'),
-        leading: const Icon(Icons.playlist_play),
-        trailing: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-        onTap: () => setState(() => _expanded = !_expanded),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(12, 6, 12, 10),
+    child: Material(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          ListTile(
+            title: const Text('播放列表'),
+            leading: const Icon(Icons.playlist_play),
+            trailing: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
+            onTap: () => setState(() => _expanded = !_expanded),
+          ),
+          if (_expanded)
+            LayoutBuilder(
+              builder: (context, bounds) => SizedBox(
+                height: EpisodeLayout.playlistHeight(
+                  MediaQuery.sizeOf(context),
+                  bounds.maxWidth,
+                ),
+                child: widget.builder(context),
+              ),
+            ),
+        ],
       ),
-      if (_expanded)
-        SizedBox(
-          height: (MediaQuery.sizeOf(context).height * .45).clamp(180.0, 400.0),
-          child: widget.builder(context),
-        ),
-    ],
+    ),
   );
 }
