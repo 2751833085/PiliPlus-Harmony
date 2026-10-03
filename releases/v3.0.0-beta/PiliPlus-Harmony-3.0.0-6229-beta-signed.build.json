@@ -1,0 +1,19 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6229,
+  "releaseTag": "v3.0.0+6229",
+  "sha256": "6bc1df6cc34a5e690107f76060051dbfa592bcf471e90aa8cc6f495ae2ef2394",
+  "sizeBytes": 33087619,
+  "signatureVerified": true,
+  "sourceCommit": "bf6e39e3850b452d710bfa301976d62ec26fc4a2",
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "validation": "7 targeted widget regressions passed (collection reservation and fade at 1x/1.5x/2x text, toggle, collapse, placeholders, entry cancellation); changed sidebar analyzer: no issues; signature, ZIP CRC, version and MPV hash verified. Device smoke test: launch, video with a 25-episode collection, header expand/collapse and return at 3184x2232. Asynchronous layout stability verified by widget test; no exhaustive frame-rate validation.",
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "deviceOverwrite": {
+    "uidPreserved": true,
+    "firstInstallTimePreserved": true,
+    "launchSucceeded": true,
+    "launchBlockedByLockScreen": false
+  }
+}
