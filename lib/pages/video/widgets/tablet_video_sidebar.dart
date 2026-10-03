@@ -24,35 +24,37 @@ class TabletVideoSidebar extends StatelessWidget {
       builder: (context, open, _) => Column(
         children: [
           if (hasPlaylist)
-            Row(
-              children: [
-                Expanded(child: header),
-                IconButton(
-                  tooltip: open ? '收起合集' : '查看全部',
-                  onPressed: () => expanded.value = !open,
-                  icon: Icon(open ? Icons.close : Icons.playlist_play),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => expanded.value = !open,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Row(
+                    children: [
+                      Expanded(child: IgnorePointer(child: header)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Icon(
+                          open ? Icons.expand_less : Icons.expand_more,
+                          semanticLabel: open ? '收起合集' : '查看全部',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: MediaQuery.disableAnimationsOf(context)
-                  ? Duration.zero
-                  : const Duration(milliseconds: 240),
-              layoutBuilder: (current, previous) =>
-                  current ?? const SizedBox.shrink(),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: open && hasPlaylist
-                  ? KeyedSubtree(
-                      key: const ValueKey('playlist'),
-                      child: playlistBuilder(context),
-                    )
-                  : KeyedSubtree(
-                      key: const ValueKey('related'),
-                      child: related,
-                    ),
-            ),
+            child: open && hasPlaylist
+                ? KeyedSubtree(
+                    key: const ValueKey('playlist'),
+                    child: playlistBuilder(context),
+                  )
+                : KeyedSubtree(
+                    key: const ValueKey('related'),
+                    child: related,
+                  ),
           ),
         ],
       ),

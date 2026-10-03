@@ -13,7 +13,7 @@ void main() {
       expect(size.width - side, greaterThanOrEqualTo(450));
     }
   });
-  testWidgets('rapid playlist toggles do not duplicate keyed content', (
+  testWidgets('header toggles playlist immediately without a close button', (
     tester,
   ) async {
     final expanded = ValueNotifier(false);
@@ -27,7 +27,10 @@ void main() {
             width: 280,
             child: TabletVideoSidebar(
               expanded: expanded,
-              header: const Text('合集'),
+              header: InkWell(
+                onTap: () => fail('nested header must not consume taps'),
+                child: const Text('合集'),
+              ),
               hasPlaylist: true,
               related: ListView(
                 key: relatedKey,
@@ -41,8 +44,13 @@ void main() {
       ),
     );
     for (var i = 0; i < 8; i++) {
-      expanded.value = !expanded.value;
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tap(find.text('合集'));
+      await tester.pump();
+      expect(expanded.value, i.isEven);
+      expect(find.text(i.isEven ? '选集' : '推荐视频'), findsOneWidget);
+      expect(find.text(i.isEven ? '推荐视频' : '选集'), findsNothing);
+      expect(find.byType(AnimatedSwitcher), findsNothing);
+      expect(find.byIcon(Icons.close), findsNothing);
       expect(tester.takeException(), isNull);
     }
     await tester.pumpAndSettle();
