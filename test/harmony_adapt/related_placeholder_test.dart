@@ -13,7 +13,7 @@ void main() {
             home: Center(
               child: SizedBox(
                 width: width,
-                height: 110,
+                height: 116,
                 child: const VideoCardHSkeleton(adaptiveCover: true),
               ),
             ),
@@ -22,7 +22,7 @@ void main() {
         final cover = tester.getSize(find.byType(AspectRatio));
         expect(cover.width / cover.height, closeTo(Style.aspectRatio, .001));
         expect(cover.width, lessThan(width / 2));
-        expect(cover.height, lessThanOrEqualTo(100));
+        expect(cover.height, lessThanOrEqualTo(106));
         await tester.pump(const Duration(milliseconds: 120));
         expect(tester.getSize(find.byType(AspectRatio)), cover);
         expect(tester.takeException(), isNull);

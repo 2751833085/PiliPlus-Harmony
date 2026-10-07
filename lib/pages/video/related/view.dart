@@ -37,14 +37,17 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-      padding: EdgeInsets.only(top: 7, bottom: widget.sidebar ? 16 : 100),
+      padding: EdgeInsets.only(
+        top: widget.sidebar ? 13 : 7,
+        bottom: widget.sidebar ? 16 : 100,
+      ),
       sliver: Obx(() => _buildBody(_relatedController.loadingState.value)),
     );
   }
 
   static const _sidebarDelegate = SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: 1,
-    mainAxisExtent: 110,
+    mainAxisExtent: 116,
     mainAxisSpacing: 2,
   );
 

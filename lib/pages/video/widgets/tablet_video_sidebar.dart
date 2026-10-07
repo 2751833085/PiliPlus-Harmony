@@ -117,5 +117,7 @@ class TabletVideoSidebar extends StatelessWidget {
 abstract final class TabletVideoLayout {
   static bool enabled(Size window) =>
       window.width >= 680 && window.height >= 560;
+  static bool wide(Size window) =>
+      enabled(window) && window.width >= 960 && window.aspectRatio >= 1.2;
   static double sidebarWidth(double width) => (width * .365).clamp(240, 440);
 }

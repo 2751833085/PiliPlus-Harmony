@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/widgets/tablet_episode_strip.dart';
 import 'package:PiliPlus/pages/video/widgets/video_entrance.dart';
 import 'package:PiliPlus/pages/video/related/controller.dart';
 import 'package:PiliPlus/pages/video/widgets/tablet_video_sidebar.dart';
@@ -1717,6 +1718,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Widget _tabletVideoBody() {
+    if (TabletVideoLayout.wide(Size(maxWidth - padding.horizontal, maxHeight))) {
+      return _wideTabletVideoBody();
+    }
     final availableWidth = maxWidth - padding.horizontal;
     final sideWidth = TabletVideoLayout.sidebarWidth(availableWidth);
     final leftWidth = availableWidth - sideWidth;
@@ -1812,6 +1816,130 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           ),
         ],
       ),
+    );
+  }
+
+  bool get _tabletPlaylistPending =>
+      videoDetailController.plPlayerController.horizontalSeasonPanel &&
+      ugcIntroController.videoDetail.value.bvid == null &&
+      ugcIntroController.status.value;
+
+  Widget _wideTabletVideoBody() {
+    final width = maxWidth - padding.horizontal;
+    final sideWidth = TabletVideoLayout.sidebarWidth(width);
+    final leftWidth = width - sideWidth;
+    final height = leftWidth / Style.aspectRatio16x9;
+    final bodyHeight = maxHeight - padding.top;
+    final playerWidth = _expand(leftWidth, maxWidth);
+    final playerHeight = _expand(height, maxHeight);
+    final intro = UgcIntroPanel(
+      key: videoIntroKey,
+      heroTag: heroTag,
+      showAiBottomSheet: showAiBottomSheet,
+      showEpisodes: showEpisodes,
+      onShowMemberPage: onShowMemberPage,
+      isPortrait: isPortrait,
+      isHorizontal: true,
+      showCollection: !_shouldShowSeasonPanel,
+    );
+    return MiniScaffold(
+      key: videoDetailController.childKey,
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              SizedBox(
+                width: playerWidth,
+                height: playerHeight,
+                child: videoPlayer(width: playerWidth, height: playerHeight),
+              ),
+              PlayerExpansionPanel(
+                progress: _fullscreenProgress.value,
+                axis: Axis.vertical,
+                child: SizedBox(
+                  width: leftWidth,
+                  height: max(0.0, bodyHeight - height),
+                  child: _tabletPlaylistPending
+                      ? const SizedBox.expand()
+                      : CustomScrollView(
+                          key: const PageStorageKey('wide-tablet-related'),
+                          controller:
+                              videoDetailController.effectiveIntroScrollCtr,
+                          slivers: [
+                            if (_shouldShowSeasonPanel)
+                              SliverToBoxAdapter(child: _wideTabletEpisodes()),
+                            if (videoDetailController.showRelatedVideo)
+                              RelatedVideoPanel(
+                                key: videoRelatedKey,
+                                heroTag: heroTag,
+                              ),
+                          ],
+                        ),
+                ),
+              ),
+            ],
+          ),
+          PlayerExpansionPanel(
+            progress: _fullscreenProgress.value,
+            axis: Axis.horizontal,
+            child: SizedBox(
+              width: sideWidth,
+              height: bodyHeight,
+              child: ClipRect(
+                child: MiniScaffold(
+                  key: _tabletSidebarKey,
+                  body: videoDetailController.showReply
+                      ? videoReplyPanel(headerSlivers: [intro])
+                      : CustomScrollView(slivers: [intro]),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _wideTabletEpisodes() {
+    final detail = ugcIntroController.videoDetail.value;
+    final pages = detail.pages ?? const <Part>[];
+    final sections = detail.ugcSeason?.sections ?? const <SectionItem>[];
+    final episodes = [for (final section in sections) ...?section.episodes];
+    return Column(
+      children: [
+        if (pages.length > 1)
+          TabletEpisodeStrip(
+            key: ValueKey('parts-${videoDetailController.bvid}'),
+            title: '分 P · ${pages.length} 集',
+            labels: [for (final page in pages) page.part ?? '分 P'],
+            selectedIndex: pages.indexWhere(
+              (page) => page.cid == videoDetailController.cid.value,
+            ),
+            onSelected: (index) => ugcIntroController.onChangeEpisode(
+              pages[index]
+                ..bvid ??= videoDetailController.bvid
+                ..cover ??= videoDetailController.cover.value,
+            ),
+          ),
+        if (episodes.isNotEmpty)
+          TabletEpisodeStrip(
+            key: ValueKey('season-${detail.ugcSeason?.id}'),
+            title: detail.ugcSeason?.title ?? '合集',
+            labels: [for (final episode in episodes) episode.title ?? '选集'],
+            selectedIndex: episodes.indexWhere(
+              (episode) =>
+                  episode.bvid == videoDetailController.bvid ||
+                  episode.cid == videoDetailController.cid.value,
+            ),
+            onSelected: (index) async {
+              final episode = episodes[index];
+              if (await ugcIntroController.onChangeEpisode(episode)) {
+                videoDetailController.seasonCid = episode.cid;
+              }
+            },
+          ),
+      ],
     );
   }
 
@@ -2980,7 +3108,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoDetailController.showMediaListPanel(context);
       return;
     }
-    if (_usesTabletVideoLayout && !isFullScreen && _shouldShowSeasonPanel) {
+    if (_usesTabletVideoLayout && !isFullScreen && _shouldShowSeasonPanel &&
+        !TabletVideoLayout.wide(Size(maxWidth - padding.horizontal, maxHeight))) {
       _tabletPlaylistExpanded.value = true;
       return;
     }

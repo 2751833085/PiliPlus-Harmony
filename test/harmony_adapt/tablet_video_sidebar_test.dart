@@ -4,6 +4,12 @@ import 'package:PiliPlus/pages/video/widgets/tablet_video_sidebar.dart';
 import 'package:PiliPlus/pages/video/widgets/collapsible_playlist.dart';
 
 void main() {
+  test('wide layout only activates for expanded landscape windows', () {
+    expect(TabletVideoLayout.wide(const Size(712, 776)), isFalse);
+    expect(TabletVideoLayout.wide(const Size(1108, 776)), isTrue);
+    expect(TabletVideoLayout.wide(const Size(1000, 1100)), isFalse);
+    expect(TabletVideoLayout.wide(const Size(1000, 480)), isFalse);
+  });
   test('tablet columns leave readable room at dual and triple fold widths', () {
     expect(TabletVideoLayout.enabled(const Size(350, 776)), isFalse);
     for (final size in [const Size(712, 776), const Size(1108, 776)]) {
