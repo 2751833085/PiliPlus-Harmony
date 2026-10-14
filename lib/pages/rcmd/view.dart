@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
     as refresh;
 import 'package:PiliPlus/harmony_adapt/widgets/initial_feed_content.dart';
