@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_navigation_surface.dart';
@@ -119,6 +120,72 @@ void main() {
           expect(find.byType(BackdropFilter), findsNothing);
           expect(tester.takeException(), isNull);
         }
+      }
+    },
+  );
+
+  testWidgets(
+    'native navigation intercepts duplicate physical touches over video cards',
+    (tester) async {
+      tester.view.devicePixelRatio = 2.875;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        HarmonyChannel.onShellTabSwitch = null;
+      });
+      for (final width in [390.0, 740.0, 1108.0]) {
+        tester.view.physicalSize = Size(width, 800) * 2.875;
+        final extent = ValueNotifier<double>(76);
+        var openedVideo = 0;
+        var dragStarts = 0;
+        final selectedTabs = <int>[];
+        HarmonyChannel.onShellTabSwitch = selectedTabs.add;
+        await HarmonyChannel.setShellBarsObscured(false);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              extendBody: true,
+              body: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => openedVideo++,
+                onVerticalDragStart: (_) => dragStarts++,
+                child: const SizedBox.expand(),
+              ),
+              bottomNavigationBar: NativeNavigationSpacer(
+                extent: extent,
+                scale: 1,
+                fallback: 76,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        // ArkUI dispatches a navigation event while Flutter may receive the
+        // same pointer. Only navigation must run, including empty side margins.
+        for (final x in [5.0, width / 3, width * 2 / 3, width - 5]) {
+          await HarmonyChannel.handler(
+            const MethodCall('showTab', {'index': 1}),
+          );
+          await tester.tapAt(Offset(x, 750));
+          await tester.pump();
+          await tester.tapAt(Offset(x, 790)); // system-safe strip
+          await tester.pump();
+        }
+        await tester.dragFrom(Offset(width / 2, 750), const Offset(0, -100));
+        await tester.pumpAndSettle();
+        expect(openedVideo, 0);
+        expect(dragStarts, 0);
+        expect(selectedTabs, [1, 1, 1, 1]);
+        await tester.tapAt(Offset(width / 2, 600));
+        await tester.pump();
+        expect(
+          openedVideo,
+          1,
+          reason: 'the feed above the bar stays interactive',
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        extent.dispose();
       }
     },
   );

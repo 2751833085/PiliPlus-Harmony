@@ -18,8 +18,14 @@ class NativeNavigationSpacer extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<double>(
     valueListenable: extent,
-    builder: (_, height, _) => SizedBox(
-      height: height > 0 ? height / scale : fallback,
+    builder: (_, height, _) => AbsorbPointer(
+      // Native ArkUI and Flutter can both receive the same physical touch.
+      // Reserve AND absorb the full bar area so a tab tap cannot open a card
+      // painted underneath Scaffold.extendBody, including during tab changes.
+      child: SizedBox(
+        width: double.infinity,
+        height: height > 0 ? height / scale : fallback,
+      ),
     ),
   );
 }

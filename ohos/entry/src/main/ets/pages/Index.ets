@@ -855,6 +855,7 @@ struct Index {
       .width(Math.min(600, this.winWidth))
       .height(52)
       .onTabBarClick((index: number) => {
+        if (this.shellBarsObscured || this.shellBarsHidden) return;
         this.currentNavIndex = index;
         this.context.eventHub.emit(EVENT_TAB_SWITCH, index);
       })
@@ -864,10 +865,11 @@ struct Index {
     .clip(true)
     .translate({ y: this.shellBarsScrollHidden ? 52 + this.navigationSafeBottom : 0 })
     .animation({ duration: 180, curve: Curve.EaseOut })
-    .opacity(this.shellBarsObscured ? 0.4 : 1)
+    .position({ x: 0, y: Math.max(0, this.winHeight - 52 - this.navigationSafeBottom) })
     .enabled(!this.shellBarsObscured)
     .visibility(this.navTabs.length <= 1 || this.shellBarsHidden ? Visibility.None : Visibility.Visible)
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(this.shellBarsObscured ? HitTestMode.None : HitTestMode.Default)
+    .onTouch((event: TouchEvent) => event.stopPropagation())
   }
 
   @Builder
@@ -972,14 +974,9 @@ struct Index {
           .translate({ x: this.dockOffset(), y: 0 })
           .hitTestBehavior(HitTestMode.Transparent)
         } else {
-          // A child's .align() aligns its own contents, not its position in
-          // the root Stack. Give the classic bar a full-window bottom host.
-          Stack({ alignContent: Alignment.Bottom }) {
-            this.classicMainTabs()
-          }
-          .width('100%')
-          .height('100%')
-          .hitTestBehavior(HitTestMode.Transparent)
+          // Limit hit-testing to the actual bar rectangle. A transparent
+          // full-window host also forwards tab touches to Flutter beneath it.
+          this.classicMainTabs()
         }
       }
       // API 26+：Navigation 标题栏 + ArkUI systemMaterial（全部元素带材质）
