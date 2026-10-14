@@ -14,6 +14,7 @@ enum HarmonyHandSide { center, left, right }
 
 abstract class HarmonyChannel {
   static final nativeDockInset = ValueNotifier<double>(0);
+  static final nativeNavigationExtent = ValueNotifier<double>(0);
   static final handSide = ValueNotifier(HarmonyHandSide.center);
   static final handAvailable = ValueNotifier(false);
   static final handStatus = ValueNotifier<String>('waiting');
@@ -60,6 +61,11 @@ abstract class HarmonyChannel {
       return;
     switch (call.method) {
       case 'onDockMetrics':
+        nativeNavigationExtent.value =
+            ((call.arguments['layoutExtent'] as num?)?.toDouble() ?? 0).clamp(
+              0,
+              200,
+            );
         nativeDockInset.value =
             ((call.arguments['bottom'] as num?)?.toDouble() ?? 0).clamp(0, 200);
         break;
@@ -170,11 +176,13 @@ abstract class HarmonyChannel {
   /// 向原生发送 shell 配置（Flutter 侧计算后通知 ArkTS）
   static Future<void> setShellBars({
     required bool useNativeTabs,
+    bool floating = false,
     bool handedness = false,
     bool immersive = false,
     bool translucentBottomBar = true,
   }) => _invoke('setShellBars', {
     'useNativeTabs': useNativeTabs,
+    'floating': floating,
     'handedness': handedness,
     'immersive': immersive,
     'translucentBottomBar': translucentBottomBar,

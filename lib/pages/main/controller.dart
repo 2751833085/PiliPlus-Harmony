@@ -194,16 +194,14 @@ class MainController extends GetxController
         (await DeviceInfoPlugin().ohosInfo).sdkApiVersion ?? 0;
     // 底栏/顶栏均自 API 23（鸿蒙 6.1）起可用：ArkTS 侧 API 26+ 走 Navigation
     // 标题栏 + ArkUI systemMaterial，API 23~25 走 HdsNavigation 标题栏材质
-    final useHdsBar =
-        Pref.harmonyUI &&
-        Pref.harmonyNavigation == HarmonyNavigation.floatingDock &&
-        sdkApiVersion > 22;
+    final useHdsBar = Pref.harmonyUI && sdkApiVersion > 22;
     final useHdsTopBar = Pref.harmonyUI && sdkApiVersion > 22;
     useNativeTabs.value = useHdsBar;
     useNativeTopBar.value = useHdsTopBar;
     _syncNativeTopBarActive();
     HarmonyChannel.setShellBars(
       useNativeTabs: useHdsBar,
+      floating: Pref.harmonyNavigation == HarmonyNavigation.floatingDock,
       handedness: Pref.harmonyHandedness,
       immersive: Pref.harmonyImmersive,
       translucentBottomBar: Pref.translucentBottomBar,

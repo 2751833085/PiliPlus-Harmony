@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:PiliPlus/common/widgets/scale_app.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/native_navigation_spacer.dart';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/navigation_press_feedback.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_navigation_surface.dart';
@@ -417,16 +419,21 @@ class _MainAppState extends PopScopeState<MainApp>
   Widget? get _bottomNav {
     Widget? bottomNav;
     if (_mainController.navigationBars.length > 1) {
-      // 开启鸿蒙沉浸光感后无需 Flutter 底栏（由原生 HDS 渲染）。
+      // 原生底栏负责材质与按钮；Flutter 只保留稳定的底部布局空间。
       // 这里是非响应式读取，异步就绪后的重建由 initState 中的
       // _nativeTabsWorker 触发；该提前返回分支不读 Rx，不能改成
       // Obx 包裹（会抛 ObxError）
       if (_mainController.useNativeTabs.value) {
-        return null;
+        return NativeNavigationSpacer(
+          extent: HarmonyChannel.nativeNavigationExtent,
+          scale: ScaledWidgetsFlutterBinding.effectiveScaleFactor,
+          fallback:
+              52 / ScaledWidgetsFlutterBinding.effectiveScaleFactor +
+              _padding.bottom,
+        );
       }
       if (HarmonyStyle.enabled(context)) {
         bottomNav = HarmonyNavigationSurface(
-          translucent: Pref.translucentBottomBar,
           child: SafeArea(
             top: false,
             child: Align(

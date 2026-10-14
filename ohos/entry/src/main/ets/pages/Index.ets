@@ -6,6 +6,7 @@ import image from '@ohos.multimedia.image';
 import window from '@ohos.window';
 import { FlutterPage } from '@ohos/flutter_ohos';
 import { MovingPhotoSave } from '../plugins/MovingPhotoSave';
+import { ShellBarBackdrop } from '../components/ShellBarBackdrop';
 
 let storage = LocalStorage.getShared();
 
@@ -107,6 +108,8 @@ struct Index {
   }
 
   @StorageLink('useNativeTabs') @Watch('syncDockMetrics') useNativeTabs: boolean = false;
+  @StorageLink('floatingNativeTabs') @Watch('syncDockMetrics') floatingNativeTabs: boolean = false;
+  @State @Watch('syncDockMetrics') navigationSafeBottom: number = 0;
   @StorageLink('shellBarsHidden') @Watch('syncDockMetrics') shellBarsHidden: boolean = false;
   @StorageLink('__scrollHidden') @Watch('onScrollHiddenChanged') shellBarsScrollHidden: boolean = false;
   @StorageLink('tabSelectedColor') navSelected: string = '#3367D6';
@@ -140,6 +143,7 @@ struct Index {
 
   private categoryController: TabsController = new TabsController();
   private controller: HdsTabsController = new HdsTabsController();
+  private classicController: TabsController = new TabsController();
   private win: window.Window | null = null;
   private sizeCallback: ((size: window.Size) => void) | null = null;
   private rectCallback: ((opts: window.RectChangeOptions) => void) | null = null;
@@ -165,13 +169,15 @@ struct Index {
 
   syncDockMetrics(): void {
     const visible = this.useNativeTabs && !this.shellBarsHidden && !this.shellBarsScrollHidden && this.navTabs.length > 1;
-    const bottom = visible ? 56 + this.bottomAvoidAreaHeight : 0;
-    this.context.eventHub.emit('EVENT_DOCK_METRICS', bottom);
+    const extent = this.floatingNativeTabs ? 56 + this.bottomAvoidAreaHeight : 52 + this.navigationSafeBottom;
+    const layoutExtent = this.useNativeTabs && this.navTabs.length > 1 ? extent : 0;
+    // Route coverage must not resize the retained home page underneath it.
+    this.context.eventHub.emit('EVENT_DOCK_METRICS', visible ? extent : 0, layoutExtent);
   }
 
   onScrollHiddenChanged(): void {
     this.syncDockMetrics();
-    if (!this.useNativeTabs || this.shellBarsHidden) {
+    if (!this.useNativeTabs || !this.floatingNativeTabs || this.shellBarsHidden) {
       return;
     }
     if (this.shellBarsScrollHidden) {
@@ -234,6 +240,7 @@ struct Index {
     this.context.eventHub.on(EVENT_CHANGE_TAB, (index: number) => {
       this.currentNavIndex = index;
       this.controller.changeIndex(index);
+      this.classicController.changeIndex(index);
     });
 
     window.getLastWindow(this.context).then((w: window.Window) => {
@@ -286,12 +293,14 @@ struct Index {
 
       let windowBottomAvoidArea = w.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
       let uiContext = this.getUIContext();
+      this.navigationSafeBottom = uiContext.px2vp(windowBottomAvoidArea.bottomRect.height);
       this.bottomAvoidAreaHeight = windowBottomAvoidArea.bottomRect.height === 0
         ? BOTTOM_SPECIAL_AVOID_AREA_VALUE
         : (uiContext.px2vp(windowBottomAvoidArea.bottomRect.height) + BOTTOM_NORMAL_AVOID_AREA_VALUE);
 
       w.on('avoidAreaChange', (data) => {
         if (data.type === window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
+          this.navigationSafeBottom = uiContext.px2vp(data.area.bottomRect.height);
           this.bottomAvoidAreaHeight = data.area.bottomRect.height === 0
             ? BOTTOM_SPECIAL_AVOID_AREA_VALUE
             : (uiContext.px2vp(data.area.bottomRect.height) + BOTTOM_NORMAL_AVOID_AREA_VALUE);
@@ -303,7 +312,7 @@ struct Index {
   }
 
   aboutToDisappear(): void {
-    this.context.eventHub.emit('EVENT_DOCK_METRICS', 0);
+    this.context.eventHub.emit('EVENT_DOCK_METRICS', 0, 0);
     MovingPhotoSave.cancel();
     if (this.win !== null) {
       try {
@@ -358,7 +367,7 @@ struct Index {
             style: { badgeSize: 8, badgeColor: this.navSelected, borderColor: $r('sys.color.comp_common_contrary') }
           }) {
             SymbolGlyph(navTabSymbol(typeIndex))
-              .fontSize(22)
+              .fontSize(this.floatingNativeTabs ? 22 : 24)
               .fontColor(
                 [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED,
                   this.currentNavIndex === index ? this.navSelectedSub : $r('sys.color.icon_tertiary')])
@@ -380,7 +389,7 @@ struct Index {
             }
           }) {
             SymbolGlyph(navTabSymbol(typeIndex))
-              .fontSize(22)
+              .fontSize(this.floatingNativeTabs ? 22 : 24)
               .fontColor(
                 [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED,
                   this.currentNavIndex === index ? this.navSelectedSub : $r('sys.color.icon_tertiary')])
@@ -390,7 +399,7 @@ struct Index {
         }
       } else {
         SymbolGlyph(navTabSymbol(typeIndex))
-          .fontSize(22)
+          .fontSize(this.floatingNativeTabs ? 22 : 24)
           .fontColor(
             [this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED,
               this.currentNavIndex === index ? this.navSelectedSub : $r('sys.color.icon_tertiary')])
@@ -399,7 +408,7 @@ struct Index {
       }
 
       Text(navTabLabel(typeIndex))
-        .fontSize(10.5)
+        .fontSize(this.floatingNativeTabs ? 10.5 : 12)
         .fontWeight(this.currentNavIndex === index ? FontWeight.Bold : FontWeight.Normal)
         .fontColor(this.currentNavIndex === index ? this.navSelected : NAV_UNSELECTED)
     }
@@ -496,26 +505,14 @@ struct Index {
   @Builder
   homeTopBar() {
     RelativeContainer() {
-      // A bounded, light native backdrop blur keeps scrolling composition cheap.
-      Column() {
-      }
+      ShellBarBackdrop()
       .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
-      .linearGradient({
-          direction: GradientDirection.Bottom, // 渐变方向
-          colors: [
-                [$r('app.color.top_bar_mask_start'), 0],
-                [$r('app.color.top_bar_mask_mid'), 0.8],
-                [$r('app.color.top_bar_mask_end'), 0.95],
-                [$r('app.color.top_bar_mask_end'), 1],
-              ],
-        })
       .alignRules({
         top: { anchor: 'topBarContent', align: VerticalAlign.Top },
         bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },
         left: { anchor: 'topBarContent', align: HorizontalAlign.Start },
         right: { anchor: 'topBarContent', align: HorizontalAlign.End }
       })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_THIN)
       .id('topBarBg')
       .hitTestBehavior(HitTestMode.Transparent)
       .align(Alignment.Top)
@@ -724,26 +721,14 @@ struct Index {
   @Builder
   homeTopBarHds() {
     RelativeContainer() {
-      // A bounded, light native backdrop blur keeps scrolling composition cheap.
-      Column() {
-      }
+      ShellBarBackdrop()
       .constraintSize({ maxHeight: TOP_BAR_EXPANDED_HEIGHT })
-      .linearGradient({
-          direction: GradientDirection.Bottom, // 渐变方向
-          colors: [
-                [$r('app.color.top_bar_mask_start'), 0],
-                [$r('app.color.top_bar_mask_mid'), 0.8],
-                [$r('app.color.top_bar_mask_end'), 0.95],
-                [$r('app.color.top_bar_mask_end'), 1],
-              ],
-        })
       .alignRules({
         top: { anchor: 'topBarContent', align: VerticalAlign.Top },
         bottom: { anchor: 'topBarContent', align: VerticalAlign.Bottom },
         left: { anchor: 'topBarContent', align: HorizontalAlign.Start },
         right: { anchor: 'topBarContent', align: HorizontalAlign.End }
       })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_THIN)
       .id('topBarBg')
       .hitTestBehavior(HitTestMode.Transparent)
       .align(Alignment.Top)
@@ -850,6 +835,43 @@ struct Index {
   }
 
   @Builder
+  classicMainTabs() {
+    Stack({ alignContent: Alignment.Top }) {
+      ShellBarBackdrop({ enabled: this.immersiveEnabled && this.translucentBottomBar, inverted: true })
+      Tabs({ controller: this.classicController, barPosition: BarPosition.End, index: this.currentNavIndex }) {
+        ForEach(this.navTabs, (typeIndex: number, index: number) => {
+          TabContent() {}
+            .tabBar(this.navTabBuilder(typeIndex, index))
+        }, (typeIndex: number, index: number) => index + '_' + typeIndex)
+      }
+      .barMode(BarMode.Fixed)
+      .barHeight(52, true)
+      .barOverlap(true)
+      .barBackgroundColor(Color.Transparent)
+      .barBackgroundBlurStyle(BlurStyle.NONE)
+      .fadingEdge(false)
+      .scrollable(false)
+      .animationDuration(0)
+      .width(Math.min(600, this.winWidth))
+      .height(52)
+      .onTabBarClick((index: number) => {
+        this.currentNavIndex = index;
+        this.context.eventHub.emit(EVENT_TAB_SWITCH, index);
+      })
+    }
+    .width('100%')
+    .height(52 + this.navigationSafeBottom)
+    .clip(true)
+    .translate({ y: this.shellBarsScrollHidden ? 52 + this.navigationSafeBottom : 0 })
+    .animation({ duration: 180, curve: Curve.EaseOut })
+    .opacity(this.shellBarsObscured ? 0.4 : 1)
+    .enabled(!this.shellBarsObscured)
+    .visibility(this.navTabs.length <= 1 || this.shellBarsHidden ? Visibility.None : Visibility.Visible)
+    .align(Alignment.Bottom)
+    .hitTestBehavior(HitTestMode.Transparent)
+  }
+
+  @Builder
   hdsMainTabs() {
     HdsTabs({ controller: this.controller }) {
       ForEach(this.navTabs, (typeIndex: number, index: number) => {
@@ -942,14 +964,17 @@ struct Index {
         .height('100%')
         .align(Alignment.Top)
       if (this.useNativeTabs && deviceInfo.sdkApiVersion >= 23) {
-        Stack() {
-          this.hdsMainTabs()
+        if (this.floatingNativeTabs) {
+          Stack() {
+            this.hdsMainTabs()
+          }
+          .width('100%')
+          .height('100%')
+          .translate({ x: this.dockOffset(), y: 0 })
+          .hitTestBehavior(HitTestMode.Transparent)
+        } else {
+          this.classicMainTabs()
         }
-        .width('100%')
-        .height('100%')
-        // Move only the stable host. Never animate HdsTabs' viewport/bar metrics.
-        .translate({ x: this.dockOffset(), y: 0 })
-        .hitTestBehavior(HitTestMode.Transparent)
       }
       // API 26+：Navigation 标题栏 + ArkUI systemMaterial（全部元素带材质）
       // API 23~25：自绘顶栏，仅消息按钮（HdsTabs 悬浮栏）带 HDS 材质

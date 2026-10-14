@@ -55,8 +55,8 @@ export default class EntryAbility extends FlutterAbility {
 
   /// 监听 Index.ets eventHub 的底栏切换事件，转发给 Flutter
   private initShellEventListeners(): void {
-    this.context.eventHub.on('EVENT_DOCK_METRICS', (bottom: number) => {
-      this.flutterChannel?.invokeMethod('onDockMetrics', { bottom: bottom });
+    this.context.eventHub.on('EVENT_DOCK_METRICS', (bottom: number, layoutExtent: number) => {
+      this.flutterChannel?.invokeMethod('onDockMetrics', { bottom: bottom, layoutExtent: layoutExtent });
     });
     this.context.eventHub.on(EVENT_TAB_SWITCH, (index: number) => {
       this.flutterChannel?.invokeMethod('showTab', { index: index });

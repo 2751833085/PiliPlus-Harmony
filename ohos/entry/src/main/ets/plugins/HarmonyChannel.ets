@@ -507,6 +507,7 @@ export default class HarmonyChannel implements FlutterPlugin {
         }
         const useNativeTabs: boolean = call.argument('useNativeTabs') ?? false;
         console.log(`is use native tabs: ${useNativeTabs}`);
+        AppStorage.setOrCreate('floatingNativeTabs', call.argument('floating') ?? false);
         AppStorage.setOrCreate('useNativeTabs', useNativeTabs);
         const handedness: boolean = call.argument('handedness') ?? false;
         AppStorage.setOrCreate('handednessEnabled', handedness);
