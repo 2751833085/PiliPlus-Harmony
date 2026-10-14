@@ -91,7 +91,8 @@ class _RcmdPageState extends State<RcmdPage>
     final position = controller.scrollController.position;
     if (!_loadMoreScheduled &&
         position.pixels > position.minScrollExtent &&
-        position.pixels >= position.maxScrollExtent - 1000) {
+        position.extentAfter <=
+            (position.viewportDimension * .5).clamp(160, 400)) {
       _loadMoreScheduled = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
         _loadMoreScheduled = false;
@@ -101,7 +102,8 @@ class _RcmdPageState extends State<RcmdPage>
           return;
         final current = controller.scrollController.position;
         if (current.pixels > current.minScrollExtent &&
-            current.pixels >= current.maxScrollExtent - 1000)
+            current.extentAfter <=
+                (current.viewportDimension * .5).clamp(160, 400))
           controller.onLoadMore();
       });
     }
@@ -144,6 +146,7 @@ class _RcmdPageState extends State<RcmdPage>
                 onRefresh: controller.onRefresh,
                 child: CustomScrollView(
                   controller: controller.scrollController,
+                  cacheExtent: 120,
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
                     // 原生顶栏启用时顶部的可滚动留白（内容可滑入顶栏下方重合）
@@ -195,6 +198,7 @@ class _RcmdPageState extends State<RcmdPage>
       Success(:final response) =>
         response != null && response.isNotEmpty
             ? SliverGrid.builder(
+                addAutomaticKeepAlives: false,
                 gridDelegate: gridDelegate,
                 itemBuilder: (context, index) {
                   if (controller.lastRefreshAt != null) {

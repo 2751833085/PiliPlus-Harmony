@@ -5,6 +5,48 @@ import 'package:PiliPlus/pages/rcmd/refresh_batch.dart';
 
 void main() {
   test(
+    'cold start requests 16 independently of columns; later batches stay unchanged',
+    () {
+      for (final columns in [1, 2, 4, 12]) {
+        expect(recommendationBatchSize(columns, initialLoad: true), 16);
+      }
+      expect(recommendationBatchSize(2), 8);
+      expect(recommendationBatchSize(4), 16);
+      expect(recommendationBatchSize(12), 20);
+    },
+  );
+  test(
+    'initial parallel feed fills exactly 16 unique videos without changing refresh responses',
+    () async {
+      var calls = 0;
+      final initial = await collectRecommendationBatch<int>(
+        target: 16,
+        parallelism: 2,
+        limitToTarget: true,
+        keyOf: (v) => '$v',
+        fetch: () async {
+          final start = calls++ * 10;
+          return Success(List.generate(12, (i) => start + i));
+        },
+      );
+      expect(calls, 2);
+      expect(initial.data, List.generate(16, (i) => i));
+      calls = 0;
+      final refresh = await collectRecommendationBatch<int>(
+        target: 8,
+        maxRequests: 1,
+        keyOf: (v) => '$v',
+        fetch: () async {
+          calls++;
+          return const Success([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        },
+      );
+      expect(calls, 1);
+      expect(refresh.data, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    },
+  );
+
+  test(
     'refresh returns the first page without waiting for supplemental data',
     () async {
       var calls = 0;

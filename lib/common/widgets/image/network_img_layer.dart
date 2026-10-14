@@ -58,6 +58,10 @@ class NetworkImgLayer extends StatelessWidget {
         return child;
       } else if (isAvatar) {
         return ClipOval(child: child);
+      } else if (borderRadius == BorderRadius.zero && fit != BoxFit.none) {
+        // Image fitting already crops to the target rectangle. Feed cards own
+        // the rounded outer clip, so a second zero-radius clip adds no shape.
+        return child;
       } else {
         return ClipRRect(borderRadius: borderRadius, child: child);
       }

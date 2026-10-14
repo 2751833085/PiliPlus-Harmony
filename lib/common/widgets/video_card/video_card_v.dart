@@ -144,36 +144,31 @@ class VideoCardV extends StatelessWidget {
                             colors: [Colors.transparent, Colors.black54],
                           ),
                         ),
-                        child: Theme(
-                          data: Theme.of(context).copyWith(
-                            colorScheme: Theme.of(
-                              context,
-                            ).colorScheme.copyWith(outline: Colors.white),
-                          ),
-                          child: LayoutBuilder(
-                            builder: (context, bounds) => FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
+                        child: LayoutBuilder(
+                          builder: (context, bounds) => FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                StatWidget(
+                                  type: StatType.play,
+                                  color: const Color(0xCCFFFFFF),
+                                  value: videoItem.stat.view,
+                                ),
+                                if (bounds.maxWidth >=
+                                    140 *
+                                        MediaQuery.textScalerOf(
+                                          context,
+                                        ).scale(1)) ...[
+                                  const SizedBox(width: 6),
                                   StatWidget(
-                                    type: StatType.play,
-                                    value: videoItem.stat.view,
+                                    type: StatType.danmaku,
+                                    color: const Color(0xCCFFFFFF),
+                                    value: videoItem.stat.danmu,
                                   ),
-                                  if (bounds.maxWidth >=
-                                      140 *
-                                          MediaQuery.textScalerOf(
-                                            context,
-                                          ).scale(1)) ...[
-                                    const SizedBox(width: 6),
-                                    StatWidget(
-                                      type: StatType.danmaku,
-                                      value: videoItem.stat.danmu,
-                                    ),
-                                  ],
                                 ],
-                              ),
+                              ],
                             ),
                           ),
                         ),

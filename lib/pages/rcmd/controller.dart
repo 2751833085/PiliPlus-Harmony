@@ -11,6 +11,7 @@ class RcmdController extends CommonListController {
 
   int visibleColumns = 2;
   int _nextFreshIndex = 0;
+  bool _initialLoad = true;
 
   Future<void>? _refreshTask;
 
@@ -29,11 +30,19 @@ class RcmdController extends CommonListController {
 
   @override
   Future<LoadingState> customGetData() {
-    final target = recommendationBatchSize(visibleColumns);
+    final initialLoad = _initialLoad;
+    _initialLoad = false;
+    final target = recommendationBatchSize(
+      visibleColumns,
+      initialLoad: initialLoad,
+    );
     return collectRecommendationBatch<BaseRcmdVideoItemModel>(
       target: target,
-      maxRequests:
-          1, // Render the first page immediately; scrolling fetches more.
+      // Only cold start fills 16 items. Manual refresh and pagination retain
+      // their existing single request and column-based batch size.
+      maxRequests: initialLoad ? 4 : 1,
+      parallelism: initialLoad && appRcmd ? 2 : 1,
+      limitToTarget: initialLoad,
       keyOf: (item) => item.bvid ?? item.aid?.toString(),
       fetch: () {
         final index = _nextFreshIndex++;

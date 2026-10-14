@@ -1,6 +1,7 @@
 import 'package:PiliPlus/http/loading_state.dart';
 
-int recommendationBatchSize(int columns) => (columns * 4).clamp(8, 20);
+int recommendationBatchSize(int columns, {bool initialLoad = false}) =>
+    initialLoad ? 16 : (columns * 4).clamp(8, 20);
 
 Future<LoadingState<List<T>>> collectRecommendationBatch<T>({
   required int target,
@@ -8,6 +9,7 @@ Future<LoadingState<List<T>>> collectRecommendationBatch<T>({
   required String? Function(T) keyOf,
   int parallelism = 1,
   int maxRequests = 4,
+  bool limitToTarget = false,
 }) async {
   final items = <T>[];
   final seen = <String>{};
@@ -33,7 +35,9 @@ Future<LoadingState<List<T>>> collectRecommendationBatch<T>({
       if (result case Success(:final response)) {
         for (final item in response) {
           final key = keyOf(item);
-          if (key == null || seen.add(key)) items.add(item);
+          if (key == null || seen.add(key)) {
+            if (!limitToTarget || items.length < target) items.add(item);
+          }
         }
       } else {
         failure = result;
