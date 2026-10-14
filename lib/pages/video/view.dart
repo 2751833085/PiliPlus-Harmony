@@ -1,3 +1,4 @@
+import 'package:PiliPlus/pages/video/widgets/tablet_video_tabs.dart';
 import 'package:PiliPlus/pages/video/widgets/tablet_episode_strip.dart';
 import 'package:PiliPlus/pages/video/widgets/video_entrance.dart';
 import 'package:PiliPlus/pages/video/related/controller.dart';
@@ -1819,11 +1820,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   }
 
-  bool get _tabletPlaylistPending =>
-      videoDetailController.plPlayerController.horizontalSeasonPanel &&
-      ugcIntroController.videoDetail.value.bvid == null &&
-      ugcIntroController.status.value;
-
   Widget _wideTabletVideoBody() {
     final width = maxWidth - padding.horizontal;
     final sideWidth = TabletVideoLayout.sidebarWidth(width);
@@ -1839,7 +1835,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       showEpisodes: showEpisodes,
       onShowMemberPage: onShowMemberPage,
       isPortrait: isPortrait,
-      isHorizontal: true,
+      isHorizontal: false,
       inlineMemberPage: true,
       showCollection: !_shouldShowSeasonPanel,
     );
@@ -1861,22 +1857,18 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 child: SizedBox(
                   width: leftWidth,
                   height: max(0.0, bodyHeight - height),
-                  child: _tabletPlaylistPending
-                      ? const SizedBox.expand()
-                      : CustomScrollView(
-                          key: const PageStorageKey('wide-tablet-related'),
-                          controller:
-                              videoDetailController.effectiveIntroScrollCtr,
-                          slivers: [
-                            if (_shouldShowSeasonPanel)
-                              SliverToBoxAdapter(child: _wideTabletEpisodes()),
-                            if (videoDetailController.showRelatedVideo)
-                              RelatedVideoPanel(
-                                key: videoRelatedKey,
-                                heroTag: heroTag,
-                              ),
-                          ],
-                        ),
+                  child: CustomScrollView(
+                    key: const PageStorageKey('wide-tablet-intro'),
+                    controller: videoDetailController.effectiveIntroScrollCtr,
+                    slivers: [
+                      intro,
+                      if (_shouldShowSeasonPanel)
+                        SliverToBoxAdapter(child: _wideTabletEpisodes()),
+                      SliverToBoxAdapter(
+                        child: SizedBox(height: padding.bottom + 12),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -1890,9 +1882,24 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               child: ClipRect(
                 child: MiniScaffold(
                   key: _tabletSidebarKey,
-                  body: videoDetailController.showReply
-                      ? videoReplyPanel(headerSlivers: [intro])
-                      : CustomScrollView(slivers: [intro]),
+                  body: TabletVideoTabs(
+                    related: videoDetailController.showRelatedVideo
+                        ? CustomScrollView(
+                            key: const PageStorageKey('wide-tablet-related'),
+                            primary: false,
+                            slivers: [
+                              RelatedVideoPanel(
+                                key: videoRelatedKey,
+                                heroTag: heroTag,
+                                sidebar: true,
+                              ),
+                            ],
+                          )
+                        : null,
+                    comments: videoDetailController.showReply
+                        ? videoReplyPanel()
+                        : null,
+                  ),
                 ),
               ),
             ),
