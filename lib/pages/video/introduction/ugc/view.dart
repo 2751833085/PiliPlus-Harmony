@@ -157,10 +157,33 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                   Stack(
                     clipBehavior: .none,
                     children: [
-                      _buildInfo(videoDetail.stat, videoDetail.pubdate),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          right:
+                              widget.separateOwnerActions &&
+                                  introController.enableAi
+                              ? 32
+                              : 0,
+                        ),
+                        child: _buildInfo(
+                          videoDetail.stat,
+                          videoDetail.pubdate,
+                        ),
+                      ),
                       if (introController.enableAi) _aiBtn,
                     ],
                   ),
+                  if (isHorizontal && widget.separateOwnerActions) ...[
+                    const SizedBox(height: 10),
+                    NoTranslucentArea(
+                      child: actionGrid(
+                        context,
+                        isLoading,
+                        introController,
+                        videoDetail.stat,
+                      ),
+                    ),
+                  ],
                   if (introController.showArgueMsg)
                     if (videoDetail.argueInfo?.argueMsg case final argueMsg?
                         when argueMsg.isNotEmpty) ...[
@@ -443,14 +466,20 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
       if (isSelectable) {
         return SelectionText.rich(
           textSpan,
-          style: const TextStyle(fontSize: 16),
+          style: TextStyle(
+            fontSize: widget.separateOwnerActions ? 15 : 16,
+            height: widget.separateOwnerActions ? 1.35 : null,
+          ),
         );
       }
       return Text.rich(
         textSpan,
         maxLines: isExpand ? null : 2,
         overflow: isExpand ? null : .ellipsis,
-        style: const TextStyle(fontSize: 16),
+        style: TextStyle(
+          fontSize: widget.separateOwnerActions ? 15 : 16,
+          height: widget.separateOwnerActions ? 1.35 : null,
+        ),
       );
     }
 
@@ -513,6 +542,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           Obx(
             () => ActionItem(
               animation: introController.tripleAnimation,
+              iconSize: widget.separateOwnerActions ? 20 : 18,
               icon: const Icon(FontAwesomeIcons.thumbsUp),
               selectIcon: const Icon(FontAwesomeIcons.solidThumbsUp),
               selectStatus: introController.hasLike.value,
@@ -524,6 +554,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           ),
           Obx(
             () => ActionItem(
+              iconSize: widget.separateOwnerActions ? 20 : 18,
               icon: const Icon(FontAwesomeIcons.thumbsDown),
               selectIcon: const Icon(FontAwesomeIcons.solidThumbsDown),
               onTap: () => introController.handleAction(
@@ -537,6 +568,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           Obx(
             () => ActionItem(
               animation: introController.tripleAnimation,
+              iconSize: widget.separateOwnerActions ? 20 : 18,
               icon: const Icon(FontAwesomeIcons.b),
               selectIcon: const Icon(FontAwesomeIcons.b),
               onTap: introController.actionCoinVideo,
@@ -548,6 +580,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           Obx(
             () => ActionItem(
               animation: introController.tripleAnimation,
+              iconSize: widget.separateOwnerActions ? 20 : 18,
               icon: const Icon(FontAwesomeIcons.star),
               selectIcon: const Icon(FontAwesomeIcons.solidStar),
               onTap: () => introController.showFavBottomSheet(context),
@@ -562,6 +595,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           ),
           Obx(
             () => ActionItem(
+              iconSize: widget.separateOwnerActions ? 20 : 18,
               icon: const Icon(FontAwesomeIcons.clock),
               selectIcon: const Icon(FontAwesomeIcons.solidClock),
               onTap: () =>
@@ -572,6 +606,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
             ),
           ),
           ActionItem(
+            iconSize: widget.separateOwnerActions ? 20 : 18,
             icon: const Icon(FontAwesomeIcons.shareFromSquare),
             onTap: () => introController.actionShareVideo(context),
             selectStatus: false,
@@ -798,16 +833,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
         ],
       ],
     );
-    if (!isHorizontal || !widget.separateOwnerActions) return ownerRow;
-    return Column(
-      crossAxisAlignment: .stretch,
-      mainAxisSize: .min,
-      children: [
-        ownerRow,
-        const SizedBox(height: 12),
-        actionGrid(context, isLoading, introController, videoDetail.stat),
-      ],
-    );
+    return ownerRow;
   }
 
   Widget _buildStaff(
@@ -954,7 +980,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           children: [
             PendantAvatar(
               userStat.card?.face,
-              size: widget.separateOwnerActions ? 48 : 35,
+              size: widget.separateOwnerActions ? 44 : 35,
               badgeSize: 14,
               vipStatus: userStat.card?.vip?.status,
               officialType: userStat.card?.official?.type,
@@ -968,7 +994,10 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                     maxLines: 1,
                     overflow: .ellipsis,
                     style: TextStyle(
-                      fontSize: widget.separateOwnerActions ? 15 : 13,
+                      fontSize: widget.separateOwnerActions ? 14 : 13,
+                      fontWeight: widget.separateOwnerActions
+                          ? FontWeight.w500
+                          : null,
                       color: isVip && userStat.card?.vip?.type == 2
                           ? colorScheme.vipColor
                           : null,
@@ -990,42 +1019,43 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
   );
 
   Widget _buildInfo(VideoStat? stat, int? pubdate) {
-    return Row(
-      spacing: 10,
-      children: [
-        StatWidget(
-          type: .play,
-          value: stat?.view,
+    final children = <Widget>[
+      StatWidget(
+        type: .play,
+        value: stat?.view,
+        color: colorScheme.outline,
+      ),
+      StatWidget(
+        type: .danmaku,
+        value: stat?.danmaku,
+        color: colorScheme.outline,
+      ),
+      Text(
+        DateFormatUtils.format(pubdate),
+        style: TextStyle(
+          fontSize: 12,
           color: colorScheme.outline,
         ),
-        StatWidget(
-          type: .danmaku,
-          value: stat?.danmaku,
+      ),
+      if (MineController.anonymity.value)
+        Icon(
+          MdiIcons.incognito,
+          size: 15,
           color: colorScheme.outline,
+          semanticLabel: '无痕',
         ),
-        Text(
-          DateFormatUtils.format(pubdate),
-          style: TextStyle(
-            fontSize: 12,
-            color: colorScheme.outline,
+      if (introController.isShowOnlineTotal)
+        Obx(
+          () => Text(
+            '${introController.total.value}人在看',
+            style: TextStyle(fontSize: 12, color: colorScheme.outline),
           ),
         ),
-        if (MineController.anonymity.value)
-          Icon(
-            MdiIcons.incognito,
-            size: 15,
-            color: colorScheme.outline,
-            semanticLabel: '无痕',
-          ),
-        if (introController.isShowOnlineTotal)
-          Obx(
-            () => Text(
-              '${introController.total.value}人在看',
-              style: TextStyle(fontSize: 12, color: colorScheme.outline),
-            ),
-          ),
-      ],
-    );
+    ];
+    if (widget.separateOwnerActions) {
+      return Wrap(spacing: 10, runSpacing: 4, children: children);
+    }
+    return Row(spacing: 10, children: children);
   }
 
   Widget get _aiBtn => Positioned(

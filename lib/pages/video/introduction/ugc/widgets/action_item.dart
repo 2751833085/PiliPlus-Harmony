@@ -7,6 +7,7 @@ class ActionItem extends StatelessWidget {
   const ActionItem({
     super.key,
     required this.icon,
+    this.iconSize = 18,
     this.selectIcon,
     this.onTap,
     this.onLongPress,
@@ -21,6 +22,7 @@ class ActionItem extends StatelessWidget {
        _isThumbsUp = onStartTriple != null;
 
   final Icon icon;
+  final double iconSize;
   final Icon? selectIcon;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
@@ -42,7 +44,7 @@ class ActionItem extends StatelessWidget {
         : colorScheme.primary;
     Widget child = Icon(
       selectStatus ? selectIcon!.icon! : icon.icon,
-      size: 18,
+      size: iconSize,
       color: selectStatus ? primary : icon.color ?? colorScheme.outline,
       semanticLabel: semanticsLabel,
     );
