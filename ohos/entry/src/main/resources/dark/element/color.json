@@ -24,13 +24,17 @@
       "name": "top_bar_mask_start",
       "value": "#C0000000"
     },
-        {
+    {
       "name": "top_bar_mask_mid",
       "value": "#33000000"
     },
     {
       "name": "top_bar_mask_end",
       "value": "#00000000"
+    },
+    {
+      "name": "navigation_bar_background",
+      "value": "#25262A"
     }
   ]
 }

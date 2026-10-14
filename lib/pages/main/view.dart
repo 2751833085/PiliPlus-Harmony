@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/navigation_press_feedback.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_navigation_surface.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/cached_navigation_view.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -424,48 +425,28 @@ class _MainAppState extends PopScopeState<MainApp>
         return null;
       }
       if (HarmonyStyle.enabled(context)) {
-        bottomNav = RepaintBoundary(
-          child: ImmersiveSurface(
-            interactive: false,
-            showBorder: false,
-            blurBackground: Pref.translucentBottomBar,
-            opaque: !Pref.translucentBottomBar,
-            blurSigma: 24,
-            // Neutral thin material like the native top bar, without the old
-            // grey diagonal card tint. One clipped blur, bounded to the bar.
-            surfaceGradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: [
-                for (final alpha in const [.76, .66])
-                  (Theme.of(context).brightness == Brightness.dark
-                          ? Colors.black
-                          : Colors.white)
-                      .withValues(alpha: Pref.translucentBottomBar ? alpha : 1),
-              ],
-            ),
-            borderRadius: BorderRadius.zero,
-            child: SafeArea(
-              top: false,
-              child: Align(
-                heightFactor: 1,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: Obx(
-                    () => Row(
-                      children: [
-                        for (
-                          var i = 0;
-                          i < _mainController.navigationBars.length;
-                          i++
-                        )
-                          Expanded(
-                            child: NavigationPressFeedback(
-                              child: _harmonyDestination(i, vertical: false),
-                            ),
+        bottomNav = HarmonyNavigationSurface(
+          translucent: Pref.translucentBottomBar,
+          child: SafeArea(
+            top: false,
+            child: Align(
+              heightFactor: 1,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Obx(
+                  () => Row(
+                    children: [
+                      for (
+                        var i = 0;
+                        i < _mainController.navigationBars.length;
+                        i++
+                      )
+                        Expanded(
+                          child: NavigationPressFeedback(
+                            child: _harmonyDestination(i, vertical: false),
                           ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                 ),
               ),

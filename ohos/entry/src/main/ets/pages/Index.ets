@@ -867,7 +867,7 @@ struct Index {
     .barPosition(BarPosition.End)
     .vertical(false)
     .barHeight(56)
-    .barBackgroundColor(this.immersiveEnabled && this.translucentBottomBar ? '#00000000' : $r('sys.color.comp_background_tertiary'))
+    .barBackgroundColor(this.immersiveEnabled && this.translucentBottomBar ? '#00000000' : $r('app.color.navigation_bar_background'))
     .barFloatingStyle({
       barBottomMargin: this.bottomAvoidAreaHeight,
       adaptToHandedness: false,
@@ -876,7 +876,8 @@ struct Index {
       barWidth: { smallWidth: Math.min(280, Math.max(160, this.winWidth - 32)), mediumWidth: 320, largeWidth: 360 },
       systemMaterialEffect: {
         materialType: this.immersiveEnabled && this.translucentBottomBar ? hdsMaterial.MaterialType.IMMERSIVE : hdsMaterial.MaterialType.NONE,
-        materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
+        // Let the system adapt material cost instead of forcing the highest level.
+        materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
       }
     })
     .onTouch((event: TouchEvent) => {
