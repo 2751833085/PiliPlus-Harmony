@@ -40,9 +40,11 @@ class HorizontalMemberPage extends StatefulWidget {
     required this.mid,
     required this.videoDetailController,
     required this.ugcIntroController,
+    this.showCloseHeader = false,
   });
 
   final dynamic mid;
+  final bool showCloseHeader;
   final VideoDetailController videoDetailController;
   final UgcIntroController ugcIntroController;
 
@@ -53,6 +55,7 @@ class HorizontalMemberPage extends StatefulWidget {
 class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
   late final HorizontalMemberPageController _controller;
   late final account = Accounts.main;
+  late final String _controllerTag;
   late final String _bvid;
   late ColorScheme colorScheme;
   late final _isRefreshing = RxBool(false);
@@ -60,12 +63,16 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
   @override
   void initState() {
     super.initState();
+    _controllerTag = Utils.makeHeroTag(widget.mid);
     _controller = Get.put(
       HorizontalMemberPageController(
         mid: widget.mid,
-        currAid: widget.videoDetailController.aid.toString(),
+        currAid:
+            widget.mid == widget.ugcIntroController.videoDetail.value.owner?.mid
+            ? widget.videoDetailController.aid.toString()
+            : null,
       ),
-      tag: widget.videoDetailController.heroTag,
+      tag: _controllerTag,
     );
     _bvid = widget.videoDetailController.bvid;
     if (_controller.loadingState.value
@@ -73,10 +80,23 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
       final index = res.response?.indexWhere((e) => e.bvid == _bvid) ?? -1;
       if (index != -1) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _controller.scrollController.jumpTo(112.0 * index);
+          if (mounted && _controller.scrollController.hasClients) {
+            _controller.scrollController.jumpTo(
+              (112.0 * index).clamp(
+                0.0,
+                _controller.scrollController.position.maxScrollExtent,
+              ),
+            );
+          }
         });
       }
     }
+  }
+
+  @override
+  void dispose() {
+    Get.delete<HorizontalMemberPageController>(tag: _controllerTag);
+    super.dispose();
   }
 
   @override
@@ -88,8 +108,28 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Obx(
-        () => _buildUserPage(_controller.userState.value),
+      child: Column(
+        children: [
+          if (widget.showCloseHeader)
+            SizedBox(
+              height: 48,
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: '返回视频',
+                    onPressed: Get.back,
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+                  const Expanded(child: Text('UP 主主页')),
+                ],
+              ),
+            ),
+          Expanded(
+            child: Obx(
+              () => _buildUserPage(_controller.userState.value),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -289,18 +329,22 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
     children: [
       Row(
         children: [
-          GestureDetector(
-            onTap: () => Utils.copyText(memberInfoModel.name ?? ''),
-            child: Text(
-              memberInfoModel.name ?? '',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color:
-                    (memberInfoModel.vip?.status ?? -1) > 0 &&
-                        memberInfoModel.vip?.type == 2
-                    ? colorScheme.vipColor
-                    : null,
+          Expanded(
+            child: GestureDetector(
+              onTap: () => Utils.copyText(memberInfoModel.name ?? ''),
+              child: Text(
+                memberInfoModel.name ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color:
+                      (memberInfoModel.vip?.status ?? -1) > 0 &&
+                          memberInfoModel.vip?.type == 2
+                      ? colorScheme.vipColor
+                      : null,
+                ),
               ),
             ),
           ),

@@ -59,6 +59,7 @@ class UgcIntroPanel extends StatefulWidget {
     required this.isPortrait,
     required this.isHorizontal,
     this.showCollection = true,
+    this.inlineMemberPage = false,
   });
   final String heroTag;
   final Function showAiBottomSheet;
@@ -67,6 +68,7 @@ class UgcIntroPanel extends StatefulWidget {
   final bool isPortrait;
   final bool isHorizontal;
   final bool showCollection;
+  final bool inlineMemberPage;
 
   @override
   State<UgcIntroPanel> createState() => _UgcIntroPanelState();
@@ -762,7 +764,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                 () {
                   if (mid != null) {
                     feedBack();
-                    if (!isPortrait && introController.horizontalMemberPage) {
+                    if (widget.inlineMemberPage ||
+                        (!isPortrait && introController.horizontalMemberPage)) {
                       widget.onShowMemberPage(mid);
                     } else {
                       Get.toNamed(
@@ -802,10 +805,11 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
     return GestureDetector(
       behavior: .opaque,
       onTap: () {
-        if (item.mid == ownerMid &&
-            !isPortrait &&
-            introController.horizontalMemberPage) {
-          widget.onShowMemberPage(ownerMid);
+        if (widget.inlineMemberPage ||
+            (item.mid == ownerMid &&
+                !isPortrait &&
+                introController.horizontalMemberPage)) {
+          widget.onShowMemberPage(item.mid);
         } else {
           onTap();
         }

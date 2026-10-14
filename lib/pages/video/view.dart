@@ -1840,6 +1840,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       onShowMemberPage: onShowMemberPage,
       isPortrait: isPortrait,
       isHorizontal: true,
+      inlineMemberPage: true,
       showCollection: !_shouldShowSeasonPanel,
     );
     return MiniScaffold(
@@ -3245,15 +3246,21 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   void onShowMemberPage(int? mid) {
-    videoDetailController.childKey.currentState?.showBottomSheet(
+    if (mid == null) return;
+    final inSidebar = _usesTabletVideoLayout && !isFullScreen &&
+        TabletVideoLayout.wide(Size(maxWidth - padding.horizontal, maxHeight));
+    final host = inSidebar
+        ? _tabletSidebarKey.currentState
+        : videoDetailController.childKey.currentState;
+    host?.showBottomSheet(
       constraints: const BoxConstraints(),
-      (context) {
-        return HorizontalMemberPage(
-          mid: mid,
-          videoDetailController: videoDetailController,
-          ugcIntroController: ugcIntroController,
-        );
-      },
+      enableDrag: !inSidebar,
+      (context) => HorizontalMemberPage(
+        mid: mid,
+        showCloseHeader: inSidebar,
+        videoDetailController: videoDetailController,
+        ugcIntroController: ugcIntroController,
+      ),
     );
   }
 }
