@@ -6,12 +6,20 @@
   "sizeBytes": 33103494,
   "signatureVerified": true,
   "sourceCommit": "1a373041543e9a500695fcd2fc9a325245034adf",
-  "installedOnDevice": false,
+  "installedOnDevice": true,
   "fullDeviceValidationComplete": false,
-  "validation": "251 Harmony regression tests passed. Analyzer has no errors; two existing unused-method warnings remain in video/live controllers. Signed HAP signature, ZIP CRC, version and native MPV hash verified. Device installation and final runtime testing deferred at user request because the phone is in use. Earlier 6236 candidate still showed black video; AI voice playback and real-world frame pacing remain unverified after the latest source fixes.",
+  "validation": "251 Harmony regression tests passed. Analyzer has no errors; two existing unused-method warnings remain in video/live controllers. Signed HAP signature, ZIP CRC, version and native MPV hash verified. Final 6237 overwritten onto the connected device successfully; UID and first installation time were preserved. EntryAbility launch succeeded and the settings interface was visibly rendered. Full runtime regression was not performed; AI voice playback and real-world frame pacing remain unverified after the latest source fixes.",
   "knownLimitations": [
     "AI voice-related black screen requires device retest; not confirmed resolved.",
     "Dislike totals are not disclosed by current public responses; zero placeholders are shown as unavailable."
   ],
-  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6"
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "deviceOverwrite": {
+    "previousVersionCode": 6236,
+    "installedVersionCode": 6237,
+    "uidPreserved": true,
+    "firstInstallTimePreserved": true,
+    "launchSucceeded": true,
+    "visibleInterfaceVerified": true
+  }
 }
