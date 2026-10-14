@@ -59,13 +59,12 @@ class PlayUrlModel {
   List<SegmentItemModel>? clipInfoList;
 
   int findAvailableVideoQuality(int preferredQuality) {
-    final curHighestVideoQa = dash!.video!.first.quality.code;
-    if (acceptQuality case final qualitys?
-        when preferredQuality <= curHighestVideoQa) {
-      return qualitys.findClosestTarget((e) => e <= preferredQuality, max);
-    } else {
-      return curHighestVideoQa;
-    }
+    // Advertised qualities can be absent from the returned DASH streams (for
+    // example translated tracks or account-limited responses). Select a stream
+    // that really exists, independent of server ordering.
+    final available = dash!.video!.map((e) => e.quality.code).toSet();
+    final below = available.where((e) => e <= preferredQuality);
+    return below.isNotEmpty ? below.reduce(max) : available.reduce(min);
   }
 
   /// Supplemental qualities need not block the first frame when the selected
@@ -73,7 +72,13 @@ class PlayUrlModel {
   bool canDeferQualitySupplement(int preferredQuality) {
     final videos = dash?.video;
     if (videos == null || videos.isEmpty) return false;
-    final target = findAvailableVideoQuality(preferredQuality);
+    final highest = videos.map((e) => e.quality.code).reduce(max);
+    final advertised = acceptQuality?.where((e) => e <= preferredQuality);
+    final target = preferredQuality >= highest
+        ? highest
+        : advertised?.isNotEmpty == true
+        ? advertised!.reduce(max)
+        : findAvailableVideoQuality(preferredQuality);
     return videos.any((video) => video.quality.code == target);
   }
 
@@ -83,7 +88,7 @@ class PlayUrlModel {
     try {
       final video = dash!.video!;
       final available = video.availableVideoQualities;
-      final highest = video.first.id;
+      final highest = available.reduce(max);
 
       for (final item in supportFormats!) {
         final quality = item.quality;

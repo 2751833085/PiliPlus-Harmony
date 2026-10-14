@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:PiliPlus/pages/video/widgets/tablet_episode_strip.dart';
 import 'package:PiliPlus/pages/video/widgets/video_entrance.dart';
 import 'package:PiliPlus/pages/video/related/controller.dart';
@@ -1292,34 +1293,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         return SimpleScaffold(
           appBar: removeAppBar(isFullScreen)
               ? null
-              : Obx(
-                  () {
-                    final scrollRatio = videoDetailController.scrollRatio.value;
-                    final brightness = colorScheme.brightness;
-                    final Brightness statusBarBrightness;
-                    final Brightness statusBarIconBrightness;
-                    final backgroundColor = isPortrait && scrollRatio > 0
-                        ? Color.lerp(
-                            Colors.black,
-                            colorScheme.surface,
-                            scrollRatio,
-                          )!
-                        : Colors.black;
-                    if (isPortrait && scrollRatio >= 0.5) {
-                      statusBarBrightness = brightness;
-                      statusBarIconBrightness = brightness.reverse;
-                    } else {
-                      statusBarBrightness = .dark;
-                      statusBarIconBrightness = .light;
-                    }
-                    return SimpleAppBar(
-                      height: padding.top,
-                      backgroundColor: backgroundColor,
-                      brightness: brightness,
-                      statusBarBrightness: statusBarBrightness,
-                      statusBarIconBrightness: statusBarIconBrightness,
-                    );
-                  },
+              : SimpleAppBar(
+                  height: padding.top,
+                  backgroundColor: colorScheme.surface,
+                  brightness: colorScheme.brightness,
+                  statusBarBrightness: colorScheme.brightness,
+                  statusBarIconBrightness: colorScheme.brightness.reverse,
                 ),
           body: ExtendedNestedScrollView(
             onlyOneScrollInBody: true,
@@ -1571,6 +1550,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   }
 
+  SystemUiOverlayStyle get _videoSystemOverlayStyle => SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: theme.brightness.reverse,
+    statusBarBrightness: theme.brightness,
+  );
+
   Widget get childWhenDisabledLandscape => Obx(
     () {
       final isFullScreen = this.isFullScreen;
@@ -1578,7 +1563,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         appBar: removeAppBar(isFullScreen)
             ? null
             : AppBar(
-                backgroundColor: Colors.black,
+                backgroundColor: theme.colorScheme.surface,
+                systemOverlayStyle: _videoSystemOverlayStyle,
                 automaticallyImplyLeading: false,
                 toolbarHeight: _expand(
                   isPortrait ? (_fixedTopInset ?? padding.top) : padding.top,
@@ -1769,7 +1755,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             child: SizedBox(
               width: sideWidth,
               height: maxHeight - padding.top,
-              child: ClipRect(
+              child: TabletSidebarSurface(
                 child: MiniScaffold(
                   key: _tabletSidebarKey,
                   body: TabletVideoSidebar(
@@ -1862,22 +1848,27 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 child: SizedBox(
                   width: leftWidth,
                   height: max(0.0, bodyHeight - height),
-                  child: _tabletPlaylistPending
-                      ? const SizedBox.expand()
-                      : CustomScrollView(
-                          key: const PageStorageKey('wide-tablet-related'),
-                          controller:
-                              videoDetailController.effectiveIntroScrollCtr,
-                          slivers: [
-                            if (_shouldShowSeasonPanel)
-                              SliverToBoxAdapter(child: _wideTabletEpisodes()),
-                            if (videoDetailController.showRelatedVideo)
-                              RelatedVideoPanel(
-                                key: videoRelatedKey,
-                                heroTag: heroTag,
-                              ),
-                          ],
-                        ),
+                  child: Material(
+                    color: theme.colorScheme.surface,
+                    clipBehavior: Clip.hardEdge,
+                    child: _tabletPlaylistPending
+                        ? const SizedBox.expand()
+                        : CustomScrollView(
+                            key: const PageStorageKey('wide-tablet-related'),
+                            clipBehavior: Clip.hardEdge,
+                            controller:
+                                videoDetailController.effectiveIntroScrollCtr,
+                            slivers: [
+                              if (_shouldShowSeasonPanel)
+                                SliverToBoxAdapter(child: _wideTabletEpisodes()),
+                              if (videoDetailController.showRelatedVideo)
+                                RelatedVideoPanel(
+                                  key: videoRelatedKey,
+                                  heroTag: heroTag,
+                                ),
+                            ],
+                          ),
+                  ),
                 ),
               ),
             ],
@@ -1888,7 +1879,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
             child: SizedBox(
               width: sideWidth,
               height: bodyHeight,
-              child: ClipRect(
+              child: TabletSidebarSurface(
                 child: MiniScaffold(
                   key: _tabletSidebarKey,
                   body: videoDetailController.showReply
@@ -2065,7 +2056,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       appBar: removeAppBar(isFullScreen)
           ? null
           : AppBar(
-              backgroundColor: Colors.black,
+              backgroundColor: theme.colorScheme.surface,
+              systemOverlayStyle: _videoSystemOverlayStyle,
               automaticallyImplyLeading: false,
               toolbarHeight: _expand(_fixedTopInset ?? padding.top, 0),
               primary: false,
@@ -3180,6 +3172,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           child: Theme(data: theme, child: child),
         ),
         constraints: const BoxConstraints(),
+        panelId: ('episodes', season?.id, bvid),
         enableDrag: false,
         slideFromRight: true,
         sheetAnimationStyle: const AnimationStyle(

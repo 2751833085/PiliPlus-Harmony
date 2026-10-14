@@ -1,6 +1,7 @@
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
-import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/image/full_cover_preview.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:PiliPlus/common/widgets/selection_text.dart';
 import 'package:PiliPlus/http/user.dart';
 import 'package:PiliPlus/pages/common/publish/publish_route.dart';
@@ -34,27 +35,24 @@ void imageSaveDialog({
         final imgWidth = wide
             ? (panelWidth - 300).clamp(0.0, 560.0)
             : (screen.width - 64).clamp(0.0, 560.0);
-        final height = imgWidth / Style.aspectRatio16x9;
         final preview = Container(
           width: imgWidth,
           margin: const .symmetric(horizontal: Style.safeSpace),
-          decoration: _ImageDecoration(
-            imageHeight: height,
-            color: colorScheme.surface,
-            borderRadius: const .all(Style.imgRadius),
-          ),
           child: Column(
             mainAxisSize: .min,
             children: [
-              IgnorePointer(
-                child: NetworkImgLayer(
-                  src: cover,
-                  quality: 100,
+              if (cover?.isNotEmpty == true)
+                FullCoverPreview(
+                  image: ResizeImage.resizeIfNeeded(
+                    1280,
+                    null,
+                    CachedNetworkImageProvider(
+                      ImageUtils.thumbnailUrlWithSize(cover, 1280, null, 100),
+                    ),
+                  ),
                   width: imgWidth,
-                  height: height,
-                  borderRadius: const .vertical(top: Style.imgRadius),
+                  maxHeight: (screen.height - 192).clamp(120.0, 900.0),
                 ),
-              ),
               Padding(
                 padding: const .fromLTRB(12, 10, 8, 10),
                 child: Row(
@@ -181,80 +179,4 @@ void imageSaveDialog({
       },
     ),
   );
-}
-
-class _ImageDecoration extends Decoration {
-  const _ImageDecoration({
-    required this.color,
-    required this.imageHeight,
-    required this.borderRadius,
-  });
-
-  final Color color;
-  final double imageHeight;
-  final BorderRadius borderRadius;
-
-  @override
-  Path getClipPath(Rect rect, TextDirection textDirection) {
-    return Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is _ImageDecoration &&
-        other.color == color &&
-        other.borderRadius == borderRadius &&
-        imageHeight == other.imageHeight;
-  }
-
-  @override
-  int get hashCode => Object.hash(color, borderRadius, imageHeight);
-
-  @override
-  bool hitTest(Size size, Offset position, {TextDirection? textDirection}) {
-    return position.dy >= imageHeight;
-  }
-
-  @override
-  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
-    assert(onChanged != null);
-    return _ImageDecorationPainter(this, onChanged);
-  }
-}
-
-class _ImageDecorationPainter extends BoxPainter {
-  _ImageDecorationPainter(this._decoration, super.onChanged);
-
-  final _ImageDecoration _decoration;
-
-  Paint? _cachedBackgroundPaint;
-  Paint _getBackgroundPaint(Rect rect) {
-    if (_cachedBackgroundPaint == null) {
-      final paint = Paint()..color = _decoration.color;
-      _cachedBackgroundPaint = paint;
-    }
-
-    return _cachedBackgroundPaint!;
-  }
-
-  @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    assert(configuration.size != null);
-    final Rect rect = offset & configuration.size!;
-    canvas.drawRRect(
-      _decoration.borderRadius.toRRect(rect),
-      _getBackgroundPaint(rect),
-    );
-  }
-
-  @override
-  String toString() {
-    return '_ImagePainter for $_decoration';
-  }
 }

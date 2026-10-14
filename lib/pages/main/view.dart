@@ -424,14 +424,12 @@ class _MainAppState extends PopScopeState<MainApp>
         return null;
       }
       if (HarmonyStyle.enabled(context)) {
-        bottomNav = ColoredBox(
-          color: theme.brightness == Brightness.dark
-              ? const Color(0xFF25262A)
-              : const Color(0xFFF7F8FA),
+        bottomNav = RepaintBoundary(
           child: ImmersiveSurface(
             interactive: false,
             showBorder: false,
-            blurBackground: false,
+            blurBackground: true,
+            blurSigma: 8,
             borderRadius: BorderRadius.zero,
             child: SafeArea(
               top: false,

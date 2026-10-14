@@ -37,6 +37,7 @@ class MiniScaffoldState extends State<MiniScaffold>
   final _dismissedBottomSheets = <_StandardBottomSheet>[];
   MiniBottomSheetController? _currentBottomSheet;
   LocalHistoryEntry? _persistentSheetHistoryEntry;
+  Object? _currentPanelId;
 
   void _closeCurrentBottomSheet() {
     // Remove the previous local-history entry before opening another panel.
@@ -82,6 +83,7 @@ class MiniScaffoldState extends State<MiniScaffold>
       bottomSheetKey.currentState!.close();
       setState(() {
         _currentBottomSheet = null;
+        _currentPanelId = null;
       });
 
       if (!animationController.isDismissed) {
@@ -163,8 +165,14 @@ class MiniScaffoldState extends State<MiniScaffold>
     AnimationController? transitionAnimationController,
     AnimationStyle? sheetAnimationStyle,
     bool slideFromRight = false,
+    Object? panelId,
   }) {
     assert(debugCheckHasMediaQuery(context));
+    if (panelId != null &&
+        panelId == _currentPanelId &&
+        _currentBottomSheet != null) {
+      return _currentBottomSheet!;
+    }
 
     _closeCurrentBottomSheet();
     final AnimationController controller =
@@ -175,6 +183,7 @@ class MiniScaffoldState extends State<MiniScaffold>
               ))
           ..forward();
     setState(() {
+      _currentPanelId = panelId;
       _currentBottomSheet = _buildBottomSheet(
         builder,
         isPersistent: false,

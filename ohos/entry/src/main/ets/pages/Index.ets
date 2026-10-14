@@ -866,7 +866,7 @@ struct Index {
     .barPosition(BarPosition.End)
     .vertical(false)
     .barHeight(56)
-    .barBackgroundColor($r('sys.color.comp_background_tertiary'))
+    .barBackgroundColor(this.immersiveEnabled ? '#00000000' : $r('sys.color.comp_background_tertiary'))
     .barFloatingStyle({
       barBottomMargin: this.bottomAvoidAreaHeight,
       adaptToHandedness: false,

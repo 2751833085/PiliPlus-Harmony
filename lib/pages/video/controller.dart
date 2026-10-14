@@ -9,7 +9,7 @@ import 'package:PiliPlus/plugin/pl_player/models/playback_owner.dart';
 import 'package:PiliPlus/pages/video/shorts/request_queue.dart';
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' show min;
+import 'dart:math' show min, max;
 import 'dart:ui';
 
 import 'package:PiliPlus/common/style.dart';
@@ -683,7 +683,7 @@ class VideoDetailController extends GetxController
     VideoItem? bestVideo;
     int bestIndex = preferCodecs.length;
     for (final video in videoList) {
-      final c = video.codecs!;
+      final c = video.codecs ?? 'avc1';
       if (currentCodes.any(c.startsWith)) {
         return video;
       }
@@ -701,7 +701,7 @@ class VideoDetailController extends GetxController
         currentDecodeFormats = preferCodecs[bestIndex];
       } else {
         currentDecodeFormats = VideoDecodeFormatType.fromString(
-          videoList.first.codecs!,
+          videoList.first.codecs ?? 'avc1',
         );
       }
     }
@@ -735,12 +735,17 @@ class VideoDetailController extends GetxController
     videoUrl = VideoUtils.getCdnUrl(firstVideo.playUrls);
 
     /// 根据currentAudioQa 重新设置audioUrl
-    if (currentAudioQa != null) {
-      final firstAudio = data.dash!.audio!.firstWhere(
-        (i) => i.id == currentAudioQa!.code,
-        orElse: () => data.dash!.audio!.first,
+    final audio = data.dash?.audio;
+    if (audio != null && audio.isNotEmpty) {
+      final firstAudio = audio.firstWhere(
+        (i) => i.id == currentAudioQa?.code,
+        orElse: () => audio.first,
       );
+      currentAudioQa = AudioQuality.fromCode(firstAudio.id);
       audioUrl = VideoUtils.getCdnUrl(firstAudio.playUrls, isAudio: true);
+    } else {
+      audioUrl = '';
+      currentAudioQa = null;
     }
   }
 
@@ -758,22 +763,15 @@ class VideoDetailController extends GetxController
     if (videoList == null || videoList.isEmpty) return;
 
     final cacheVideoQa = plPlayerController.cacheVideoQa;
-    final curHighestVideoQa = videoList.first.quality.code;
-    int targetVideoQa = curHighestVideoQa;
-    if (cacheVideoQa != null &&
-        data.acceptQuality?.isNotEmpty == true &&
-        cacheVideoQa <= curHighestVideoQa) {
-      targetVideoQa = data.acceptQuality!.findClosestTarget(
-        (e) => e <= cacheVideoQa,
-        (a, b) => a > b ? a : b,
-      );
-    }
+    final targetVideoQa = data.findAvailableVideoQuality(
+      cacheVideoQa ?? videoList.map((e) => e.id).reduce(max),
+    );
     currentVideoQa.value = VideoQuality.fromCode(targetVideoQa);
 
     final audioList = data.dash?.audio;
     if (audioList != null && audioList.isNotEmpty) {
       final cacheAudioQa = plPlayerController.cacheAudioQa;
-      final List<int> audioIds = audioList.map((e) => e.id!).toList();
+      final List<int> audioIds = audioList.map((e) => e.id).toList();
       int closestNumber = audioIds.findClosestTarget(
         (e) => e <= cacheAudioQa,
         (a, b) => a > b ? a : b,
@@ -786,9 +784,9 @@ class VideoDetailController extends GetxController
         (e) => e.id == closestNumber,
         orElse: () => audioList.first,
       );
-      if (firstAudio.id case final int id?) {
-        currentAudioQa = AudioQuality.fromCode(id);
-      }
+      currentAudioQa = AudioQuality.fromCode(firstAudio.id);
+    } else {
+      currentAudioQa = null;
     }
   }
 
@@ -1347,6 +1345,7 @@ class VideoDetailController extends GetxController
       SmartDialog.showToast('账号未登录');
       return;
     }
+    playedTime = plPlayerController.videoPlayerController?.state.position;
     currLang.value = language;
     queryVideoUrl(fromReset: true);
   }
@@ -1526,30 +1525,12 @@ class VideoDetailController extends GetxController
       final targetVideoQa = data.findAvailableVideoQuality(cacheVideoQa);
       currentVideoQa.value = VideoQuality.fromCode(targetVideoQa);
 
-      /// 优先顺序 设置中指定解码格式 -> 当前可选的首个解码格式
-      final supportFormats = data.supportFormats!;
-
-      // 根据画质选编码格式
       currentDecodeFormats = VideoUtils.selectCodec(
-        supportFormats
-            .firstWhere(
-              (e) => e.quality == targetVideoQa,
-              orElse: () => supportFormats.first,
-            )
-            .codecs!,
+        data.dash!.video!.where((v) => v.id == targetVideoQa)
+            .map((v) => v.codecs ?? 'avc1'),
         preferCodecs,
       );
-
-      /// 取出符合当前画质的videoList
-      final videosList = data.dash!.video!
-          .where((e) => e.quality.code == targetVideoQa)
-          .toList();
-
-      /// 取出符合当前解码格式的videoItem
-      firstVideo = videosList.firstWhere(
-        (e) => currentDecodeFormats.codes.any(e.codecs!.startsWith),
-        orElse: () => videosList.first,
-      );
+      firstVideo = findVideoByQa(targetVideoQa, setCodecs: true);
       _setVideoHeight();
 
       videoUrl =
@@ -1579,6 +1560,7 @@ class VideoDetailController extends GetxController
         currentAudioQa = AudioQuality.fromCode(firstAudio.id);
       } else {
         audioUrl = '';
+        currentAudioQa = null;
       }
       _usingWarmSelection =
           _usingWarmSelection &&

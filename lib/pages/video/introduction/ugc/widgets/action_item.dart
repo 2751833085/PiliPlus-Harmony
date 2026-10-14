@@ -8,6 +8,7 @@ class ActionItem extends StatelessWidget {
     super.key,
     required this.icon,
     this.iconSize = 18,
+    this.labelSize,
     this.selectIcon,
     this.onTap,
     this.onLongPress,
@@ -23,6 +24,7 @@ class ActionItem extends StatelessWidget {
 
   final Icon icon;
   final double iconSize;
+  final double? labelSize;
   final Icon? selectIcon;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
@@ -98,7 +100,7 @@ class ActionItem extends StatelessWidget {
         color: selectStatus
             ? theme.colorScheme.primary
             : theme.colorScheme.outline,
-        fontSize: theme.textTheme.labelSmall!.fontSize,
+        fontSize: labelSize ?? theme.textTheme.labelSmall!.fontSize,
       ),
     );
     if (hasText) {

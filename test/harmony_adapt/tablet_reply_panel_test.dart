@@ -3,6 +3,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
 
 void main() {
+  testWidgets(
+    'repeated playlist taps reuse the live panel and one back closes it',
+    (tester) async {
+      final sidebar = GlobalKey<MiniScaffoldState>();
+      final nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          home: Scaffold(
+            body: MiniScaffold(key: sidebar, body: const Text('video')),
+          ),
+        ),
+      );
+      MiniBottomSheetController open() => sidebar.currentState!.showBottomSheet(
+        (_) => const SizedBox(height: 300, child: Text('all episodes')),
+        panelId: ('episodes', 42),
+        slideFromRight: true,
+      );
+      final first = open();
+      for (var i = 0; i < 20; i++) expect(identical(first, open()), isTrue);
+      await tester.pump(const Duration(milliseconds: 100));
+      for (var i = 0; i < 20; i++) expect(identical(first, open()), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('all episodes'), findsOneWidget);
+      await nav.currentState!.maybePop();
+      await tester.pumpAndSettle();
+      expect(find.text('all episodes'), findsNothing);
+      expect(find.text('video'), findsOneWidget);
+      expect(identical(first, open()), isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('all episodes'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('reply sheet stays in sidebar and back preserves video route', (
     tester,
   ) async {

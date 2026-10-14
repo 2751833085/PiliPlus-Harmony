@@ -97,21 +97,21 @@ class _ReplyPageState extends CommonRichTextPubPageState<ReplyPage> {
     Widget child = ViewSafeArea(
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: Container(
+        child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
-          decoration: BoxDecoration(
+          child: ImmersiveSurface(
+            blurBackground: true,
+            blurSigma: 12,
             borderRadius: Style.bottomSheetRadius,
-            color: theme.colorScheme.surface,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...buildInputView(),
-              buildImagePreview(),
-              Flexible(child: buildPanelContainer(Colors.transparent)),
-            ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...buildInputView(),
+                buildImagePreview(),
+                Flexible(child: buildPanelContainer(Colors.transparent)),
+              ],
+            ),
           ),
         ),
       ),

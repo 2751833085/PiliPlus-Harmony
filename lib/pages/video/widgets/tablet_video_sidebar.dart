@@ -121,3 +121,26 @@ abstract final class TabletVideoLayout {
       enabled(window) && window.width >= 960 && window.aspectRatio >= 1.2;
   static double sidebarWidth(double width) => (width * .365).clamp(240, 440);
 }
+
+/// The inset separates the columns without resizing or remounting the player.
+class TabletSidebarSurface extends StatelessWidget {
+  const TabletSidebarSurface({super.key, required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      border: Border(
+        left: BorderSide(
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: .5),
+        ),
+      ),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.only(left: 9),
+      child: ClipRect(child: child),
+    ),
+  );
+}

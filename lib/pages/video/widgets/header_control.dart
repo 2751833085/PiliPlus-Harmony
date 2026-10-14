@@ -497,10 +497,10 @@ class HeaderControlState extends State<HeaderControl>
             ),
           if (video.languages.value?.isNotEmpty == true)
             row(
-              '字幕翻译',
+              'AI 原声翻译',
               Icons.translate,
-              () => _showChoices('字幕翻译', video.currLang.value ?? '', [
-                (value: '', label: '关闭翻译'),
+              () => _showChoices('AI 原声翻译', video.currLang.value ?? '', [
+                (value: '', label: '原声'),
                 for (final lang in video.languages.value!)
                   (value: lang.lang!, label: lang.title ?? lang.lang!),
               ], video.setLanguage),

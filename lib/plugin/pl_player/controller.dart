@@ -1148,12 +1148,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (dataSource.audioSource case final audio? when (audio.isNotEmpty)) {
       if (onlyPlayAudio.value) {
         video = audio;
+        await player.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
       } else {
         var audioUri = Platform.isWindows
             ? audio.replaceAll(';', '\\;')
             : audio.replaceAll(':', '\\:');
         extras['audio-files'] = audioUri;
-        player.platform!.maybeAsNativePlayer.setProperty(
+        await player.platform!.maybeAsNativePlayer.setProperty(
           'audio-files',
           audioUri,
         );
@@ -1166,7 +1167,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       // Media.extras 传入 audio-files，每次 player.open 都会随新 Media 重置。
       // 当切换到无单独音频源的内容（如直播、关闭听视频）时，必须主动清空
       // audio-files，否则旧视频的外部音轨会继续播放，导致画面与声音不一致。
-      player.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
+      await player.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
     }
 
     assert(!isLive || seekTo == null);
@@ -1207,7 +1208,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     String? audioUri;
     if (!isLive) {
       if (dataSource.audioSource.isNullOrEmpty) {
-        SmartDialog.showToast('音频源为空');
+        await player!.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
       } else {
         audioUri = Platform.isWindows
             ? dataSource.audioSource!.replaceAll(';', '\\;')
@@ -1231,7 +1232,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       Media(
         dataSource.videoSource,
         start: isLive ? null : Duration(milliseconds: positionInMilliseconds),
-        extras: audioUri == null ? null : {'audio-files': '"$audioUri"'},
+        httpHeaders: {
+          'user-agent': BrowserUa.pc,
+          'referer': HttpString.baseUrl,
+        },
+        extras: audioUri == null ? null : {'audio-files': audioUri},
       ),
       play: false,
     );

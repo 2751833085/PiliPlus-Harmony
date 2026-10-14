@@ -123,10 +123,10 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
     final isPortrait = widget.isPortrait;
     final isHorizontal = !isPortrait && widget.isHorizontal;
     return SliverPadding(
-      padding: const .only(
-        left: Style.safeSpace,
-        right: Style.safeSpace,
-        top: 10,
+      padding: EdgeInsets.only(
+        left: widget.separateOwnerActions ? 16 : Style.safeSpace,
+        right: widget.separateOwnerActions ? 16 : Style.safeSpace,
+        top: widget.separateOwnerActions ? 16 : 10,
       ),
       sliver: Obx(
         () {
@@ -151,7 +151,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                       videoDetail,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: widget.separateOwnerActions ? 14 : 8),
                   _buildTitle(isLoading, isHorizontal, videoDetail),
                   const SizedBox(height: 8),
                   Stack(
@@ -174,7 +174,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                     ],
                   ),
                   if (isHorizontal && widget.separateOwnerActions) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     NoTranslucentArea(
                       child: actionGrid(
                         context,
@@ -467,8 +467,9 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
         return SelectionText.rich(
           textSpan,
           style: TextStyle(
-            fontSize: widget.separateOwnerActions ? 15 : 16,
-            height: widget.separateOwnerActions ? 1.35 : null,
+            fontSize: 16,
+            height: widget.separateOwnerActions ? 1.4 : null,
+            fontWeight: widget.separateOwnerActions ? FontWeight.w500 : null,
           ),
         );
       }
@@ -477,8 +478,9 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
         maxLines: isExpand ? null : 2,
         overflow: isExpand ? null : .ellipsis,
         style: TextStyle(
-          fontSize: widget.separateOwnerActions ? 15 : 16,
-          height: widget.separateOwnerActions ? 1.35 : null,
+          fontSize: 16,
+          height: widget.separateOwnerActions ? 1.4 : null,
+          fontWeight: widget.separateOwnerActions ? FontWeight.w500 : null,
         ),
       );
     }
@@ -535,14 +537,17 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
     VideoStat? stat,
   ) {
     return SizedBox(
-      height: 48,
+      height: widget.separateOwnerActions
+          ? 36 + MediaQuery.textScalerOf(context).scale(14)
+          : 48,
       child: Row(
         crossAxisAlignment: .start,
         children: [
           Obx(
             () => ActionItem(
               animation: introController.tripleAnimation,
-              iconSize: widget.separateOwnerActions ? 20 : 18,
+              iconSize: widget.separateOwnerActions ? 22 : 18,
+            labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.thumbsUp),
               selectIcon: const Icon(FontAwesomeIcons.solidThumbsUp),
               selectStatus: introController.hasLike.value,
@@ -554,7 +559,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           ),
           Obx(
             () => ActionItem(
-              iconSize: widget.separateOwnerActions ? 20 : 18,
+              iconSize: widget.separateOwnerActions ? 22 : 18,
+            labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.thumbsDown),
               selectIcon: const Icon(FontAwesomeIcons.solidThumbsDown),
               onTap: () => introController.handleAction(
@@ -568,7 +574,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           Obx(
             () => ActionItem(
               animation: introController.tripleAnimation,
-              iconSize: widget.separateOwnerActions ? 20 : 18,
+              iconSize: widget.separateOwnerActions ? 22 : 18,
+            labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.b),
               selectIcon: const Icon(FontAwesomeIcons.b),
               onTap: introController.actionCoinVideo,
@@ -580,7 +587,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           Obx(
             () => ActionItem(
               animation: introController.tripleAnimation,
-              iconSize: widget.separateOwnerActions ? 20 : 18,
+              iconSize: widget.separateOwnerActions ? 22 : 18,
+            labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.star),
               selectIcon: const Icon(FontAwesomeIcons.solidStar),
               onTap: () => introController.showFavBottomSheet(context),
@@ -595,7 +603,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           ),
           Obx(
             () => ActionItem(
-              iconSize: widget.separateOwnerActions ? 20 : 18,
+              iconSize: widget.separateOwnerActions ? 22 : 18,
+            labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.clock),
               selectIcon: const Icon(FontAwesomeIcons.solidClock),
               onTap: () =>
@@ -606,7 +615,8 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
             ),
           ),
           ActionItem(
-            iconSize: widget.separateOwnerActions ? 20 : 18,
+            iconSize: widget.separateOwnerActions ? 22 : 18,
+            labelSize: widget.separateOwnerActions ? 12 : null,
             icon: const Icon(FontAwesomeIcons.shareFromSquare),
             onTap: () => introController.actionShareVideo(context),
             selectStatus: false,
@@ -975,12 +985,12 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
         final userStat = introController.userStat.value;
         final isVip = (userStat.card?.vip?.status ?? 0) > 0;
         return Row(
-          spacing: widget.separateOwnerActions ? 12 : 10,
+          spacing: 10,
           mainAxisSize: .min,
           children: [
             PendantAvatar(
               userStat.card?.face,
-              size: widget.separateOwnerActions ? 44 : 35,
+              size: widget.separateOwnerActions ? 34 : 35,
               badgeSize: 14,
               vipStatus: userStat.card?.vip?.status,
               officialType: userStat.card?.official?.type,
@@ -994,7 +1004,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                     maxLines: 1,
                     overflow: .ellipsis,
                     style: TextStyle(
-                      fontSize: widget.separateOwnerActions ? 14 : 13,
+                      fontSize: widget.separateOwnerActions ? 15 : 13,
                       fontWeight: widget.separateOwnerActions
                           ? FontWeight.w500
                           : null,
@@ -1003,6 +1013,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                           : null,
                     ),
                   ),
+                  if (widget.separateOwnerActions) const SizedBox(height: 3),
                   Text(
                     '${NumUtils.numFormat(userStat.follower)}粉丝    ${'${NumUtils.numFormat(userStat.archiveCount)}视频'}',
                     maxLines: 1,
