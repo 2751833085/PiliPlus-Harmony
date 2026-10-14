@@ -800,10 +800,6 @@ abstract final class Pref {
 
   static bool get tabletVideoInfoOnRight =>
       _setting.get(SettingBoxKey.tabletVideoInfoOnRight, defaultValue: false);
-  static bool get showReplyDislikeCount =>
-      _setting.get(SettingBoxKey.showReplyDislikeCount, defaultValue: false);
-  static bool get showVideoDislikeCount =>
-      _setting.get(SettingBoxKey.showVideoDislikeCount, defaultValue: false);
   static bool get translucentBottomBar =>
       _setting.get(SettingBoxKey.translucentBottomBar, defaultValue: true);
 

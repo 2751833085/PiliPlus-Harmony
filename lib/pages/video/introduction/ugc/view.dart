@@ -564,9 +564,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
               ),
               selectStatus: introController.hasDislike.value,
               semanticsLabel: '点踩',
-              text:
-                  stat?.dislikeLabel(showCount: Pref.showVideoDislikeCount) ??
-                  (Pref.showVideoDislikeCount ? '未公开' : '点踩'),
+              text: '点踩',
             ),
           ),
           Obx(

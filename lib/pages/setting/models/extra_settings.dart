@@ -451,14 +451,6 @@ List<SettingsModel> get networkSecuritySettings => [
 ];
 
 List<SettingsModel> get personalizationExtraSettings => [
-  const SwitchModel(
-    section: '评论偏好',
-    title: '显示评论点踩数量（实验性）',
-    subtitle: '默认关闭；不一定有用，哔哩哔哩可能不提供或使接口失效。当前评论接口未公开点踩总数，开启后显示“未公开”',
-    leading: Icon(Icons.thumb_down_outlined),
-    setKey: SettingBoxKey.showReplyDislikeCount,
-    defaultVal: false,
-  ),
   ...privacyRecordSettings,
   SplitModel(
     section: '动态偏好',

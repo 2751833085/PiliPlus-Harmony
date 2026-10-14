@@ -72,14 +72,6 @@ List<SettingsModel> get _playSettings => [
     },
   ),
   const SwitchModel(
-    section: '视频详情',
-    title: '显示视频点踩数量（实验性）',
-    subtitle: '默认关闭；不一定有用，哔哩哔哩可能不提供或使接口失效。仅显示可信数量，否则显示“未公开”',
-    leading: Icon(Icons.thumb_down_outlined),
-    setKey: SettingBoxKey.showVideoDislikeCount,
-    defaultVal: false,
-  ),
-  const SwitchModel(
     section: '弹幕与字幕',
     title: '弹幕开关',
     subtitle: '是否展示弹幕',

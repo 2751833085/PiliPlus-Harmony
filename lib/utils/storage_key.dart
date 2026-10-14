@@ -2,8 +2,6 @@
 
 abstract final class SettingBoxKey {
   static const String tabletVideoInfoOnRight = 'tabletVideoInfoOnRight';
-  static const String showReplyDislikeCount = 'showReplyDislikeCount';
-  static const String showVideoDislikeCount = 'showVideoDislikeCount';
   static const String translucentBottomBar = 'translucentBottomBar';
   static const String showMineHistory = 'showMineHistory';
   static const String biliPlayerControls = 'biliPlayerControls';
