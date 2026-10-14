@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/feed_bottom_footer.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
     as refresh;
@@ -159,6 +160,11 @@ class _RcmdPageState extends State<RcmdPage>
                           colorScheme,
                           controller.loadingState.value,
                         ),
+                      ),
+                    ),
+                    Obx(
+                      () => FeedBottomFooter(
+                        loading: controller.loadingMore.value,
                       ),
                     ),
                   ],

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/feed_bottom_footer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/native_top_spacer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
@@ -120,6 +121,7 @@ class _HotPageState extends State<HotPage>
               () => _buildBody(controller.loadingState.value),
             ),
           ),
+          Obx(() => FeedBottomFooter(loading: controller.loadingMore.value)),
         ],
       ),
     );
@@ -134,7 +136,9 @@ class _HotPageState extends State<HotPage>
                 gridDelegate: gridDelegate,
                 itemBuilder: (context, index) {
                   if (index == response.length - 1) {
-                    controller.onLoadMore();
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) controller.onLoadMore();
+                    });
                   }
                   return VideoCardH(
                     videoItem: response[index],

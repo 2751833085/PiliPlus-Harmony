@@ -6,12 +6,14 @@ abstract class CommonListController<R, T> extends CommonController<R, T> {
   int page = 1;
   bool isEnd = false;
   bool? hasFooter;
+  final RxBool loadingMore = false.obs;
   int _requestRevision = 0;
 
   /// Source changes must discard the previous page response before reloading.
   void invalidateRequests() {
     _requestRevision++;
     isLoading = false;
+    loadingMore.value = false;
   }
 
   @override
@@ -31,38 +33,47 @@ abstract class CommonListController<R, T> extends CommonController<R, T> {
     if (isLoading || (!isRefresh && isEnd)) return;
     isLoading = true;
     final revision = ++_requestRevision;
-    final LoadingState<R> res = await customGetData();
-    if (isClosed || revision != _requestRevision) return;
-    if (res case Success(:final response)) {
-      if (!customHandleResponse(isRefresh, res)) {
-        final dataList = getDataList(response);
-        if (dataList == null || dataList.isEmpty) {
-          isEnd = true;
+    loadingMore.value = !isRefresh;
+    try {
+      final LoadingState<R> res = await customGetData();
+      if (isClosed || revision != _requestRevision) return;
+      if (res case Success(:final response)) {
+        if (!customHandleResponse(isRefresh, res)) {
+          final dataList = getDataList(response);
+          if (dataList == null || dataList.isEmpty) {
+            isEnd = true;
+            if (isRefresh) {
+              loadingState.value = Success(dataList);
+            } else if (hasFooter == true) {
+              loadingState.refresh();
+            }
+            isLoading = false;
+            return;
+          }
+          handleListResponse(dataList);
           if (isRefresh) {
+            checkIsEnd(dataList.length);
             loadingState.value = Success(dataList);
-          } else if (hasFooter == true) {
+          } else if (loadingState.value case Success(:final response)) {
+            response!.addAll(dataList);
+            checkIsEnd(response.length);
             loadingState.refresh();
           }
-          isLoading = false;
-          return;
         }
-        handleListResponse(dataList);
-        if (isRefresh) {
-          checkIsEnd(dataList.length);
-          loadingState.value = Success(dataList);
-        } else if (loadingState.value case Success(:final response)) {
-          response!.addAll(dataList);
-          checkIsEnd(response.length);
-          loadingState.refresh();
+        page++;
+      } else {
+        if (isRefresh && !handleError(res is Error ? res.errMsg : null)) {
+          loadingState.value = res as Error;
         }
       }
-      page++;
-    } else {
-      if (isRefresh && !handleError(res is Error ? res.errMsg : null)) {
-        loadingState.value = res as Error;
+    } finally {
+      // A refresh/source change owns the newer state; an obsolete pagination
+      // response must not hide its indicator or clear its in-flight flag.
+      if (revision == _requestRevision) {
+        isLoading = false;
+        if (!isClosed) loadingMore.value = false;
       }
     }
-    isLoading = false;
   }
 
   @override
