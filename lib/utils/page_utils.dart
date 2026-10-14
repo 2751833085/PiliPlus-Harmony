@@ -48,6 +48,7 @@ abstract final class PageUtils {
     int? quality,
     ValueChanged<int>? onPageChanged,
     String tag = '',
+    bool longPressHaptic = true,
   }) {
     return Get.key.currentState!.push<void>(
       HeroDialogRoute(
@@ -57,6 +58,7 @@ abstract final class PageUtils {
           quality: quality ?? GlobalData().imgQuality,
           onPageChanged: onPageChanged,
           tag: tag,
+          longPressHaptic: longPressHaptic,
         ),
       ),
     );

@@ -154,23 +154,19 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
                   SizedBox(height: widget.separateOwnerActions ? 14 : 8),
                   _buildTitle(isLoading, isHorizontal, videoDetail),
                   const SizedBox(height: 8),
-                  Stack(
-                    clipBehavior: .none,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                          right:
-                              widget.separateOwnerActions &&
-                                  introController.enableAi
-                              ? 32
-                              : 0,
-                        ),
+                      Expanded(
                         child: _buildInfo(
                           videoDetail.stat,
                           videoDetail.pubdate,
                         ),
                       ),
-                      if (introController.enableAi) _aiBtn,
+                      if (introController.enableAi) ...[
+                        const SizedBox(width: 8),
+                        _aiBtn,
+                      ],
                     ],
                   ),
                   if (isHorizontal && widget.separateOwnerActions) ...[
@@ -547,7 +543,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
             () => ActionItem(
               animation: introController.tripleAnimation,
               iconSize: widget.separateOwnerActions ? 22 : 18,
-            labelSize: widget.separateOwnerActions ? 12 : null,
+              labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.thumbsUp),
               selectIcon: const Icon(FontAwesomeIcons.solidThumbsUp),
               selectStatus: introController.hasLike.value,
@@ -560,7 +556,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           Obx(
             () => ActionItem(
               iconSize: widget.separateOwnerActions ? 22 : 18,
-            labelSize: widget.separateOwnerActions ? 12 : null,
+              labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.thumbsDown),
               selectIcon: const Icon(FontAwesomeIcons.solidThumbsDown),
               onTap: () => introController.handleAction(
@@ -568,14 +564,16 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
               ),
               selectStatus: introController.hasDislike.value,
               semanticsLabel: '点踩',
-              text: "点踩",
+              text:
+                  stat?.dislikeLabel(showCount: Pref.showVideoDislikeCount) ??
+                  (Pref.showVideoDislikeCount ? '未公开' : '点踩'),
             ),
           ),
           Obx(
             () => ActionItem(
               animation: introController.tripleAnimation,
               iconSize: widget.separateOwnerActions ? 22 : 18,
-            labelSize: widget.separateOwnerActions ? 12 : null,
+              labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.b),
               selectIcon: const Icon(FontAwesomeIcons.b),
               onTap: introController.actionCoinVideo,
@@ -588,7 +586,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
             () => ActionItem(
               animation: introController.tripleAnimation,
               iconSize: widget.separateOwnerActions ? 22 : 18,
-            labelSize: widget.separateOwnerActions ? 12 : null,
+              labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.star),
               selectIcon: const Icon(FontAwesomeIcons.solidStar),
               onTap: () => introController.showFavBottomSheet(context),
@@ -604,7 +602,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           Obx(
             () => ActionItem(
               iconSize: widget.separateOwnerActions ? 22 : 18,
-            labelSize: widget.separateOwnerActions ? 12 : null,
+              labelSize: widget.separateOwnerActions ? 12 : null,
               icon: const Icon(FontAwesomeIcons.clock),
               selectIcon: const Icon(FontAwesomeIcons.solidClock),
               onTap: () =>
@@ -1063,33 +1061,31 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           ),
         ),
     ];
-    if (widget.separateOwnerActions) {
-      return Wrap(spacing: 10, runSpacing: 4, children: children);
-    }
-    return Row(spacing: 10, children: children);
+    return Wrap(spacing: 10, runSpacing: 4, children: children);
   }
 
-  Widget get _aiBtn => Positioned(
-    right: 8,
-    child: Center(
-      child: GestureDetector(
-        behavior: .opaque,
-        onTap: () async {
-          if (introController.aiConclusionResult == null) {
-            await introController.aiConclusion();
+  Widget get _aiBtn => SizedBox(
+    width: 36,
+    height: 32,
+    child: GestureDetector(
+      behavior: .opaque,
+      onTap: () async {
+        if (introController.aiConclusionResult == null) {
+          await introController.aiConclusion();
+        }
+        if (!mounted) return;
+        if (introController.aiConclusionResult case AiConclusionResult(
+          :final summary,
+          :final outline,
+        )) {
+          if (summary?.isNotEmpty == true || outline?.isNotEmpty == true) {
+            widget.showAiBottomSheet();
+          } else {
+            SmartDialog.showToast("当前视频不支持AI视频总结");
           }
-          if (!mounted) return;
-          if (introController.aiConclusionResult case AiConclusionResult(
-            :final summary,
-            :final outline,
-          )) {
-            if (summary?.isNotEmpty == true || outline?.isNotEmpty == true) {
-              widget.showAiBottomSheet();
-            } else {
-              SmartDialog.showToast("当前视频不支持AI视频总结");
-            }
-          }
-        },
+        }
+      },
+      child: Center(
         child: Image.asset(
           semanticLabel: 'AI总结',
           Assets.ai,

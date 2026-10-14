@@ -51,6 +51,34 @@ List<SettingsModel> get playSettings => prioritizeSettings(
 List<SettingsModel> get _playSettings => [
   ...harmonyPlaybackSettings,
   ...playbackExtraSettings,
+  NormalModel(
+    section: '视频详情',
+    title: '平板视频信息位置',
+    leading: const Icon(Icons.view_sidebar_outlined),
+    getSubtitle: () => Pref.tabletVideoInfoOnRight ? '右侧上方' : '左侧视频下方（默认）',
+    onTap: (context, setState) async {
+      final value = await showDialog<bool>(
+        context: context,
+        builder: (_) => SelectDialog<bool>(
+          title: '平板视频信息位置',
+          value: Pref.tabletVideoInfoOnRight,
+          values: const [(false, '左侧视频下方（默认）'), (true, '右侧上方')],
+        ),
+      );
+      if (value != null) {
+        await GStorage.setting.put(SettingBoxKey.tabletVideoInfoOnRight, value);
+        setState();
+      }
+    },
+  ),
+  const SwitchModel(
+    section: '视频详情',
+    title: '显示视频点踩数量（实验性）',
+    subtitle: '默认关闭；仅显示接口提供的有效数量，未提供时显示“未公开”，不估算或将占位值当作零',
+    leading: Icon(Icons.thumb_down_outlined),
+    setKey: SettingBoxKey.showVideoDislikeCount,
+    defaultVal: false,
+  ),
   const SwitchModel(
     section: '弹幕与字幕',
     title: '弹幕开关',

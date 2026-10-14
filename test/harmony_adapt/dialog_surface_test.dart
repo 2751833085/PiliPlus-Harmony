@@ -3,6 +3,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
+  testWidgets(
+    'opaque navigation finish removes backdrop blur and transmission',
+    (tester) async {
+      for (final brightness in Brightness.values) {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: HarmonyTheme.apply(
+              ThemeData(brightness: brightness),
+              immersive: true,
+            ),
+            home: const Scaffold(
+              body: ImmersiveSurface(
+                opaque: true,
+                blurBackground: true,
+                child: SizedBox(width: 400, height: 60),
+              ),
+            ),
+          ),
+        );
+        expect(find.byType(BackdropFilter), findsNothing);
+        final gradients = tester
+            .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+            .map((box) => box.decoration)
+            .whereType<BoxDecoration>()
+            .map((box) => box.gradient)
+            .whereType<LinearGradient>();
+        expect(gradients, isNotEmpty);
+        for (final gradient in gradients) {
+          expect(gradient.colors.every((color) => color.a == 1), isTrue);
+        }
+        expect(find.byType(ImmersiveInteraction), findsOneWidget);
+      }
+    },
+  );
+
   testWidgets('immersive dialog preserves cancel, confirmation and result', (
     tester,
   ) async {

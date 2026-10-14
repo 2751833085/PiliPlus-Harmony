@@ -87,6 +87,7 @@ struct Index {
   private context = getContext(this) as common.UIAbilityContext;
   @LocalStorageLink('viewId') viewId: string = "";
   @StorageLink('immersiveEnabled') immersiveEnabled: boolean = false;
+  @StorageLink('translucentBottomBar') translucentBottomBar: boolean = true;
   @StorageLink('handednessEnabled') handednessEnabled: boolean = false;
   @StorageLink('systemHoldingSide') @Watch('holdingSideChanged') systemHoldingSide: string = 'center';
   @StorageLink('shellBarsObscured') shellBarsObscured: boolean = false;
@@ -866,7 +867,7 @@ struct Index {
     .barPosition(BarPosition.End)
     .vertical(false)
     .barHeight(56)
-    .barBackgroundColor(this.immersiveEnabled ? '#00000000' : $r('sys.color.comp_background_tertiary'))
+    .barBackgroundColor(this.immersiveEnabled && this.translucentBottomBar ? '#00000000' : $r('sys.color.comp_background_tertiary'))
     .barFloatingStyle({
       barBottomMargin: this.bottomAvoidAreaHeight,
       adaptToHandedness: false,
@@ -874,7 +875,7 @@ struct Index {
       gradientMask: { maskColor: '#00000000', maskHeight: 1 },
       barWidth: { smallWidth: Math.min(280, Math.max(160, this.winWidth - 32)), mediumWidth: 320, largeWidth: 360 },
       systemMaterialEffect: {
-        materialType: this.immersiveEnabled ? hdsMaterial.MaterialType.IMMERSIVE : hdsMaterial.MaterialType.NONE,
+        materialType: this.immersiveEnabled && this.translucentBottomBar ? hdsMaterial.MaterialType.IMMERSIVE : hdsMaterial.MaterialType.NONE,
         materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
       }
     })

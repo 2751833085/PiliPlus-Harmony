@@ -237,9 +237,9 @@ class LiveRoomController extends GetxController {
     if (videoUrl == null) {
       return null;
     }
-    plPlayerController.sourceOwner = this;
     return plPlayerController.setDataSource(
       NetworkSource(videoSource: videoUrl!, audioSource: null),
+      owner: this,
       isLive: true,
       autoplay: autoplay,
       isVertical: isPortrait.value,

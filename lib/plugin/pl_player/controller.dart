@@ -1,4 +1,5 @@
 import 'package:PiliPlus/plugin/pl_player/models/buffering_recovery.dart';
+import 'package:PiliPlus/pages/video/shorts/request_queue.dart';
 import 'package:PiliPlus/plugin/pl_player/models/source_frame_gate.dart';
 import 'package:PiliPlus/plugin/pl_player/models/playback_owner.dart';
 import 'package:PiliPlus/pages/setting/models/play_settings.dart'
@@ -837,6 +838,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   // 将初始化串行化，保证同一时刻只有一个 _setDataSource 在执行。
   Future<void> setDataSource(
     DataSource dataSource, {
+    bool Function()? isCurrent,
+    Object? owner,
     bool isLive = false,
     bool autoplay = true,
     // 初始化播放位置
@@ -860,15 +863,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     Volume? volume,
     bool autoFullScreenFlag = false,
   }) {
-    final previous = _setDataSourceQueue;
-    final run = () async {
-      if (previous != null) {
-        try {
-          await previous;
-        } catch (_) {
-          // 前一个初始化失败不阻塞本次
-        }
-      }
+    return _sourceRequests.run((ticket) async {
+      if (isCurrent != null && !isCurrent()) return;
+      if (owner != null) sourceOwner = owner;
       await _setDataSource(
         dataSource,
         isLive: isLive,
@@ -890,13 +887,18 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         volume: volume,
         autoFullScreenFlag: autoFullScreenFlag,
       );
-    }();
-    _setDataSourceQueue = run;
-    return run;
+    });
   }
 
   /// setDataSource 串行队列尾；同一时刻仅一个初始化流程在执行
-  Future<void>? _setDataSourceQueue;
+  final _sourceRequests = VideoRequestQueue();
+
+  bool canResumeSource(Object owner, int sourceCid) =>
+      identical(sourceOwner, owner) &&
+      cid == sourceCid &&
+      !_processing &&
+      dataStatus.value == DataStatus.loaded &&
+      _videoPlayerController != null;
 
   Future<void> _setDataSource(
     DataSource dataSource, {
@@ -1148,7 +1150,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (dataSource.audioSource case final audio? when (audio.isNotEmpty)) {
       if (onlyPlayAudio.value) {
         video = audio;
-        await player.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
+        await player.platform!.maybeAsNativePlayer.setProperty(
+          'audio-files',
+          '',
+        );
       } else {
         var audioUri = Platform.isWindows
             ? audio.replaceAll(';', '\\;')
@@ -1186,8 +1191,22 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     );
   }
 
-  Future<bool?> refreshPlayer() =>
-      _refreshTask ??= _refreshPlayer().whenComplete(() => _refreshTask = null);
+  Future<bool?> refreshPlayer() {
+    if (_refreshTask != null) return _refreshTask!;
+    // A recovery attempt must never overtake a source selected by the user.
+    if (_sourceRequests.isBusy || _processing) return Future.value(false);
+    final owner = sourceOwner;
+    final source = dataSource;
+    bool? result = false;
+    return _refreshTask = _sourceRequests
+        .run((_) async {
+          if (identical(owner, sourceOwner) && identical(source, dataSource)) {
+            result = await _refreshPlayer();
+          }
+        })
+        .then((_) => result)
+        .whenComplete(() => _refreshTask = null);
+  }
 
   Future<bool?> _refreshPlayer() async {
     final player = _videoPlayerController;
@@ -1208,7 +1227,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     String? audioUri;
     if (!isLive) {
       if (dataSource.audioSource.isNullOrEmpty) {
-        await player!.platform!.maybeAsNativePlayer.setProperty('audio-files', '');
+        await player!.platform!.maybeAsNativePlayer.setProperty(
+          'audio-files',
+          '',
+        );
       } else {
         audioUri = Platform.isWindows
             ? dataSource.audioSource!.replaceAll(';', '\\;')
@@ -2263,6 +2285,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     }
 
     _playerCount = 0;
+    _sourceRequests.dispose();
     if (removeSafeArea) {
       showSystemBar();
     }

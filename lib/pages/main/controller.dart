@@ -206,6 +206,7 @@ class MainController extends GetxController
       useNativeTabs: useHdsBar,
       handedness: Pref.harmonyHandedness,
       immersive: Pref.harmonyImmersive,
+      translucentBottomBar: Pref.translucentBottomBar,
     );
     HarmonyChannel.setHandednessEnabled(Pref.harmonyHandedness);
     HarmonyChannel.setShellTopBar(useNativeTopBar: useHdsTopBar);

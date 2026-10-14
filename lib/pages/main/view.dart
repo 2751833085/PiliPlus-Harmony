@@ -428,7 +428,8 @@ class _MainAppState extends PopScopeState<MainApp>
           child: ImmersiveSurface(
             interactive: false,
             showBorder: false,
-            blurBackground: true,
+            blurBackground: Pref.translucentBottomBar,
+            opaque: !Pref.translucentBottomBar,
             blurSigma: 8,
             borderRadius: BorderRadius.zero,
             child: SafeArea(

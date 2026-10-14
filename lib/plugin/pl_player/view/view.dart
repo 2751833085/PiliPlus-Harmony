@@ -311,33 +311,45 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         } catch (_) {}
 
         try {
-          if (Platform.isIOS || plPlayerController.setSystemBrightness) {
-            _getSystemBrightness();
-            _brightnessListener = ScreenBrightnessPlatform
-                .instance
-                .onSystemScreenBrightnessChanged
-                .listen(_onBrightnessChanged);
-          } else {
+          if (OS.isHarmony) {
             _getAppBrightness();
-            _brightnessListener = ScreenBrightnessPlatform
-                .instance
-                .onApplicationScreenBrightnessChanged
-                .listen(_onBrightnessChanged);
+            _brightnessListener = pluginEventChannelApplicationBrightnessChanged
+                .receiveBroadcastStream()
+                .listen(
+                  (dynamic value) {
+                    if (mounted && value is num && value.isFinite) {
+                      _onBrightnessChanged(value.toDouble());
+                    }
+                  },
+                  onError: (Object error) {
+                    debugPrint('监听屏幕亮度失败: $error');
+                  },
+                );
+          } else {
+            final system =
+                Platform.isIOS || plPlayerController.setSystemBrightness;
+            if (system) {
+              _getSystemBrightness();
+            } else {
+              _getAppBrightness();
+            }
+            _brightnessListener =
+                (system
+                        ? ScreenBrightnessPlatform
+                              .instance
+                              .onSystemScreenBrightnessChanged
+                        : ScreenBrightnessPlatform
+                              .instance
+                              .onApplicationScreenBrightnessChanged)
+                    .listen(
+                      _onBrightnessChanged,
+                      onError: (Object error) {
+                        debugPrint('监听屏幕亮度失败: $error');
+                      },
+                    );
           }
         } catch (e) {
           debugPrint('监听屏幕亮度失败: $e');
-          if (OS.isHarmony) {
-            // 鸿蒙侧下发的是 number，标准 Stream<double> 监听会抛错
-            _harmonyBrightnessChanged ??=
-                pluginEventChannelApplicationBrightnessChanged
-                    .receiveBroadcastStream()
-                    .cast<num>();
-            _harmonyBrightnessChanged!.listen((num value) {
-              if (mounted) {
-                _brightnessValue.value = value.toDouble();
-              }
-            });
-          }
         }
       });
     }
@@ -373,8 +385,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       trackpadScrollCausesScale: false,
     );
   }
-
-  Stream<num>? _harmonyBrightnessChanged;
 
   StreamSubscription<bool>? _harmonyBackPlayingSub;
 

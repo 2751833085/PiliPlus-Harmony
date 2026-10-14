@@ -22,7 +22,7 @@ class PlayerExpansionPanel extends StatelessWidget {
         alignment: Alignment.topLeft,
         widthFactor: axis == Axis.horizontal ? 1 - progress : 1,
         heightFactor: axis == Axis.vertical ? 1 - progress : 1,
-        child: child,
+        child: RepaintBoundary(child: child),
       ),
     ),
   );

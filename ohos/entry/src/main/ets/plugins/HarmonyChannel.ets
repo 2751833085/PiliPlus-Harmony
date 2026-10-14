@@ -508,6 +508,7 @@ export default class HarmonyChannel implements FlutterPlugin {
         AppStorage.setOrCreate('handednessEnabled', handedness);
         const immersive: boolean = call.argument('immersive') ?? false;
         AppStorage.setOrCreate('immersiveEnabled', immersive);
+        AppStorage.setOrCreate('translucentBottomBar', call.argument('translucentBottomBar') ?? true);
         result.success(true);
         break;
       }

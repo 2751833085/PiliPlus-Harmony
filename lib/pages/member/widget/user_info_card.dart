@@ -537,6 +537,7 @@ class UserInfoCard extends StatelessWidget {
       onTap: () => PageUtils.imageView(
         tag: hashCode.toString(),
         imgList: [SourceModel(url: card.face.http2https)],
+        longPressHaptic: false,
       ),
     );
     if (pendant == null || pendant.isEmpty) {

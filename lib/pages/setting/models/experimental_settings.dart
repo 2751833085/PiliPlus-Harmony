@@ -22,6 +22,15 @@ List<SettingsModel> get harmonyAppearanceSettings => [
   if (Pref.harmonyUI) ...[
     SwitchModel(
       section: '鸿蒙界面风格',
+      title: '底栏半透明磨砂',
+      subtitle: '默认开启；关闭后使用不透明材质，保留按钮按压高光',
+      leading: const Icon(Icons.blur_on),
+      setKey: SettingBoxKey.translucentBottomBar,
+      defaultVal: true,
+      onChanged: refreshHarmonySettings,
+    ),
+    SwitchModel(
+      section: '鸿蒙界面风格',
       title: '沉浸光感',
       subtitle: '为底栏、顶栏、菜单、播放面板与账户卡片启用光感材质；关闭后使用实色背景',
       leading: const Icon(Icons.water_drop_outlined),

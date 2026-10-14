@@ -62,6 +62,7 @@ class GalleryViewer extends StatefulWidget {
     this.initIndex = 0,
     this.onPageChanged,
     this.tag = '',
+    this.longPressHaptic = true,
   });
 
   final double minScale;
@@ -71,6 +72,7 @@ class GalleryViewer extends StatefulWidget {
   final int initIndex;
   final ValueChanged<int>? onPageChanged;
   final String tag;
+  final bool longPressHaptic;
 
   @override
   State<GalleryViewer> createState() => _GalleryViewerState();
@@ -533,7 +535,7 @@ class _GalleryViewerState extends State<GalleryViewer>
   void _onLongPress() {
     final item = widget.sources[_currIndex.value];
     if (item.sourceType == .fileImage) return;
-    HapticFeedback.mediumImpact();
+    if (widget.longPressHaptic) HapticFeedback.mediumImpact();
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(

@@ -492,6 +492,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
   Widget _buildAvatar(String face) => GestureDetector(
     onTap: () => PageUtils.imageView(
       imgList: [SourceModel(url: face)],
+      longPressHaptic: false,
     ),
     child: NetworkImgLayer(
       src: face,

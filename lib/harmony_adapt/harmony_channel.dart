@@ -170,10 +170,12 @@ abstract class HarmonyChannel {
     required bool useNativeTabs,
     bool handedness = false,
     bool immersive = false,
+    bool translucentBottomBar = true,
   }) => _invoke('setShellBars', {
     'useNativeTabs': useNativeTabs,
     'handedness': handedness,
     'immersive': immersive,
+    'translucentBottomBar': translucentBottomBar,
   });
 
   static Future<void> setHandednessEnabled(bool enabled) =>

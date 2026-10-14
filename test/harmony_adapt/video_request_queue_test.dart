@@ -5,6 +5,29 @@ import 'package:PiliPlus/pages/common/common_list_controller.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 
 void main() {
+  test(
+    'return to previous video skips queued next video after a slow open',
+    () async {
+      final queue = VideoRequestQueue();
+      final opening = Completer<void>();
+      final opened = <String>[];
+      final old = queue.run((_) async {
+        await opening.future;
+      });
+      await Future<void>.delayed(Duration.zero);
+      final next = queue.run((_) async {
+        opened.add('next');
+      });
+      final back = queue.run((_) async {
+        opened.add('previous');
+      });
+      opening.complete();
+      await Future.wait([old, next, back]);
+      expect(opened, ['previous']);
+      queue.dispose();
+    },
+  );
+
   test('latest source wins, native initializations never overlap', () async {
     final queue = VideoRequestQueue();
     final first = Completer<void>();

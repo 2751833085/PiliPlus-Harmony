@@ -1201,6 +1201,30 @@ class VideoDetailController extends GetxController
   }
 
   Future<bool>? entranceReady;
+  bool _playbackVisible = true;
+  void suspendPlayback() {
+    _playbackVisible = false;
+    _playerRequests.invalidate();
+    _routeRetry?.cancel();
+    _routeRetry = null;
+  }
+
+  void activatePlayback() => _playbackVisible = true;
+
+  Future<void> restorePlayback({required bool autoplay}) async {
+    activatePlayback();
+    final player = plPlayerController;
+    if (player.canResumeSource(this, cid.value)) {
+      videoState.value = true;
+      if (autoplay) await player.play();
+      return;
+    }
+    if (videoUrl == null && !isFileSource) {
+      if (!isQuerying) await queryVideoUrl(fromReset: true);
+      return;
+    }
+    await playerInit(autoplay: autoplay);
+  }
 
   Future<void> playerInit({
     bool? autoplay,
@@ -1211,10 +1235,10 @@ class VideoDetailController extends GetxController
     final source = (bvid, cid.value);
     return _playerRequests.run((ticket) async {
       if (isClosed ||
+          !_playbackVisible ||
           source != (bvid, cid.value) ||
           (!isFileSource && videoUrl == null))
         return;
-      plPlayerController.sourceOwner = this;
       if (resolveRoutes &&
           !_usingWarmSelection &&
           usesOverseasRoutes &&
@@ -1237,7 +1261,7 @@ class VideoDetailController extends GetxController
         if (isClosed ||
             !_playerRequests.isCurrent(ticket) ||
             source != (bvid, cid.value) ||
-            !identical(plPlayerController.sourceOwner, this))
+            !_playbackVisible)
           return;
         videoUrl = selected.first;
         if (selected.length > 1) audioUrl = selected[1];
@@ -1264,8 +1288,10 @@ class VideoDetailController extends GetxController
         return;
       final entrance = entranceReady;
       if (entrance != null && !await entrance) return;
-      if (isClosed || !_playerRequests.isCurrent(ticket) ||
-          source != (bvid, cid.value)) return;
+      if (isClosed ||
+          !_playerRequests.isCurrent(ticket) ||
+          source != (bvid, cid.value))
+        return;
       await plPlayerController.setDataSource(
         isFileSource
             ? FileSource(
@@ -1278,6 +1304,12 @@ class VideoDetailController extends GetxController
                 videoSource: videoSource!,
                 audioSource: audioSource,
               ),
+        owner: this,
+        isCurrent: () =>
+            _playbackVisible &&
+            !isClosed &&
+            _playerRequests.isCurrent(ticket) &&
+            source == (bvid, cid.value),
         seekTo: seek,
         duration: data.timeLength == null
             ? null
@@ -1292,7 +1324,11 @@ class VideoDetailController extends GetxController
         pgcType: isUgc ? null : pgcType,
         videoType: videoType,
         onInit: () {
-          if (isClosed || source != (bvid, cid.value)) return;
+          if (isClosed ||
+              !_playbackVisible ||
+              !_playerRequests.isCurrent(ticket) ||
+              source != (bvid, cid.value))
+            return;
           initialized = true;
           videoState.value = true;
           setSubtitle(vttSubtitlesIndex.value);
@@ -1444,8 +1480,9 @@ class VideoDetailController extends GetxController
       data = response;
       // Start the available preferred quality immediately. Supplement other
       // quality choices after player initialization, independent of region.
-      final deferQualities =
-          data.canDeferQualitySupplement(plPlayerController.cacheVideoQa!);
+      final deferQualities = data.canDeferQualitySupplement(
+        plPlayerController.cacheVideoQa!,
+      );
       if (data.dash != null && !deferQualities)
         await _supplementVideoQualities(ticket);
       if (!_videoRequests.isCurrent(ticket) || isClosed) return;
@@ -1526,7 +1563,8 @@ class VideoDetailController extends GetxController
       currentVideoQa.value = VideoQuality.fromCode(targetVideoQa);
 
       currentDecodeFormats = VideoUtils.selectCodec(
-        data.dash!.video!.where((v) => v.id == targetVideoQa)
+        data.dash!.video!
+            .where((v) => v.id == targetVideoQa)
             .map((v) => v.codecs ?? 'avc1'),
         preferCodecs,
       );

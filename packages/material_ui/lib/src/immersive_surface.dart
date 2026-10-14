@@ -11,6 +11,7 @@ class ImmersiveSurface extends StatelessWidget {
     required this.child,
     this.color,
     this.blurBackground = false,
+    this.opaque = false,
     this.blurSigma = 24,
     this.interactive = true,
     this.allowMovement = false,
@@ -26,6 +27,7 @@ class ImmersiveSurface extends StatelessWidget {
   /// Page surfaces default to a cached finish. Opt in only for overlays
   /// that actually need to sample the content behind them.
   final bool blurBackground;
+  final bool opaque;
   final double blurSigma;
 
   final BorderRadius borderRadius;
@@ -61,11 +63,11 @@ class ImmersiveSurface extends StatelessWidget {
                       (theme.brightness == Brightness.dark
                               ? const Color(0xFF25262A)
                               : const Color(0xFFF7F8FA))
-                          .withValues(alpha: .82),
+                          .withValues(alpha: opaque ? 1 : .82),
                       (theme.brightness == Brightness.dark
                               ? const Color(0xFF25262A)
                               : const Color(0xFFF7F8FA))
-                          .withValues(alpha: .72),
+                          .withValues(alpha: opaque ? 1 : .72),
                     ],
                   ),
                 ),
@@ -83,7 +85,7 @@ class ImmersiveSurface extends StatelessWidget {
         : surface;
   }
 
-  Widget _withBlur(Widget child) => blurBackground
+  Widget _withBlur(Widget child) => blurBackground && !opaque
       ? BackdropFilter(
           filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
           child: child,

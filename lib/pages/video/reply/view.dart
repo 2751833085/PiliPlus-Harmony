@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 import 'package:PiliPlus/common/skeleton/video_reply.dart';
 import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/pages/video/reply/widgets/panel_header.dart';
@@ -236,7 +237,7 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
       int oid = replyItem.oid.toInt();
       int rpid = replyItem.id.toInt();
       Widget builder(BuildContext context) => VideoReplyReplyPanel(
-        enableSlide: widget.onShowReplyDetails == null,
+        enableSlide: false,
         id: id,
         oid: oid,
         rpid: rpid,
@@ -252,7 +253,16 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
       } else {
         MiniScaffold.of(
           context,
-        ).showBottomSheet(builder, constraints: const BoxConstraints());
+        ).showBottomSheet(
+          builder,
+          constraints: const BoxConstraints(),
+          slideFromRight: true,
+          enableDrag: false,
+          sheetAnimationStyle: const AnimationStyle(
+            duration: HarmonyMotion.duration,
+            reverseDuration: HarmonyMotion.duration,
+          ),
+        );
       }
     });
   }
