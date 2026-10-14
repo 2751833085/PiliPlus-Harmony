@@ -1,0 +1,21 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6244,
+  "releaseTag": "v3.0.0+6244",
+  "sha256": "11889afd2082397f8feee8310e9703d60b18bfb714d550574877c81f886ca3cb",
+  "sizeBytes": 33114885,
+  "signatureVerified": true,
+  "sourceCommit": "7934b808ae01204e9780b0394914c67f9f3cfef9",
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "validation": "12 targeted regression tests passed for 6244; inherited 6243 passed 274 Harmony tests. Static analysis has no errors/warnings. Signature, ZIP CRC, MPV hash, installed version and preserved UID/first-install time verified. Device screenshot confirms ordinary video page covers the native home bar and compact related/comment tabs appear. Navigation return, AI gesture and weak-network playback remain user-tested; device operation stopped at user request.",
+  "knownLimitations": [
+    "User will perform actual interaction validation; full device test is incomplete.",
+    "Audio-clock guard cannot detect physically silent output with a healthy audio clock; intermittent weak-network loss of sound requires real-device reproduction.",
+    "Frame pacing has not been measured."
+  ],
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "deviceTarget": "192.168.1.218:38201",
+  "uid": 20020326,
+  "firstInstallTime": 1789973612430
+}
