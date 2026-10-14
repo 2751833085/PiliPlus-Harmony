@@ -54,6 +54,7 @@ function fixture({ unsupported = false, denied = false, foldable = true, initial
 
 {
   const f = fixture();
+  assert.equal(f.service.isFoldable(), true);
   f.service.start();
   assert.equal(f.motionListeners.size, 0, 'grip must be opt-in');
   assert.equal(f.displayListeners.size, 3);
@@ -118,6 +119,7 @@ function fixture({ unsupported = false, denied = false, foldable = true, initial
   assert.equal(f.messages.at(-1).available, false, 'unsupported hardware degrades without throwing');
   assert.equal(f.messages.at(-1).state, 'unsupported');
   assert.equal(f.displayListeners.size, 0);
+  assert.equal(f.service.isFoldable(), false, 'non-fold hardware cannot enable fold-only settings');
   f.service.stop();
 }
 {

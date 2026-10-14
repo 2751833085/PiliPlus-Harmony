@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/utils/path_utils.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
@@ -53,6 +54,36 @@ void main() {
     await GStorage.setting.put(SettingBoxKey.harmonyNavigation, 0);
   });
   tearDown(() => debugDefaultTargetPlatformOverride = null);
+
+  test(
+    'bottom immersive control follows parent without clearing its preference',
+    () async {
+      await GStorage.setting.put(SettingBoxKey.translucentBottomBar, false);
+      await GStorage.setting.put(SettingBoxKey.harmonyImmersive, true);
+      final titles = harmonyAppearanceSettings.map((e) => e.title).toList();
+      expect(titles.indexOf('底栏沉浸光感'), titles.indexOf('沉浸光感') + 1);
+      await GStorage.setting.put(SettingBoxKey.harmonyImmersive, false);
+      expect(
+        harmonyAppearanceSettings.map((e) => e.title),
+        isNot(contains('底栏沉浸光感')),
+      );
+      await GStorage.setting.put(SettingBoxKey.harmonyImmersive, true);
+      expect(Pref.translucentBottomBar, isFalse);
+      await GStorage.setting.delete(SettingBoxKey.translucentBottomBar);
+    },
+  );
+
+  test('fold options require hardware capability even while folded', () {
+    HarmonyChannel.foldExpanded.value = false;
+    HarmonyChannel.foldable.value = false;
+    expect(foldOnlySettingReason(), contains('此选项无效'));
+    final multi = styleSettings.where((e) => e.title?.contains('双屏') == true);
+    expect(multi.every((e) => e.disabledReason?.call() != null), isTrue);
+    HarmonyChannel.foldable.value = true;
+    expect(foldOnlySettingReason(), isNull);
+    expect(harmonyPlaybackSettings.first.disabledReason!(), isNull);
+    HarmonyChannel.foldable.value = false;
+  });
 
   test(
     'initial recommendation failures show retry while refresh keeps existing data',

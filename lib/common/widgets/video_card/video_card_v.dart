@@ -90,6 +90,7 @@ class VideoCardV extends StatelessWidget {
     void onLongPress() => imageSaveDialog(
       title: videoItem.title,
       cover: videoItem.cover,
+      coverAspectRatio: videoItem.coverAspectRatio,
       bvid: videoItem.bvid,
       actionsBuilder: homeLayout
           ? (_) => Column(

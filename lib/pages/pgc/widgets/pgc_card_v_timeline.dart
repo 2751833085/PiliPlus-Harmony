@@ -20,6 +20,7 @@ class PgcCardVTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void onLongPress() => imageSaveDialog(
+      coverAspectRatio: 0.75,
       title: item.title,
       cover: item.cover,
     );

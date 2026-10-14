@@ -2,6 +2,7 @@ import 'package:PiliPlus/grpc/bilibili/main/community/reply/v1.pb.dart'
     show ReplyInfo;
 import 'package:PiliPlus/http/reply.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
@@ -132,13 +133,29 @@ class ZanButtonGrpc extends StatelessWidget {
               isLike: isLike,
               isDislike: isDislike,
             ),
-            child: Icon(
-              isDislike
-                  ? FontAwesomeIcons.solidThumbsDown
-                  : FontAwesomeIcons.thumbsDown,
-              size: 16,
-              color: isDislike ? primary : outline,
-              semanticLabel: isDislike ? '已踩' : '点踩',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 4,
+              children: [
+                Icon(
+                  isDislike
+                      ? FontAwesomeIcons.solidThumbsDown
+                      : FontAwesomeIcons.thumbsDown,
+                  size: 16,
+                  color: isDislike ? primary : outline,
+                  semanticLabel: isDislike ? '已踩' : '点踩',
+                ),
+                // ReplyInfo exposes the user's action, not a dislike total.
+                // Do not interpret action=2 or reply count as the number of dislikes.
+                if (Pref.showReplyDislikeCount)
+                  Text(
+                    '未公开',
+                    style: TextStyle(
+                      color: isDislike ? primary : outline,
+                      fontSize: theme.textTheme.labelSmall!.fontSize,
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

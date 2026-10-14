@@ -117,7 +117,16 @@ class _TabletEpisodeStripState extends State<TabletEpisodeStrip> {
                           color: selected
                               ? colors.secondaryContainer
                               : colors.surfaceContainer,
-                          borderRadius: BorderRadius.circular(8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: selected
+                                  ? colors.primary.withValues(alpha: .65)
+                                  : colors.outlineVariant.withValues(
+                                      alpha: .75,
+                                    ),
+                            ),
+                          ),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(8),
                             onTap: selected

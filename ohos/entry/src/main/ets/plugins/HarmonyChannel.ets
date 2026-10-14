@@ -403,6 +403,10 @@ export default class HarmonyChannel implements FlutterPlugin {
 
   async onMethodCall(call: MethodCall, result: MethodResult): Promise<void> {
     switch (call.method) {
+      case "isFoldable": {
+        result.success(this.posture?.isFoldable() ?? false);
+        break;
+      }
       case "getFoldExpanded": {
         result.success(this.posture?.isExpanded() ?? false);
         break;

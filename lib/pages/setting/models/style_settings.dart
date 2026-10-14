@@ -109,8 +109,11 @@ List<SettingsModel> get _appearanceSettings => [
       leading: const Icon(Icons.grid_view_outlined),
       title: '首页栏数 · ${FeedColumns.labels[profile]}',
       section: '首页布局',
-      disabledReason: () =>
-          Pref.useCardWidthLimit ? '已启用高级 DP 宽度限制，关闭后可按栏数设置。' : null,
+      disabledReason: () => profile >= 2 && foldOnlySettingReason() != null
+          ? foldOnlySettingReason()
+          : Pref.useCardWidthLimit
+          ? '已启用高级 DP 宽度限制，关闭后可按栏数设置。'
+          : null,
       getSubtitle: () => Pref.feedColumns[profile] == 0
           ? '默认（${FeedColumns.defaults[profile]} 栏，随可用窗口适配）'
           : '${Pref.feedColumns[profile]} 栏（窄窗口自动减少）',

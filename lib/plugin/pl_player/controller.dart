@@ -738,6 +738,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   // 添加一个私有构造函数
   bool get followExpandedFold =>
       OS.isHarmony &&
+      HarmonyChannel.foldable.value &&
       Pref.harmonyFoldOrientation &&
       HarmonyChannel.foldExpanded.value &&
       !HarmonyChannel.isWindowMode;
@@ -745,6 +746,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   final _foldPlayback = HarmonyFoldPlayback();
   bool get _keepInlineAfterFold =>
       OS.isHarmony &&
+      HarmonyChannel.foldable.value &&
       Pref.harmonyFoldOrientation &&
       !HarmonyChannel.isWindowMode &&
       _foldPlayback.keepInline;
@@ -753,7 +755,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _cancelAutoExitFs();
     _applyFoldPlaybackAction(
       _foldPlayback.changed(
-        enabled: Pref.harmonyFoldOrientation,
+        enabled: HarmonyChannel.foldable.value && Pref.harmonyFoldOrientation,
         windowMode: HarmonyChannel.isWindowMode,
         expanded: HarmonyChannel.foldExpanded.value,
         fullscreen: isFullScreen.value,

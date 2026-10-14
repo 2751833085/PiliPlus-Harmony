@@ -74,7 +74,7 @@ List<SettingsModel> get _playSettings => [
   const SwitchModel(
     section: '视频详情',
     title: '显示视频点踩数量（实验性）',
-    subtitle: '默认关闭；仅显示接口提供的有效数量，未提供时显示“未公开”，不估算或将占位值当作零',
+    subtitle: '默认关闭；不一定有用，哔哩哔哩可能不提供或使接口失效。仅显示可信数量，否则显示“未公开”',
     leading: Icon(Icons.thumb_down_outlined),
     setKey: SettingBoxKey.showVideoDislikeCount,
     defaultVal: false,

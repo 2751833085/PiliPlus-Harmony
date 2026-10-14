@@ -28,17 +28,23 @@ void main() {
             child: FullCoverPreview(
               image: MemoryImage(bytes!),
               width: 480,
+              aspectRatio: size.aspectRatio,
               maxHeight: 500,
             ),
           ),
         ),
       );
+      final before = tester.getSize(find.byType(RawImage));
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 40)),
       );
       await tester.pumpAndSettle();
       final render = tester.renderObject<RenderImage>(find.byType(RawImage));
       expect(render.image, isNotNull);
+      expect(
+        render.size,
+        before,
+      ); // first frame must never change preview geometry
       final fitted = applyBoxFit(render.fit!, size, render.size);
       expect(fitted.source, size); // no cropping, including tall covers
       expect(render.size.height, lessThanOrEqualTo(500));

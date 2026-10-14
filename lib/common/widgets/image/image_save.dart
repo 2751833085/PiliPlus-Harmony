@@ -20,6 +20,7 @@ void imageSaveDialog({
   dynamic aid,
   String? bvid,
   WidgetBuilder? actionsBuilder,
+  double coverAspectRatio = 16 / 9,
 }) {
   Get.key.currentState!.push(
     PublishRoute(
@@ -43,6 +44,7 @@ void imageSaveDialog({
             children: [
               if (cover?.isNotEmpty == true)
                 FullCoverPreview(
+                  aspectRatio: coverAspectRatio,
                   image: ResizeImage.resizeIfNeeded(
                     1280,
                     null,

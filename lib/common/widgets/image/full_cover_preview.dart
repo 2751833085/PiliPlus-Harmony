@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class FullCoverPreview extends StatelessWidget {
@@ -6,26 +7,30 @@ class FullCoverPreview extends StatelessWidget {
     required this.image,
     required this.width,
     required this.maxHeight,
+    this.aspectRatio = 16 / 9,
   });
   final ImageProvider image;
   final double width;
   final double maxHeight;
+  final double aspectRatio;
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-    child: ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight),
-      child: Image(
-        image: image,
+  Widget build(BuildContext context) {
+    final ratio = aspectRatio.isFinite && aspectRatio > 0
+        ? aspectRatio
+        : 16 / 9;
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+      child: SizedBox(
         width: width,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.medium,
-        errorBuilder: (_, error, stack) => SizedBox(
-          width: width,
-          height: width / (16 / 9),
-          child: const Center(child: Icon(Icons.broken_image_outlined)),
+        height: math.min(width / ratio, maxHeight),
+        child: Image(
+          image: image,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.medium,
+          errorBuilder: (_, error, stack) =>
+              const Center(child: Icon(Icons.broken_image_outlined)),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

@@ -876,7 +876,7 @@ struct Index {
       barWidth: { smallWidth: Math.min(280, Math.max(160, this.winWidth - 32)), mediumWidth: 320, largeWidth: 360 },
       systemMaterialEffect: {
         materialType: this.immersiveEnabled && this.translucentBottomBar ? hdsMaterial.MaterialType.IMMERSIVE : hdsMaterial.MaterialType.NONE,
-        materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+        materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
       }
     })
     .onTouch((event: TouchEvent) => {

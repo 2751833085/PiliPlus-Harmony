@@ -89,6 +89,10 @@ export class SystemPosture {
 
   // The first event can precede Dart handler registration on a cold start.
   // Flutter pulls a fresh snapshot before laying out its first page.
+  isFoldable(): boolean {
+    try { return display.isFoldable(); } catch (_) { return false; }
+  }
+
   isExpanded(): boolean {
     try {
       const status = display.getFoldStatus();

@@ -4,12 +4,23 @@ import 'package:PiliPlus/models/model_video.dart';
 
 abstract class BaseRcmdVideoItemModel extends BaseVideoItemModel {
   Dimension? dimension;
+  double coverAspectRatio = 16 / 9;
   bool get isPortraitVideo =>
       (dimension?.width ?? 0) > 0 &&
       (dimension?.height ?? 0) > 0 &&
       dimension!.height! > dimension!.width!;
 
   void readDimension(Map<String, dynamic> json) {
+    final coverWidth = json['cover_width'];
+    final coverHeight = json['cover_height'];
+    if (coverWidth is num &&
+        coverHeight is num &&
+        coverWidth > 0 &&
+        coverHeight > 0 &&
+        coverWidth.isFinite &&
+        coverHeight.isFinite) {
+      coverAspectRatio = coverWidth / coverHeight;
+    }
     final data = json['dimension'] ?? json['player_args']?['dimension'];
     if (data is Map<String, dynamic>) {
       dimension = Dimension.fromJson(data);

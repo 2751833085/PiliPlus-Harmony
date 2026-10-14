@@ -13,6 +13,7 @@ class ImmersiveSurface extends StatelessWidget {
     this.blurBackground = false,
     this.opaque = false,
     this.blurSigma = 24,
+    this.surfaceGradient,
     this.interactive = true,
     this.allowMovement = false,
     this.showBorder = true,
@@ -29,6 +30,7 @@ class ImmersiveSurface extends StatelessWidget {
   final bool blurBackground;
   final bool opaque;
   final double blurSigma;
+  final Gradient? surfaceGradient;
 
   final BorderRadius borderRadius;
   @override
@@ -56,20 +58,22 @@ class ImmersiveSurface extends StatelessWidget {
                                 : .75,
                           ),
                         ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      (theme.brightness == Brightness.dark
-                              ? const Color(0xFF25262A)
-                              : const Color(0xFFF7F8FA))
-                          .withValues(alpha: opaque ? 1 : .82),
-                      (theme.brightness == Brightness.dark
-                              ? const Color(0xFF25262A)
-                              : const Color(0xFFF7F8FA))
-                          .withValues(alpha: opaque ? 1 : .72),
-                    ],
-                  ),
+                  gradient:
+                      surfaceGradient ??
+                      LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          (theme.brightness == Brightness.dark
+                                  ? const Color(0xFF25262A)
+                                  : const Color(0xFFF7F8FA))
+                              .withValues(alpha: opaque ? 1 : .82),
+                          (theme.brightness == Brightness.dark
+                                  ? const Color(0xFF25262A)
+                                  : const Color(0xFFF7F8FA))
+                              .withValues(alpha: opaque ? 1 : .72),
+                        ],
+                      ),
                 ),
                 child: content,
               ),

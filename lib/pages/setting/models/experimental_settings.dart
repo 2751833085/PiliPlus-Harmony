@@ -1,4 +1,5 @@
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_switch.dart';
@@ -22,15 +23,6 @@ List<SettingsModel> get harmonyAppearanceSettings => [
   if (Pref.harmonyUI) ...[
     SwitchModel(
       section: '鸿蒙界面风格',
-      title: '底栏半透明磨砂',
-      subtitle: '默认开启；关闭后使用不透明材质，保留按钮按压高光',
-      leading: const Icon(Icons.blur_on),
-      setKey: SettingBoxKey.translucentBottomBar,
-      defaultVal: true,
-      onChanged: refreshHarmonySettings,
-    ),
-    SwitchModel(
-      section: '鸿蒙界面风格',
       title: '沉浸光感',
       subtitle: '为底栏、顶栏、菜单、播放面板与账户卡片启用光感材质；关闭后使用实色背景',
       leading: const Icon(Icons.water_drop_outlined),
@@ -38,6 +30,16 @@ List<SettingsModel> get harmonyAppearanceSettings => [
       defaultVal: true,
       onChanged: refreshHarmonySettings,
     ),
+    if (Pref.harmonyImmersive)
+      SwitchModel(
+        section: '鸿蒙界面风格',
+        title: '底栏沉浸光感',
+        subtitle: '与顶栏统一磨砂材质；默认开启，关闭后底栏使用不透明材质',
+        leading: const Icon(Icons.blur_on),
+        setKey: SettingBoxKey.translucentBottomBar,
+        defaultVal: true,
+        onChanged: refreshHarmonySettings,
+      ),
   ],
   const SwitchModel(
     section: '交互与动画',
@@ -49,8 +51,12 @@ List<SettingsModel> get harmonyAppearanceSettings => [
   ),
 ];
 
+String? foldOnlySettingReason() =>
+    HarmonyChannel.foldable.value ? null : '未检测到折叠屏设备，此选项无效。普通手机和平板保持自动窗口适配。';
+
 List<SettingsModel> get harmonyPlaybackSettings => [
-  const SwitchModel(
+  SwitchModel(
+    disabledReason: foldOnlySettingReason,
     section: '全屏与折叠屏',
     title: '全屏跟随折叠形态',
     subtitle: '默认开启：展开时重新适配全屏方向，合回单屏时回到详情页播放器并继续播放；关闭后保留原有全屏方向行为',

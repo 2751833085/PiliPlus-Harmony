@@ -430,7 +430,20 @@ class _MainAppState extends PopScopeState<MainApp>
             showBorder: false,
             blurBackground: Pref.translucentBottomBar,
             opaque: !Pref.translucentBottomBar,
-            blurSigma: 8,
+            blurSigma: 24,
+            // Neutral thin material like the native top bar, without the old
+            // grey diagonal card tint. One clipped blur, bounded to the bar.
+            surfaceGradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [
+                for (final alpha in const [.76, .66])
+                  (Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black
+                          : Colors.white)
+                      .withValues(alpha: Pref.translucentBottomBar ? alpha : 1),
+              ],
+            ),
             borderRadius: BorderRadius.zero,
             child: SafeArea(
               top: false,

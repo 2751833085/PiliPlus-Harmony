@@ -17,10 +17,12 @@ abstract class HarmonyChannel {
   static final handSide = ValueNotifier(HarmonyHandSide.center);
   static final handAvailable = ValueNotifier(false);
   static final handStatus = ValueNotifier<String>('waiting');
+  static final foldable = ValueNotifier(false);
   static final foldExpanded = ValueNotifier(false);
   static DateTime _foldChangedAt = DateTime.fromMillisecondsSinceEpoch(0);
   static bool get foldTransitionActive =>
       OS.isHarmony &&
+      foldable.value &&
       Pref.harmonyFoldOrientation &&
       DateTime.now().difference(_foldChangedAt) <
           const Duration(milliseconds: 900);
@@ -483,6 +485,11 @@ abstract class HarmonyChannel {
   /// 一致（并把 viewPadding.top 钉成三键高度）。
   static Future<void> initWindowState() async {
     if (!OS.isHarmony) return;
+    try {
+      foldable.value = await _channel.invokeMethod<bool>('isFoldable') ?? false;
+    } catch (_) {
+      foldable.value = false;
+    }
     try {
       foldExpanded.value =
           await _channel.invokeMethod<bool>('getFoldExpanded') ?? false;

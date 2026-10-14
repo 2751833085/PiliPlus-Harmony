@@ -86,7 +86,6 @@ import 'package:PiliPlus/services/shutdown_timer_service.dart'
     show shutdownTimerService;
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
-import 'package:PiliPlus/utils/extension/theme_ext.dart';
 import 'package:PiliPlus/utils/image_utils.dart';
 import 'package:PiliPlus/utils/max_screen_size.dart';
 import 'package:PiliPlus/utils/mobile_observer.dart';
@@ -1317,10 +1316,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               ? null
               : SimpleAppBar(
                   height: padding.top,
-                  backgroundColor: colorScheme.surface,
-                  brightness: colorScheme.brightness,
-                  statusBarBrightness: colorScheme.brightness,
-                  statusBarIconBrightness: colorScheme.brightness.reverse,
+                  backgroundColor: Colors.black,
+                  brightness: Brightness.dark,
+                  statusBarBrightness: Brightness.dark,
+                  statusBarIconBrightness: Brightness.light,
                 ),
           body: ExtendedNestedScrollView(
             onlyOneScrollInBody: true,
@@ -1572,11 +1571,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   }
 
-  SystemUiOverlayStyle get _videoSystemOverlayStyle => SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: theme.brightness.reverse,
-    statusBarBrightness: theme.brightness,
-  );
+  SystemUiOverlayStyle get _videoSystemOverlayStyle =>
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.black,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      );
 
   Widget get childWhenDisabledLandscape => Obx(
     () {
@@ -1585,7 +1585,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         appBar: removeAppBar(isFullScreen)
             ? null
             : AppBar(
-                backgroundColor: theme.colorScheme.surface,
+                backgroundColor: Colors.black,
                 systemOverlayStyle: _videoSystemOverlayStyle,
                 automaticallyImplyLeading: false,
                 toolbarHeight: _expand(
@@ -2102,7 +2102,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       appBar: removeAppBar(isFullScreen)
           ? null
           : AppBar(
-              backgroundColor: theme.colorScheme.surface,
+              backgroundColor: Colors.black,
               systemOverlayStyle: _videoSystemOverlayStyle,
               automaticallyImplyLeading: false,
               toolbarHeight: _expand(_fixedTopInset ?? padding.top, 0),
