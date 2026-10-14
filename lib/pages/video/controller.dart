@@ -1200,11 +1200,20 @@ class VideoDetailController extends GetxController
     });
   }
 
+  final manualPlayPending = false.obs;
+  void requestManualPlayback() {
+    if (isClosed || !_playbackVisible) return;
+    autoPlay = true;
+    manualPlayPending.value = !videoState.value;
+  }
+
   Future<bool>? entranceReady;
   bool _playbackVisible = true;
-  void suspendPlayback() {
+  void suspendPlayback({bool cancelVideoQuery = false}) {
     _playbackVisible = false;
+    manualPlayPending.value = false;
     _playerRequests.invalidate();
+    if (cancelVideoQuery) _videoRequests.invalidate();
     _routeRetry?.cancel();
     _routeRetry = null;
   }
@@ -1233,130 +1242,141 @@ class VideoDetailController extends GetxController
   }) {
     if (!resolveRoutes) _manualRoute = true;
     final source = (bvid, cid.value);
-    return _playerRequests.run((ticket) async {
-      if (isClosed ||
-          !_playbackVisible ||
-          source != (bvid, cid.value) ||
-          (!isFileSource && videoUrl == null))
-        return;
-      if (resolveRoutes &&
-          !_usingWarmSelection &&
-          usesOverseasRoutes &&
-          data.dash?.video?.isNotEmpty == true) {
-        final routes = _overseasRoutes ??= OverseasPlaybackRoutes();
-        final audios = data.dash?.audio;
-        final selectedAudio =
-            audios
-                ?.where((item) => item.id == currentAudioQa?.code)
-                .firstOrNull ??
-            audios?.firstOrNull;
-        final selected = await Future.wait([
-          routes.video.resolve(firstVideo.playUrls, fallback: videoUrl!),
-          if (selectedAudio != null)
-            routes.audio.resolve(
-              selectedAudio.playUrls,
-              fallback: audioUrl ?? '',
-            ),
-        ]);
+    return _playerRequests.runLatest(
+      (
+        bvid,
+        cid.value,
+        videoUrl,
+        audioUrl,
+        autoplay ?? autoPlay,
+        resolveRoutes,
+      ),
+      (ticket) async {
+        if (isClosed ||
+            !_playbackVisible ||
+            source != (bvid, cid.value) ||
+            (!isFileSource && videoUrl == null))
+          return;
+        if (resolveRoutes &&
+            !_usingWarmSelection &&
+            usesOverseasRoutes &&
+            data.dash?.video?.isNotEmpty == true) {
+          final routes = _overseasRoutes ??= OverseasPlaybackRoutes();
+          final audios = data.dash?.audio;
+          final selectedAudio =
+              audios
+                  ?.where((item) => item.id == currentAudioQa?.code)
+                  .firstOrNull ??
+              audios?.firstOrNull;
+          final selected = await Future.wait([
+            routes.video.resolve(firstVideo.playUrls, fallback: videoUrl!),
+            if (selectedAudio != null)
+              routes.audio.resolve(
+                selectedAudio.playUrls,
+                fallback: audioUrl ?? '',
+              ),
+          ]);
+          if (isClosed ||
+              !_playerRequests.isCurrent(ticket) ||
+              source != (bvid, cid.value) ||
+              !_playbackVisible)
+            return;
+          videoUrl = selected.first;
+          if (selected.length > 1) audioUrl = selected[1];
+        }
+        Duration? seek = defaultST ?? playedTime;
+        if (seek == .zero) seek = null;
+        seek ??= getFirstSegment();
+        var initialized = false;
+        _pinnedShortSources = {
+          if (videoUrl != null) videoUrl!,
+          if (audioUrl != null) audioUrl!,
+        };
+        final cache = _shortMediaCache;
+        final videoSource = !isFileSource && cache != null
+            ? await cache.playbackSourceFor(videoUrl!)
+            : videoUrl;
+        final audioSource = !isFileSource && cache != null && audioUrl != null
+            ? await cache.playbackSourceFor(audioUrl!)
+            : audioUrl;
+        _usingShortProxy = videoSource != videoUrl || audioSource != audioUrl;
+        if (isClosed ||
+            source != (bvid, cid.value) ||
+            !_playerRequests.isCurrent(ticket))
+          return;
+        final entrance = entranceReady;
+        if (entrance != null && !await entrance) return;
         if (isClosed ||
             !_playerRequests.isCurrent(ticket) ||
-            source != (bvid, cid.value) ||
-            !_playbackVisible)
+            source != (bvid, cid.value))
           return;
-        videoUrl = selected.first;
-        if (selected.length > 1) audioUrl = selected[1];
-      }
-      Duration? seek = defaultST ?? playedTime;
-      if (seek == .zero) seek = null;
-      seek ??= getFirstSegment();
-      var initialized = false;
-      _pinnedShortSources = {
-        if (videoUrl != null) videoUrl!,
-        if (audioUrl != null) audioUrl!,
-      };
-      final cache = _shortMediaCache;
-      final videoSource = !isFileSource && cache != null
-          ? await cache.playbackSourceFor(videoUrl!)
-          : videoUrl;
-      final audioSource = !isFileSource && cache != null && audioUrl != null
-          ? await cache.playbackSourceFor(audioUrl!)
-          : audioUrl;
-      _usingShortProxy = videoSource != videoUrl || audioSource != audioUrl;
-      if (isClosed ||
-          source != (bvid, cid.value) ||
-          !_playerRequests.isCurrent(ticket))
-        return;
-      final entrance = entranceReady;
-      if (entrance != null && !await entrance) return;
-      if (isClosed ||
-          !_playerRequests.isCurrent(ticket) ||
-          source != (bvid, cid.value))
-        return;
-      await plPlayerController.setDataSource(
-        isFileSource
-            ? FileSource(
-                dir: args['dirPath'],
-                typeTag: entry.typeTag!,
-                isMp4: entry.mediaType == 1,
-                hasDashAudio: entry.hasDashAudio,
-              )
-            : NetworkSource(
-                videoSource: videoSource!,
-                audioSource: audioSource,
-              ),
-        owner: this,
-        isCurrent: () =>
-            _playbackVisible &&
-            !isClosed &&
-            _playerRequests.isCurrent(ticket) &&
-            source == (bvid, cid.value),
-        seekTo: seek,
-        duration: data.timeLength == null
-            ? null
-            : Duration(milliseconds: data.timeLength!),
-        isVertical: isVertical.value,
-        aid: aid,
-        bvid: bvid,
-        cid: cid.value,
-        autoplay: autoplay ?? _autoPlay.value,
-        epid: isUgc ? null : epId,
-        seasonId: isUgc ? null : seasonId,
-        pgcType: isUgc ? null : pgcType,
-        videoType: videoType,
-        onInit: () {
-          if (isClosed ||
-              !_playbackVisible ||
-              !_playerRequests.isCurrent(ticket) ||
-              source != (bvid, cid.value))
-            return;
-          initialized = true;
-          videoState.value = true;
-          setSubtitle(vttSubtitlesIndex.value);
-        },
-        width: firstVideo.width,
-        height: firstVideo.height,
-        volume: volume,
-        autoFullScreenFlag: autoFullScreenFlag,
-      );
+        await plPlayerController.setDataSource(
+          isFileSource
+              ? FileSource(
+                  dir: args['dirPath'],
+                  typeTag: entry.typeTag!,
+                  isMp4: entry.mediaType == 1,
+                  hasDashAudio: entry.hasDashAudio,
+                )
+              : NetworkSource(
+                  videoSource: videoSource!,
+                  audioSource: audioSource,
+                ),
+          owner: this,
+          isCurrent: () =>
+              _playbackVisible &&
+              !isClosed &&
+              _playerRequests.isCurrent(ticket) &&
+              source == (bvid, cid.value),
+          seekTo: seek,
+          duration: data.timeLength == null
+              ? null
+              : Duration(milliseconds: data.timeLength!),
+          isVertical: isVertical.value,
+          aid: aid,
+          bvid: bvid,
+          cid: cid.value,
+          autoplay: autoplay ?? _autoPlay.value,
+          epid: isUgc ? null : epId,
+          seasonId: isUgc ? null : seasonId,
+          pgcType: isUgc ? null : pgcType,
+          videoType: videoType,
+          onInit: () {
+            if (isClosed ||
+                !_playbackVisible ||
+                !_playerRequests.isCurrent(ticket) ||
+                source != (bvid, cid.value))
+              return;
+            initialized = true;
+            manualPlayPending.value = false;
+            videoState.value = true;
+            setSubtitle(vttSubtitlesIndex.value);
+          },
+          width: firstVideo.width,
+          height: firstVideo.height,
+          volume: volume,
+          autoFullScreenFlag: autoFullScreenFlag,
+        );
 
-      if (!initialized || isClosed || source != (bvid, cid.value)) return;
+        if (!initialized || isClosed || source != (bvid, cid.value)) return;
 
-      if (!isFileSource) {
-        if (plPlayerController.enableBlock) {
-          initSkip();
+        if (!isFileSource) {
+          if (plPlayerController.enableBlock) {
+            initSkip();
+          }
+
+          if (vttSubtitlesIndex.value == -1) {
+            _queryPlayInfo();
+          }
+
+          if (plPlayerController.showDmChart && dmTrend.value == null) {
+            _getDmTrend();
+          }
         }
 
-        if (vttSubtitlesIndex.value == -1) {
-          _queryPlayInfo();
-        }
-
-        if (plPlayerController.showDmChart && dmTrend.value == null) {
-          _getDmTrend();
-        }
-      }
-
-      defaultST = null;
-    });
+        defaultST = null;
+      },
+    );
   }
 
   bool isQuerying = false;
@@ -1615,6 +1635,7 @@ class VideoDetailController extends GetxController
       if (plPlayerController.isFullScreen.value) {
         plPlayerController.triggerFullScreen(status: false);
       }
+      manualPlayPending.value = false;
       result.toast();
     }
   }

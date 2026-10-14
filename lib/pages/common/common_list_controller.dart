@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 
 abstract class CommonListController<R, T> extends CommonController<R, T> {
   int page = 1;
+
+  /// Optional presentation gate; networking still starts immediately.
+  Future<bool>? presentationReady;
   bool isEnd = false;
   bool? hasFooter;
   final RxBool loadingMore = false.obs;
@@ -36,6 +39,8 @@ abstract class CommonListController<R, T> extends CommonController<R, T> {
     loadingMore.value = !isRefresh;
     try {
       final LoadingState<R> res = await customGetData();
+      final ready = presentationReady;
+      if (ready != null && !await ready) return;
       if (isClosed || revision != _requestRevision) return;
       if (res case Success(:final response)) {
         if (!customHandleResponse(isRefresh, res)) {

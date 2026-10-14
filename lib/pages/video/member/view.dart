@@ -337,7 +337,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color:
                       (memberInfoModel.vip?.status ?? -1) > 0 &&
@@ -370,7 +370,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
               .expand((child) sync* {
                 yield SizedBox(
                   height: 10,
-                  width: 20,
+                  width: 12,
                   child: VerticalDivider(
                     width: 1,
                     color: colorScheme.outline,
@@ -397,7 +397,8 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
                     : null,
                 padding: EdgeInsets.zero,
                 tapTargetSize: .shrinkWrap,
-                visualDensity: const VisualDensity(vertical: -2),
+                minimumSize: const Size(0, 32),
+                visualDensity: const VisualDensity(vertical: -3),
               ),
               onPressed: () {
                 if (widget.mid == account.mid) {
@@ -426,7 +427,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
                     ? '已关注'
                     : '关注',
                 maxLines: 1,
-                style: const TextStyle(fontSize: 14),
+                style: const TextStyle(fontSize: 12),
               ),
             ),
           ),
@@ -435,13 +436,14 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.zero,
                 tapTargetSize: .shrinkWrap,
-                visualDensity: const VisualDensity(vertical: -2),
+                minimumSize: const Size(0, 32),
+                visualDensity: const VisualDensity(vertical: -3),
               ),
               onPressed: () => Get.toNamed('/member?mid=${widget.mid}'),
               child: const Text(
                 '查看主页',
                 maxLines: 1,
-                style: TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 12),
               ),
             ),
           ),
@@ -482,7 +484,7 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
       child: Text(
         '$num${type.title}',
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 12,
           color: colorScheme.outline,
         ),
       ),
@@ -497,8 +499,8 @@ class _HorizontalMemberPageState extends State<HorizontalMemberPage> {
     child: NetworkImgLayer(
       src: face,
       type: ImageType.avatar,
-      width: 70,
-      height: 70,
+      width: 44,
+      height: 44,
     ),
   );
 }

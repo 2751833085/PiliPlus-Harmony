@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/skeleton/video_card_h.dart';
+import 'package:PiliPlus/common/widgets/image/feed_image_budget.dart';
 import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
@@ -68,12 +69,14 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
             ? SliverGrid.builder(
                 gridDelegate: widget.sidebar ? _sidebarDelegate : gridDelegate,
                 itemBuilder: (context, index) {
-                  return VideoCardH(
-                    videoItem: response[index],
-                    adaptiveCover: widget.sidebar,
-                    onRemove: () => _relatedController.loadingState
-                      ..value.data!.removeAt(index)
-                      ..refresh(),
+                  return FeedImageBudget(
+                    child: VideoCardH(
+                      videoItem: response[index],
+                      adaptiveCover: widget.sidebar,
+                      onRemove: () => _relatedController.loadingState
+                        ..value.data!.removeAt(index)
+                        ..refresh(),
+                    ),
                   );
                 },
                 itemCount: response.length,

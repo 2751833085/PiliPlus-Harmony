@@ -73,6 +73,67 @@ void main() {
     await pending;
     expect(count, 1);
   });
+  test(
+    '50 rapid play taps join one open; source change supersedes it',
+    () async {
+      final queue = VideoRequestQueue();
+      final gate = Completer<void>();
+      var opens = 0;
+      final applied = <String>[];
+      Future<void> task(int ticket) async {
+        opens++;
+        await gate.future;
+        if (queue.isCurrent(ticket)) applied.add('old');
+      }
+
+      final first = queue.runLatest('video-a', task);
+      for (var i = 0; i < 50; i++) {
+        expect(identical(queue.runLatest('video-a', task), first), isTrue);
+      }
+      await Future<void>.delayed(Duration.zero);
+      final next = queue.runLatest('video-b', (_) async => applied.add('next'));
+      gate.complete();
+      await Future.wait([first, next]);
+      expect(opens, 1);
+      expect(applied, ['next']);
+      queue.dispose();
+    },
+  );
+  test(
+    'cached comments wait for entrance and are discarded after early back',
+    () async {
+      final controller = _ListFixture();
+      final entered = Completer<bool>();
+      controller.presentationReady = entered.future;
+      final work = controller.queryData();
+      controller.pending.single.complete(Success(['comment']));
+      await Future<void>.delayed(Duration.zero);
+      expect(controller.loadingState.value, isA<Loading>());
+      entered.complete(false);
+      await work;
+      expect(controller.loadingState.value, isA<Loading>());
+      expect(controller.isLoading, isFalse);
+      controller.scrollController.dispose();
+    },
+  );
+  test(
+    'a newer refresh wins while an old response waits for entrance',
+    () async {
+      final controller = _ListFixture();
+      final entered = Completer<bool>();
+      controller.presentationReady = entered.future;
+      final old = controller.queryData();
+      controller.pending.single.complete(Success(['old']));
+      await Future<void>.delayed(Duration.zero);
+      controller.invalidateRequests();
+      final next = controller.queryData();
+      controller.pending.last.complete(Success(['new']));
+      entered.complete(true);
+      await Future.wait([old, next]);
+      expect(controller.loadingState.value.dataOrNull, ['new']);
+      controller.scrollController.dispose();
+    },
+  );
   test('old comments cannot overwrite a newly selected video', () async {
     final controller = _ListFixture();
     final old = controller.queryData();

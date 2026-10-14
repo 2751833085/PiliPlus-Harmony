@@ -107,6 +107,7 @@ class _HomePageState extends CommonPageState<HomePage>
           child: onBuild(
             FeedImageBudget(
               child: tabBarView(
+                preloadAdjacent: true,
                 controller: _homeController.tabController,
                 children: _homeController.tabs.map((e) => e.page).toList(),
               ),

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:PiliPlus/common/widgets/scroll_physics.dart' show tabBarView;
 import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
 import 'package:flutter/material.dart';
 
@@ -176,7 +177,8 @@ class TabletDetailTabs extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: TabBarView(
+          child: tabBarView(
+            preloadAdjacent: true,
             children: [
               KeepAliveWrapper(child: related),
               KeepAliveWrapper(child: comments),

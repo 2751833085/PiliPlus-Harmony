@@ -37,6 +37,7 @@ class TabBarView<T extends HorizontalDragGestureRecognizer>
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
     this.viewportFraction = 1.0,
+    this.preloadAdjacent = false,
     this.clipBehavior = Clip.hardEdge,
     required this.horizontalDragGestureRecognizer,
   });
@@ -71,6 +72,7 @@ class TabBarView<T extends HorizontalDragGestureRecognizer>
 
   /// {@macro flutter.widgets.pageview.viewportFraction}
   final double viewportFraction;
+  final bool preloadAdjacent;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -361,6 +363,7 @@ class _TabBarViewState<T extends HorizontalDragGestureRecognizer>
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: PageView<T>(
+        allowImplicitScrolling: widget.preloadAdjacent,
         dragStartBehavior: widget.dragStartBehavior,
         clipBehavior: widget.clipBehavior,
         controller: _pageController,

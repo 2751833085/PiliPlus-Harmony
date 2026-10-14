@@ -1,9 +1,14 @@
+import 'package:PiliPlus/utils/storage.dart';
+import 'helpers/memory_box.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:PiliPlus/pages/video/widgets/tablet_video_sidebar.dart';
 import 'package:PiliPlus/pages/video/widgets/collapsible_playlist.dart';
 
 void main() {
+  setUpAll(() {
+    GStorage.setting = MemoryBox();
+  });
   testWidgets('sidebar tabs switch by tap and swipe without replacing player', (
     tester,
   ) async {

@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:PiliPlus/pages/video/widgets/tablet_episode_strip.dart';
 import 'package:PiliPlus/pages/video/widgets/video_entrance.dart';
@@ -823,7 +824,18 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     // Defer only playback/network work, never the destination layout.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        videoDetailController.entranceReady = waitForVideoEntrance(context);
+        final entrance = waitForVideoEntrance(context);
+        videoDetailController.entranceReady = entrance;
+        if (videoDetailController.showReply) {
+          _videoReplyController.presentationReady = entrance;
+          // Starting on related videos must not defer comments until the first
+          // swipe. Keep the request single-flight through the list controller.
+          unawaited(_videoReplyController.queryData());
+        }
+        if (Get.isRegistered<RelatedController>(tag: heroTag)) {
+          Get.find<RelatedController>(tag: heroTag).presentationReady =
+              entrance;
+        }
         videoSourceInit();
       }
     });
@@ -895,11 +907,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Future<void>? playCallBack() {
-    if (!isShowing) {
-      plPlayerController
-        ?..addStatusLister(playerListener)
-        ..addPositionListener(positionListener);
-    }
+    if (!mounted || !isShowing) return null;
     return plPlayerController?.play();
   }
 
@@ -992,13 +1000,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   /// 未开启自动播放时触发播放
   Future<void>? handlePlay() {
+    if (!mounted || !isShowing) return null;
+    videoDetailController.requestManualPlayback();
+    _attachPlayerListeners();
     if (!videoDetailController.isFileSource) {
       if (videoDetailController.isQuerying) {
         if (kDebugMode) debugPrint('handlePlay: querying');
         return null;
       }
-      if (videoDetailController.videoUrl == null ||
-          videoDetailController.audioUrl == null) {
+      if (videoDetailController.videoUrl == null) {
         if (kDebugMode) {
           debugPrint('handlePlay: videoUrl/audioUrl not initialized');
         }
@@ -1079,6 +1089,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     removeObserverMobile(this);
 
     super.dispose();
+  }
+
+  @override
+  void didPop() {
+    isShowing = false;
+    videoDetailController.suspendPlayback(cancelVideoQuery: true);
+    if (videoDetailController.showReply)
+      _videoReplyController.invalidateRequests();
+    super.didPop();
   }
 
   @override
@@ -1540,6 +1559,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           bottom: -2,
           child: GestureDetector(
             onTap: () {
+              if (!videoDetailController.videoState.value) {
+                handlePlay();
+                return;
+              }
               if (!videoDetailController.isFileSource) {
                 if (videoDetailController.isQuerying) {
                   if (kDebugMode) {
@@ -2717,6 +2740,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         ),
 
         plPlayer(width: width, height: height),
+
+        Obx(
+          () => videoDetailController.manualPlayPending.value
+              ? const Positioned.fill(
+                  child: IgnorePointer(
+                    child: ColoredBox(
+                      color: Colors.black,
+                      child: Center(child: HarmonyLoadingIndicator(size: 24)),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
 
         PlaybackCover(
           shortMode: _shortMode,

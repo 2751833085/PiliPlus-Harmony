@@ -88,6 +88,16 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     final res = prepared == null
         ? await VideoHttp.videoIntro(bvid: requestedBvid)
         : Success(prepared);
+    // Resolve the playback identifier immediately; only the visible metadata
+    // waits for entrance, so manual play can fetch its URL in parallel.
+    if (res case Success(:final response)
+        when response.redirectUrl == null &&
+            cid.value == 0 &&
+            response.pages?.isNotEmpty == true) {
+      cid.value = response.pages!.first.cid!;
+    }
+    final entrance = videoDetailCtr.entranceReady;
+    if (entrance != null && !await entrance) return;
     if (isClosed || requestedBvid != bvid) return;
     if (res case Success(:final response)) {
       if (response.redirectUrl != null &&

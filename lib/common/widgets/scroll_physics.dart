@@ -1,4 +1,5 @@
 import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/idle_tab_preload.dart';
 import 'package:PiliPlus/common/widgets/flutter/page/tabs.dart' as paging;
 import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -11,15 +12,26 @@ Widget tabBarView({
   required List<Widget> children,
   TabController? controller,
   HitTestBehavior hitTestBehavior = .opaque,
-}) => Listener(
-  behavior: hitTestBehavior,
-  child: paging.TabBarView<HorizontalDragGestureRecognizer>(
-    controller: controller,
-    physics: tabBarScrollPhysics,
-    horizontalDragGestureRecognizer: CustomHorizontalDragGestureRecognizer.new,
-    children: [for (final child in children) RepaintBoundary(child: child)],
-  ),
-);
+  bool preloadAdjacent = false,
+}) {
+  Widget build(bool prepared) => Listener(
+    behavior: hitTestBehavior,
+    child: paging.TabBarView<HorizontalDragGestureRecognizer>(
+      controller: controller,
+      physics: tabBarScrollPhysics,
+      preloadAdjacent: prepared,
+      horizontalDragGestureRecognizer:
+          CustomHorizontalDragGestureRecognizer.new,
+      children: [for (final child in children) RepaintBoundary(child: child)],
+    ),
+  );
+  return preloadAdjacent
+      ? IdleTabPreload(
+          controller: controller,
+          builder: (_, ready) => build(ready),
+        )
+      : build(false);
+}
 
 SpringDescription kSpringDescription = _customSpringDescription();
 

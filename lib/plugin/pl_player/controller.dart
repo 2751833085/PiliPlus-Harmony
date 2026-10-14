@@ -883,6 +883,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       if (owner != null) sourceOwner = owner;
       await _setDataSource(
         dataSource,
+        isCurrent: () =>
+            _sourceRequests.isCurrent(ticket) && (isCurrent?.call() ?? true),
         isLive: isLive,
         autoplay: autoplay,
         seekTo: seekTo,
@@ -917,6 +919,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   Future<void> _setDataSource(
     DataSource dataSource, {
+    bool Function()? isCurrent,
     bool isLive = false,
     bool autoplay = true,
     // 初始化播放位置
@@ -978,7 +981,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         return;
       }
       // 配置Player 音轨、字幕等等
+      if (isCurrent != null && !isCurrent()) return;
       await _createVideoController(dataSource, seekTo, volume);
+      // Opening may finish after the route was popped. Never publish loaded,
+      // start playback or auto-enter fullscreen for that obsolete request.
+      if (isCurrent != null && !isCurrent()) return;
 
       if (_playerCount == 0) {
         _removeListeners();
@@ -997,8 +1004,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         triggerFullScreen(status: true);
       }
 
-      await _initializePlayer();
-      onInit?.call();
+      await _initializePlayer(isCurrent: isCurrent);
+      if (isCurrent == null || isCurrent()) onInit?.call();
     } catch (err, stackTrace) {
       dataStatus.value = DataStatus.error;
       if (kDebugMode) {
@@ -1295,13 +1302,14 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   // 开始播放
-  Future<void> _initializePlayer() async {
+  Future<void> _initializePlayer({bool Function()? isCurrent}) async {
     if (_instance == null) return;
     // 设置倍速
     if (_videoPlayerController != null &&
         _videoPlayerController!.state.rate != _playbackSpeed.value) {
       await setPlaybackSpeed(isLive ? 1.0 : _playbackSpeed.value);
     }
+    if (isCurrent != null && !isCurrent()) return;
     _initVideoFit();
 
     // 自动播放
