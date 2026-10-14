@@ -160,11 +160,20 @@ class TabletDetailTabs extends StatelessWidget {
     length: 2,
     child: Column(
       children: [
-        const TabBar(
-          tabs: [
-            Tab(text: '相关视频'),
-            Tab(text: '评论'),
-          ],
+        const Align(
+          alignment: Alignment.centerLeft,
+          child: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            padding: EdgeInsets.zero,
+            labelPadding: EdgeInsets.symmetric(horizontal: 10),
+            labelStyle: TextStyle(fontSize: 13),
+            dividerHeight: 0,
+            tabs: [
+              Tab(text: '相关视频'),
+              Tab(text: '评论'),
+            ],
+          ),
         ),
         Expanded(
           child: TabBarView(

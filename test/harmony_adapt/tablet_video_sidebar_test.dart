@@ -26,6 +26,12 @@ void main() {
       ),
     );
     expect(find.text('recommendations'), findsOneWidget);
+    expect(
+      (tester.getCenter(find.text('评论')).dx -
+              tester.getCenter(find.text('相关视频')).dx)
+          .abs(),
+      lessThan(120),
+    );
     await tester.tap(find.text('评论'));
     await tester.pumpAndSettle();
     expect(find.text('comment list'), findsOneWidget);

@@ -856,7 +856,7 @@ struct Index {
       .width(Math.min(600, this.winWidth))
       .height(52)
       .onTabBarClick((index: number) => {
-        if (this.shellBarsObscured || this.shellBarsHidden || this.playbackFullscreen) return;
+        if (this.shellBarsObscured || this.shellBarsHidden || this.playbackFullscreen || this.topBarExposure < 1) return;
         this.currentNavIndex = index;
         this.context.eventHub.emit(EVENT_TAB_SWITCH, index);
       })
@@ -866,10 +866,14 @@ struct Index {
     .clip(true)
     .translate({ y: this.shellBarsScrollHidden ? 52 + this.navigationSafeBottom : 0 })
     .animation({ duration: 180, curve: Curve.EaseOut })
+    // Match the retained home route's coverage, not a second show/hide clock.
+    .clipShape(new Rect({ width: Math.max(0, this.winWidth * (0.2 + 0.8 * this.topBarExposure)), height: 52 + this.navigationSafeBottom }))
+    .translate({ x: -0.2 * this.winWidth * (1 - this.topBarExposure), y: this.shellBarsScrollHidden ? 52 + this.navigationSafeBottom : 0 })
+    .animation({ duration: this.topBarExposureDuration, curve: curves.cubicBezierCurve(0.4, 0, 0.6, 1) })
     .position({ x: 0, y: Math.max(0, this.winHeight - 52 - this.navigationSafeBottom) })
-    .enabled(!this.shellBarsObscured)
+    .enabled(!this.shellBarsObscured && this.topBarExposure >= 1)
     .visibility(this.navTabs.length <= 1 || this.shellBarsHidden || this.playbackFullscreen ? Visibility.None : Visibility.Visible)
-    .hitTestBehavior(this.shellBarsObscured ? HitTestMode.None : HitTestMode.Default)
+    .hitTestBehavior(this.shellBarsObscured || this.topBarExposure < 1 ? HitTestMode.None : HitTestMode.Default)
     .onTouch((event: TouchEvent) => event.stopPropagation())
   }
 

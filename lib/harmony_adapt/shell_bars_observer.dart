@@ -94,7 +94,6 @@ class ShellBarsObserver extends NavigatorObserver {
     // 底栏隐藏条件：页面覆盖（无弹层）或弹层覆盖（PopupRoute 计入）或横屏。
     // 底栏 + 顶栏宽高比分流共用此信号：dialog/bottomSheet/popupmenu 弹出时
     // 也触发，顶栏按「首页 + 宽高比」由 ArkTS syncTopBarVisibility 收起/隐藏。
-    final hasPage = _activeRoutes.whereType<PageRoute>().length > 1;
     final hasBlockingPanel = _activeRoutes.any(
       (route) =>
           route is ModalBottomSheetRoute ||
@@ -105,8 +104,7 @@ class ShellBarsObserver extends NavigatorObserver {
     final pages = _activeRoutes.whereType<PageRoute>().toList();
     final onVideo = pages.isNotEmpty && pages.last.settings.name == '/videoV';
     if (onVideo) HarmonyChannel.setShellBarsScrollHidden(false);
-    final hasOverlay =
-        (hasPage && !onVideo) || hasBlockingPanel || _orientationHidden;
+    final hasOverlay = hasBlockingPanel || _orientationHidden;
     final obscured =
         !hasOverlay && _activeRoutes.any((route) => route is PopupRoute);
     HarmonyChannel.setShellBarsObscured(

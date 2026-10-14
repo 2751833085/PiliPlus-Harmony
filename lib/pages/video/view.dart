@@ -1,5 +1,3 @@
-import 'package:PiliPlus/common/widgets/scale_app.dart';
-import 'package:PiliPlus/harmony_adapt/widgets/native_navigation_spacer.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:PiliPlus/pages/video/widgets/tablet_episode_strip.dart';
 import 'package:PiliPlus/pages/video/widgets/video_entrance.dart';
@@ -2490,16 +2488,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   ColorScheme get colorScheme => theme.colorScheme;
   late bool isPortrait;
   late double maxWidth;
-  late double _windowHeight;
-  set maxHeight(double height) => _windowHeight = height;
-  double get maxHeight =>
-      _windowHeight -
-      (OS.isHarmony &&
-              !isFullScreen &&
-              !videoDetailController.plPlayerController.isPipMode
-          ? HarmonyChannel.nativeNavigationExtent.value /
-                ScaledWidgetsFlutterBinding.effectiveScaleFactor
-          : 0);
+  late double maxHeight;
   bool isWindowMode = false;
   late EdgeInsets padding;
 
@@ -2560,24 +2549,6 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       );
     }
     result = Theme(data: theme, child: child);
-    if (OS.isHarmony) {
-      result = Obx(
-        () => Column(
-          children: [
-            Expanded(
-              child: Theme(data: theme, child: child),
-            ),
-            if (!isFullScreen &&
-                !videoDetailController.plPlayerController.isPipMode)
-              NativeNavigationSpacer(
-                extent: HarmonyChannel.nativeNavigationExtent,
-                scale: ScaledWidgetsFlutterBinding.effectiveScaleFactor,
-                fallback: 0,
-              ),
-          ],
-        ),
-      );
-    }
     return Listener(
       // Once the user operates this page, late video dimensions may resize the
       // picture but must not silently select another viewing mode.
