@@ -320,26 +320,32 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       onClosing: widget.onClosing!,
       builder: widget.builder,
       constraints: widget.constraints,
+      alignment: widget.slideFromRight
+          ? Alignment.bottomRight
+          : Alignment.bottomCenter,
     );
     if (widget.slideFromRight) {
-      return ClipRect(
-        child: AnimatedBuilder(
-          animation: widget.animationController,
-          builder: (context, child) => FractionalTranslation(
-            translation: Offset(
-              1 -
-                  HarmonyMotion.pageCoverage(
-                    widget.animationController.value,
-                    interactive: false,
-                    reverse:
-                        widget.animationController.status ==
-                        AnimationStatus.reverse,
-                  ),
-              0,
+      return Align(
+        alignment: Alignment.bottomRight,
+        child: ClipRect(
+          child: AnimatedBuilder(
+            animation: widget.animationController,
+            builder: (context, child) => FractionalTranslation(
+              translation: Offset(
+                1 -
+                    HarmonyMotion.pageCoverage(
+                      widget.animationController.value,
+                      interactive: false,
+                      reverse:
+                          widget.animationController.status ==
+                          AnimationStatus.reverse,
+                    ),
+                0,
+              ),
+              child: child,
             ),
-            child: child,
+            child: RepaintBoundary(child: child),
           ),
-          child: RepaintBoundary(child: child),
         ),
       );
     }

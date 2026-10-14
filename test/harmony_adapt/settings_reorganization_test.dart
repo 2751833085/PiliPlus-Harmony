@@ -56,6 +56,20 @@ void main() {
   tearDown(() => debugDefaultTargetPlatformOverride = null);
 
   test(
+    'combined right panel defaults on and forces details below the video',
+    () async {
+      await GStorage.setting.delete(SettingBoxKey.tabletCombinedRightPanel);
+      await GStorage.setting.put(SettingBoxKey.tabletVideoInfoOnRight, true);
+      expect(Pref.tabletCombinedRightPanel, isTrue);
+      expect(Pref.tabletVideoInfoOnRight, isFalse);
+      await GStorage.setting.put(SettingBoxKey.tabletCombinedRightPanel, false);
+      expect(Pref.tabletVideoInfoOnRight, isTrue);
+      await GStorage.setting.delete(SettingBoxKey.tabletCombinedRightPanel);
+      await GStorage.setting.delete(SettingBoxKey.tabletVideoInfoOnRight);
+    },
+  );
+
+  test(
     'bottom immersive control follows parent without clearing its preference',
     () async {
       await GStorage.setting.put(SettingBoxKey.translucentBottomBar, false);

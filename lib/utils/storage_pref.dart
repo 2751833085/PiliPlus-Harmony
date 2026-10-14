@@ -798,7 +798,11 @@ abstract final class Pref {
   static bool get showMineHistory =>
       _setting.get(SettingBoxKey.showMineHistory, defaultValue: false);
 
+  static bool get tabletCombinedRightPanel =>
+      _setting.get(SettingBoxKey.tabletCombinedRightPanel, defaultValue: true);
+
   static bool get tabletVideoInfoOnRight =>
+      !tabletCombinedRightPanel &&
       _setting.get(SettingBoxKey.tabletVideoInfoOnRight, defaultValue: false);
   static bool get translucentBottomBar =>
       _setting.get(SettingBoxKey.translucentBottomBar, defaultValue: true);

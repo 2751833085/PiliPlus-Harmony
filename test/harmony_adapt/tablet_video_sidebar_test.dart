@@ -4,6 +4,38 @@ import 'package:PiliPlus/pages/video/widgets/tablet_video_sidebar.dart';
 import 'package:PiliPlus/pages/video/widgets/collapsible_playlist.dart';
 
 void main() {
+  testWidgets('sidebar tabs switch by tap and swipe without replacing player', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Row(
+            children: [
+              const Expanded(child: Text('player unchanged')),
+              SizedBox(
+                width: 280,
+                child: TabletDetailTabs(
+                  related: const Center(child: Text('recommendations')),
+                  comments: const Center(child: Text('comment list')),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(find.text('recommendations'), findsOneWidget);
+    await tester.tap(find.text('评论'));
+    await tester.pumpAndSettle();
+    expect(find.text('comment list'), findsOneWidget);
+    expect(find.text('player unchanged'), findsOneWidget);
+    await tester.flingFrom(const Offset(540, 250), const Offset(220, 0), 700);
+    await tester.pumpAndSettle();
+    expect(find.text('recommendations'), findsOneWidget);
+    expect(find.text('player unchanged'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
   test('wide layout only activates for expanded landscape windows', () {
     expect(TabletVideoLayout.wide(const Size(712, 776)), isFalse);
     expect(TabletVideoLayout.wide(const Size(1108, 776)), isTrue);

@@ -34,7 +34,7 @@ List<SettingsModel> get harmonyAppearanceSettings => [
       SwitchModel(
         section: '鸿蒙界面风格',
         title: '底栏沉浸光感',
-        subtitle: '与顶栏统一磨砂材质；默认开启，关闭后底栏使用不透明材质',
+        subtitle: '与顶栏统一磨砂材质；默认开启，关闭后底栏使用不透明材质。开启后会增加性能消耗，可能出现卡顿，请谨慎开启。',
         leading: const Icon(Icons.blur_on),
         setKey: SettingBoxKey.translucentBottomBar,
         defaultVal: true,

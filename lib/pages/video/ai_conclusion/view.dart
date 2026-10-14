@@ -9,10 +9,15 @@ import 'package:material_ui/material_ui.dart';
 
 class AiConclusionPanel extends CommonSlidePage {
   final AiConclusionResult item;
+  final VoidCallback? onClose;
+  final bool sidePanel;
 
   const AiConclusionPanel({
     super.key,
     required this.item,
+    this.onClose,
+    this.sidePanel = false,
+    super.enableSlide,
   });
 
   @override
@@ -96,14 +101,16 @@ class AiConclusionPanel extends CommonSlidePage {
 
 class _AiDetailState extends State<AiConclusionPanel>
     with SingleTickerProviderStateMixin, CommonSlideMixin {
+  double _dragDistance = 0;
+
   @override
   Widget buildPage(ThemeData theme) {
-    return Material(
+    final content = Material(
       color: theme.colorScheme.surface,
       child: Column(
         children: [
           GestureDetector(
-            onTap: Get.back,
+            onTap: widget.onClose ?? Get.back,
             child: SizedBox(
               height: 35,
               child: Center(
@@ -124,6 +131,17 @@ class _AiDetailState extends State<AiConclusionPanel>
         ],
       ),
     );
+    if (!widget.sidePanel) return content;
+    return GestureDetector(
+      onHorizontalDragStart: (_) => _dragDistance = 0,
+      onHorizontalDragUpdate: (details) => _dragDistance += details.delta.dx,
+      onHorizontalDragEnd: (details) {
+        if (_dragDistance > 60 || (details.primaryVelocity ?? 0) > 300) {
+          widget.onClose?.call();
+        }
+      },
+      child: content,
+    );
   }
 
   late Key _key;
@@ -131,8 +149,8 @@ class _AiDetailState extends State<AiConclusionPanel>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final controller = PrimaryScrollController.of(context);
-    _key = ValueKey(controller.hashCode);
+    final controller = PrimaryScrollController.maybeOf(context);
+    _key = ValueKey(controller?.hashCode ?? widget.item.hashCode);
   }
 
   @override

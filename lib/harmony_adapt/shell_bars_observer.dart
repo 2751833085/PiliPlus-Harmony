@@ -102,7 +102,11 @@ class ShellBarsObserver extends NavigatorObserver {
               route.settings.name != 'harmony:coverPreview'),
     );
     _blockingPanelHidden = hasBlockingPanel;
-    final hasOverlay = hasPage || hasBlockingPanel || _orientationHidden;
+    final pages = _activeRoutes.whereType<PageRoute>().toList();
+    final onVideo = pages.isNotEmpty && pages.last.settings.name == '/videoV';
+    if (onVideo) HarmonyChannel.setShellBarsScrollHidden(false);
+    final hasOverlay =
+        (hasPage && !onVideo) || hasBlockingPanel || _orientationHidden;
     final obscured =
         !hasOverlay && _activeRoutes.any((route) => route is PopupRoute);
     HarmonyChannel.setShellBarsObscured(
@@ -115,7 +119,6 @@ class ShellBarsObserver extends NavigatorObserver {
     // 顶栏「强制隐藏」仅针对页面覆盖（PageRoute：如视频页/设置页）与横屏；
     // 弹层（PopupRoute：dialog/bottomSheet/popupmenu）不计入，避免顶栏被
     // 直接隐藏而绕过宽高比分流。
-    final pages = _activeRoutes.whereType<PageRoute>().toList();
     if (pages.length > 1) _trackHomeCover(pages[1]);
     // Keep a popped route until its reverse transition removes the overlay.
     _syncTopBarExposure();

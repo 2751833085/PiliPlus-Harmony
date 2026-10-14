@@ -1,4 +1,5 @@
 import 'package:PiliPlus/plugin/pl_player/models/video_buffer_guard.dart';
+import 'package:PiliPlus/plugin/pl_player/models/audio_recovery_guard.dart';
 import 'package:PiliPlus/plugin/pl_player/models/buffering_recovery.dart';
 import 'package:PiliPlus/pages/video/shorts/request_queue.dart';
 import 'package:PiliPlus/plugin/pl_player/models/source_frame_gate.dart';
@@ -178,6 +179,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   // 用位置停滞检测兜底：播放中且非缓冲时位置连续数秒不前进，视为被系统打断。
   final _bufferingRecovery = BufferingRecovery();
   final _videoBufferGuard = VideoBufferGuard();
+  final _audioRecoveryGuard = AudioRecoveryGuard();
   Timer? _videoBufferTimer;
   int _videoBufferEpoch = 0;
   bool _nativeBuffering = false;
@@ -1656,6 +1658,19 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           waitForInitialization: false,
         );
         if (!current()) return;
+        final restoreAudio = _audioRecoveryGuard.sample(
+          now: _recoveryClock.elapsed,
+          video: double.tryParse(video),
+          audio: double.tryParse(audio),
+          buffering: _nativeBuffering || _videoBufferGuard.holding,
+          eligible: player.state.volume > 0 && playerStatus.isPlaying,
+        );
+        if (restoreAudio && current()) {
+          // Recreate the OHOS audio output without replacing the media, seeking
+          // or overriding user volume. Never steal focus from another app.
+          await native.command(const ['ao-reload']);
+          if (!current()) return;
+        }
         final action = _videoBufferGuard.sample(
           now: _recoveryClock.elapsed,
           video: double.tryParse(video),
@@ -1700,6 +1715,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _stallLastPosition = null;
     _stallTicks = 0;
     _bufferingRecovery.reset();
+    _audioRecoveryGuard.reset();
     _stallWatchdog = Timer.periodic(const Duration(milliseconds: 1200), (_) {
       final recover = _bufferingRecovery.sample(
         now: _recoveryClock.elapsed,
@@ -1760,6 +1776,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   Future<void> seek(Duration position, {bool isSeek = false}) async {
+    _audioRecoveryGuard.reset();
     if (isSeek) {
       /// 拖动进度条调节时，不等待第一帧，防止抖动
       await _videoPlayerController?.stream.buffer.first.timeout(

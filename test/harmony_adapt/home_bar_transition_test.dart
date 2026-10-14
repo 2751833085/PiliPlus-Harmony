@@ -71,6 +71,18 @@ void main() {
       expect(exposure(), closeTo(.5, .002));
       await tester.pumpAndSettle();
       expect(exposure(), 0);
+      expect(
+        calls
+            .lastWhere((c) => c.method == 'setShellBarsHidden')
+            .arguments['hidden'],
+        false,
+      );
+      expect(
+        calls
+            .lastWhere((c) => c.method == 'setShellBarsScrollHidden')
+            .arguments['hidden'],
+        false,
+      );
       key.currentState!.pop();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));

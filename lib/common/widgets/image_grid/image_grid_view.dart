@@ -70,11 +70,13 @@ class ImageGridView extends StatelessWidget {
     required this.picArr,
     this.onViewImage,
     this.fullScreen = false,
+    this.longPressHaptic = true,
   });
 
   final List<ImageModel> picArr;
   final VoidCallback? onViewImage;
   final bool fullScreen;
+  final bool longPressHaptic;
 
   static bool horizontalPreview = Pref.horizontalPreview;
   static final _regex = RegExp(r'/videoV|/dynamicDetail$|/articlePage');
@@ -104,6 +106,7 @@ class ImageGridView extends StatelessWidget {
           constraints: const BoxConstraints(),
           (context) => GalleryViewer(
             sources: imgList,
+            longPressHaptic: longPressHaptic,
             initIndex: index,
             quality: GlobalData().imgQuality,
           ),
@@ -114,6 +117,7 @@ class ImageGridView extends StatelessWidget {
     }
     PageUtils.imageView(
       initialPage: index,
+      longPressHaptic: longPressHaptic,
       imgList: imgList,
       tag: hashCode.toString(),
     );
@@ -147,7 +151,7 @@ class ImageGridView extends StatelessWidget {
   static bool enableImgMenu = Pref.enableImgMenu;
 
   void _showMenu(BuildContext context, int index, Offset offset) {
-    HapticFeedback.mediumImpact();
+    if (longPressHaptic) HapticFeedback.mediumImpact();
     final item = picArr[index];
     showMenu(
       context: context,

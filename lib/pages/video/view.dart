@@ -1,3 +1,5 @@
+import 'package:PiliPlus/common/widgets/scale_app.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/native_navigation_spacer.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:PiliPlus/pages/video/widgets/tablet_episode_strip.dart';
 import 'package:PiliPlus/pages/video/widgets/video_entrance.dart';
@@ -1775,10 +1777,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Widget _tabletVideoBody() {
-    if (Pref.tabletVideoInfoOnRight ||
-        TabletVideoLayout.wide(
-          Size(maxWidth - padding.horizontal, maxHeight),
-        )) {
+    if (!Pref.tabletCombinedRightPanel &&
+        (Pref.tabletVideoInfoOnRight ||
+            TabletVideoLayout.wide(
+              Size(maxWidth - padding.horizontal, maxHeight),
+            ))) {
       return _wideTabletVideoBody();
     }
     final availableWidth = maxWidth - padding.horizontal;
@@ -1807,7 +1810,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 child: SizedBox(
                   width: leftWidth,
                   height: detailsHeight,
-                  child: videoDetailController.showReply
+                  child: Pref.tabletCombinedRightPanel
+                      ? CustomScrollView(slivers: [intro])
+                      : videoDetailController.showReply
                       ? _tabletReplies(intro)
                       : CustomScrollView(slivers: [intro]),
                 ),
@@ -1823,38 +1828,42 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               child: TabletSidebarSurface(
                 child: MiniScaffold(
                   key: _tabletSidebarKey,
-                  body: TabletVideoSidebar(
-                    expanded: _tabletPlaylistExpanded,
-                    hasPlaylist: _shouldShowSeasonPanel,
-                    playlistPending:
-                        videoDetailController
-                            .plPlayerController
-                            .horizontalSeasonPanel &&
-                        ugcIntroController.videoDetail.value.bvid == null &&
-                        ugcIntroController.status.value,
-                    header: Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child:
-                          ugcIntroController.videoDetail.value.ugcSeason != null
-                          ? SeasonPanel(
-                              key: ValueKey(
-                                ugcIntroController.videoDetail.value,
-                              ),
-                              heroTag: heroTag,
-                              showEpisodes: showEpisodes,
-                              ugcIntroController: ugcIntroController,
-                            )
-                          : const Text('分集'),
-                    ),
-                    playlistBuilder: (_) =>
-                        _buildSeasonPanel(showHeader: false),
-                    related: CustomScrollView(
-                      key: const PageStorageKey('tablet-related'),
-                      controller: videoDetailController.effectiveIntroScrollCtr,
-                      slivers: [
-                        if (videoDetailController.showRelatedVideo)
-                          _tabletRelated(sidebar: true),
-                      ],
+                  body: _tabletRightTabs(
+                    TabletVideoSidebar(
+                      expanded: _tabletPlaylistExpanded,
+                      hasPlaylist: _shouldShowSeasonPanel,
+                      playlistPending:
+                          videoDetailController
+                              .plPlayerController
+                              .horizontalSeasonPanel &&
+                          ugcIntroController.videoDetail.value.bvid == null &&
+                          ugcIntroController.status.value,
+                      header: Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child:
+                            ugcIntroController.videoDetail.value.ugcSeason !=
+                                null
+                            ? SeasonPanel(
+                                key: ValueKey(
+                                  ugcIntroController.videoDetail.value,
+                                ),
+                                heroTag: heroTag,
+                                showEpisodes: showEpisodes,
+                                ugcIntroController: ugcIntroController,
+                              )
+                            : const Text('分集'),
+                      ),
+                      playlistBuilder: (_) =>
+                          _buildSeasonPanel(showHeader: false),
+                      related: CustomScrollView(
+                        key: const PageStorageKey('tablet-related'),
+                        controller:
+                            videoDetailController.effectiveIntroScrollCtr,
+                        slivers: [
+                          if (videoDetailController.showRelatedVideo)
+                            _tabletRelated(sidebar: true),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -1865,6 +1874,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       ),
     );
   }
+
+  Widget _tabletRightTabs(Widget related) => Pref.tabletCombinedRightPanel
+      ? TabletDetailTabs(
+          related: related,
+          comments: videoDetailController.showReply
+              ? _tabletReplies(null)
+              : const Center(child: Text('评论已关闭')),
+        )
+      : related;
 
   Widget _wideTabletVideoBody() {
     final infoOnRight = Pref.tabletVideoInfoOnRight;
@@ -2472,7 +2490,16 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   ColorScheme get colorScheme => theme.colorScheme;
   late bool isPortrait;
   late double maxWidth;
-  late double maxHeight;
+  late double _windowHeight;
+  set maxHeight(double height) => _windowHeight = height;
+  double get maxHeight =>
+      _windowHeight -
+      (OS.isHarmony &&
+              !isFullScreen &&
+              !videoDetailController.plPlayerController.isPipMode
+          ? HarmonyChannel.nativeNavigationExtent.value /
+                ScaledWidgetsFlutterBinding.effectiveScaleFactor
+          : 0);
   bool isWindowMode = false;
   late EdgeInsets padding;
 
@@ -2533,6 +2560,24 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       );
     }
     result = Theme(data: theme, child: child);
+    if (OS.isHarmony) {
+      result = Obx(
+        () => Column(
+          children: [
+            Expanded(
+              child: Theme(data: theme, child: child),
+            ),
+            if (!isFullScreen &&
+                !videoDetailController.plPlayerController.isPipMode)
+              NativeNavigationSpacer(
+                extent: HarmonyChannel.nativeNavigationExtent,
+                scale: ScaledWidgetsFlutterBinding.effectiveScaleFactor,
+                fallback: 0,
+              ),
+          ],
+        ),
+      );
+    }
     return Listener(
       // Once the user operates this page, late video dimensions may resize the
       // picture but must not silently select another viewing mode.
@@ -3137,10 +3182,29 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   // ai总结
   void showAiBottomSheet() {
-    videoDetailController.childKey.currentState?.showBottomSheet(
-      constraints: const BoxConstraints(),
-      (context) =>
-          AiConclusionPanel(item: ugcIntroController.aiConclusionResult!),
+    final sidebar = _usesTabletVideoLayout && !isFullScreen;
+    final host = sidebar
+        ? _tabletSidebarKey.currentState
+        : videoDetailController.childKey.currentState;
+    if (host == null) return;
+    late MiniBottomSheetController panel;
+    panel = host.showBottomSheet(
+      (context) => AiConclusionPanel(
+        item: ugcIntroController.aiConclusionResult!,
+        enableSlide: false,
+        sidePanel: true,
+        onClose: () => panel.close(),
+      ),
+      constraints: sidebar
+          ? const BoxConstraints()
+          : BoxConstraints(maxWidth: min(maxWidth, 440)),
+      enableDrag: false,
+      slideFromRight: true,
+      panelId: ('ai-summary', ugcIntroController.bvid),
+      sheetAnimationStyle: const AnimationStyle(
+        duration: HarmonyMotion.duration,
+        reverseDuration: HarmonyMotion.duration,
+      ),
     );
   }
 

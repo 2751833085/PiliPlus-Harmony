@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 abstract final class SettingBoxKey {
+  static const String tabletCombinedRightPanel = 'tabletCombinedRightPanel';
   static const String tabletVideoInfoOnRight = 'tabletVideoInfoOnRight';
   static const String translucentBottomBar = 'translucentBottomBar';
   static const String showMineHistory = 'showMineHistory';

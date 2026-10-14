@@ -390,6 +390,7 @@ export default class HarmonyChannel implements FlutterPlugin {
    * 窗口布局保持主流程（main.dart 的 edgeToEdge）设置的普通布局。
    */
   async setFullScreenBars(fullscreen: boolean) {
+    AppStorage.setOrCreate('playbackFullscreen', fullscreen);
     this.lastWindow ??= await window.getLastWindow(getContext());
     await this.lastWindow.setSpecificSystemBarEnabled("status", !fullscreen, false);
     await this.lastWindow.setSpecificSystemBarEnabled("navigation", !fullscreen, false);

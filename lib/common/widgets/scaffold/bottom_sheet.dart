@@ -20,6 +20,7 @@ class BottomSheet_ extends StatefulWidget {
     this.onDragStart,
     this.onDragEnd,
     this.constraints,
+    this.alignment = Alignment.bottomCenter,
     required this.onClosing,
     required this.builder,
   });
@@ -29,6 +30,7 @@ class BottomSheet_ extends StatefulWidget {
   final BottomSheetDragStartHandler? onDragStart;
   final BottomSheetDragEndHandler? onDragEnd;
   final BoxConstraints? constraints;
+  final Alignment alignment;
   final VoidCallback onClosing;
   final WidgetBuilder builder;
 
@@ -132,7 +134,7 @@ class _BottomSheet_State extends State<BottomSheet_> {
     if (widget.constraints != null &&
         widget.constraints != const BoxConstraints()) {
       bottomSheet = Align(
-        alignment: Alignment.bottomCenter,
+        alignment: widget.alignment,
         heightFactor: 1.0,
         child: ConstrainedBox(
           constraints: widget.constraints!,

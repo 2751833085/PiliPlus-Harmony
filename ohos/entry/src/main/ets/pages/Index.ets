@@ -110,6 +110,7 @@ struct Index {
   @StorageLink('useNativeTabs') @Watch('syncDockMetrics') useNativeTabs: boolean = false;
   @StorageLink('floatingNativeTabs') @Watch('syncDockMetrics') floatingNativeTabs: boolean = false;
   @State @Watch('syncDockMetrics') navigationSafeBottom: number = 0;
+  @StorageLink('playbackFullscreen') @Watch('syncDockMetrics') playbackFullscreen: boolean = false;
   @StorageLink('shellBarsHidden') @Watch('syncDockMetrics') shellBarsHidden: boolean = false;
   @StorageLink('__scrollHidden') @Watch('onScrollHiddenChanged') shellBarsScrollHidden: boolean = false;
   @StorageLink('tabSelectedColor') navSelected: string = '#3367D6';
@@ -168,7 +169,7 @@ struct Index {
   }
 
   syncDockMetrics(): void {
-    const visible = this.useNativeTabs && !this.shellBarsHidden && !this.shellBarsScrollHidden && this.navTabs.length > 1;
+    const visible = this.useNativeTabs && !this.playbackFullscreen && !this.shellBarsHidden && !this.shellBarsScrollHidden && this.navTabs.length > 1;
     const extent = this.floatingNativeTabs ? 56 + this.bottomAvoidAreaHeight : 52 + this.navigationSafeBottom;
     const layoutExtent = this.useNativeTabs && this.navTabs.length > 1 ? extent : 0;
     // Route coverage must not resize the retained home page underneath it.
@@ -855,7 +856,7 @@ struct Index {
       .width(Math.min(600, this.winWidth))
       .height(52)
       .onTabBarClick((index: number) => {
-        if (this.shellBarsObscured || this.shellBarsHidden) return;
+        if (this.shellBarsObscured || this.shellBarsHidden || this.playbackFullscreen) return;
         this.currentNavIndex = index;
         this.context.eventHub.emit(EVENT_TAB_SWITCH, index);
       })
@@ -867,7 +868,7 @@ struct Index {
     .animation({ duration: 180, curve: Curve.EaseOut })
     .position({ x: 0, y: Math.max(0, this.winHeight - 52 - this.navigationSafeBottom) })
     .enabled(!this.shellBarsObscured)
-    .visibility(this.navTabs.length <= 1 || this.shellBarsHidden ? Visibility.None : Visibility.Visible)
+    .visibility(this.navTabs.length <= 1 || this.shellBarsHidden || this.playbackFullscreen ? Visibility.None : Visibility.Visible)
     .hitTestBehavior(this.shellBarsObscured ? HitTestMode.None : HitTestMode.Default)
     .onTouch((event: TouchEvent) => event.stopPropagation())
   }
@@ -912,7 +913,7 @@ struct Index {
     })
     .opacity(this.shellBarsObscured ? 0.4 : 1)
     .enabled(!this.shellBarsObscured)
-    .visibility(this.navTabs.length <= 1 || this.shellBarsHidden
+    .visibility(this.navTabs.length <= 1 || this.shellBarsHidden || this.playbackFullscreen
       ? Visibility.None
       : Visibility.Visible)
     .align(Alignment.Bottom)

@@ -112,6 +112,9 @@ abstract class HarmonyChannel {
       // 原生底栏切换页签（index 为 Navbar 排序后的页签序号，与设置内
       // Navbar 编辑保持一致；数量与顺序由 setNavBarConfig 同步）
       case 'showTab':
+        if (Get.currentRoute == '/videoV') {
+          Get.until((route) => route.isFirst);
+        }
         _onShellTabSwitch?.call(call.arguments['index'] as int? ?? 0);
         break;
       // ArkTS 顶栏搜索框点击 → Flutter 跳转搜索页

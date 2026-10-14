@@ -51,12 +51,29 @@ List<SettingsModel> get playSettings => prioritizeSettings(
 List<SettingsModel> get _playSettings => [
   ...harmonyPlaybackSettings,
   ...playbackExtraSettings,
+  SwitchModel(
+    section: '视频详情',
+    title: '右侧统一显示相关视频和评论',
+    subtitle: '默认开启；平板布局右侧顶部页签左右切换，视频详情固定显示在左侧视频下方',
+    leading: const Icon(Icons.tab_outlined),
+    setKey: SettingBoxKey.tabletCombinedRightPanel,
+    defaultVal: true,
+    onChanged: refreshHarmonySettings,
+  ),
   NormalModel(
     section: '视频详情',
     title: '平板视频信息位置',
     leading: const Icon(Icons.view_sidebar_outlined),
-    getSubtitle: () => Pref.tabletVideoInfoOnRight ? '右侧上方' : '左侧视频下方（默认）',
+    getSubtitle: () => Pref.tabletCombinedRightPanel
+        ? '已固定为左侧视频下方（右侧统一显示已开启）'
+        : Pref.tabletVideoInfoOnRight
+        ? '右侧上方'
+        : '左侧视频下方（默认）',
     onTap: (context, setState) async {
+      if (Pref.tabletCombinedRightPanel) {
+        SmartDialog.showToast('请先关闭“右侧统一显示相关视频和评论”');
+        return;
+      }
       final value = await showDialog<bool>(
         context: context,
         builder: (_) => SelectDialog<bool>(

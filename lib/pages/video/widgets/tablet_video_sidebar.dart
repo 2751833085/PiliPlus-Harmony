@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:PiliPlus/common/widgets/keep_alive_wrapper.dart';
 import 'package:flutter/material.dart';
 
 /// The side column switches independently; the player and comments stay mounted.
@@ -141,6 +142,39 @@ class TabletSidebarSurface extends StatelessWidget {
     child: Padding(
       padding: const EdgeInsets.only(left: 9),
       child: ClipRect(child: child),
+    ),
+  );
+}
+
+/// Keeps the video outside the tab viewport; both lists retain their state.
+class TabletDetailTabs extends StatelessWidget {
+  const TabletDetailTabs({
+    super.key,
+    required this.related,
+    required this.comments,
+  });
+  final Widget related;
+  final Widget comments;
+  @override
+  Widget build(BuildContext context) => DefaultTabController(
+    length: 2,
+    child: Column(
+      children: [
+        const TabBar(
+          tabs: [
+            Tab(text: '相关视频'),
+            Tab(text: '评论'),
+          ],
+        ),
+        Expanded(
+          child: TabBarView(
+            children: [
+              KeepAliveWrapper(child: related),
+              KeepAliveWrapper(child: comments),
+            ],
+          ),
+        ),
+      ],
     ),
   );
 }

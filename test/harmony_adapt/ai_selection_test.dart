@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
 import 'package:os_type/os_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -64,5 +65,42 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
     debugDefaultTargetPlatformOverride = null;
+  });
+  testWidgets('AI panel is right aligned, slow side swipe preserves video', (
+    tester,
+  ) async {
+    final host = GlobalKey<MiniScaffoldState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MiniScaffold(key: host, body: const Text('playing video')),
+        ),
+      ),
+    );
+    late MiniBottomSheetController panel;
+    panel = host.currentState!.showBottomSheet(
+      (_) => AiConclusionPanel(
+        item: AiConclusionResult(summary: '测试总结'),
+        enableSlide: false,
+        sidePanel: true,
+        onClose: () => panel.close(),
+      ),
+      constraints: const BoxConstraints(maxWidth: 280),
+      enableDrag: false,
+      slideFromRight: true,
+      panelId: 'ai',
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byType(AiConclusionPanel)).dx, 520);
+    expect(tester.getSize(find.byType(AiConclusionPanel)).width, 280);
+    await tester.timedDragFrom(
+      const Offset(535, 200),
+      const Offset(90, 0),
+      const Duration(milliseconds: 900),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(AiConclusionPanel), findsNothing);
+    expect(find.text('playing video'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
