@@ -1,0 +1,18 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6243,
+  "releaseTag": "v3.0.0+6243",
+  "sha256": "f4c57bd59c2a7b1888076bb4b3b3795759da2c3e102da049405ab298d8cec209",
+  "sizeBytes": 33115413,
+  "signatureVerified": true,
+  "sourceCommit": "ecb2652db96278731cead14054a5769377e6ea73",
+  "installedOnDevice": false,
+  "fullDeviceValidationComplete": false,
+  "validation": "274 Harmony regression tests passed. Real AI panel is right aligned and a slow horizontal swipe closes only the local panel. Right sidebar tabs switch by tap and swipe without replacing the player. Default sidebar setting forces details below the video and preserves the previous preference. Navigation route and bounded audio-clock recovery tests passed. Static analysis has no errors or warnings. Signature, ZIP CRC, version and native MPV hash verified.",
+  "knownLimitations": [
+    "No connected HDC device was detected: overwrite installation and actual navigation touch validation are pending.",
+    "Audio-clock guard cannot detect physical audio-output silence with a healthy clock; intermittent weak-network loss of sound still requires device reproduction.",
+    "Device frame pacing has not been measured in this update."
+  ],
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6"
+}
