@@ -1,3 +1,4 @@
+import 'package:PiliPlus/plugin/pl_player/models/video_buffer_guard.dart';
 import 'package:PiliPlus/plugin/pl_player/models/buffering_recovery.dart';
 import 'package:PiliPlus/pages/video/shorts/request_queue.dart';
 import 'package:PiliPlus/plugin/pl_player/models/source_frame_gate.dart';
@@ -176,6 +177,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   // 被打断后 mpv 仍自认为在播放，进度停滞、UI 按钮状态错误且无法点击恢复。
   // 用位置停滞检测兜底：播放中且非缓冲时位置连续数秒不前进，视为被系统打断。
   final _bufferingRecovery = BufferingRecovery();
+  final _videoBufferGuard = VideoBufferGuard();
+  Timer? _videoBufferTimer;
+  int _videoBufferEpoch = 0;
+  bool _nativeBuffering = false;
+
+  void _resetVideoBufferGuard() {
+    _videoBufferEpoch++;
+    _videoBufferGuard.reset();
+  }
+
   final _recoveryClock = Stopwatch()..start();
   Future<bool?>? _refreshTask;
   Timer? _stallWatchdog;
@@ -1110,6 +1121,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     Duration? seekTo,
     Volume? volume,
   ) async {
+    _resetVideoBufferGuard();
+    _nativeBuffering = false;
     isBuffering.value = false;
     _heartDuration = 0;
     danmakuController?.clear();
@@ -1140,6 +1153,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         extras.addAll(liveBuffer);
       } else {
         extras.addAll(buffer);
+        if (OS.isHarmony) extras.addAll(harmonyNetworkBufferOptions);
         if (sourceOwner case NetworkPlaybackOwner(usesOverseasRoutes: true)) {
           extras['network-timeout'] = '8';
           // Refill continuously within the user's existing cache limits.
@@ -1252,6 +1266,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         !identical(owner, sourceOwner) ||
         !identical(source, dataSource))
       return false;
+    _resetVideoBufferGuard();
     await player!.open(
       Media(
         dataSource.videoSource,
@@ -1260,7 +1275,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
           'user-agent': BrowserUa.pc,
           'referer': HttpString.baseUrl,
         },
-        extras: audioUri == null ? null : {'audio-files': audioUri},
+        extras: {
+          ...(isLive ? liveBuffer : buffer),
+          if (OS.isHarmony && !isLive) ...harmonyNetworkBufferOptions,
+          'audio-files': ?audioUri,
+        },
       ),
       play: false,
     );
@@ -1329,6 +1348,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     assert(_subscriptions == null);
     if (OS.isHarmony) {
       _startStallWatchdog();
+      _startVideoBufferGuard();
       Floating().onPipAction = _onPipAction;
       // isPipMode 是普通 bool，build 读它不产生依赖；PiP 结束时若窗口尺寸
       // 恰好没变（如画中画期间从应用栏以小窗打开 app），没有任何重建时机，
@@ -1340,6 +1360,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _subscriptions = [
       /// playing
       stream.playing.listen((bool playing) {
+        // A protective buffer pause is not a user pause. Preserve the intent,
+        // wake lock, PiP state and loading UI until the video queue recovers.
+        if (!playing &&
+            _videoBufferGuard.holding &&
+            intendsPlayback &&
+            !_pauseRequestedByApp) {
+          _stopWakeLockTimer();
+          _updatePlaybackState();
+          return;
+        }
         if (playing) {
           playerStatus = .playing;
           _stopWakeLockTimer();
@@ -1430,7 +1460,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         buffered.value = buffer.inSeconds;
       }),
       stream.buffering.listen((bool buffering) {
-        isBuffering.value = buffering;
+        _nativeBuffering = buffering;
+        isBuffering.value = buffering || _videoBufferGuard.holding;
         if (!playerStatus.isCompleted) {
           _stopWakeLockTimer();
           _updatePlaybackState();
@@ -1527,6 +1558,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   /// 移除事件监听
   void _removeListeners() {
     _sourceFramePoll?.cancel();
+    _videoBufferTimer?.cancel();
+    _videoBufferTimer = null;
+    _resetVideoBufferGuard();
     sourceFrameGate.invalidate();
     _stallWatchdog?.cancel();
     _stallWatchdog = null;
@@ -1554,6 +1588,110 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       case 'fastBackward':
         onBackward(fastForBackwardDuration);
     }
+  }
+
+  /// Sample only while a network video is active; no per-frame rebuilds or
+  /// native event-callback reentrancy. A source/seek/pause invalidates all reads.
+  void _startVideoBufferGuard() {
+    _videoBufferTimer?.cancel();
+    var reading = false;
+    _videoBufferTimer = Timer.periodic(const Duration(milliseconds: 400), (
+      _,
+    ) async {
+      if (reading) return;
+      final player = _videoPlayerController;
+      final active =
+          player != null &&
+          intendsPlayback &&
+          !_pauseRequestedByApp &&
+          !_processing &&
+          _refreshTask == null &&
+          !isSeeking.value &&
+          dataStatus.value == DataStatus.loaded &&
+          !isLive &&
+          dataSource is NetworkSource &&
+          !onlyPlayAudio.value &&
+          !player.state.completed &&
+          (player.state.width ?? 0) > 0 &&
+          (WidgetsBinding.instance.lifecycleState ==
+                  AppLifecycleState.resumed ||
+              isPipMode);
+      if (!active) {
+        // User pause/source change reset the guard at their own entry points.
+        // Do not forget a protective pause just because the app is backgrounded.
+        if (!_videoBufferGuard.holding) _videoBufferGuard.reset();
+        return;
+      }
+      reading = true;
+      final epoch = _videoBufferEpoch;
+      final source = dataSource;
+      final native = player.platform!.maybeAsNativePlayer;
+      bool current() =>
+          epoch == _videoBufferEpoch &&
+          !native.disposed &&
+          identical(player, _videoPlayerController) &&
+          identical(source, dataSource) &&
+          intendsPlayback &&
+          !_pauseRequestedByApp;
+      try {
+        final seeking = await native.getProperty(
+          'seeking',
+          waitForInitialization: false,
+        );
+        if (!current()) return;
+        if (seeking == 'yes') {
+          if (!_videoBufferGuard.holding) _videoBufferGuard.reset();
+          return;
+        }
+        final video = await native.getProperty(
+          'time-pos',
+          waitForInitialization: false,
+        );
+        final audio = await native.getProperty(
+          'audio-pts',
+          waitForInitialization: false,
+        );
+        final cache = await native.getProperty(
+          'demuxer-cache-state',
+          waitForInitialization: false,
+        );
+        if (!current()) return;
+        final action = _videoBufferGuard.sample(
+          now: _recoveryClock.elapsed,
+          video: double.tryParse(video),
+          audio: double.tryParse(audio),
+          cache: VideoCacheSample.parse(cache),
+          eligible: true,
+          speed: playbackSpeed,
+        );
+        switch (action) {
+          case VideoBufferAction.hold:
+            isBuffering.value = true;
+            await player.pause();
+            if (!current()) return;
+            _updatePlaybackState();
+          case VideoBufferAction.resume:
+            // Return audio to the last video timestamp instead of skipping the
+            // part the user could hear but could not see. mpv then buffers both.
+            final target = _videoBufferGuard.resumePosition!;
+            await player.seek(Duration(microseconds: (target * 1e6).round()));
+            if (!current()) return;
+            await player.play();
+            if (!current()) return;
+            _resetVideoBufferGuard();
+            isBuffering.value = _nativeBuffering;
+            _updatePlaybackState();
+          case VideoBufferAction.none:
+            break;
+        }
+      } catch (error) {
+        // Unsupported/missing properties must not turn a healthy video into a
+        // pause. If already held, the existing bounded retry remains available.
+        if (kDebugMode) debugPrint('video buffer guard: $error');
+      } finally {
+        reading = false;
+      }
+    });
   }
 
   /// 鸿蒙音频打断兜底检测（见 _stallWatchdog 字段注释）
@@ -1624,11 +1762,25 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   Future<void> seek(Duration position, {bool isSeek = false}) async {
     if (isSeek) {
       /// 拖动进度条调节时，不等待第一帧，防止抖动
-      await _videoPlayerController?.stream.buffer.first;
+      await _videoPlayerController?.stream.buffer.first.timeout(
+        const Duration(milliseconds: 250),
+        onTimeout: () => Duration.zero,
+      );
     }
     danmakuController?.clear();
+    final wasHeld = _videoBufferGuard.holding;
+    final player = _videoPlayerController;
+    _resetVideoBufferGuard();
+    final epoch = _videoBufferEpoch;
     try {
-      await _videoPlayerController?.seek(position);
+      await player?.seek(position);
+      if (wasHeld &&
+          epoch == _videoBufferEpoch &&
+          identical(player, _videoPlayerController) &&
+          intendsPlayback &&
+          !_pauseRequestedByApp) {
+        await player?.play();
+      }
     } catch (e) {
       if (kDebugMode) debugPrint('seek failed: $e');
     }
@@ -1716,7 +1868,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       } catch (_) {}
     }
 
-    await _videoPlayerController?.play();
+    if (!_videoBufferGuard.holding) await _videoPlayerController?.play();
 
     audioSessionHandler?.setActive(true);
 
@@ -1738,6 +1890,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   void autoResumeInPipIfNeeded() {
     if (OS.isHarmony &&
         !_pauseRequestedByApp &&
+        !_videoBufferGuard.holding &&
         isPipMode &&
         !playerStatus.isPlaying &&
         !(videoPlayerController?.state.completed ?? false) &&
@@ -1760,6 +1913,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   Future<void> pause({bool notify = true, bool isInterrupt = false}) async {
     _pauseRequestedByApp = true;
+    _resetVideoBufferGuard();
+    isBuffering.value = false;
     if (notify || isInterrupt) _playbackIntent = false;
     await _videoPlayerController?.pause();
     playerStatus = .paused;

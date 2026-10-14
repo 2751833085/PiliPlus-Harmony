@@ -837,7 +837,7 @@ struct Index {
   @Builder
   classicMainTabs() {
     Stack({ alignContent: Alignment.Top }) {
-      ShellBarBackdrop({ enabled: this.immersiveEnabled && this.translucentBottomBar, inverted: true })
+      ShellBarBackdrop({ materialEnabled: this.immersiveEnabled && this.translucentBottomBar, inverted: true })
       Tabs({ controller: this.classicController, barPosition: BarPosition.End, index: this.currentNavIndex }) {
         ForEach(this.navTabs, (typeIndex: number, index: number) => {
           TabContent() {}
