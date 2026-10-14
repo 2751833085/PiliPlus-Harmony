@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:PiliPlus/pages/rcmd/refresh_batch.dart';
 import 'package:PiliPlus/models/model_rec_video_item.dart';
 import 'package:PiliPlus/http/loading_state.dart';
@@ -50,7 +51,14 @@ class RcmdController extends CommonListController {
             ? VideoHttp.rcmdVideoListApp(freshIdx: index)
             : VideoHttp.rcmdVideoList(freshIdx: index, ps: target);
       },
-    );
+    ).then((result) {
+      if (initialLoad) {
+        if (result case Success(:final response)) {
+          debugPrint('[home-feed] initial items=${response.length} target=16');
+        }
+      }
+      return result;
+    });
   }
 
   @override

@@ -146,7 +146,7 @@ class _RcmdPageState extends State<RcmdPage>
                 onRefresh: controller.onRefresh,
                 child: CustomScrollView(
                   controller: controller.scrollController,
-                  cacheExtent: 120,
+                  scrollCacheExtent: const ScrollCacheExtent.pixels(120),
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
                     // 原生顶栏启用时顶部的可滚动留白（内容可滑入顶栏下方重合）
