@@ -867,7 +867,6 @@ struct Index {
     .opacity(this.shellBarsObscured ? 0.4 : 1)
     .enabled(!this.shellBarsObscured)
     .visibility(this.navTabs.length <= 1 || this.shellBarsHidden ? Visibility.None : Visibility.Visible)
-    .align(Alignment.Bottom)
     .hitTestBehavior(HitTestMode.Transparent)
   }
 
@@ -973,7 +972,14 @@ struct Index {
           .translate({ x: this.dockOffset(), y: 0 })
           .hitTestBehavior(HitTestMode.Transparent)
         } else {
-          this.classicMainTabs()
+          // A child's .align() aligns its own contents, not its position in
+          // the root Stack. Give the classic bar a full-window bottom host.
+          Stack({ alignContent: Alignment.Bottom }) {
+            this.classicMainTabs()
+          }
+          .width('100%')
+          .height('100%')
+          .hitTestBehavior(HitTestMode.Transparent)
         }
       }
       // API 26+：Navigation 标题栏 + ArkUI systemMaterial（全部元素带材质）
