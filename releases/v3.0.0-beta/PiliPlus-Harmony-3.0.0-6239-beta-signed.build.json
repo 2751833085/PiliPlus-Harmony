@@ -1,0 +1,19 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6239,
+  "releaseTag": "v3.0.0+6239",
+  "sha256": "a931ff3214f17bff210d0628710efe7381bd2d0ed192f3e4fc5d008e6eb14dde",
+  "sizeBytes": 33107387,
+  "signatureVerified": true,
+  "sourceCommit": "c76023c5939348c80ed6249f063d13a1960f5d7c",
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "validation": "253 Harmony regression tests passed. Changed-file analyzer has no errors or warnings; four existing style infos remain. Signed HAP signature, ZIP CRC, version and native MPV hash verified. HDC overwrite installation confirmed version 6239; UID and firstInstallTime unchanged. Launch was blocked by the locked device (10106102), so visual and frame-pacing validation remain pending. Video and comment dislike count options and display have been removed; original dislike actions are retained. Bottom navigation restores neutral opaque colors when disabled; its lighter bounded backdrop is separated from button feedback. Native floating material uses the adaptive system level.",
+  "knownLimitations": [
+    "AI voice-related black screen requires device retest; not confirmed resolved.",
+    "Actual device frame pacing has not been measured in this update."
+  ],
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "launchVerified": false,
+  "dataPreservationVerified": true
+}
