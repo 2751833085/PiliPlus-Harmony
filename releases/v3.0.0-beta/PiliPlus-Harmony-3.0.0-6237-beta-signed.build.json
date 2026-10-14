@@ -1,0 +1,17 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6237,
+  "releaseTag": "v3.0.0+6237",
+  "sha256": "e66bb77ff61d06e0801539f77177a694feb6d13defbe9492fc0bca60b10904b2",
+  "sizeBytes": 33103494,
+  "signatureVerified": true,
+  "sourceCommit": "1a373041543e9a500695fcd2fc9a325245034adf",
+  "installedOnDevice": false,
+  "fullDeviceValidationComplete": false,
+  "validation": "251 Harmony regression tests passed. Analyzer has no errors; two existing unused-method warnings remain in video/live controllers. Signed HAP signature, ZIP CRC, version and native MPV hash verified. Device installation and final runtime testing deferred at user request because the phone is in use. Earlier 6236 candidate still showed black video; AI voice playback and real-world frame pacing remain unverified after the latest source fixes.",
+  "knownLimitations": [
+    "AI voice-related black screen requires device retest; not confirmed resolved.",
+    "Dislike totals are not disclosed by current public responses; zero placeholders are shown as unavailable."
+  ],
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6"
+}
