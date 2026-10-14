@@ -1,0 +1,18 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6235,
+  "releaseTag": "v3.0.0+6235",
+  "sha256": "1d03a66df4d00669f6f6ecb7df275ad2de98e50a92f638a91668378ecbe1d5da",
+  "sizeBytes": 33104002,
+  "signatureVerified": true,
+  "sourceCommit": "feed3e60698087f584216021fdfa302768235c9e",
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "validation": "239 Harmony regression tests passed. Analyzer: no errors or warnings (8 existing style infos). Signed HAP signature, ZIP CRC, version and native MPV hash verified. Mate XTS three-screen 3184x2232 smoke checks passed: owner/action hierarchy, UP profile opens within right pane and single back closes it, 10-part playlist expands within right pane, part selection closes panel and updates active item, horizontal strip scrolling, repeated expand/back. Runtime log scan found no Flutter exception patterns. Physical single/dual-screen fold checks were not repeated.",
+  "deviceOverwrite": {
+    "uidPreserved": true,
+    "firstInstallTimePreserved": true,
+    "launchSucceeded": true
+  },
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6"
+}
