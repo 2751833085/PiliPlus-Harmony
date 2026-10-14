@@ -7,6 +7,7 @@ void main() {
     'wide episode strip lazily scrolls, selects, and reveals the active part',
     (tester) async {
       var selected = 0;
+      var expanded = 0;
       final labels = List.generate(100, (i) => '分集$i');
       Widget page(int index, {double scale = 1, List<String>? items}) =>
           MaterialApp(
@@ -21,6 +22,7 @@ void main() {
                       labels: items ?? labels,
                       selectedIndex: index,
                       onSelected: (i) => selected = i,
+                      onExpand: () => expanded++,
                     ),
                   ),
                 ),
@@ -30,6 +32,9 @@ void main() {
       await tester.pumpWidget(page(0));
       await tester.pumpAndSettle();
       expect(find.text('100. 分集99'), findsNothing);
+      await tester.tap(find.text('展开全部 · 100'));
+      expect(expanded, 1);
+      expect(selected, 0);
       await tester.tap(find.text('2. 分集1'));
       expect(selected, 1);
       await tester.pumpWidget(page(80, scale: 1.8));

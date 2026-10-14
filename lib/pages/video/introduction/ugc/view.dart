@@ -60,6 +60,7 @@ class UgcIntroPanel extends StatefulWidget {
     required this.isHorizontal,
     this.showCollection = true,
     this.inlineMemberPage = false,
+    this.separateOwnerActions = false,
   });
   final String heroTag;
   final Function showAiBottomSheet;
@@ -69,6 +70,7 @@ class UgcIntroPanel extends StatefulWidget {
   final bool isHorizontal;
   final bool showCollection;
   final bool inlineMemberPage;
+  final bool separateOwnerActions;
 
   @override
   State<UgcIntroPanel> createState() => _UgcIntroPanelState();
@@ -470,6 +472,9 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
           child: TextButton(
             onPressed: () => introController.actionRelationMod(context),
             style: TextButton.styleFrom(
+              minimumSize: widget.separateOwnerActions
+                  ? const Size(80, 36)
+                  : null,
               tapTargetSize: .shrinkWrap,
               visualDensity: const VisualDensity(vertical: -2.8),
               foregroundColor: attr != 0
@@ -740,7 +745,7 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
     VideoDetailData videoDetail,
   ) {
     final mid = videoDetail.owner?.mid;
-    return Row(
+    final ownerRow = Row(
       children: [
         if (videoDetail.staff case final staff? when staff.isNotEmpty)
           Expanded(
@@ -777,9 +782,10 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
               ),
             ),
           ),
+          if (widget.separateOwnerActions) const SizedBox(width: 12),
           followButton(context),
         ],
-        if (isHorizontal) ...[
+        if (isHorizontal && !widget.separateOwnerActions) ...[
           const SizedBox(width: 10),
           Expanded(
             child: actionGrid(
@@ -790,6 +796,16 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
             ),
           ),
         ],
+      ],
+    );
+    if (!isHorizontal || !widget.separateOwnerActions) return ownerRow;
+    return Column(
+      crossAxisAlignment: .stretch,
+      mainAxisSize: .min,
+      children: [
+        ownerRow,
+        const SizedBox(height: 12),
+        actionGrid(context, isLoading, introController, videoDetail.stat),
       ],
     );
   }
@@ -933,35 +949,39 @@ class _UgcIntroPanelState extends State<UgcIntroPanel> {
         final userStat = introController.userStat.value;
         final isVip = (userStat.card?.vip?.status ?? 0) > 0;
         return Row(
-          spacing: 10,
+          spacing: widget.separateOwnerActions ? 12 : 10,
           mainAxisSize: .min,
           children: [
             PendantAvatar(
               userStat.card?.face,
-              size: 35,
+              size: widget.separateOwnerActions ? 48 : 35,
               badgeSize: 14,
               vipStatus: userStat.card?.vip?.status,
               officialType: userStat.card?.official?.type,
             ),
-            Column(
-              crossAxisAlignment: .start,
-              children: [
-                Text(
-                  userStat.card?.name ?? "",
-                  maxLines: 1,
-                  overflow: .ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: isVip && userStat.card?.vip?.type == 2
-                        ? colorScheme.vipColor
-                        : null,
+            Flexible(
+              child: Column(
+                crossAxisAlignment: .start,
+                children: [
+                  Text(
+                    userStat.card?.name ?? "",
+                    maxLines: 1,
+                    overflow: .ellipsis,
+                    style: TextStyle(
+                      fontSize: widget.separateOwnerActions ? 15 : 13,
+                      color: isVip && userStat.card?.vip?.type == 2
+                          ? colorScheme.vipColor
+                          : null,
+                    ),
                   ),
-                ),
-                Text(
-                  '${NumUtils.numFormat(userStat.follower)}粉丝    ${'${NumUtils.numFormat(userStat.archiveCount)}视频'}',
-                  style: TextStyle(fontSize: 12, color: colorScheme.outline),
-                ),
-              ],
+                  Text(
+                    '${NumUtils.numFormat(userStat.follower)}粉丝    ${'${NumUtils.numFormat(userStat.archiveCount)}视频'}',
+                    maxLines: 1,
+                    overflow: .ellipsis,
+                    style: TextStyle(fontSize: 12, color: colorScheme.outline),
+                  ),
+                ],
+              ),
             ),
           ],
         );

@@ -1,4 +1,3 @@
-import 'package:PiliPlus/pages/video/widgets/tablet_video_tabs.dart';
 import 'package:PiliPlus/pages/video/widgets/tablet_episode_strip.dart';
 import 'package:PiliPlus/pages/video/widgets/video_entrance.dart';
 import 'package:PiliPlus/pages/video/related/controller.dart';
@@ -1820,6 +1819,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   }
 
+  bool get _tabletPlaylistPending =>
+      videoDetailController.plPlayerController.horizontalSeasonPanel &&
+      ugcIntroController.videoDetail.value.bvid == null &&
+      ugcIntroController.status.value;
+
   Widget _wideTabletVideoBody() {
     final width = maxWidth - padding.horizontal;
     final sideWidth = TabletVideoLayout.sidebarWidth(width);
@@ -1835,8 +1839,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       showEpisodes: showEpisodes,
       onShowMemberPage: onShowMemberPage,
       isPortrait: isPortrait,
-      isHorizontal: false,
+      isHorizontal: true,
       inlineMemberPage: true,
+      separateOwnerActions: true,
       showCollection: !_shouldShowSeasonPanel,
     );
     return MiniScaffold(
@@ -1857,18 +1862,22 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 child: SizedBox(
                   width: leftWidth,
                   height: max(0.0, bodyHeight - height),
-                  child: CustomScrollView(
-                    key: const PageStorageKey('wide-tablet-intro'),
-                    controller: videoDetailController.effectiveIntroScrollCtr,
-                    slivers: [
-                      intro,
-                      if (_shouldShowSeasonPanel)
-                        SliverToBoxAdapter(child: _wideTabletEpisodes()),
-                      SliverToBoxAdapter(
-                        child: SizedBox(height: padding.bottom + 12),
-                      ),
-                    ],
-                  ),
+                  child: _tabletPlaylistPending
+                      ? const SizedBox.expand()
+                      : CustomScrollView(
+                          key: const PageStorageKey('wide-tablet-related'),
+                          controller:
+                              videoDetailController.effectiveIntroScrollCtr,
+                          slivers: [
+                            if (_shouldShowSeasonPanel)
+                              SliverToBoxAdapter(child: _wideTabletEpisodes()),
+                            if (videoDetailController.showRelatedVideo)
+                              RelatedVideoPanel(
+                                key: videoRelatedKey,
+                                heroTag: heroTag,
+                              ),
+                          ],
+                        ),
                 ),
               ),
             ],
@@ -1882,24 +1891,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               child: ClipRect(
                 child: MiniScaffold(
                   key: _tabletSidebarKey,
-                  body: TabletVideoTabs(
-                    related: videoDetailController.showRelatedVideo
-                        ? CustomScrollView(
-                            key: const PageStorageKey('wide-tablet-related'),
-                            primary: false,
-                            slivers: [
-                              RelatedVideoPanel(
-                                key: videoRelatedKey,
-                                heroTag: heroTag,
-                                sidebar: true,
-                              ),
-                            ],
-                          )
-                        : null,
-                    comments: videoDetailController.showReply
-                        ? videoReplyPanel()
-                        : null,
-                  ),
+                  body: videoDetailController.showReply
+                      ? videoReplyPanel(headerSlivers: [intro])
+                      : CustomScrollView(slivers: [intro]),
                 ),
               ),
             ),
@@ -1920,6 +1914,14 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           TabletEpisodeStrip(
             key: ValueKey('parts-${videoDetailController.bvid}'),
             title: '分 P · ${pages.length} 集',
+            onExpand: () => showEpisodes(
+              0,
+              null,
+              pages,
+              videoDetailController.bvid,
+              videoDetailController.aid,
+              videoDetailController.cid.value,
+            ),
             labels: [for (final page in pages) page.part ?? '分 P'],
             selectedIndex: pages.indexWhere(
               (page) => page.cid == videoDetailController.cid.value,
@@ -1934,6 +1936,15 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
           TabletEpisodeStrip(
             key: ValueKey('season-${detail.ugcSeason?.id}'),
             title: detail.ugcSeason?.title ?? '合集',
+            onExpand: () => showEpisodes(
+              videoDetailController.seasonIndex.value,
+              detail.ugcSeason,
+              null,
+              videoDetailController.bvid,
+              videoDetailController.aid,
+              videoDetailController.seasonCid ??
+                  videoDetailController.cid.value,
+            ),
             labels: [for (final episode in episodes) episode.title ?? '选集'],
             selectedIndex: episodes.indexWhere(
               (episode) =>
@@ -3116,8 +3127,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       videoDetailController.showMediaListPanel(context);
       return;
     }
-    if (_usesTabletVideoLayout && !isFullScreen && _shouldShowSeasonPanel &&
-        !TabletVideoLayout.wide(Size(maxWidth - padding.horizontal, maxHeight))) {
+    if (_usesTabletVideoLayout &&
+        !isFullScreen &&
+        _shouldShowSeasonPanel &&
+        !TabletVideoLayout.wide(
+          Size(maxWidth - padding.horizontal, maxHeight),
+        )) {
       _tabletPlaylistExpanded.value = true;
       return;
     }
@@ -3142,12 +3157,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       isReversed: !videoDetailController.isUgc
           ? null
           : season != null
-          ? ugcIntroController
-                .videoDetail
-                .value
-                .ugcSeason!
-                .sections![videoDetailController.seasonIndex.value]
-                .isReversed
+          ? _seasonSectionReversed(season.sections ?? const <SectionItem>[])
           : ugcIntroController.videoDetail.value.isPageReversed,
       isSupportReverse: videoDetailController.isUgc,
       onChangeEpisode: videoDetailController.isUgc
@@ -3160,6 +3170,25 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       },
     );
     final child = listSheetContent(enableSlide: false);
+    if (_usesTabletVideoLayout &&
+        !isFullScreen &&
+        TabletVideoLayout.wide(
+          Size(maxWidth - padding.horizontal, maxHeight),
+        )) {
+      _tabletSidebarKey.currentState?.showBottomSheet(
+        (_) => SizedBox.expand(
+          child: Theme(data: theme, child: child),
+        ),
+        constraints: const BoxConstraints(),
+        enableDrag: false,
+        slideFromRight: true,
+        sheetAnimationStyle: const AnimationStyle(
+          duration: HarmonyMotion.duration,
+          reverseDuration: HarmonyMotion.duration,
+        ),
+      );
+      return;
+    }
     PageUtils.showVideoBottomSheet(
       context,
       maxWidth: 560,
@@ -3254,7 +3283,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   void onShowMemberPage(int? mid) {
     if (mid == null) return;
-    final inSidebar = _usesTabletVideoLayout && !isFullScreen &&
+    final inSidebar =
+        _usesTabletVideoLayout &&
+        !isFullScreen &&
         TabletVideoLayout.wide(Size(maxWidth - padding.horizontal, maxHeight));
     final host = inSidebar
         ? _tabletSidebarKey.currentState
@@ -3262,6 +3293,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     host?.showBottomSheet(
       constraints: const BoxConstraints(),
       enableDrag: !inSidebar,
+      slideFromRight: inSidebar,
+      sheetAnimationStyle: inSidebar
+          ? const AnimationStyle(
+              duration: HarmonyMotion.duration,
+              reverseDuration: HarmonyMotion.duration,
+            )
+          : null,
       (context) => HorizontalMemberPage(
         mid: mid,
         showCloseHeader: inSidebar,

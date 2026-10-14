@@ -1,5 +1,7 @@
 import 'dart:async' show Completer;
 
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
+
 // Port of the Flutter framework's private `_StandardBottomSheet` /
 // `PersistentBottomSheetController` internals, which are not public in the
 // HarmonyOS Flutter SDK.
@@ -37,17 +39,8 @@ class MiniScaffoldState extends State<MiniScaffold>
   LocalHistoryEntry? _persistentSheetHistoryEntry;
 
   void _closeCurrentBottomSheet() {
-    if (_currentBottomSheet != null) {
-      if (!_currentBottomSheet!.isLocalHistoryEntry) {
-        _currentBottomSheet!.close();
-      }
-      assert(() {
-        _currentBottomSheet?.completer.future.whenComplete(() {
-          assert(_currentBottomSheet == null);
-        });
-        return true;
-      }());
-    }
+    // Remove the previous local-history entry before opening another panel.
+    _currentBottomSheet?.close();
   }
 
   MiniBottomSheetController _buildBottomSheet(
@@ -57,6 +50,7 @@ class MiniScaffoldState extends State<MiniScaffold>
     BoxConstraints? constraints,
     bool? enableDrag,
     bool shouldDisposeAnimationController = true,
+    bool slideFromRight = false,
   }) {
     final completer = Completer<void>();
     final bottomSheetKey = GlobalKey<_StandardBottomSheetState>();
@@ -119,7 +113,8 @@ class MiniScaffoldState extends State<MiniScaffold>
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
       animationController: animationController,
-      enableDrag: enableDrag ?? !isPersistent,
+      enableDrag: slideFromRight ? false : enableDrag ?? !isPersistent,
+      slideFromRight: slideFromRight,
       onClosing: () {
         if (_currentBottomSheet == null) {
           return;
@@ -167,6 +162,7 @@ class MiniScaffoldState extends State<MiniScaffold>
     bool? enableDrag,
     AnimationController? transitionAnimationController,
     AnimationStyle? sheetAnimationStyle,
+    bool slideFromRight = false,
   }) {
     assert(debugCheckHasMediaQuery(context));
 
@@ -185,6 +181,7 @@ class MiniScaffoldState extends State<MiniScaffold>
         animationController: controller,
         constraints: constraints,
         enableDrag: enableDrag,
+        slideFromRight: slideFromRight,
         shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
@@ -230,6 +227,7 @@ class _StandardBottomSheet extends StatefulWidget {
     super.key,
     required this.animationController,
     this.enableDrag = true,
+    this.slideFromRight = false,
     required this.onClosing,
     required this.onDismissed,
     required this.builder,
@@ -241,6 +239,7 @@ class _StandardBottomSheet extends StatefulWidget {
   final AnimationController
   animationController; // we control it, but it must be disposed by whoever created it.
   final bool enableDrag;
+  final bool slideFromRight;
   final VoidCallback? onClosing;
   final VoidCallback? onDismissed;
   final VoidCallback? onDispose;
@@ -313,6 +312,28 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       builder: widget.builder,
       constraints: widget.constraints,
     );
+    if (widget.slideFromRight) {
+      return ClipRect(
+        child: AnimatedBuilder(
+          animation: widget.animationController,
+          builder: (context, child) => FractionalTranslation(
+            translation: Offset(
+              1 -
+                  HarmonyMotion.pageCoverage(
+                    widget.animationController.value,
+                    interactive: false,
+                    reverse:
+                        widget.animationController.status ==
+                        AnimationStatus.reverse,
+                  ),
+              0,
+            ),
+            child: child,
+          ),
+          child: RepaintBoundary(child: child),
+        ),
+      );
+    }
     if (widget.enableDrag) {
       return AnimatedBuilder(
         animation: widget.animationController,
