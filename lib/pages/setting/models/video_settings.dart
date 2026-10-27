@@ -25,7 +25,7 @@ import 'package:material_ui/material_ui.dart';
 
 List<SettingsModel> get videoSettings => prioritizeSettings(
   _videoSettings,
-  sections: ['画质与解码', '音质与音量', '网络与加载', '缓冲与同步', '竖屏短视频'],
+  sections: ['画质与解码', '音质与音量', '网络与加载', '缓冲与同步'],
   titles: [
     '默认画质',
     '蜂窝网络画质',

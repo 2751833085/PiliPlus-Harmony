@@ -1,3 +1,5 @@
+import 'package:PiliPlus/common/widgets/scale_app.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/native_top_hit_test_guard.dart';
 import 'package:PiliPlus/common/widgets/image/feed_image_budget.dart';
 import 'package:PiliPlus/pages/whisper/message_route.dart';
 import 'package:PiliPlus/pages/whisper/view.dart';
@@ -96,7 +98,7 @@ class _HomePageState extends CommonPageState<HomePage>
     } else {
       tabBar = const SizedBox(height: 6);
     }
-    return Column(
+    final content = Column(
       children: [
         if (!useNativeTopBar && _mainController.useBottomNav)
           customAppBar(theme)
@@ -115,6 +117,16 @@ class _HomePageState extends CommonPageState<HomePage>
           ),
         ),
       ],
+    );
+    // Cache the page tree; a collapse update changes only the invisible shield.
+    return Obx(
+      () => NativeTopHitTestGuard(
+        active: _mainController.nativeTopBarActive.value,
+        hideTopBar: _homeController.hideTopBar,
+        collapsed: _homeController.topBarCollapsed.value,
+        scaleFactor: ScaledWidgetsFlutterBinding.effectiveScaleFactor,
+        child: content,
+      ),
     );
   }
 

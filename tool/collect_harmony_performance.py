@@ -5,7 +5,7 @@ Only whitelisted QA timing JSON and error-class counters are persisted. No raw
 application logs, URLs, message contents or account data are written to disk.
 """
 import argparse
-import datetime as dt
+from contextlib import closing
 import json
 import math
 import os
@@ -200,20 +200,11 @@ def read_markers(path, started, elapsed, default):
     return scene
 
 
-def log_epoch(line, device_clock):
-    match = re.search(r'(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})\.(\d{3,6})', line)
-    if not match:
-        return None
-    month, day, hour, minute, second = map(int, match.groups()[:5])
-    try:
-        stamp = device_clock.replace(month=month, day=day, hour=hour, minute=minute,
-            second=second, microsecond=int(match[6].ljust(6, '0')))
-        # Handle a capture spanning New Year without accepting stale records.
-        if (stamp - device_clock).days < -180:
-            stamp = stamp.replace(year=stamp.year + 1)
-        return stamp.timestamp()
-    except ValueError:
-        return None
+def log_epoch(line):
+    # -v epoch is independent of local timezone and 12/24-hour UI formatting.
+    # hilog emits seconds since 1970 with a fractional second prefix.
+    match = re.match(r'^\s*(\d{9,12}(?:\.\d{1,9})?)\s+', line)
+    return float(match[1]) if match else None
 
 
 def bounded_lines(command, duration):
@@ -307,41 +298,51 @@ def main():
     pid = read('pidof ' + args.package)
     if not re.fullmatch(r'\d+', pid):
         raise SystemExit('Expected one running app PID, got: ' + pid[:80])
-    clock_text = read("date '+%Y-%m-%dT%H:%M:%S%z'")
-    try:
-        device_clock = dt.datetime.strptime(clock_text, '%Y-%m-%dT%H:%M:%S%z')
-    except ValueError:
-        raise SystemExit('Cannot establish device log time; refusing to mix old logs: ' + clock_text[:80])
+    clock_text = read('date +%s')
+    if not re.fullmatch(r'\d{9,12}', clock_text):
+        raise SystemExit('Cannot establish device epoch time; refusing to mix old logs: ' + clock_text[:80])
+    device_epoch = float(clock_text)
     started, monotonic = time.time(), time.monotonic()
     events_path = args.output.with_suffix('.samples.jsonl')
     events_path.parent.mkdir(parents=True, exist_ok=True)
     reason = 'duration_or_log_stream_end'
-    with events_path.open('w') as stream:
-        for line in bounded_lines(base + ['hilog -x -P ' + pid], args.duration):
-            stamp = log_epoch(line, device_clock)
-            if stamp is None or stamp < device_clock.timestamp():
-                continue
-            elapsed = time.monotonic() - monotonic
-            # Store timing protocol only, stripping all unrelated hilog content.
-            try:
-                event = parse_event(line)
-            except (ValueError, TypeError, KeyError):
-                session.invalid_events += 1
-                continue
-            scene = read_markers(args.markers, started, elapsed, args.scene) if event else args.scene
-            session.ingest(line, scene, elapsed)
-            if event:
-                kind, data = event
-                safe_line = ('PiliPlusFrameTiming' if kind == 'summary' else 'PiliPlusFrameSamples') + ' ' + json.dumps(data)
-                stream.write(json.dumps({'elapsed_s': elapsed, 'scene': scene, 'line': safe_line},
-                                        ensure_ascii=False) + '\n')
-            if len(session.completed) >= args.max_batches:
-                reason = 'max_batches'
-                break
+    try:
+        # Line buffering makes complete JSONL records visible while collecting;
+        # no fsync or device-side persistence is requested.
+        with events_path.open('w', buffering=1) as stream:
+            with closing(bounded_lines(base + ['hilog -v epoch -P ' + pid], args.duration)) as lines:
+                for line in lines:
+                    stamp = log_epoch(line)
+                    if stamp is None or stamp < device_epoch:
+                        continue
+                    elapsed = time.monotonic() - monotonic
+                    # Store timing protocol only, stripping all unrelated hilog content.
+                    try:
+                        event = parse_event(line)
+                    except (ValueError, TypeError, KeyError):
+                        session.invalid_events += 1
+                        continue
+                    scene = read_markers(args.markers, started, elapsed, args.scene) if event else args.scene
+                    if event:
+                        kind, data = event
+                        safe_line = ('PiliPlusFrameTiming' if kind == 'summary' else 'PiliPlusFrameSamples') + ' ' + json.dumps(data)
+                        stream.write(json.dumps({'elapsed_s': elapsed, 'scene': scene, 'line': safe_line},
+                                                ensure_ascii=False) + '\n')
+                    session.ingest(line, scene, elapsed)
+                    if len(session.completed) >= args.max_batches:
+                        reason = 'max_batches'
+                        break
+    except KeyboardInterrupt:
+        # closing() terminates only the HDC log client created by this capture.
+        # The app, HDC server, and other captures remain untouched.
+        reason = 'operator_stop'
+    elapsed = time.monotonic() - monotonic
+    if reason not in {'max_batches', 'operator_stop'}:
+        reason = 'duration' if elapsed >= args.duration - .05 else 'log_stream_ended_early'
     result = session.report()
-    result.update(duration_requested_s=args.duration, duration_elapsed_s=time.monotonic() - monotonic,
+    result.update(duration_requested_s=args.duration, duration_elapsed_s=elapsed,
                   stop_reason=reason, pid=int(pid), samples_file=str(events_path),
-                  fresh_log_filter='Device timestamp to second precision; first batch per scene discarded')
+                  fresh_log_filter='hilog -v epoch and device date +%s; second precision; first batch per scene discarded')
     save(args.output, result)
     print(json.dumps({'output': str(args.output), 'complete_batches': len(session.completed),
                       'incomplete_batches': result['incomplete_batches'], 'metric': result['metric']}))

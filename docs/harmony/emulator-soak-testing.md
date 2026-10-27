@@ -48,7 +48,7 @@ python3 tool/collect_harmony_performance.py capture \
 python3 tool/collect_harmony_performance.py mark --markers /tmp/pili-qa/scenes.jsonl --scene video-tabs
 ```
 
-默认最多运行 60 秒、500 个完整批次；可设 1–3600 秒、1–10000 批次，任一边界达到便停止本地 HDC 日志客户端。不会结束应用。原始应用日志不落盘；只保存白名单计时 JSON、场景标记、样本量及已知异常类别计数。采集按设备时间排除先前日志，每次场景变更后的首个批次保守丢弃，避免 120 帧统计跨越场景边界。
+默认最多运行 60 秒、500 个完整批次；可设 1–3600 秒、1–10000 批次，任一边界达到便停止本地 HDC 日志客户端。按 Ctrl+C（SIGINT）会正常保存当前报告，标记 `stop_reason=operator_stop`，仅停止该次采集创建的 HDC 日志客户端，不结束应用或其他采集。样本 JSONL 逐行缓冲，采集运行时即可读取，不调用 fsync。原始应用日志不落盘；只保存白名单计时 JSON、场景标记、样本量及已知异常类别计数。采集使用阻塞跟随的 `hilog -v epoch -P PID`（不使用会立即退出的 `-x`），并用同设备 `date +%s` 对齐来排除先前日志；与本地时区或 12/24 小时显示无关。每次场景变更后的首个批次保守丢弃，避免 120 帧统计跨越场景边界。
 
 报告中的 `build_p50_ms`、`build_p95_ms`、`raster_p50_ms`、`raster_p95_ms` 在原始样本完整时精确聚合。数据每批最多 120 帧、每行最多 20 对样本，含 `run_id / batch_id / start`，缺片或重片不会被默认为完整。5 秒周期会输出未满 120 帧的短场景尾帧。若仅存在旧格式的批次摘要，工具保留逐批数字，但将整个场景的百分位设为 `null`，绝不平均百分位冒充真实场景统计。
 

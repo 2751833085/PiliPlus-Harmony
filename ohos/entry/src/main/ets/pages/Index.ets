@@ -498,6 +498,7 @@ struct Index {
     .backgroundColor(Color.Transparent)
     .barBackgroundColor(Color.Transparent)
     .onTabBarClick((index: number) => {
+      if (this.shellBarsObscured || this.topBarHidden || this.topBarExposure < 1 || index < 0 || index >= this.homeTabs.length) return;
       this.context.eventHub.emit(EVENT_HOME_TAB_CHANGE, index);
       this.categoryCurrentIndex = index;
     })
@@ -629,7 +630,11 @@ struct Index {
     .animation({ duration: this.topBarExposureDuration, curve: curves.cubicBezierCurve(0.4, 0, 0.6, 1) })
     .visibility(this.topBarHidden ? Visibility.Hidden : Visibility.Visible)
     .blur(this.shellBarsBlurred ? 12 : 0)
-    .hitTestBehavior(this.shellBarsObscured || this.topBarExposure < 1 ? HitTestMode.None : HitTestMode.Transparent)
+    // A transparent host admits the sibling FlutterPage to the same hit test.
+    // Only the visible, bounded header consumes input; its child controls keep
+    // their own gestures, while covered routes remain completely uninvolved.
+    .hitTestBehavior(this.shellBarsObscured || this.topBarExposure < 1 ? HitTestMode.BLOCK_DESCENDANTS : HitTestMode.Default)
+    .onTouch((event: TouchEvent) => event.stopPropagation())
     .align(Alignment.Top)
   }
 
@@ -831,7 +836,11 @@ struct Index {
     .animation({ duration: this.topBarExposureDuration, curve: curves.cubicBezierCurve(0.4, 0, 0.6, 1) })
     .visibility(this.topBarHidden ? Visibility.Hidden : Visibility.Visible)
     .blur(this.shellBarsBlurred ? 12 : 0)
-    .hitTestBehavior(this.shellBarsObscured || this.topBarExposure < 1 ? HitTestMode.None : HitTestMode.Transparent)
+    // A transparent host admits the sibling FlutterPage to the same hit test.
+    // Only the visible, bounded header consumes input; its child controls keep
+    // their own gestures, while covered routes remain completely uninvolved.
+    .hitTestBehavior(this.shellBarsObscured || this.topBarExposure < 1 ? HitTestMode.BLOCK_DESCENDANTS : HitTestMode.Default)
+    .onTouch((event: TouchEvent) => event.stopPropagation())
     .align(Alignment.Top)
   }
 

@@ -27,7 +27,6 @@ import 'package:os_type/os_type.dart';
 List<SettingsModel> get playSettings => prioritizeSettings(
   _playSettings,
   sections: [
-    '竖屏短视频',
     '播放控制',
     '播放手势',
     '全屏与折叠屏',
@@ -41,7 +40,6 @@ List<SettingsModel> get playSettings => prioritizeSettings(
     '自动播放',
     '哔哩哔哩式播放器控制栏',
     '倍速设置',
-    '启用短视频模式（实验性）',
     '弹幕开关',
     '自动启用字幕',
     '全屏跟随折叠形态',

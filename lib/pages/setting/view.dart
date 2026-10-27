@@ -49,7 +49,7 @@ class _SettingPageState extends State<SettingPage> {
   static const List<_SettingsModel> _items = [
     _SettingsModel(
       type: SettingType.playSetting,
-      subtitle: '播放控制、全屏与折叠屏、竖屏短视频、弹幕与字幕',
+      subtitle: '播放控制、全屏与折叠屏、弹幕与字幕',
       icon: Icon(Icons.touch_app_outlined),
     ),
     _SettingsModel(
@@ -64,7 +64,7 @@ class _SettingPageState extends State<SettingPage> {
     ),
     _SettingsModel(
       type: SettingType.featuredSetting,
-      subtitle: '空降助手、海外模式、短视频、AI 总结与鸿蒙增强',
+      subtitle: '空降助手、海外模式、AI 总结与鸿蒙增强',
       icon: Icon(Icons.auto_awesome_outlined),
     ),
     _SettingsModel(
