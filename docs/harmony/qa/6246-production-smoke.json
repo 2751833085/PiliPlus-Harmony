@@ -1,0 +1,25 @@
+{
+  "sourceCommit": "c1cff0dd6a21726098bfaecf3ee5faa7e55df0f1",
+  "shippingHapSha256": "450a72ddd6d1f8d22d30ce3a7268a1cd4f4ae0b75a3876dbc0e9b6fb8a1d4c3a",
+  "productionConfiguration": true,
+  "emulator": "official HarmonyOS 7 TripleFold",
+  "physicalSizePx": [
+    1008,
+    2232
+  ],
+  "completedCycles": 5,
+  "elapsedSeconds": 97.583,
+  "actions": 46,
+  "checksPassed": 26,
+  "sameProcessAtEnd": true,
+  "matchedLogCounts": {
+    "Native loading opacity update failed": 0,
+    "MissingPluginException": 0,
+    "Unhandled Exception": 0,
+    "RenderFlex": 0,
+    "ErrorWidget": 0,
+    "PiliPlusFrameTiming": 0,
+    "PiliPlusFrameSamples": 0
+  },
+  "scope": "Bounded same-binary guest UI smoke and PID log keyword checks, not all business functions, native decode, presented FPS or proof of no bugs."
+}

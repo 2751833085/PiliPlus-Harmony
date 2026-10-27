@@ -1,0 +1,27 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6246,
+  "releaseTag": "v3.0.0+6246",
+  "sha256": "450a72ddd6d1f8d22d30ce3a7268a1cd4f4ae0b75a3876dbc0e9b6fb8a1d4c3a",
+  "sizeBytes": 33130955,
+  "signatureVerified": true,
+  "sourceCommit": "c1cff0dd6a21726098bfaecf3ee5faa7e55df0f1",
+  "installedOnDevice": true,
+  "fullDeviceValidationComplete": false,
+  "qaGuestIsolated": false,
+  "performanceDiagnostics": false,
+  "layoutDiagnostics": false,
+  "validation": "317 Harmony regression tests and 12 Python capture-tool tests passed; performance callback test passed separately with diagnostics enabled. Official HarmonyOS 7 TripleFold guest UI testing used native single/double/triple resolutions; see emulator-soak-testing.md for exact scope, failures, fixes and retest counts. HAP signature, ZIP CRC, version and pinned native MPV hash verified. Same production HAP passed five additional emulator smoke cycles (46 actions, 26 checks), with no stale loading opacity warning matched in that PID window. Phone overwrite install verified: 6245 to 6246, same app UID and first-install time; no phone UI automation performed.",
+  "knownLimitations": [
+    "Pinned media_kit_video rejects emulator texture output; actual video/audio decode and weak-network synchronization remain unverified.",
+    "Guest-only account features and full remote offline-download/playback workflow are not fully validated; download engine has real local HTTP/disk regression coverage.",
+    "Flutter build/raster timing is not presented FPS; actual phone frame pacing and absence of all bugs are not proven."
+  ],
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "libmpvSha256": "38664cf7dc7af1b3093a731c94f6e48f9c1092c97a774656e6c2b59cfe0df99e",
+  "overwriteInstallVerified": true,
+  "applicationUidRetained": true,
+  "firstInstallTimeRetained": true,
+  "phoneUiAutomationPerformed": false,
+  "productionEmulatorSmokeCycles": 5
+}
