@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "record_kind": "frozen_graphics_trace_summary",
+  "source_commit": "9f984508ed63988da917cc3258d94846cf88018a",
+  "scenario": "mixed-navigation",
+  "trace_source": {
+    "file": "pili-fixed-trace.txt",
+    "size_bytes": 33303415,
+    "sha256": "0f9b1a5ce85c2a890749655cd43a9331176728c47fd90f4df6d1e5b411bbb085",
+    "requested_duration_s": 10,
+    "observed_event_window_s": 10.044124,
+    "categories": [
+      "graphic",
+      "ace",
+      "animation",
+      "app",
+      "window"
+    ],
+    "scope": "Three-screen automated navigation with actual scrolling, popular/recommendation and mine/dynamics switching; not a pure home-scroll benchmark."
+  },
+  "trace_integrity": {
+    "complete_synchronous_slices": 119791,
+    "unmatched_end_markers": 1,
+    "unclosed_begin_markers": 1,
+    "cross_pid_paired_slices": 0,
+    "boundary_note": "One unmatched end and one unclosed begin occur at trace boundaries; summary uses complete paired slices."
+  },
+  "processes": {
+    "flutter_trace_pid": 3582,
+    "render_service_trace_pid": 789
+  },
+  "metrics_ms": {
+    "flutter_raster_draw": {
+      "count": 256,
+      "total": 5426.457,
+      "p50": 16.547,
+      "p95": 44.116,
+      "max": 319.202
+    },
+    "flutter_layer_tree_paint": {
+      "count": 256,
+      "total": 1887.257,
+      "p50": 3.576,
+      "p95": 26.396,
+      "max": 128.93
+    },
+    "flutter_surface_submit": {
+      "count": 256,
+      "total": 3433.289,
+      "p50": 12.275,
+      "p95": 16.356,
+      "max": 312.344
+    },
+    "flutter_swap_buffers": {
+      "count": 256,
+      "total": 3001.023,
+      "p50": 10.705,
+      "p95": 14.814,
+      "max": 311.115
+    },
+    "flutter_gr_context_flush_submit": {
+      "count": 256,
+      "total": 426.206,
+      "p50": 1.423,
+      "p95": 3.068,
+      "max": 17.123
+    },
+    "flutter_ui_begin_frame_callback": {
+      "count": 256,
+      "total": 350.104,
+      "p50": 0.393,
+      "p95": 4.456,
+      "max": 64.763
+    },
+    "flutter_ui_draw_frame_callback": {
+      "count": 256,
+      "total": 281.674,
+      "p50": 0.304,
+      "p95": 4.224,
+      "max": 49.778
+    },
+    "arkui_flush_layout": {
+      "count": 325,
+      "total": 14.002,
+      "p50": 0.001,
+      "p95": 0.001,
+      "max": 8.867
+    },
+    "arkui_js_rerender": {
+      "count": 255,
+      "total": 139.94,
+      "p50": 0.139,
+      "p95": 0.516,
+      "max": 68.229
+    },
+    "rs_screen_draw": {
+      "count": 400,
+      "total": 7320.194,
+      "p50": 16.437,
+      "p95": 28.022,
+      "max": 255.965
+    },
+    "rs_kawase_blur_synchronous_marker": {
+      "count": 508,
+      "total": 0.289,
+      "p50": 0.001,
+      "p95": 0.001,
+      "max": 0.005
+    },
+    "rs_present_fence_wait_observation": {
+      "count": 400,
+      "total": 1.014,
+      "p50": 0.002,
+      "p95": 0.005,
+      "max": 0.025
+    }
+  },
+  "presented_fps": null,
+  "presented_drop_rate": null,
+  "image_decode_attribution": "not_supported_by_captured_markers",
+  "native_material_gpu_cost_attribution": "not_isolated",
+  "observations": [
+    "The longer measured wall-clock slices occur in Flutter raster/paint/submission; native layout and typical UI callbacks are shorter in this mixed window.",
+    "SwapBuffers wall time can include blocking or unlabelled driver work; it is not a direct CPU/GPU busy measurement.",
+    "Kawase blur markers demonstrate native filter activity, but their short synchronous duration is not the full GPU cost and does not prove blur is free or the primary cause."
+  ],
+  "coverage_limits": [
+    "Nested slice totals overlap: surface submission includes swap/flush work and must not be added to them as independent load.",
+    "No useful image decode or upload markers support a decoder bottleneck attribution or prove decoding absent.",
+    "PresentFence observation/wait slices do not establish complete Flutter-frame-to-presentation mapping or kernel fence signal/scheduler coverage; no actual FPS or drop-rate claim.",
+    "This is a ten-second mixed automated emulator workload with host and instrumentation effects, not a physical-device or pure-scroll acceptance benchmark.",
+    "No matched-action A/B run isolates native material cost; no all-bug-free or zero-jank conclusion."
+  ]
+}

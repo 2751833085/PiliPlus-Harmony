@@ -1,0 +1,493 @@
+{
+  "schema": 1,
+  "record_kind": "post_fix_emulator_round_summary",
+  "source_commit": "9f984508ed63988da917cc3258d94846cf88018a",
+  "status": "completed_bounded_emulator_round_with_residual_issue",
+  "artifact_policy": {
+    "whitelisted_fields_only": true,
+    "raw_application_or_system_log_included": false,
+    "account_or_message_content_included": false
+  },
+  "source_artifacts": [
+    {
+      "file": "session-3.json",
+      "size_bytes": 75069,
+      "sha256": "6cceddc4f75d3a3310b7844716cb9affaec8b5436343551be17979ecd5b1c3a4"
+    },
+    {
+      "file": "session-3.samples.jsonl",
+      "size_bytes": 706837,
+      "sha256": "06fd00e42ad36ecc3cc47f9a1f5ea13a4409386a7772dfbf33eaefd3e20bc8a4"
+    },
+    {
+      "file": "soak-triple-fixed.jsonl",
+      "size_bytes": 21459,
+      "sha256": "b6384827ca2461a08f7d47887d4d0029c1626fb50038c16b4c201f3b81d72d43"
+    },
+    {
+      "file": "soak-double-fixed.jsonl",
+      "size_bytes": 10810,
+      "sha256": "0ea9c5d70d733310d0570d57ceaee2cb9739a447c063f87d32907e1aaedef4be"
+    },
+    {
+      "file": "soak-single-fixed.jsonl",
+      "size_bytes": 10822,
+      "sha256": "0e29b0278a8e636264e313f93cc18f7ddf387150e0d238e6fc46744f7e46be10"
+    },
+    {
+      "file": "missing-plugin-search.json",
+      "size_bytes": 2877,
+      "sha256": "49230e88973481690a92a6892bbcea553e1086fa2ceb5c05c427db19d91da009"
+    },
+    {
+      "file": "trace-summary.json",
+      "size_bytes": 4223,
+      "sha256": "211b7764adf8c15058589e58860f1d0c6c034ff1f918de71d0255c6b1c4b91bc"
+    },
+    {
+      "file": "pili-6246-triple-profile.json",
+      "size_bytes": 607,
+      "sha256": "8ac4070220e193ed841cdd931cc53012158c27ed4157ec228777f227920aa5b5"
+    },
+    {
+      "file": "double-profile.json",
+      "size_bytes": 576,
+      "sha256": "1da327dd4d394f74475f363cf52751175c505e3a47707f6d1746317cfb907042"
+    },
+    {
+      "file": "single-profile.json",
+      "size_bytes": 577,
+      "sha256": "d5d19ade8c8387a11f4226606c155fbd0ec39e3df440d2ba8d660321fedb374b"
+    }
+  ],
+  "display_profiles": [
+    {
+      "device_model": "DevEco TripleFold (Mate XTS geometry)",
+      "form": "triple",
+      "captured_at": "2026-10-27T10:06:04.437015+00:00",
+      "source": "emulator, HDC DisplayManagerService (current fields)",
+      "physical_size_px": [
+        3184,
+        2232
+      ],
+      "device_pixel_ratio": 2.875,
+      "logical_size_at_ui_scale_1": [
+        1107.4782608695652,
+        776.3478260869565
+      ],
+      "density_dpi": 460.0,
+      "physical_ppi": [
+        258.871,
+        518.42
+      ],
+      "rotation": 0,
+      "fold_status": "FOLD_STATE_EXPAND_WITH_SECOND_EXPAND",
+      "scope": "Display metrics only. App UI/text scale and safe-area insets are not inferred."
+    },
+    {
+      "device_model": "DevEco TripleFold (Mate XTS geometry)",
+      "form": "double",
+      "captured_at": "2026-10-27T10:25:47.041735+00:00",
+      "source": "emulator, HDC DisplayManagerService (current fields)",
+      "physical_size_px": [
+        2048,
+        2232
+      ],
+      "device_pixel_ratio": 2.875,
+      "logical_size_at_ui_scale_1": [
+        712.3478260869565,
+        776.3478260869565
+      ],
+      "density_dpi": 460.0,
+      "physical_ppi": [
+        258.871,
+        518.42
+      ],
+      "rotation": 0,
+      "fold_status": "EXPAND",
+      "scope": "Display metrics only. App UI/text scale and safe-area insets are not inferred."
+    },
+    {
+      "device_model": "DevEco TripleFold (Mate XTS geometry)",
+      "form": "single",
+      "captured_at": "2026-10-27T10:28:02.767440+00:00",
+      "source": "emulator, HDC DisplayManagerService (current fields)",
+      "physical_size_px": [
+        1008,
+        2232
+      ],
+      "device_pixel_ratio": 2.875,
+      "logical_size_at_ui_scale_1": [
+        350.60869565217394,
+        776.3478260869565
+      ],
+      "density_dpi": 460.0,
+      "physical_ppi": [
+        258.871,
+        518.42
+      ],
+      "rotation": 0,
+      "fold_status": "FOLDED",
+      "scope": "Display metrics only. App UI/text scale and safe-area insets are not inferred."
+    }
+  ],
+  "functional_navigation_soak": {
+    "evidence": "parsed_automated_soak_logs",
+    "completed_cycles": 40,
+    "requested_cycles": 40,
+    "actions": 363,
+    "checks": 203,
+    "checks_passed": 203,
+    "sum_start_to_complete_s": 891.436,
+    "sum_log_complete_elapsed_s": 891.669,
+    "forms": [
+      {
+        "form": "triple",
+        "evidence": "parsed_automated_soak_log",
+        "source_file": "soak-triple-fixed.jsonl",
+        "planned_cycles": 20,
+        "completed_cycles": 20,
+        "cycle_sequence_contiguous": true,
+        "completion_event_count": 1,
+        "start_elapsed_s": 0.082,
+        "complete_elapsed_s": 413.373,
+        "start_to_complete_s": 413.291,
+        "action_count": 181,
+        "actions_by_type": {
+          "click": 101,
+          "scroll": 80
+        },
+        "check_count": 101,
+        "check_results": {
+          "pass": 101
+        },
+        "checks_by_type": {
+          "home": 21,
+          "hot-tab-reachable": 20,
+          "recommendation-tab-reachable": 20,
+          "guest-mine": 20,
+          "guest-dynamics-login-state": 20
+        },
+        "invalid_json_lines": 0,
+        "app_pid": 3582,
+        "result": "passed"
+      },
+      {
+        "form": "double",
+        "evidence": "parsed_automated_soak_log",
+        "source_file": "soak-double-fixed.jsonl",
+        "planned_cycles": 10,
+        "completed_cycles": 10,
+        "cycle_sequence_contiguous": true,
+        "completion_event_count": 1,
+        "start_elapsed_s": 0.06,
+        "complete_elapsed_s": 290.191,
+        "start_to_complete_s": 290.131,
+        "action_count": 91,
+        "actions_by_type": {
+          "click": 51,
+          "scroll": 40
+        },
+        "check_count": 51,
+        "check_results": {
+          "pass": 51
+        },
+        "checks_by_type": {
+          "home": 11,
+          "hot-tab-reachable": 10,
+          "recommendation-tab-reachable": 10,
+          "guest-mine": 10,
+          "guest-dynamics-login-state": 10
+        },
+        "invalid_json_lines": 0,
+        "app_pid": 3582,
+        "result": "passed"
+      },
+      {
+        "form": "single",
+        "evidence": "parsed_automated_soak_log",
+        "source_file": "soak-single-fixed.jsonl",
+        "planned_cycles": 10,
+        "completed_cycles": 10,
+        "cycle_sequence_contiguous": true,
+        "completion_event_count": 1,
+        "start_elapsed_s": 0.091,
+        "complete_elapsed_s": 188.105,
+        "start_to_complete_s": 188.014,
+        "action_count": 91,
+        "actions_by_type": {
+          "click": 51,
+          "scroll": 40
+        },
+        "check_count": 51,
+        "check_results": {
+          "pass": 51
+        },
+        "checks_by_type": {
+          "home": 11,
+          "hot-tab-reachable": 10,
+          "recommendation-tab-reachable": 10,
+          "guest-mine": 10,
+          "guest-dynamics-login-state": 10
+        },
+        "invalid_json_lines": 0,
+        "app_pid": 3582,
+        "result": "passed"
+      }
+    ],
+    "limits": [
+      "Automated checks cover guest home, popular/recommendation reachability, guest mine and guest dynamics login state. They are not an exhaustive feature assertion.",
+      "Measured action counts are logged clicks/scrolls, not distinct features. No crash-free or zero-jank guarantee is inferred."
+    ]
+  },
+  "manual_functional_checks": [
+    {
+      "scenario": "original_native_topbar_touch_through",
+      "evidence": "root-reported_actual_ui_test",
+      "result": "not_reproduced_during_post_fix_40_cycles",
+      "baseline_reproductions": 2,
+      "limit": "Finite regression only; not proof the defect can never recur."
+    },
+    {
+      "scenario": "cover_popup_background_tap_popular_tab",
+      "evidence": "root-reported_actual_ui_test",
+      "result": "popup_closed_underlying_tab_unchanged"
+    },
+    {
+      "scenario": "search_discovery_to_results",
+      "evidence": "root-reported_actual_ui_test",
+      "result": "actual_results_reached"
+    },
+    {
+      "scenario": "play_then_back_after_120_ms",
+      "evidence": "root-reported_actual_ui_test",
+      "completed_rounds": 3,
+      "result": "passed",
+      "app_pid_after_deliberate_cold_start": 19661,
+      "same_pid_retained_across_three_rounds": true,
+      "limit": "This smoke followed an intentional restart from PID 3582; it is not continuity across the capture or decoder verification."
+    }
+  ],
+  "timing_capture": {
+    "duration_requested_s": 1200.0,
+    "duration_elapsed_s": 1200.0067626250093,
+    "stop_reason": "duration",
+    "selected_app_pid": 3582,
+    "measurement_status": "complete_batches",
+    "timing_protocol_jsonl_records": 1509,
+    "complete_batches": 304,
+    "raw_frames_in_complete_batches": 22278,
+    "retained_complete_batches": 298,
+    "retained_raw_frame_samples": 22117,
+    "discarded_boundary_batches": 6,
+    "discarded_boundary_frames": 161,
+    "invalid_events": 0,
+    "duplicate_events": 0,
+    "incomplete_batches": 0,
+    "offline_reaggregation_matches_final_report": true,
+    "limits": [
+      "The 1200-second capture includes idle and tool gaps; sample count divided by capture time is not FPS.",
+      "Each first complete batch after a scene transition is discarded because it may straddle the marker. Summary receipt timestamps are not exact scene frame intervals."
+    ]
+  },
+  "performance": {
+    "metric": "Flutter build/raster work duration in milliseconds",
+    "quantile_method": "sorted sample at index floor((n-1)*fraction+0.5)",
+    "presented_fps": null,
+    "presented_drop_rate": null,
+    "aggregate_mixed_capture": {
+      "sample_count": 22117,
+      "build_p50_ms": 0.271,
+      "build_p95_ms": 2.042,
+      "build_p99_ms": 5.27,
+      "raster_p50_ms": 16.509,
+      "raster_p95_ms": 29.503,
+      "raster_p99_ms": 77.577,
+      "raster_max_ms": 4034.332
+    },
+    "scenes": [
+      {
+        "scene": "post-fix-triple-navigation",
+        "boundary_batches_discarded": 2,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 9979,
+        "frames_reported": 9979,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 0.292,
+        "build_p95_ms": 2.343,
+        "raster_p50_ms": 16.576,
+        "raster_p95_ms": 30.335,
+        "raster_over_16_67_ms": 4641,
+        "raster_over_11_11_ms": 9195,
+        "raster_over_8_33_ms": 9557,
+        "retained_complete_batches": 126,
+        "summary_received_elapsed_range_s": [
+          13.005053417000454,
+          423.0063348750118
+        ],
+        "build_p99_ms": 4.896,
+        "build_max_ms": 171.303,
+        "raster_p99_ms": 53.089,
+        "raster_max_ms": 561.258,
+        "raster_over_33_33_ms": 345,
+        "raster_over_50_ms": 127,
+        "raster_over_100_ms": 23
+      },
+      {
+        "scene": "triple-navigation-with-system-trace",
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 747,
+        "frames_reported": 747,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 0.295,
+        "build_p95_ms": 2.835,
+        "raster_p50_ms": 16.743,
+        "raster_p95_ms": 43.278,
+        "raster_over_16_67_ms": 394,
+        "raster_over_11_11_ms": 714,
+        "raster_over_8_33_ms": 734,
+        "retained_complete_batches": 9,
+        "summary_received_elapsed_range_s": [
+          91.74794045800809,
+          118.00252429200918
+        ],
+        "build_p99_ms": 6.383,
+        "build_max_ms": 58.635,
+        "raster_p99_ms": 115.697,
+        "raster_max_ms": 319.114,
+        "raster_over_33_33_ms": 64,
+        "raster_over_50_ms": 22,
+        "raster_over_100_ms": 8
+      },
+      {
+        "scene": "post-fix-double-navigation",
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 5411,
+        "frames_reported": 5411,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 0.27,
+        "build_p95_ms": 2.141,
+        "raster_p50_ms": 16.514,
+        "raster_p95_ms": 51.625,
+        "raster_over_16_67_ms": 2311,
+        "raster_over_11_11_ms": 5071,
+        "raster_over_8_33_ms": 5240,
+        "retained_complete_batches": 86,
+        "summary_received_elapsed_range_s": [
+          497.43433025002014,
+          783.0084816250019
+        ],
+        "build_p99_ms": 15.771,
+        "build_max_ms": 320.845,
+        "raster_p99_ms": 201.657,
+        "raster_max_ms": 4034.332,
+        "raster_over_33_33_ms": 364,
+        "raster_over_50_ms": 278,
+        "raster_over_100_ms": 128
+      },
+      {
+        "scene": "post-fix-single-navigation",
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 5921,
+        "frames_reported": 5921,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 0.235,
+        "build_p95_ms": 1.318,
+        "raster_p50_ms": 16.425,
+        "raster_p95_ms": 17.369,
+        "raster_over_16_67_ms": 2020,
+        "raster_over_11_11_ms": 5544,
+        "raster_over_8_33_ms": 5667,
+        "retained_complete_batches": 75,
+        "summary_received_elapsed_range_s": [
+          818.0023475830094,
+          1008.0236963750212
+        ],
+        "build_p99_ms": 2.07,
+        "build_max_ms": 7.071,
+        "raster_p99_ms": 25.45,
+        "raster_max_ms": 78.641,
+        "raster_over_33_33_ms": 35,
+        "raster_over_50_ms": 11,
+        "raster_over_100_ms": 0
+      },
+      {
+        "scene": "post-fix-manual-single",
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 59,
+        "frames_reported": 59,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 0.762,
+        "build_p95_ms": 11.353,
+        "raster_p50_ms": 16.039,
+        "raster_p95_ms": 25.981,
+        "raster_over_16_67_ms": 22,
+        "raster_over_11_11_ms": 42,
+        "raster_over_8_33_ms": 49,
+        "retained_complete_batches": 2,
+        "summary_received_elapsed_range_s": [
+          1038.0103833330213,
+          1088.002115500014
+        ],
+        "build_p99_ms": 15.874,
+        "build_max_ms": 17.466,
+        "raster_p99_ms": 34.047,
+        "raster_max_ms": 34.333,
+        "raster_over_33_33_ms": 2,
+        "raster_over_50_ms": 0,
+        "raster_over_100_ms": 0
+      }
+    ],
+    "limits": [
+      "These are emulator Flutter work-duration samples, not actual presented-frame cadence or device FPS.",
+      "Scene actions, instrumentation, sample counts and idle coverage differ; screen-size groups are not a causal performance A/B comparison.",
+      "Raster work exceeding nominal time thresholds demonstrates slow timing samples, not a counted dropped presentation.",
+      "The system-trace scene includes additional tracing overhead. No zero-frame-drop claim is supported."
+    ]
+  },
+  "matched_error_class_counts": {
+    "RenderFlex": 0,
+    "Unhandled Exception": 0,
+    "MissingPluginException": 1,
+    "ErrorWidget": 0,
+    "[VideoController] does not support emulator": 0
+  },
+  "error_count_scope": "Final realtime selected-PID/time capture counters for known strings. Timing-only JSONL cannot reconstruct non-timing error counters. Zero matches do not establish absence of other failures.",
+  "residual_issue": {
+    "reference": "missing-plugin-search.json",
+    "matches_in_final_session": 1,
+    "method": "setOpacity",
+    "channel": "piliplus/native-loading/22",
+    "caught": true,
+    "observed_runtime_stack_trace_available": false,
+    "interpretation": "A caught opacity update targeted an old per-native-view channel. The exact method is located; a full runtime disposal/animation chain is not captured. Global plugin absence is not established.",
+    "repair_state": "root-reported_repair_in_progress_at_summary_preparation",
+    "new_source_smoke_required": true,
+    "count_preserved_for_this_source": true
+  },
+  "video_decode_acceptance": {
+    "status": "not_verified_on_emulator",
+    "reason": "Pinned media_kit_video Harmony emulator display guard blocks supported playback-output validation. Zero matching guard messages in this capture does not establish playback support.",
+    "audio_video_sync_verified": false,
+    "network_buffer_recovery_verified": false,
+    "physical_device_verification_required": true
+  },
+  "separate_trace_evidence": {
+    "reference": "trace-summary.json",
+    "scenario": "mixed-navigation",
+    "source_commit": "9f984508ed63988da917cc3258d94846cf88018a",
+    "trace_sha256": "0f9b1a5ce85c2a890749655cd43a9331176728c47fd90f4df6d1e5b411bbb085",
+    "scope": "Separate ten-second mixed-navigation trace; not merged into timing capture metrics or treated as pure homepage scrolling.",
+    "presented_fps": null,
+    "image_decode_attribution": "not_supported_by_captured_markers"
+  },
+  "overall_limits": [
+    "Only observed guest emulator scenarios and the stated finite repetitions are accepted here; signed-in actions, real downloads, video decoding and physical-device performance are not covered.",
+    "Residual caught MissingPluginException remains one for source 9f984508e. Later-source repairs and smoke results must be recorded separately.",
+    "No assertion of zero bugs, zero dropped frames, universal feature correctness or physical-device smoothness."
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "record_kind": "targeted_missing_plugin_search",
+  "searched_at_utc": "2026-10-27T11:05:02.624615+00:00",
+  "scope": {
+    "source": "Official emulator automatically retained hilog_tmp_* gzip files",
+    "gzip_files_searched": 20,
+    "compressed_bytes_searched": 10778980,
+    "target_pid": 3582,
+    "target_bundle": "com.example.piliplus",
+    "only_target_exception_included": true,
+    "raw_system_logs_included": false
+  },
+  "matches": 1,
+  "record": {
+    "source_relative_file": "Log/hilog_tmp_2026-10-27T063558/hilog.014.20261027-184608.gz",
+    "gzip_sha256": "f575377f831a6e1a260bf574479cb4db5d48fc80536eb5fa6850412e1c4f9585",
+    "decompressed_file_bytes": 4255204,
+    "exception_decompressed_byte_offset": 1302064,
+    "identity_evidence": "Binary record prefix contains com.example.piliplus/XComFlutterOHOS_Native and two little-endian u32 values 3582 at offsets -149/-145 from the exception text.",
+    "message": "Native loading opacity update failed: MissingPluginException(No implementation found for method setOpacity on channel piliplus/native-loading/22)",
+    "exception": "MissingPluginException",
+    "method": "setOpacity",
+    "channel": "piliplus/native-loading/22",
+    "caught": true,
+    "observed_runtime_stack_trace_available": false
+  },
+  "source_reconstructed_call_chain": [
+    "harmony_loading.dart:41 entry animation listener",
+    "harmony_loading.dart:46 _sendOpacity -> NativeLoadingOpacity.update",
+    "native_loading_opacity.dart:25-32 _send -> MethodChannel.invokeMethod(setOpacity)",
+    "native_loading_opacity.dart:38-40 onError catches the failure and writes the observed diagnostic"
+  ],
+  "native_handler": {
+    "file": "ohos/entry/src/main/ets/plugins/HarmonyLoadingPlugin.ets",
+    "registration_lines": "46-47",
+    "set_opacity_lines": "50-55",
+    "view_disposal_line": 61
+  },
+  "interpretation": {
+    "exact_api_located": true,
+    "plugin_globally_missing_is_not_established": true,
+    "specific_lifecycle_cause_proven": false,
+    "hypothesis": "OhosView key changes for color/animate can unregister an old platform-view handler before the replacement view callback attaches its new channel; an opacity animation may still address the old per-view channel during that gap. Whole-widget disposal can also race an already in-flight call.",
+    "hypothesis_evidence": "harmony_loading.dart uses ValueKey((color, animate)) at line 116 and attaches the replacement channel at line 130; native view dispose unregisters its handler. No runtime stack or explicit disposal-event pairing proves the exact trigger.",
+    "functional_ui_impact_proven": false,
+    "zero_bug_or_fixed_claim": false
+  },
+  "actions_performed": [
+    "Read compressed local retained logs",
+    "Read matching source files",
+    "Write this whitelisted local summary"
+  ],
+  "source_modified": false,
+  "ui_operated": false
+}

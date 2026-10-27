@@ -1,4 +1,4 @@
-import 'native_loading_opacity.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/native_loading_opacity.dart';
 import 'package:flutter/services.dart';
 import 'package:os_type/os_type.dart';
 import 'dart:math' as math;
@@ -28,6 +28,42 @@ class HarmonyLoadingIndicator extends StatefulWidget {
 class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
     with TickerProviderStateMixin {
   final _nativeOpacity = NativeLoadingOpacity();
+  (int, bool)? _nativeViewConfiguration;
+  int? _nativeViewGeneration;
+
+  bool get _nativeAnimate =>
+      widget.value == null &&
+      !MediaQuery.disableAnimationsOf(context) &&
+      TickerMode.of(context);
+
+  void _detachNativeView() {
+    if (_nativeViewGeneration != null) {
+      _nativeOpacity.detach();
+      _entry.stop();
+    }
+    _nativeViewGeneration = null;
+    _nativeViewConfiguration = null;
+  }
+
+  void _syncNativeView() {
+    if (!OS.isHarmony) {
+      if (_nativeViewGeneration != null) _detachNativeView();
+      return;
+    }
+    if (widget.size < 1) {
+      _detachNativeView();
+      return;
+    }
+    final configuration = (
+      (widget.color ?? Theme.of(context).colorScheme.primary).toARGB32(),
+      _nativeAnimate,
+    );
+    if (_nativeViewConfiguration != configuration) {
+      _detachNativeView();
+      _nativeViewConfiguration = configuration;
+      _nativeViewGeneration = _nativeOpacity.detach();
+    }
+  }
 
   late final _orbit = AnimationController(
     vsync: this,
@@ -66,9 +102,18 @@ class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Even an initially zero-size native view must dispose an existing ticker,
+    // rather than lazily creating one after the element has been deactivated.
+    _entry.stop();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _syncAnimation();
+    _syncNativeView();
     if (!OS.isHarmony && !_entryStarted) _startEntry();
     if (_entryStarted && MediaQuery.disableAnimationsOf(context)) {
       _entry.value = 1;
@@ -79,6 +124,7 @@ class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
   void didUpdateWidget(HarmonyLoadingIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncAnimation();
+    _syncNativeView();
     _sendOpacity();
   }
 
@@ -102,8 +148,12 @@ class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
         child: OS.isHarmony
             ? LayoutBuilder(
                 builder: (context, constraints) {
-                  if (constraints.maxWidth < 1 || constraints.maxHeight < 1)
+                  if (constraints.maxWidth < 1 || constraints.maxHeight < 1) {
+                    _detachNativeView();
                     return const SizedBox.shrink();
+                  }
+                  _syncNativeView();
+                  final generation = _nativeViewGeneration!;
                   final color =
                       (widget.color ?? Theme.of(context).colorScheme.primary)
                           .toARGB32();
@@ -122,12 +172,19 @@ class _HarmonyLoadingIndicatorState extends State<HarmonyLoadingIndicator>
                         'opacity': 0.0,
                       },
                       onPlatformViewCreated: (id) {
-                        if (!mounted) return;
+                        if (!mounted || !_nativeOpacity.canAttach(generation)) {
+                          return;
+                        }
                         // Native creation may finish after the pull is armed.
                         // Begin at zero only once the actual surface is ready.
                         _entry.value = 0;
                         _sendOpacity();
-                        _nativeOpacity.attach(id);
+                        if (!_nativeOpacity.attach(
+                          id,
+                          generation: generation,
+                        )) {
+                          return;
+                        }
                         _startEntry();
                       },
                     ),

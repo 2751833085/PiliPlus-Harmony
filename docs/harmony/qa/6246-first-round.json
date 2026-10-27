@@ -1,0 +1,343 @@
+{
+  "schema": 1,
+  "record_kind": "pre_fix_first_round_emulator_summary",
+  "source_commit": "fbb7f2e235400c095daf3e96afeb6bc2233ac35c",
+  "created_at_utc": "2026-10-27T10:35:41.630893+00:00",
+  "overall_outcome": "failed_navigation_case_and_limited_playback_coverage",
+  "not_final_acceptance": true,
+  "source_artifacts": {
+    "capture_report": {
+      "file": "session-2.json",
+      "bytes": 24810,
+      "sha256": "e75bbe637a67a0dd857305486c2b490e8a0564116479df9804b696419b5dd604"
+    },
+    "timing_samples": {
+      "file": "session-2.samples.jsonl",
+      "bytes": 214720,
+      "sha256": "5ddf85f9558305624280c910f914af332f96d0e4dee3009aac47979b33e6e1e1"
+    },
+    "scene_markers": {
+      "file": "scenes.jsonl",
+      "bytes": 342,
+      "sha256": "51e97852a6cfd7bbaf5d3d914e707ccb1bf4df86af38da64331eb58e97a62b30"
+    }
+  },
+  "display_profiles": [
+    {
+      "device_model": "DevEco TripleFold (Mate XTS geometry)",
+      "form": "triple",
+      "captured_at": "2026-10-27T10:06:04.437015+00:00",
+      "source": "emulator, HDC DisplayManagerService (current fields)",
+      "physical_size_px": [
+        3184,
+        2232
+      ],
+      "device_pixel_ratio": 2.875,
+      "logical_size_at_ui_scale_1": [
+        1107.4782608695652,
+        776.3478260869565
+      ],
+      "density_dpi": 460.0,
+      "physical_ppi": [
+        258.871,
+        518.42
+      ],
+      "rotation": 0,
+      "fold_status": "FOLD_STATE_EXPAND_WITH_SECOND_EXPAND",
+      "scope": "Display metrics only. App UI/text scale and safe-area insets are not inferred."
+    },
+    {
+      "device_model": "DevEco TripleFold (Mate XTS geometry)",
+      "form": "double",
+      "captured_at": "2026-10-27T10:25:47.041735+00:00",
+      "source": "emulator, HDC DisplayManagerService (current fields)",
+      "physical_size_px": [
+        2048,
+        2232
+      ],
+      "device_pixel_ratio": 2.875,
+      "logical_size_at_ui_scale_1": [
+        712.3478260869565,
+        776.3478260869565
+      ],
+      "density_dpi": 460.0,
+      "physical_ppi": [
+        258.871,
+        518.42
+      ],
+      "rotation": 0,
+      "fold_status": "EXPAND",
+      "scope": "Display metrics only. App UI/text scale and safe-area insets are not inferred."
+    },
+    {
+      "device_model": "DevEco TripleFold (Mate XTS geometry)",
+      "form": "single",
+      "captured_at": "2026-10-27T10:28:02.767440+00:00",
+      "source": "emulator, HDC DisplayManagerService (current fields)",
+      "physical_size_px": [
+        1008,
+        2232
+      ],
+      "device_pixel_ratio": 2.875,
+      "logical_size_at_ui_scale_1": [
+        350.60869565217394,
+        776.3478260869565
+      ],
+      "density_dpi": 460.0,
+      "physical_ppi": [
+        258.871,
+        518.42
+      ],
+      "rotation": 0,
+      "fold_status": "FOLDED",
+      "scope": "Display metrics only. App UI/text scale and safe-area insets are not inferred."
+    }
+  ],
+  "functional_navigation_soak": {
+    "planned_rounds": 30,
+    "completed_rounds": 7,
+    "failed_during_round": 8,
+    "failure": "native_topbar_touch_through",
+    "reproductions": 2,
+    "outcome": "failed",
+    "evidence_scope": "Observed UI results supplied by the test coordinator; timing data does not prove functional correctness."
+  },
+  "capture": {
+    "requested_duration_s": 1200.0,
+    "actual_duration_s": 1200.0093086250126,
+    "reported_stop_reason": "duration_or_log_stream_end",
+    "requested_duration_reached": true,
+    "fresh_log_filter": "hilog -v epoch and device date +%s; second precision; first batch per scene discarded",
+    "input_event_lines": 459,
+    "complete_batches": 94,
+    "raw_frames_in_complete_batches_before_boundary_filter": 6723,
+    "retained_frames_after_boundary_filter": 6683,
+    "boundary_frames_discarded": 40,
+    "invalid_json_lines": 0,
+    "invalid_protocol_events": 0,
+    "duplicate_protocol_events": 0,
+    "incomplete_batches": 0,
+    "complete_batch_id_range": [
+      5,
+      98
+    ],
+    "reaggregation_matches_final_capture_report": true
+  },
+  "matched_error_class_counts": {
+    "RenderFlex": 0,
+    "Unhandled Exception": 0,
+    "MissingPluginException": 0,
+    "ErrorWidget": 0,
+    "[VideoController] does not support emulator": 4
+  },
+  "error_count_interpretation": {
+    "source": "Final live capture report, not counts inferred from the timing-only JSONL.",
+    "scope": "Selected app PID and fresh-log interval; exact known text matches only. Does not cover all native/system errors or functional bugs.",
+    "known_dependency_limitation": "Four emulator video-output unsupported matches; cannot accept true video rendering, audio sync or offline decoding on this path.",
+    "zero_other_matches_is_not_zero_bugs": true
+  },
+  "performance": {
+    "metric": "Flutter build/raster work duration in milliseconds",
+    "presented_fps": null,
+    "presented_drop_rate": null,
+    "scene_quantile_method": "Nearest sampled rank using round((n-1)*fraction), on complete raw samples after boundary exclusion.",
+    "scenes": {
+      "navigation-and-home-triple": {
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 0,
+        "frames_reported": 0,
+        "scene_quantiles_exact": false,
+        "build_p50_ms": null,
+        "build_p95_ms": null,
+        "raster_p50_ms": null,
+        "raster_p95_ms": null,
+        "raster_over_16_67_ms": 0,
+        "raster_over_11_11_ms": 0,
+        "raster_over_8_33_ms": 0,
+        "complete_batches_before_boundary_filter": 1,
+        "retained_complete_batches": 0,
+        "raw_frames_before_boundary_filter": 6,
+        "boundary_frames_discarded": 6,
+        "summary_received_elapsed_range_s": [
+          58.8498132500099,
+          58.8498132500099
+        ],
+        "build_p99_ms": null,
+        "build_max_ms": null,
+        "raster_p99_ms": null,
+        "raster_max_ms": null,
+        "raster_over_33_33_ms": 0,
+        "raster_over_50_ms": 0,
+        "raster_over_100_ms": 0,
+        "interpretation": "No retained samples after boundary filtering; no performance conclusion."
+      },
+      "settings-triple-light": {
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 8,
+        "frames_reported": 8,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 1.927,
+        "build_p95_ms": 8.022,
+        "raster_p50_ms": 30.311,
+        "raster_p95_ms": 139.21,
+        "raster_over_16_67_ms": 7,
+        "raster_over_11_11_ms": 8,
+        "raster_over_8_33_ms": 8,
+        "complete_batches_before_boundary_filter": 2,
+        "retained_complete_batches": 1,
+        "raw_frames_before_boundary_filter": 11,
+        "boundary_frames_discarded": 3,
+        "summary_received_elapsed_range_s": [
+          153.84335304200067,
+          208.84381291700993
+        ],
+        "build_p99_ms": 8.022,
+        "build_max_ms": 8.022,
+        "raster_p99_ms": 139.21,
+        "raster_max_ms": 139.21,
+        "raster_over_33_33_ms": 3,
+        "raster_over_50_ms": 3,
+        "raster_over_100_ms": 2,
+        "interpretation": "Small heterogeneous sample; descriptive quantiles only, not a stable performance comparison."
+      },
+      "settings-triple-dark": {
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 46,
+        "frames_reported": 46,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 0.383,
+        "build_p95_ms": 4.438,
+        "raster_p50_ms": 16.23,
+        "raster_p95_ms": 22.165,
+        "raster_over_16_67_ms": 17,
+        "raster_over_11_11_ms": 35,
+        "raster_over_8_33_ms": 39,
+        "complete_batches_before_boundary_filter": 3,
+        "retained_complete_batches": 2,
+        "raw_frames_before_boundary_filter": 63,
+        "boundary_frames_discarded": 17,
+        "summary_received_elapsed_range_s": [
+          273.86239666701294,
+          378.84516416699626
+        ],
+        "build_p99_ms": 8.013,
+        "build_max_ms": 8.013,
+        "raster_p99_ms": 257.787,
+        "raster_max_ms": 257.787,
+        "raster_over_33_33_ms": 2,
+        "raster_over_50_ms": 1,
+        "raster_over_100_ms": 1,
+        "interpretation": "Small heterogeneous sample; descriptive quantiles only, not a stable performance comparison."
+      },
+      "navigation-scroll-triple-dark": {
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 6468,
+        "frames_reported": 6468,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 0.239,
+        "build_p95_ms": 1.706,
+        "raster_p50_ms": 16.37,
+        "raster_p95_ms": 23.492,
+        "raster_over_16_67_ms": 2394,
+        "raster_over_11_11_ms": 5587,
+        "raster_over_8_33_ms": 6191,
+        "complete_batches_before_boundary_filter": 77,
+        "retained_complete_batches": 76,
+        "raw_frames_before_boundary_filter": 6475,
+        "boundary_frames_discarded": 7,
+        "summary_received_elapsed_range_s": [
+          463.8406894580112,
+          893.8382061250159
+        ],
+        "build_p99_ms": 3.822,
+        "build_max_ms": 16.376,
+        "raster_p99_ms": 36.065,
+        "raster_max_ms": 215.644,
+        "raster_over_33_33_ms": 78,
+        "raster_over_50_ms": 25,
+        "raster_over_100_ms": 4,
+        "interpretation": "Mixed navigation/scroll work; quantiles describe sampled Flutter work, not presented FPS or one isolated route."
+      },
+      "double-layout-dark": {
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 97,
+        "frames_reported": 97,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 0.324,
+        "build_p95_ms": 2.051,
+        "raster_p50_ms": 15.815,
+        "raster_p95_ms": 22.023,
+        "raster_over_16_67_ms": 23,
+        "raster_over_11_11_ms": 76,
+        "raster_over_8_33_ms": 81,
+        "complete_batches_before_boundary_filter": 7,
+        "retained_complete_batches": 6,
+        "raw_frames_before_boundary_filter": 101,
+        "boundary_frames_discarded": 4,
+        "summary_received_elapsed_range_s": [
+          938.8840036670153,
+          1073.8796838329872
+        ],
+        "build_p99_ms": 2.402,
+        "build_max_ms": 5.107,
+        "raster_p99_ms": 33.673,
+        "raster_max_ms": 36.229,
+        "raster_over_33_33_ms": 2,
+        "raster_over_50_ms": 0,
+        "raster_over_100_ms": 0,
+        "interpretation": "Small heterogeneous sample; descriptive quantiles only, not a stable performance comparison."
+      },
+      "single-layout-dark": {
+        "boundary_batches_discarded": 1,
+        "summary_only_frames": 0,
+        "raw_frame_samples": 64,
+        "frames_reported": 64,
+        "scene_quantiles_exact": true,
+        "build_p50_ms": 0.335,
+        "build_p95_ms": 1.575,
+        "raster_p50_ms": 16.057,
+        "raster_p95_ms": 17.155,
+        "raster_over_16_67_ms": 13,
+        "raster_over_11_11_ms": 45,
+        "raster_over_8_33_ms": 50,
+        "complete_batches_before_boundary_filter": 4,
+        "retained_complete_batches": 3,
+        "raw_frames_before_boundary_filter": 67,
+        "boundary_frames_discarded": 3,
+        "summary_received_elapsed_range_s": [
+          1083.8440357919899,
+          1108.9788300830114
+        ],
+        "build_p99_ms": 2.681,
+        "build_max_ms": 5.225,
+        "raster_p99_ms": 17.926,
+        "raster_max_ms": 22.834,
+        "raster_over_33_33_ms": 0,
+        "raster_over_50_ms": 0,
+        "raster_over_100_ms": 0,
+        "interpretation": "Small heterogeneous sample; descriptive quantiles only, not a stable performance comparison."
+      }
+    },
+    "interpretation_boundaries": [
+      "Timing samples include idle gaps and tool-driven interaction intervals; dividing sample count by wall time is not FPS.",
+      "Budget exceedance counts at 60/90/120 Hz are duration thresholds, not actual missed-present or dropped-frame counts.",
+      "First complete batch per scene transition is excluded because batches can cross a marker; this excludes some initial work.",
+      "Flutter timing excludes independent native navigation/header animations; actual presentation needs RenderService/PresentFence evidence.",
+      "Screen/brightness scenarios have different actions and sample counts; no causal light-vs-dark or single-vs-triple speed claim.",
+      "Emulator and host load cannot establish physical-phone performance, power, temperature or memory-leak absence.",
+      "No post-fix behavior or performance can be inferred from this pre-fix source commit."
+    ]
+  },
+  "unverified_or_blocked": [
+    "Post-fix native topbar hit testing and full planned navigation soak.",
+    "Actual emulator video output is blocked by pinned media_kit_video guard.",
+    "Real weak-network audio/video synchronization and hardware decoding.",
+    "Complete actual download, resume, integrity and offline playback acceptance.",
+    "All settings, login-only flows, physical-fold/cutout behavior, memory leaks and power."
+  ]
+}
