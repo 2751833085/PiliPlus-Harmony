@@ -36,38 +36,40 @@ class _SliderDialogState extends State<SliderDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: widget.title,
-      contentPadding: const .only(top: 20, left: 8, right: 8, bottom: 8),
-      content: SizedBox(
-        height: 40,
-        child: Slider(
-          value: _tempValue,
-          min: widget.min,
-          max: widget.max,
-          divisions: widget.divisions,
-          label:
-              '${_tempValue.toStringAsFixed(widget.precise)}${widget.suffix}',
-          onChanged: (double value) {
-            setState(() {
-              _tempValue = value.toPrecision(widget.precise);
-            });
-          },
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: Navigator.of(context).pop,
-          child: Text(
-            '取消',
-            style: TextStyle(color: Theme.of(context).colorScheme.outline),
+    return DialogSurface(
+      child: AlertDialog(
+        title: widget.title,
+        contentPadding: const .only(top: 20, left: 8, right: 8, bottom: 8),
+        content: SizedBox(
+          height: 40,
+          child: Slider(
+            value: _tempValue,
+            min: widget.min,
+            max: widget.max,
+            divisions: widget.divisions,
+            label:
+                '${_tempValue.toStringAsFixed(widget.precise)}${widget.suffix}',
+            onChanged: (double value) {
+              setState(() {
+                _tempValue = value.toPrecision(widget.precise);
+              });
+            },
           ),
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, _tempValue),
-          child: const Text('确定'),
-        ),
-      ],
+        actions: [
+          TextButton(
+            onPressed: Navigator.of(context).pop,
+            child: Text(
+              '取消',
+              style: TextStyle(color: Theme.of(context).colorScheme.outline),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, _tempValue),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
     );
   }
 }

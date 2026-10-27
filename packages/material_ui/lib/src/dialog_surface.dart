@@ -21,7 +21,7 @@ Future<T?> showDialog<T>({
   AnimationStyle? animationStyle,
 }) => m.showDialog<T>(
   context: context,
-  builder: (context) => _DialogSurface(child: builder(context)),
+  builder: (context) => DialogSurface(child: builder(context)),
   barrierDismissible: barrierDismissible,
   barrierColor: barrierColor,
   barrierLabel: barrierLabel,
@@ -35,8 +35,10 @@ Future<T?> showDialog<T>({
   animationStyle: animationStyle,
 );
 
-class _DialogSurface extends StatelessWidget {
-  const _DialogSurface({required this.child});
+/// Applies the same bounded finish to dialogs constructed inside custom widgets.
+/// The outer showDialog wrapper cannot inspect a StatefulWidget's eventual child.
+class DialogSurface extends StatelessWidget {
+  const DialogSurface({super.key, required this.child});
   final Widget child;
   @override
   Widget build(BuildContext context) {
@@ -48,8 +50,9 @@ class _DialogSurface extends StatelessWidget {
     };
     if (built is! Dialog ||
         built.child == null ||
-        (built.insetPadding == EdgeInsets.zero && built.elevation == 0))
+        (built.insetPadding == EdgeInsets.zero && built.elevation == 0)) {
       return child;
+    }
     final shape = built.shape ?? DialogTheme.of(context).shape;
     if (shape is! RoundedRectangleBorder) return child;
     final radius = shape.borderRadius.resolve(Directionality.of(context));

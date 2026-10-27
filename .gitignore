@@ -186,3 +186,6 @@ ohos/.codegenie
 
 # Keep Finder metadata ignored even inside regression test exceptions.
 **/.DS_Store
+
+# Python QA tools must not add interpreter caches to the source tree.
+**/__pycache__/

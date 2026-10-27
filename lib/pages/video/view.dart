@@ -1,4 +1,4 @@
-import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
+import 'package:PiliPlus/pages/video/widgets/playback_request_overlay.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:PiliPlus/pages/video/widgets/tablet_episode_strip.dart';
 import 'package:PiliPlus/pages/video/widgets/video_entrance.dart';
@@ -1022,7 +1022,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     plPlayerController
       ..addStatusLister(playerListener)
       ..addPositionListener(positionListener);
-    if (plPlayerController.preInitPlayer) {
+    if (plPlayerController.preInitPlayer &&
+        videoDetailController.videoState.value) {
       if (plPlayerController.autoEnterFullScreen && !_shortMode) {
         plPlayerController.triggerFullScreen();
       }
@@ -2742,16 +2743,12 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         plPlayer(width: width, height: height),
 
         Obx(
-          () => videoDetailController.manualPlayPending.value
-              ? const Positioned.fill(
-                  child: IgnorePointer(
-                    child: ColoredBox(
-                      color: Colors.black,
-                      child: Center(child: HarmonyLoadingIndicator(size: 24)),
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
+          () => PlaybackRequestOverlay(
+            pending: videoDetailController.manualPlayPending.value,
+            failed: videoDetailController.manualPlayFailed.value,
+            onRetry: handlePlay,
+            onBack: () => Navigator.maybePop(context),
+          ),
         ),
 
         PlaybackCover(

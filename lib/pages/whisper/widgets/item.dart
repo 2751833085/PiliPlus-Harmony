@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/immersive_row_interaction.dart';
 import 'package:PiliPlus/pages/whisper/message_route.dart';
 import 'package:PiliPlus/pages/whisper_detail/view.dart';
 import 'dart:convert';
@@ -80,7 +81,7 @@ class WhisperSessionItem extends StatelessWidget {
 
     final theme = Theme.of(context);
 
-    return ListTile(
+    final surface = ListTile(
       safeArea: true,
       tileColor: selected
           ? theme.colorScheme.surfaceContainerHigh
@@ -377,5 +378,6 @@ class WhisperSessionItem extends StatelessWidget {
         ],
       ),
     );
+    return ImmersiveRowInteraction(child: surface);
   }
 }

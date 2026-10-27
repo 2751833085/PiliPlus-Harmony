@@ -92,6 +92,7 @@ data = {
     'ENABLE_FLEX_OVERFLOW': False,
     'HARMONY_LAYOUT_DIAGNOSTICS': os.environ.get('HARMONY_LAYOUT_DIAGNOSTICS') == '1',
     'HARMONY_QA_GUEST': os.environ.get('HARMONY_QA_GUEST') == '1',
+    'HARMONY_QA_PERFORMANCE': os.environ.get('HARMONY_QA_PERFORMANCE') == '1',
 }
 Path('build/harmony/env.json').write_text(json.dumps(data) + '\n')
 PY
@@ -138,6 +139,7 @@ for path in paths:
         'libmpv_sha256': mpv_digest,
         'layout_diagnostics': os.environ.get('HARMONY_LAYOUT_DIAGNOSTICS') == '1',
         'qa_guest_isolated': os.environ.get('HARMONY_QA_GUEST') == '1',
+        'performance_diagnostics': os.environ.get('HARMONY_QA_PERFORMANCE') == '1',
     }
     target.with_suffix('.build.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n')
     print(f'{target}\nSHA256 {digest}')

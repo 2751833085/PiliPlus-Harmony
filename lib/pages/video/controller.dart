@@ -1,4 +1,5 @@
 import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
+import 'package:PiliPlus/plugin/pl_player/models/data_status.dart';
 import 'package:PiliPlus/pages/video/reply/controller.dart';
 import 'package:PiliPlus/pages/video/shorts/media_cache.dart';
 import 'package:PiliPlus/pages/video/shorts/preloader.dart';
@@ -1201,9 +1202,11 @@ class VideoDetailController extends GetxController
   }
 
   final manualPlayPending = false.obs;
+  final manualPlayFailed = false.obs;
   void requestManualPlayback() {
     if (isClosed || !_playbackVisible) return;
     autoPlay = true;
+    manualPlayFailed.value = false;
     manualPlayPending.value = !videoState.value;
   }
 
@@ -1212,6 +1215,7 @@ class VideoDetailController extends GetxController
   void suspendPlayback({bool cancelVideoQuery = false}) {
     _playbackVisible = false;
     manualPlayPending.value = false;
+    manualPlayFailed.value = false;
     _playerRequests.invalidate();
     if (cancelVideoQuery) _videoRequests.invalidate();
     _routeRetry?.cancel();
@@ -1349,6 +1353,7 @@ class VideoDetailController extends GetxController
               return;
             initialized = true;
             manualPlayPending.value = false;
+            manualPlayFailed.value = false;
             videoState.value = true;
             setSubtitle(vttSubtitlesIndex.value);
           },
@@ -1358,7 +1363,19 @@ class VideoDetailController extends GetxController
           autoFullScreenFlag: autoFullScreenFlag,
         );
 
-        if (!initialized || isClosed || source != (bvid, cid.value)) return;
+        if (isClosed ||
+            !_playbackVisible ||
+            !_playerRequests.isCurrent(ticket) ||
+            source != (bvid, cid.value))
+          return;
+        if (!initialized) {
+          if (plPlayerController.dataStatus.value == DataStatus.error) {
+            manualPlayPending.value = false;
+            manualPlayFailed.value = true;
+            videoState.value = false;
+          }
+          return;
+        }
 
         if (!isFileSource) {
           if (plPlayerController.enableBlock) {

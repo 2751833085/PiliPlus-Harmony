@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart' show CancelToken;
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/models/common/account_type.dart';
@@ -22,12 +23,14 @@ abstract final class DownloadHttp {
     SourceInfo? source,
     PageInfo? pageData,
     EpInfo? ep,
+    CancelToken? cancelToken,
   }) async {
     final isLogin = Accounts.get(AccountType.video).isLogin;
     final res = await VideoHttp.videoUrl(
       avid: entry.avid,
       bvid: entry.bvid,
       cid: entry.cid,
+      cancelToken: cancelToken,
       seasonId: entry.seasonId,
       epid: ep?.episodeId,
       qn: entry.preferedVideoQuality,

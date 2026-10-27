@@ -2455,18 +2455,27 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     Get.until((route) => route.isFirst);
   }
 
-  Future<void> dispose() async {
-    // 每次减1，最后销毁
+  Future<void>? _disposeTask;
+
+  Future<void> dispose() {
+    final closing = _disposeTask;
+    if (closing != null) return closing;
+    // Each retained page releases one reference. Final disposal detaches the
+    // singleton synchronously, before any native cleanup can yield to a new page.
     resetScreenRotation();
     cancelLongPressTimer();
     _cancelSubForSeek();
     if (!isCloseAll && _playerCount > 1) {
       _playerCount -= 1;
       _heartDuration = 0;
-      return;
+      return Future.value();
     }
-
     _playerCount = 0;
+    if (identical(_instance, this)) _instance = null;
+    return _disposeTask = _disposeFinal();
+  }
+
+  Future<void> _disposeFinal() async {
     _sourceRequests.dispose();
     if (removeSafeArea) {
       showSystemBar();
@@ -2512,11 +2521,12 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (kDebugMode) {
       debugPrint('dispose player');
     }
-    await _videoPlayerController?.dispose();
+    final closingPlayer = _videoPlayerController;
     _videoPlayerController = null;
     _videoController = null;
-    _instance = null;
-    videoPlayerServiceHandler?.clear();
+    await closingPlayer?.dispose();
+    // A new video may already own the shared media session by this point.
+    if (_instance == null) videoPlayerServiceHandler?.clear();
     HarmonyChannel.releaseContinuation(this);
   }
 

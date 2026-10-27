@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/immersive_row_interaction.dart';
 import 'package:PiliPlus/pages/history/open_item.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
@@ -203,7 +204,7 @@ class HistoryItem extends StatelessWidget {
         ),
       ),
     );
-    return surface;
+    return ImmersiveRowInteraction(child: surface);
   }
 
   Widget content(ThemeData theme) {

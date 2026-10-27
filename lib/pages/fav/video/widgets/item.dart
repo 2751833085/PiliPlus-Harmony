@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/immersive_row_interaction.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -21,7 +22,7 @@ class FavVideoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    final surface = Material(
       type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
@@ -60,6 +61,7 @@ class FavVideoItem extends StatelessWidget {
         ),
       ),
     );
+    return ImmersiveRowInteraction(child: surface);
   }
 
   Widget content(BuildContext context) {

@@ -16,4 +16,4 @@ export 'src/popup_surface.dart'
 
 export 'src/immersive_surface.dart' show ImmersiveSurface, ImmersiveInteraction;
 
-export 'src/dialog_surface.dart' show showDialog;
+export 'src/dialog_surface.dart' show showDialog, DialogSurface;

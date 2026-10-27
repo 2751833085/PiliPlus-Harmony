@@ -13,6 +13,7 @@ class ImmersiveSurface extends StatelessWidget {
     this.blurBackground = false,
     this.opaque = false,
     this.blurSigma = 24,
+    this.backdropGroupKey,
     this.surfaceGradient,
     this.interactive = true,
     this.allowMovement = false,
@@ -30,6 +31,10 @@ class ImmersiveSurface extends StatelessWidget {
   final bool blurBackground;
   final bool opaque;
   final double blurSigma;
+
+  /// Only non-overlapping surfaces sampling one backdrop may share this key.
+  /// Leave unset for independent dialogs or overlapping panels.
+  final BackdropKey? backdropGroupKey;
   final Gradient? surfaceGradient;
 
   final BorderRadius borderRadius;
@@ -92,6 +97,7 @@ class ImmersiveSurface extends StatelessWidget {
   Widget _withBlur(Widget child) => blurBackground && !opaque
       ? BackdropFilter(
           filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+          backdropGroupKey: backdropGroupKey,
           child: child,
         )
       : RepaintBoundary(child: child);

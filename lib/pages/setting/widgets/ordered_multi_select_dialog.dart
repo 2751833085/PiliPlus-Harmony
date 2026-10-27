@@ -33,67 +33,69 @@ class _OrderedMultiSelectDialogState<T>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return AlertDialog(
-      clipBehavior: Clip.hardEdge,
-      title: Text(widget.title),
-      contentPadding: const EdgeInsets.only(top: 12),
-      content: Material(
-        type: MaterialType.transparency,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: widget.values.entries.map((i) {
-              return Builder(
-                builder: (context) {
-                  return OrderedCheckboxListTile(
-                    dense: true,
-                    value: _tempValues[i.key],
-                    title: Text(
-                      i.value,
-                      style: theme.textTheme.titleMedium!,
-                    ),
-                    onChanged: (value) {
-                      if (value == null) {
-                        _tempValues[i.key] = _tempValues.length + 1;
-                        (context as Element).markNeedsBuild();
-                      } else {
-                        final pos = _tempValues.remove(i.key)!;
-                        if (pos == _tempValues.length + 1) {
+    return DialogSurface(
+      child: AlertDialog(
+        clipBehavior: Clip.hardEdge,
+        title: Text(widget.title),
+        contentPadding: const EdgeInsets.only(top: 12),
+        content: Material(
+          type: MaterialType.transparency,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: widget.values.entries.map((i) {
+                return Builder(
+                  builder: (context) {
+                    return OrderedCheckboxListTile(
+                      dense: true,
+                      value: _tempValues[i.key],
+                      title: Text(
+                        i.value,
+                        style: theme.textTheme.titleMedium!,
+                      ),
+                      onChanged: (value) {
+                        if (value == null) {
+                          _tempValues[i.key] = _tempValues.length + 1;
                           (context as Element).markNeedsBuild();
                         } else {
-                          _tempValues.updateAll(
-                            (key, value) => value > pos ? value - 1 : value,
-                          );
-                          setState(() {});
+                          final pos = _tempValues.remove(i.key)!;
+                          if (pos == _tempValues.length + 1) {
+                            (context as Element).markNeedsBuild();
+                          } else {
+                            _tempValues.updateAll(
+                              (key, value) => value > pos ? value - 1 : value,
+                            );
+                            setState(() {});
+                          }
                         }
-                      }
-                    },
-                  );
-                },
-              );
-            }).toList(),
-          ),
-        ),
-      ),
-      actionsPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
-      actions: [
-        TextButton(
-          onPressed: Get.back,
-          child: Text(
-            '取消',
-            style: TextStyle(
-              color: theme.colorScheme.outline,
+                      },
+                    );
+                  },
+                );
+              }).toList(),
             ),
           ),
         ),
-        TextButton(
-          onPressed: () {
-            assert(_tempValues.values.isSorted(Comparable.compare));
-            Get.back(result: _tempValues.keys.toList());
-          },
-          child: const Text('确定'),
-        ),
-      ],
+        actionsPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+        actions: [
+          TextButton(
+            onPressed: Get.back,
+            child: Text(
+              '取消',
+              style: TextStyle(
+                color: theme.colorScheme.outline,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              assert(_tempValues.values.isSorted(Comparable.compare));
+              Get.back(result: _tempValues.keys.toList());
+            },
+            child: const Text('确定'),
+          ),
+        ],
+      ),
     );
   }
 }

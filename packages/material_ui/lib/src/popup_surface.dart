@@ -108,10 +108,15 @@ List<PopupMenuEntry<T>> _surfaceItems<T>(
   if (Theme.of(context).extension<PopupSurfaceStyle>() == null ||
       (!anchored && Theme.of(context).extension<PopupSheetStyle>() != null))
     return items;
+  // Each invocation is one SDK menu: its vertically laid out entries never
+  // overlap, so the engine may reuse their identical blur input. A fresh key
+  // prevents simultaneously open or nested menus from sharing a backdrop.
+  final backdropGroupKey = BackdropKey();
   return [
     for (var i = 0; i < items.length; i++)
       _SurfaceEntry<T>(
         items[i],
+        backdropGroupKey,
         BorderRadius.vertical(
           top: i == 0 ? const Radius.circular(20) : Radius.zero,
           bottom: i == items.length - 1
@@ -123,7 +128,8 @@ List<PopupMenuEntry<T>> _surfaceItems<T>(
 }
 
 class _SurfaceEntry<T> extends PopupMenuEntry<T> {
-  const _SurfaceEntry(this.entry, this.radius);
+  const _SurfaceEntry(this.entry, this.backdropGroupKey, this.radius);
+  final BackdropKey backdropGroupKey;
   final BorderRadius radius;
   final PopupMenuEntry<T> entry;
   @override
@@ -139,6 +145,7 @@ class _SurfaceEntryState<T> extends State<_SurfaceEntry<T>> {
   Widget build(BuildContext context) {
     return ImmersiveSurface(
       blurBackground: true,
+      backdropGroupKey: widget.backdropGroupKey,
       interactive: false,
       showBorder: false,
       borderRadius: widget.radius,

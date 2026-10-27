@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/immersive_row_interaction.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/button/icon_button.dart';
@@ -41,7 +42,7 @@ class VideoCardHLater extends StatelessWidget {
             ..enableMultiSelect.value = true
             ..onSelect(videoItem);
 
-    return Material(
+    final surface = Material(
       type: MaterialType.transparency,
       child: InkWell(
         onLongPress: onLongPress,
@@ -124,7 +125,10 @@ class VideoCardHLater extends StatelessWidget {
                             top: 6.0,
                             right: 6.0,
                           ),
-                        if (progress != null && progress != 0) ...[
+                        if (progress != null &&
+                            (progress == -1 ||
+                                (progress > 0 &&
+                                    (videoItem.duration ?? 0) > 0))) ...[
                           PBadge(
                             text: progress == -1
                                 ? '已看完'
@@ -146,7 +150,7 @@ class VideoCardHLater extends StatelessWidget {
                                   : progress / videoItem.duration!,
                             ),
                           ),
-                        ] else if (videoItem.duration! > 0)
+                        ] else if ((videoItem.duration ?? 0) > 0)
                           PBadge(
                             text: DurationUtils.formatDuration(
                               videoItem.duration,
@@ -173,6 +177,7 @@ class VideoCardHLater extends StatelessWidget {
         ),
       ),
     );
+    return ImmersiveRowInteraction(child: surface);
   }
 
   Widget content(BuildContext context, ThemeData theme) {

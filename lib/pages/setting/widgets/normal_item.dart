@@ -1,3 +1,4 @@
+import 'package:PiliPlus/harmony_adapt/widgets/immersive_row_interaction.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:material_ui/material_ui.dart' hide ListTile;
@@ -47,7 +48,7 @@ class _NormalItemState extends State<NormalItem> {
                 ),
       );
     }
-    return ListTile(
+    final surface = ListTile(
       contentPadding: widget.contentPadding,
       onTap: widget.onTap == null
           ? null
@@ -64,6 +65,7 @@ class _NormalItemState extends State<NormalItem> {
               ? const Icon(Icons.chevron_right_rounded, size: 20)
               : null),
     );
+    return ImmersiveRowInteraction(child: surface);
   }
 
   void refresh() {
