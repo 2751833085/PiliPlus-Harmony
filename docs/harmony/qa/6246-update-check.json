@@ -1,0 +1,13 @@
+{
+  "releaseTag": "v3.0.0+6246",
+  "releaseUrl": "https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v3.0.0%2B6246",
+  "sourceCommit": "c1cff0dd6a21726098bfaecf3ee5faa7e55df0f1",
+  "remoteAssetBytes": 33130955,
+  "remoteAssetDigest": "sha256:450a72ddd6d1f8d22d30ce3a7268a1cd4f4ae0b75a3876dbc0e9b6fb8a1d4c3a",
+  "matchesInstalledHap": true,
+  "actualApplicationSelectorExecuted": true,
+  "selectorSourceSha256": "0c2424e78090fbfb1d11a20b95b0712c0fd161706a6afb64a8af80aa36fdf550",
+  "current6246NeedsUpdate": false,
+  "previous6245NeedsUpdate": true,
+  "correctHarmonyHapSelected": true
+}
