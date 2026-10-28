@@ -1,4 +1,4 @@
-import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/harmony_route_transition.dart';
 import 'package:material_ui/material_ui.dart'
     show PopupSheetStyle, PopupSurfaceStyle, ImmersiveInteraction;
 import 'package:flutter/material.dart';
@@ -273,34 +273,14 @@ class HarmonyPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     if (MediaQuery.disableAnimationsOf(context)) return child;
-    // Cache the page's paint, and update only its translation. The SDK's
-    // OpenRightwards implementation samples a cached primary child only once;
-    // listening to both animations here keeps push/pop moving on every frame.
-    return AnimatedBuilder(
-      animation: Listenable.merge([
-        animation,
-        secondaryAnimation,
-        if (route.navigator != null)
-          route.navigator!.userGestureInProgressNotifier,
-      ]),
+    // ModalRoute already rebuilds this delegate on animation ticks. Keep the
+    // page cached and move its paint directly instead of adding a second
+    // AnimatedBuilder/merged-listenable subscription to every route.
+    return HarmonyRouteTransition(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      userGestureInProgress: route.navigator?.userGestureInProgressNotifier,
       child: RepaintBoundary(child: child),
-      builder: (context, child) {
-        final interactive = route.navigator?.userGestureInProgress == true;
-        final primary = HarmonyMotion.pageCoverage(
-          animation.value,
-          interactive: interactive,
-          reverse: animation.status == AnimationStatus.reverse,
-        );
-        final secondary = HarmonyMotion.pageCoverage(
-          secondaryAnimation.value,
-          interactive: interactive,
-          reverse: secondaryAnimation.status == AnimationStatus.reverse,
-        );
-        return FractionalTranslation(
-          translation: Offset(1 - primary - .2 * secondary, 0),
-          child: child,
-        );
-      },
     );
   }
 }

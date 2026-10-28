@@ -560,12 +560,6 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));
       expect(
-        find.byWidgetPredicate(
-          (w) => w is FractionalTranslation,
-        ),
-        findsWidgets,
-      );
-      expect(
         tester.getTopLeft(find.byKey(const ValueKey('previous-page'))).dx,
         lessThan(0),
         reason: 'Previous Get route must move with the native shell',
@@ -573,6 +567,11 @@ void main() {
       final enteringX = tester
           .getTopLeft(find.byKey(const ValueKey('next-page')))
           .dx;
+      expect(
+        enteringX,
+        inExclusiveRange(0, 800),
+        reason: 'Incoming Get route must move in from the right',
+      );
       await tester.pumpAndSettle();
       expect(find.text('next'), findsOneWidget);
       Get.back();
