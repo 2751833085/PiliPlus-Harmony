@@ -70,6 +70,69 @@ void main() {
   );
 
   test(
+    'dual-fold comments default on without changing other layout preferences',
+    () async {
+      await GStorage.setting.delete(SettingBoxKey.dualFoldCommentsBelowVideo);
+      expect(Pref.dualFoldCommentsBelowVideo, isTrue);
+      for (final combined in [false, true]) {
+        await GStorage.setting.put(
+          SettingBoxKey.tabletCombinedRightPanel,
+          combined,
+        );
+        await GStorage.setting.put(SettingBoxKey.tabletVideoInfoOnRight, true);
+        for (final below in [false, true]) {
+          await GStorage.setting.put(
+            SettingBoxKey.dualFoldCommentsBelowVideo,
+            below,
+          );
+          expect(Pref.dualFoldCommentsBelowVideo, below);
+          expect(Pref.tabletCombinedRightPanel, combined);
+          expect(Pref.tabletVideoInfoOnRight, !combined);
+          expect(
+            GStorage.setting.get(SettingBoxKey.tabletVideoInfoOnRight),
+            isTrue,
+            reason: 'The per-form preference must not erase the saved position',
+          );
+        }
+      }
+      await GStorage.setting.delete(SettingBoxKey.dualFoldCommentsBelowVideo);
+      await GStorage.setting.delete(SettingBoxKey.tabletCombinedRightPanel);
+      await GStorage.setting.delete(SettingBoxKey.tabletVideoInfoOnRight);
+    },
+  );
+
+  test(
+    'dual-fold comment setting follows hardware capability while folded',
+    () {
+      final row =
+          SettingType.playSetting.settings.singleWhere(
+                (row) =>
+                    row is SwitchModel &&
+                    row.setKey == SettingBoxKey.dualFoldCommentsBelowVideo,
+              )
+              as SwitchModel;
+      expect(row.section, '全屏与折叠屏');
+      expect(row.defaultVal, isTrue);
+      expect(
+        SettingType.searchSettings.where(
+          (row) =>
+              row.searchIdentity ==
+              'setting:${SettingBoxKey.dualFoldCommentsBelowVideo}',
+        ),
+        hasLength(1),
+        reason:
+            'The new fold setting remains directly searchable without duplicates',
+      );
+      HarmonyChannel.foldExpanded.value = false;
+      HarmonyChannel.foldable.value = false;
+      expect(row.disabledReason!(), contains('此选项无效'));
+      HarmonyChannel.foldable.value = true;
+      expect(row.disabledReason!(), isNull);
+      HarmonyChannel.foldable.value = false;
+    },
+  );
+
+  test(
     'bottom immersive control follows parent without clearing its preference',
     () async {
       await GStorage.setting.put(SettingBoxKey.translucentBottomBar, false);

@@ -52,7 +52,7 @@ List<SettingsModel> get _playSettings => [
   SwitchModel(
     section: '视频详情',
     title: '右侧统一显示相关视频和评论',
-    subtitle: '默认开启；平板布局右侧顶部页签左右切换，视频详情固定显示在左侧视频下方',
+    subtitle: '默认开启；平板布局右侧顶部页签左右切换，视频详情固定显示在左侧视频下方；双屏评论下置时除外。',
     leading: const Icon(Icons.tab_outlined),
     setKey: SettingBoxKey.tabletCombinedRightPanel,
     defaultVal: true,

@@ -1,3 +1,5 @@
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/route_settled_autofocus.dart';
 import 'package:PiliPlus/pages/search/widgets/search_split_sliver.dart';
 import 'dart:convert';
 
@@ -117,18 +119,22 @@ class _SearchPageState extends State<SearchPage> {
       ),
       const SizedBox(width: 10),
     ],
-    title: TextField(
-      autofocus: true,
+    title: RouteSettledAutofocus(
+      enabled: HarmonyStyle.enabled(context),
       focusNode: _searchController.searchFocusNode,
-      controller: _searchController.controller,
-      textInputAction: TextInputAction.search,
-      onChanged: _searchController.onChange,
-      decoration: InputDecoration(
-        visualDensity: .standard,
-        hintText: _searchController.hintText ?? '搜索',
-        border: InputBorder.none,
+      child: TextField(
+        autofocus: !HarmonyStyle.enabled(context),
+        focusNode: _searchController.searchFocusNode,
+        controller: _searchController.controller,
+        textInputAction: TextInputAction.search,
+        onChanged: _searchController.onChange,
+        decoration: InputDecoration(
+          visualDensity: .standard,
+          hintText: _searchController.hintText ?? '搜索',
+          border: InputBorder.none,
+        ),
+        onSubmitted: (value) => _searchController.submit(),
       ),
-      onSubmitted: (value) => _searchController.submit(),
     ),
   );
 

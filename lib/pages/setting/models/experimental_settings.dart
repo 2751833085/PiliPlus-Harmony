@@ -58,6 +58,16 @@ List<SettingsModel> get harmonyPlaybackSettings => [
   SwitchModel(
     disabledReason: foldOnlySettingReason,
     section: '全屏与折叠屏',
+    title: '双屏时评论显示在视频下方',
+    subtitle: '双屏时评论位于左侧视频下方、相关视频留在右侧；优先于右侧统一显示。关闭恢复原布局，不影响单屏和三屏。',
+    leading: const Icon(Icons.view_agenda_outlined),
+    setKey: SettingBoxKey.dualFoldCommentsBelowVideo,
+    defaultVal: true,
+    onChanged: refreshHarmonySettings,
+  ),
+  SwitchModel(
+    disabledReason: foldOnlySettingReason,
+    section: '全屏与折叠屏',
     title: '全屏跟随折叠形态',
     subtitle: '默认开启：展开时重新适配全屏方向，合回单屏时回到详情页播放器并继续播放；关闭后保留原有全屏方向行为',
     leading: Icon(Icons.screen_rotation_alt_outlined),

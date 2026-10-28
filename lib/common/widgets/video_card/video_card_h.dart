@@ -1,6 +1,8 @@
 import 'package:PiliPlus/common/widgets/video_card/video_card_h_layout.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
+import 'package:PiliPlus/models/common/stat_type.dart';
+import 'package:PiliPlus/utils/num_utils.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
@@ -25,9 +27,11 @@ class VideoCardH extends StatelessWidget {
     this.onViewLater,
     this.onRemove,
     this.adaptiveCover = false,
+    this.compactSidebar = false,
   });
   final HorizontalVideoModel videoItem;
   final bool adaptiveCover;
+  final bool compactSidebar;
   final VoidCallback? onTap;
   final ValueChanged<int>? onViewLater;
   final VoidCallback? onRemove;
@@ -61,7 +65,11 @@ class VideoCardH extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: adaptiveCover
-                          ? VideoCardHLayout.coverWidth(bounds.maxWidth, bounds.maxHeight)
+                          ? VideoCardHLayout.coverWidth(
+                              bounds.maxWidth,
+                              bounds.maxHeight,
+                              compactSidebar: compactSidebar,
+                            )
                           : null,
                       child: AspectRatio(
                         aspectRatio: Style.aspectRatio,
@@ -75,27 +83,137 @@ class VideoCardH extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    content(theme),
+                    compactSidebar ? _compactContent(theme) : content(theme),
                   ],
                 ),
               ),
             ),
           ),
-          Positioned(
-            bottom: 3,
-            right: 16,
-            width: 29,
-            height: 29,
-            child: VideoPopupMenu(
-              iconSize: 17,
-              videoItem: videoItem,
-              onRemove: onRemove,
+          if (!compactSidebar)
+            Positioned(
+              bottom: 3,
+              right: 16,
+              width: 29,
+              height: 29,
+              child: VideoPopupMenu(
+                iconSize: 17,
+                videoItem: videoItem,
+                onRemove: onRemove,
+              ),
             ),
-          ),
         ],
       ),
     );
     return surface;
+  }
+
+  /// Keep metadata directly below the title. The menu has its own trailing
+  /// target and cannot paint over the play/danmaku counts.
+  Widget _compactContent(ThemeData theme) {
+    final pubdate = DateFormatUtils.dateFormat(videoItem.pubdate!);
+    final metadata = [
+      if (pubdate.isNotEmpty) pubdate,
+      videoItem.owner.name,
+    ].join('  ');
+    final titleStyle = TextStyle(
+      fontSize: theme.textTheme.bodyMedium!.fontSize,
+      height: 1.28,
+      letterSpacing: .1,
+    );
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (videoItem.titleList?.isNotEmpty == true)
+            Text.rich(
+              TextSpan(
+                children: [
+                  for (final item in videoItem.titleList!)
+                    TextSpan(
+                      text: item.text,
+                      style: item.isEm
+                          ? TextStyle(color: theme.colorScheme.primary)
+                          : null,
+                    ),
+                ],
+              ),
+              style: titleStyle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            )
+          else
+            Text(
+              videoItem.title,
+              style: titleStyle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          const SizedBox(height: 4),
+          Text(
+            metadata,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1,
+              color: theme.colorScheme.outline,
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: videoItem.isLive == true
+                    ? const SizedBox.shrink()
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _compactStat(
+                            theme,
+                            StatType.play,
+                            videoItem.stat.view,
+                          ),
+                          _compactStat(
+                            theme,
+                            StatType.danmaku,
+                            videoItem.stat.danmu,
+                          ),
+                        ],
+                      ),
+              ),
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: VideoPopupMenu(
+                  iconSize: 17,
+                  videoItem: videoItem,
+                  onRemove: onRemove,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _compactStat(ThemeData theme, StatType type, int? value) {
+    final color = theme.colorScheme.outline.withValues(alpha: .8);
+    return Row(
+      spacing: 2,
+      children: [
+        Icon(type.iconData, semanticLabel: type.label, size: 13, color: color),
+        Expanded(
+          child: Text(
+            NumUtils.numFormat(value),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 12, height: 1.25, color: color),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget content(ThemeData theme) {

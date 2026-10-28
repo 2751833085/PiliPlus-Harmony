@@ -1784,22 +1784,47 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     return _cachedTabletReplies!;
   }
 
-  bool? _tabletRelatedCompact;
+  (bool, bool)? _tabletRelatedConfig;
   Widget? _cachedTabletRelated;
   Widget _tabletRelated({required bool sidebar}) {
-    if (_tabletRelatedCompact != sidebar) {
-      _tabletRelatedCompact = sidebar;
+    final compactSidebar = sidebar && _dualFoldVideoLayout;
+    final config = (sidebar, compactSidebar);
+    if (_tabletRelatedConfig != config) {
+      _tabletRelatedConfig = config;
       _cachedTabletRelated = RelatedVideoPanel(
         key: videoRelatedKey,
         heroTag: heroTag,
         sidebar: sidebar,
+        compactSidebar: compactSidebar,
       );
     }
     return _cachedTabletRelated!;
   }
 
+  Size get _tabletWindow => Size(maxWidth - padding.horizontal, maxHeight);
+  // View metrics describe the current app window before the optional UI zoom.
+  // Form detection must not mistake a zoomed-out double fold for a triple fold.
+  Size get _unscaledTabletWindow {
+    final view = View.of(context);
+    return view.physicalSize / view.devicePixelRatio;
+  }
+
+  bool get _dualFoldVideoLayout => TabletVideoLayout.dualFold(
+    _tabletWindow,
+    foldable: HarmonyChannel.foldable.value,
+    unscaledWindow: _unscaledTabletWindow,
+  );
+  bool get _dualFoldCommentsBelow => TabletVideoLayout.commentsBelowVideo(
+    _tabletWindow,
+    foldable: HarmonyChannel.foldable.value,
+    unscaledWindow: _unscaledTabletWindow,
+    enabled: Pref.dualFoldCommentsBelowVideo,
+  );
+
   Widget _tabletVideoBody() {
-    if (!Pref.tabletCombinedRightPanel &&
+    final commentsBelow = _dualFoldCommentsBelow;
+    if (!commentsBelow &&
+        !Pref.tabletCombinedRightPanel &&
         (Pref.tabletVideoInfoOnRight ||
             TabletVideoLayout.wide(
               Size(maxWidth - padding.horizontal, maxHeight),
@@ -1809,7 +1834,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final availableWidth = maxWidth - padding.horizontal;
     final sideWidth = TabletVideoLayout.sidebarWidth(availableWidth);
     final leftWidth = availableWidth - sideWidth;
-    final height = leftWidth / Style.aspectRatio16x9;
+    final height =
+        leftWidth /
+        TabletVideoLayout.playerAspectRatio(
+          _tabletWindow,
+          foldable: HarmonyChannel.foldable.value,
+          unscaledWindow: _unscaledTabletWindow,
+        );
     final detailsHeight = max(0.0, maxHeight - padding.top - height);
     final playerWidth = _expand(leftWidth, maxWidth);
     final playerHeight = _expand(height, maxHeight);
@@ -1832,7 +1863,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                 child: SizedBox(
                   width: leftWidth,
                   height: detailsHeight,
-                  child: Pref.tabletCombinedRightPanel
+                  child: Pref.tabletCombinedRightPanel && !commentsBelow
                       ? CustomScrollView(slivers: [intro])
                       : videoDetailController.showReply
                       ? _tabletReplies(intro)
@@ -1897,7 +1928,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     );
   }
 
-  Widget _tabletRightTabs(Widget related) => Pref.tabletCombinedRightPanel
+  Widget _tabletRightTabs(Widget related) =>
+      Pref.tabletCombinedRightPanel && !_dualFoldCommentsBelow
       ? TabletDetailTabs(
           related: related,
           comments: videoDetailController.showReply
@@ -1915,7 +1947,13 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final width = maxWidth - padding.horizontal;
     final sideWidth = TabletVideoLayout.sidebarWidth(width);
     final leftWidth = width - sideWidth;
-    final height = leftWidth / Style.aspectRatio16x9;
+    final height =
+        leftWidth /
+        TabletVideoLayout.playerAspectRatio(
+          _tabletWindow,
+          foldable: HarmonyChannel.foldable.value,
+          unscaledWindow: _unscaledTabletWindow,
+        );
     final bodyHeight = maxHeight - padding.top;
     final playerWidth = _expand(leftWidth, maxWidth);
     final playerHeight = _expand(height, maxHeight);

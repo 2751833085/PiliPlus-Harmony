@@ -121,6 +121,40 @@ abstract final class TabletVideoLayout {
       window.width >= 680 && window.height >= 560;
   static bool wide(Size window) =>
       enabled(window) && window.width >= 960 && window.aspectRatio >= 1.2;
+
+  /// The longest-side bound excludes the rotated three-panel window too.
+  /// A near-square ordinary tablet must not activate a fold-only preference.
+  static bool dualFold(
+    Size window, {
+    required bool foldable,
+    Size? unscaledWindow,
+  }) =>
+      foldable &&
+      enabled(window) &&
+      enabled(unscaledWindow ?? window) &&
+      (unscaledWindow ?? window).longestSide < 960;
+
+  static bool commentsBelowVideo(
+    Size window, {
+    required bool foldable,
+    required bool enabled,
+    Size? unscaledWindow,
+  }) =>
+      enabled &&
+      dualFold(
+        window,
+        foldable: foldable,
+        unscaledWindow: unscaledWindow,
+      );
+
+  static double playerAspectRatio(
+    Size window, {
+    required bool foldable,
+    Size? unscaledWindow,
+  }) => dualFold(window, foldable: foldable, unscaledWindow: unscaledWindow)
+      ? 1.68
+      : 16 / 9;
+
   static double sidebarWidth(double width) => (width * .365).clamp(240, 440);
 }
 

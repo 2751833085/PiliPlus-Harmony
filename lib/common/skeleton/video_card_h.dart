@@ -4,8 +4,13 @@ import 'package:PiliPlus/common/style.dart';
 import 'package:material_ui/material_ui.dart';
 
 class VideoCardHSkeleton extends StatelessWidget {
-  const VideoCardHSkeleton({super.key, this.adaptiveCover = false});
+  const VideoCardHSkeleton({
+    super.key,
+    this.adaptiveCover = false,
+    this.compactSidebar = false,
+  });
   final bool adaptiveCover;
+  final bool compactSidebar;
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +27,7 @@ class VideoCardHSkeleton extends StatelessWidget {
                     ? VideoCardHLayout.coverWidth(
                         bounds.maxWidth,
                         bounds.maxHeight,
+                        compactSidebar: compactSidebar,
                       )
                     : null,
                 child: AspectRatio(
@@ -51,28 +57,20 @@ class VideoCardHSkeleton extends StatelessWidget {
                         width: 150,
                         height: 13,
                       ),
-                      const Spacer(),
+                      if (compactSidebar)
+                        const SizedBox(height: 4)
+                      else
+                        const Spacer(),
                       Container(
                         color: color,
                         width: 100,
                         height: 13,
                         margin: const .only(bottom: 5),
                       ),
-                      Row(
-                        spacing: 8,
-                        children: [
-                          Container(
-                            color: color,
-                            width: 40,
-                            height: 13,
-                          ),
-                          Container(
-                            color: color,
-                            width: 40,
-                            height: 13,
-                          ),
-                        ],
-                      ),
+                      if (compactSidebar)
+                        FittedBox(fit: BoxFit.scaleDown, child: _stats(color))
+                      else
+                        _stats(color),
                     ],
                   ),
                 ),
@@ -83,4 +81,12 @@ class VideoCardHSkeleton extends StatelessWidget {
       ),
     );
   }
+
+  Widget _stats(Color color) => Row(
+    spacing: 8,
+    children: [
+      Container(color: color, width: 40, height: 13),
+      Container(color: color, width: 40, height: 13),
+    ],
+  );
 }
