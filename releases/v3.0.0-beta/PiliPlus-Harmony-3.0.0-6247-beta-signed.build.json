@@ -1,0 +1,31 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6247,
+  "releaseTag": "v3.0.0+6247",
+  "sha256": "8b4643a692f30e029f1b6ad8824f56f3ef336ddca5af74bb57ce679f4c495694",
+  "sizeBytes": 33143243,
+  "signatureVerified": true,
+  "sourceCommit": "912caa4339367c993335f7bfcbe1c708524138b8",
+  "installedOnDevice": false,
+  "fullDeviceValidationComplete": false,
+  "qaGuestIsolated": false,
+  "performanceDiagnostics": false,
+  "layoutDiagnostics": false,
+  "validation": "339 Harmony regression tests passed before the final sidebar-only spacing refinement; six focused card/image cases passed after it. Dual-fold placement policy, UI zoom form isolation, actual related panel loading-to-content cover geometry, large text and route-settled keyboard focus were checked. Emulator verification scope is recorded separately. HAP signature, ZIP CRC, version and pinned native MPV hash verified.",
+  "knownLimitations": [
+    "Pinned media_kit_video rejects emulator texture output; actual video/audio decode and weak-network synchronization remain unverified.",
+    "Guest-only account features and full remote offline-download/playback workflow are not fully validated; download engine has real local HTTP/disk regression coverage.",
+    "Flutter build/raster timing is not presented FPS; actual phone frame pacing and absence of all bugs are not proven."
+  ],
+  "toolchainCommit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6",
+  "libmpvSha256": "38664cf7dc7af1b3093a731c94f6e48f9c1092c97a774656e6c2b59cfe0df99e",
+  "installedOnEmulator": true,
+  "installedOnPhone": false,
+  "coldEntryJankEliminationVerified": false,
+  "regressionScope": {
+    "fullSuiteAppSourceCommit": "5b272d102694549af926c589ff92b0f4bd16bccf",
+    "fullSuitePassed": 339,
+    "finalSidebarFocusedPassed": 6,
+    "finalSidebarSourceCommit": "912caa4339367c993335f7bfcbe1c708524138b8"
+  }
+}

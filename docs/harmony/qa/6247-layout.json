@@ -1,0 +1,38 @@
+{
+  "versionCode": 6247,
+  "layoutQaSourceCommit": "ad8be31122dc5dc42d1f91db7b0abd9dac219722",
+  "system": "Official HarmonyOS 7 TripleFold",
+  "nativeSizesPx": {
+    "single": [
+      1008,
+      2232
+    ],
+    "double": [
+      2048,
+      2232
+    ],
+    "triple": [
+      3184,
+      2232
+    ]
+  },
+  "devicePixelRatio": 2.875,
+  "checks": {
+    "dualCommentsHeaderInLeftColumn": true,
+    "dualDefaultHasNoRightCommentsTab": true,
+    "settingInitiallyOn": true,
+    "settingCanTurnOff": true,
+    "offRestoresRightRelatedTab": true,
+    "offRestoresRightCommentsTab": true,
+    "offPersistsAfterAppRestart": true,
+    "settingRestoredToOn": true,
+    "replyDetailsOpenInRightColumn": true,
+    "backClosesOnlyReplyDetails": true,
+    "relatedMenuOpens": true,
+    "tripleRetainsRelatedAndCommentsTabs": true
+  },
+  "normalDecodeVerified": false,
+  "presentedFps": null,
+  "coldEntryJankEliminationVerified": false,
+  "scope": "Dedicated emulator guest profile; no phone UI operations. Layout QA precedes the shared render-phase route optimization; final shipping binary gets a separate smoke test. Playback texture output is not supported by the pinned emulator dependency. Tool locator and initial-start readiness retries were excluded from passing checks."
+}

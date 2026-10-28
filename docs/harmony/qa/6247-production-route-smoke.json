@@ -1,0 +1,66 @@
+{
+  "sourceCommit": "5b272d102694549af926c589ff92b0f4bd16bccf",
+  "versionCode": 6247,
+  "hapSha256": "3398a29d5e53992a583d263d44312dfd76254befc8a05312b0ca3662ad512154",
+  "checksPassed": 11,
+  "durationSeconds": 98.623,
+  "sameProcessAlive": true,
+  "cases": [
+    {
+      "case": "production_home_ready",
+      "passed": true,
+      "elapsedSeconds": 1.97
+    },
+    {
+      "case": "first_settings_entry",
+      "passed": true,
+      "elapsedSeconds": 13.124
+    },
+    {
+      "case": "first_settings_back",
+      "passed": true,
+      "elapsedSeconds": 16.899
+    },
+    {
+      "case": "repeat_settings_entry",
+      "passed": true,
+      "elapsedSeconds": 23.17
+    },
+    {
+      "case": "repeat_settings_back",
+      "passed": true,
+      "elapsedSeconds": 28.128
+    },
+    {
+      "case": "first_video_entry",
+      "passed": true,
+      "elapsedSeconds": 48.767
+    },
+    {
+      "case": "first_video_back",
+      "passed": true,
+      "elapsedSeconds": 54.073
+    },
+    {
+      "case": "repeat_video_entry",
+      "passed": true,
+      "elapsedSeconds": 64.351
+    },
+    {
+      "case": "repeat_video_back",
+      "passed": true,
+      "elapsedSeconds": 70.685
+    },
+    {
+      "case": "production_default_dual_comments_left",
+      "passed": true,
+      "elapsedSeconds": 88.95
+    },
+    {
+      "case": "same_process_alive",
+      "passed": true,
+      "elapsedSeconds": 89.176
+    }
+  ],
+  "scope": "Functional first/repeat route navigation and default dual-fold layout; not presented FPS, jank elimination or video decoding proof."
+}

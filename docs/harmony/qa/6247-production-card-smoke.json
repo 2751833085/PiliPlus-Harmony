@@ -1,0 +1,31 @@
+{
+  "sourceCommit": "912caa4339367c993335f7bfcbe1c708524138b8",
+  "versionCode": 6247,
+  "hapSha256": "8b4643a692f30e029f1b6ad8824f56f3ef336ddca5af74bb57ce679f4c495694",
+  "sizeBytes": 33143243,
+  "signatureVerified": true,
+  "diagnosticsDisabled": true,
+  "allPassed": true,
+  "checks": {
+    "defaultDualCommentsBelowVideo": true,
+    "rightRelatedVideosLoaded": true,
+    "menuUnderCoverOpens": true,
+    "menuBackKeepsVideo": true,
+    "sameProcessAlive": true
+  },
+  "durationSeconds": 8.566,
+  "visualNumbersNotEllipsized": true,
+  "scope": "Same shipping HAP on the dedicated HarmonyOS7 emulator at native double-fold resolution. Functional layout/menu checks; no native decode or presented-FPS claim.",
+  "knownLogMatches": {
+    "Unhandled Exception": 0,
+    "RenderFlex": 0,
+    "Duplicate GlobalKey": 0,
+    "ErrorWidget": 0,
+    "MissingPluginException": 0,
+    "Native loading opacity update failed": 0,
+    "PiliPlusFrameTiming": 0,
+    "PiliPlusFrameSamples": 0
+  },
+  "visualDurationNotCovered": true,
+  "largeCountWidgetRegressionPassed": true
+}
