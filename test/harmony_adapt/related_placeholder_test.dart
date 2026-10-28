@@ -200,7 +200,7 @@ void main() {
         const MaterialApp(
           home: Center(
             child: SizedBox(
-              width: 251,
+              width: 395,
               height: 600,
               child: CustomScrollView(
                 slivers: [
@@ -214,7 +214,7 @@ void main() {
       expect(tester.getSize(find.byType(VideoCardHSkeleton).first).height, 116);
       expect(
         tester.getSize(find.byType(AspectRatio).first).width,
-        closeTo(104.42, .01),
+        closeTo(((395 - 24) * .46).clamp(0, 106 * Style.aspectRatio), .01),
       );
       expect(controller.loadingState.value, isA<Loading>());
       controller.loadingState.value = Success([

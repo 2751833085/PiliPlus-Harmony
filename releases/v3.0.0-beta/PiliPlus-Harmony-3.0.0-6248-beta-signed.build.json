@@ -1,0 +1,18 @@
+{
+  "version": "3.0.0",
+  "versionCode": 6248,
+  "releaseTag": "v3.0.0+6248",
+  "sourceCommit": "9a30495816167980e105a3462d50184ebcdaa1d3",
+  "sha256": "ef0cb7c9446a6d08dc5f7caaeb9cce6f1e256f7adc002e5a42569a1baad86c14",
+  "sizeBytes": 33143243,
+  "signatureVerified": true,
+  "qaGuestIsolated": false,
+  "performanceDiagnostics": false,
+  "layoutDiagnostics": false,
+  "installedOnDevice": false,
+  "installedOnPhone": false,
+  "installedOnEmulator": true,
+  "fullDeviceValidationComplete": false,
+  "validation": "Three targeted sidebar regression cases passed, including three double-fold column widths with three text scales, unchanged loading-to-content cover geometry, large play count visibility, and lower-right anchors matching the existing three-panel sidebar. Same shipping HAP emulator menu open/back smoke checks passed. No real-phone FPS or decode claim.",
+  "libmpvSha256": "38664cf7dc7af1b3093a731c94f6e48f9c1092c97a774656e6c2b59cfe0df99e"
+}
