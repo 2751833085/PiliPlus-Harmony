@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:PiliPlus/common/skeleton/video_card_h.dart';
 import 'package:PiliPlus/common/style.dart';
@@ -67,7 +68,7 @@ void main() {
           'pubdate': 1731650000,
           'duration': 62,
           'owner': {'name': '视频作者'},
-          'stat': {'view': 158000, 'danmaku': 893},
+          'stat': {'view': index == 1 ? 11198000 : 158000, 'danmaku': 893},
         }),
       );
       for (final scale in [1.0, 1.3, 1.8]) {
@@ -148,7 +149,17 @@ void main() {
           metadataFontSize: 12 * scale,
         );
         expect(tester.getSize(first).height, closeTo(extent, .01));
-        if (scale == 1) expect(extent, 104);
+        if (scale == 1) {
+          expect(extent, 104);
+          final largeCount = find.text('1119.8万');
+          expect(largeCount, findsOneWidget);
+          expect(
+            tester.renderObject<RenderParagraph>(largeCount).didExceedMaxLines,
+            isFalse,
+            reason:
+                'The menu must leave the complete count and its unit visible',
+          );
+        }
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
       }

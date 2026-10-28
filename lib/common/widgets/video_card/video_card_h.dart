@@ -55,37 +55,58 @@ class VideoCardH extends StatelessWidget {
             onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
             onTap: onTap ?? () => pushVideoH(videoItem),
             child: Padding(
-              padding: const .symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: Style.safeSpace,
                 vertical: 5,
               ),
               child: LayoutBuilder(
-                builder: (context, bounds) => Row(
-                  crossAxisAlignment: .start,
-                  children: [
-                    SizedBox(
-                      width: adaptiveCover
-                          ? VideoCardHLayout.coverWidth(
-                              bounds.maxWidth,
-                              bounds.maxHeight,
-                              compactSidebar: compactSidebar,
-                            )
-                          : null,
-                      child: AspectRatio(
-                        aspectRatio: Style.aspectRatio,
-                        child: _CoverBuilderH(
-                          cover: videoItem.cover,
-                          badge: videoItem.badge,
-                          duration: videoItem.duration,
-                          progress: videoItem.progress,
-                          colorScheme: theme.colorScheme,
+                builder: (context, bounds) {
+                  final coverWidth = VideoCardHLayout.coverWidth(
+                    bounds.maxWidth,
+                    bounds.maxHeight,
+                    compactSidebar: compactSidebar,
+                  );
+                  final contentRow = Row(
+                    crossAxisAlignment: .start,
+                    children: [
+                      SizedBox(
+                        width: adaptiveCover || compactSidebar
+                            ? coverWidth
+                            : null,
+                        child: AspectRatio(
+                          aspectRatio: Style.aspectRatio,
+                          child: _CoverBuilderH(
+                            cover: videoItem.cover,
+                            badge: videoItem.badge,
+                            duration: videoItem.duration,
+                            progress: videoItem.progress,
+                            colorScheme: theme.colorScheme,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    compactSidebar ? _compactContent(theme) : content(theme),
-                  ],
-                ),
+                      SizedBox(width: compactSidebar ? 6 : 10),
+                      compactSidebar ? _compactContent(theme) : content(theme),
+                    ],
+                  );
+                  if (!compactSidebar) return contentRow;
+                  return Stack(
+                    children: [
+                      contentRow,
+                      Positioned(
+                        left: coverWidth - 40,
+                        bottom: 0,
+                        width: 40,
+                        height: 40,
+                        child: VideoPopupMenu(
+                          iconSize: 17,
+                          iconOffset: const Offset(0, 7),
+                          videoItem: videoItem,
+                          onRemove: onRemove,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -107,8 +128,8 @@ class VideoCardH extends StatelessWidget {
     return surface;
   }
 
-  /// Keep metadata directly below the title. The menu has its own trailing
-  /// target and cannot paint over the play/danmaku counts.
+  /// Keep metadata directly below the title. The menu sits below the cover,
+  /// leaving this column's full width for readable play/danmaku counts.
   Widget _compactContent(ThemeData theme) {
     final pubdate = DateFormatUtils.dateFormat(videoItem.pubdate!);
     final metadata = [
@@ -160,39 +181,10 @@ class VideoCardH extends StatelessWidget {
               color: theme.colorScheme.outline,
             ),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: videoItem.isLive == true
-                    ? const SizedBox.shrink()
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _compactStat(
-                            theme,
-                            StatType.play,
-                            videoItem.stat.view,
-                          ),
-                          _compactStat(
-                            theme,
-                            StatType.danmaku,
-                            videoItem.stat.danmu,
-                          ),
-                        ],
-                      ),
-              ),
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: VideoPopupMenu(
-                  iconSize: 17,
-                  videoItem: videoItem,
-                  onRemove: onRemove,
-                ),
-              ),
-            ],
-          ),
+          if (videoItem.isLive != true) ...[
+            _compactStat(theme, StatType.play, videoItem.stat.view),
+            _compactStat(theme, StatType.danmaku, videoItem.stat.danmu),
+          ],
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -22,11 +23,12 @@ void main() {
         image.dispose();
         return data!.buffer.asUint8List();
       });
+      final imageProvider = MemoryImage(bytes!);
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
             child: FullCoverPreview(
-              image: MemoryImage(bytes!),
+              image: imageProvider,
               width: 480,
               aspectRatio: size.aspectRatio,
               maxHeight: 500,
@@ -35,9 +37,29 @@ void main() {
         ),
       );
       final before = tester.getSize(find.byType(RawImage));
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 40)),
+      final configuration = createLocalImageConfiguration(
+        tester.element(find.byType(FullCoverPreview)),
       );
+      await tester.runAsync(() async {
+        final loaded = Completer<void>();
+        final stream = imageProvider.resolve(configuration);
+        final listener = ImageStreamListener(
+          (imageInfo, _) {
+            // This listener owns its ImageInfo; the widget keeps its own copy.
+            imageInfo.dispose();
+            if (!loaded.isCompleted) loaded.complete();
+          },
+          onError: (Object error, StackTrace? stack) {
+            if (!loaded.isCompleted) loaded.completeError(error, stack);
+          },
+        );
+        try {
+          stream.addListener(listener);
+          await loaded.future.timeout(const Duration(seconds: 10));
+        } finally {
+          stream.removeListener(listener);
+        }
+      });
       await tester.pumpAndSettle();
       final render = tester.renderObject<RenderImage>(find.byType(RawImage));
       expect(render.image, isNotNull);

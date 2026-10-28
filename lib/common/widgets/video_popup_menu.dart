@@ -26,6 +26,7 @@ class _VideoCustomAction {
 class VideoPopupMenu extends StatelessWidget {
   final double? iconSize;
   final double menuItemHeight;
+  final Offset iconOffset;
   final BaseSimpleVideoItemModel videoItem;
   final VoidCallback? onRemove;
 
@@ -35,6 +36,7 @@ class VideoPopupMenu extends StatelessWidget {
     required this.videoItem,
     this.onRemove,
     this.menuItemHeight = 45,
+    this.iconOffset = const Offset(0, 2),
   });
 
   @override
@@ -42,7 +44,7 @@ class VideoPopupMenu extends StatelessWidget {
     return PopupMenuButton(
       padding: EdgeInsets.zero,
       icon: Transform.translate(
-        offset: const Offset(0, 2),
+        offset: iconOffset,
         child: Icon(
           Icons.more_vert_outlined,
           color: Theme.of(context).colorScheme.outline,
