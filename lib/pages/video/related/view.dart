@@ -40,13 +40,19 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SliverPadding(
-      padding: EdgeInsets.only(
-        top: widget.sidebar ? 13 : 7,
-        bottom: widget.sidebar ? 16 : 100,
-      ),
-      sliver: Obx(
-        () => _buildBody(context, _relatedController.loadingState.value),
+    return SliverLayoutBuilder(
+      builder: (context, constraints) => SliverPadding(
+        padding: EdgeInsets.only(
+          top: widget.sidebar ? 13 : 7,
+          bottom: widget.sidebar ? 16 : 100,
+        ),
+        sliver: Obx(
+          () => _buildBody(
+            context,
+            _relatedController.loadingState.value,
+            constraints.crossAxisExtent,
+          ),
+        ),
       ),
     );
   }
@@ -60,12 +66,14 @@ class _RelatedVideoPanelState extends State<RelatedVideoPanel> with GridMixin {
   Widget _buildBody(
     BuildContext context,
     LoadingState<List<HotVideoItemModel>?> loadingState,
+    double availableWidth,
   ) {
     final scaler = MediaQuery.textScalerOf(context);
     final sidebarDelegate = widget.compactSidebar
         ? SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 1,
             mainAxisExtent: VideoCardHLayout.compactRowExtent(
+              availableWidth: availableWidth,
               titleFontSize: scaler.scale(
                 Theme.of(context).textTheme.bodyMedium!.fontSize!,
               ),

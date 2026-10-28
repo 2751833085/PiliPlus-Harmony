@@ -15,8 +15,19 @@ abstract final class VideoCardHLayout {
   static double compactRowExtent({
     required double titleFontSize,
     required double metadataFontSize,
+    double availableWidth = 251,
   }) => max(
-    104,
+    // Keep the menu glyph below the cover after rotation or UI zoom too.
+    max(
+      104,
+      coverWidth(
+                max(0, availableWidth - 24),
+                double.infinity,
+                compactSidebar: true,
+              ) /
+              Style.aspectRatio +
+          33,
+    ),
     titleFontSize * 1.28 * 2 +
         metadataFontSize +
         max(40, metadataFontSize * 1.25 * 2) +

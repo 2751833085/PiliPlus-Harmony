@@ -48,6 +48,7 @@ class VideoCardH extends StatelessWidget {
     final surface = Material(
       type: .transparency,
       child: Stack(
+        fit: compactSidebar ? StackFit.expand : StackFit.loose,
         clipBehavior: .none,
         children: [
           InkWell(

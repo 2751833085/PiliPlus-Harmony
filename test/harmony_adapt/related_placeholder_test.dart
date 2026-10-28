@@ -71,97 +71,123 @@ void main() {
           'stat': {'view': index == 1 ? 11198000 : 158000, 'danmaku': 893},
         }),
       );
-      for (final scale in [1.0, 1.3, 1.8]) {
-        controller.loadingState.value =
-            LoadingState<List<HotVideoItemModel>?>.loading();
-        await tester.pumpWidget(
-          MaterialApp(
-            home: MediaQuery(
-              data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-              child: const Center(
-                child: SizedBox(
-                  width: 251,
-                  height: 600,
-                  child: CustomScrollView(
-                    slivers: const [
-                      RelatedVideoPanel(
-                        heroTag: 'dual',
-                        sidebar: true,
-                        compactSidebar: true,
-                      ),
-                    ],
+      for (final width in [251.0, 274.0, 315.0]) {
+        for (final scale in [1.0, 1.3, 1.8]) {
+          controller.loadingState.value =
+              LoadingState<List<HotVideoItemModel>?>.loading();
+          await tester.pumpWidget(
+            MaterialApp(
+              home: MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: Center(
+                  child: SizedBox(
+                    width: width,
+                    height: 600,
+                    child: CustomScrollView(
+                      slivers: const [
+                        RelatedVideoPanel(
+                          heroTag: 'dual',
+                          sidebar: true,
+                          compactSidebar: true,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-        final loadingCover = tester.getSize(find.byType(AspectRatio).first);
-        expect(
-          loadingCover.width / loadingCover.height,
-          closeTo(Style.aspectRatio, .001),
-        );
-        expect(loadingCover.width, closeTo(113.5, .01));
-        controller.loadingState.value = Success(items);
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 120));
-        expect(tester.getSize(find.byType(AspectRatio).first), loadingCover);
-        expect(find.byType(VideoCardHSkeleton), findsNothing);
-        final cards = find.byType(VideoCardH);
-        final first = cards.first;
-        final menu = find.descendant(
-          of: first,
-          matching: find.byType(VideoPopupMenu),
-        );
-        final play = find.descendant(of: first, matching: find.text('15.8万'));
-        final danmaku = find.descendant(of: first, matching: find.text('893'));
-        final metadata = find.descendant(
-          of: first,
-          matching: find.textContaining('视频作者'),
-        );
-        final title = find.descendant(
-          of: first,
-          matching: find.textContaining('相关视频标题'),
-        );
-        expect(tester.getSize(menu), const Size(40, 40));
-        expect(tester.widget<Text>(play).style!.fontSize, 12);
-        expect(tester.widget<Text>(danmaku).style!.fontSize, 12);
-        expect(
-          find.descendant(of: first, matching: find.byType(FittedBox)),
-          findsNothing,
-        );
-        expect(
-          tester.getTopLeft(metadata).dy - tester.getBottomLeft(title).dy,
-          closeTo(4, .01),
-        );
-        expect(tester.getRect(play).overlaps(tester.getRect(menu)), isFalse);
-        expect(tester.getRect(danmaku).overlaps(tester.getRect(menu)), isFalse);
-        expect(
-          tester.getTopLeft(play).dy,
-          lessThan(tester.getTopLeft(danmaku).dy),
-        );
-        expect(
-          tester.getBottomLeft(danmaku).dy,
-          lessThanOrEqualTo(tester.getBottomLeft(first).dy),
-        );
-        final extent = VideoCardHLayout.compactRowExtent(
-          titleFontSize: 14 * scale,
-          metadataFontSize: 12 * scale,
-        );
-        expect(tester.getSize(first).height, closeTo(extent, .01));
-        if (scale == 1) {
-          expect(extent, 104);
-          final largeCount = find.text('1119.8万');
-          expect(largeCount, findsOneWidget);
-          expect(
-            tester.renderObject<RenderParagraph>(largeCount).didExceedMaxLines,
-            isFalse,
-            reason:
-                'The menu must leave the complete count and its unit visible',
           );
+          final loadingCover = tester.getSize(find.byType(AspectRatio).first);
+          expect(
+            loadingCover.width / loadingCover.height,
+            closeTo(Style.aspectRatio, .001),
+          );
+          expect(loadingCover.width, closeTo((width - 24) * .5, .01));
+          controller.loadingState.value = Success(items);
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 120));
+          expect(tester.getSize(find.byType(AspectRatio).first), loadingCover);
+          expect(find.byType(VideoCardHSkeleton), findsNothing);
+          final cards = find.byType(VideoCardH);
+          final first = cards.first;
+          final menu = find.descendant(
+            of: first,
+            matching: find.byType(VideoPopupMenu),
+          );
+          final play = find.descendant(of: first, matching: find.text('15.8万'));
+          final danmaku = find.descendant(
+            of: first,
+            matching: find.text('893'),
+          );
+          final metadata = find.descendant(
+            of: first,
+            matching: find.textContaining('视频作者'),
+          );
+          final title = find.descendant(
+            of: first,
+            matching: find.textContaining('相关视频标题'),
+          );
+          expect(tester.getSize(menu), const Size(40, 40));
+          expect(tester.widget<Text>(play).style!.fontSize, 12);
+          expect(tester.widget<Text>(danmaku).style!.fontSize, 12);
+          expect(
+            find.descendant(of: first, matching: find.byType(FittedBox)),
+            findsNothing,
+          );
+          expect(
+            tester.getTopLeft(metadata).dy - tester.getBottomLeft(title).dy,
+            closeTo(4, .01),
+          );
+          expect(tester.getRect(play).overlaps(tester.getRect(menu)), isFalse);
+          expect(
+            tester.getRect(danmaku).overlaps(tester.getRect(menu)),
+            isFalse,
+          );
+          expect(
+            tester.getTopLeft(play).dy,
+            lessThan(tester.getTopLeft(danmaku).dy),
+          );
+          expect(
+            tester.getBottomLeft(danmaku).dy,
+            lessThanOrEqualTo(tester.getBottomLeft(first).dy),
+          );
+          final extent = VideoCardHLayout.compactRowExtent(
+            availableWidth: width,
+            titleFontSize: 14 * scale,
+            metadataFontSize: 12 * scale,
+          );
+          expect(tester.getSize(first).height, closeTo(extent, .01));
+          if (scale == 1) {
+            if (width == 251) expect(extent, 104);
+            final cover = tester.getRect(find.byType(AspectRatio).first);
+            final dots = find.descendant(
+              of: first,
+              matching: find.byIcon(Icons.more_vert_outlined),
+            );
+            expect(
+              tester
+                  .getTopLeft(
+                    find.descendant(of: dots, matching: find.byType(RichText)),
+                  )
+                  .dy,
+              greaterThan(cover.bottom),
+              reason:
+                  'Visible dots stay below the cover and duration at every column width',
+            );
+            final largeCount = find.text('1119.8万');
+            expect(largeCount, findsOneWidget);
+            expect(
+              tester
+                  .renderObject<RenderParagraph>(largeCount)
+                  .didExceedMaxLines,
+              isFalse,
+              reason:
+                  'The menu must leave the complete count and its unit visible',
+            );
+          }
+          expect(tester.takeException(), isNull);
+          await tester.pumpWidget(const SizedBox());
         }
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox());
       }
     },
   );
