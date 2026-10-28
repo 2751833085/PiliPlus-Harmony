@@ -67,7 +67,7 @@ class VideoCardH extends StatelessWidget {
                     bounds.maxHeight,
                     compactSidebar: compactSidebar,
                   );
-                  final contentRow = Row(
+                  return Row(
                     crossAxisAlignment: .start,
                     children: [
                       SizedBox(
@@ -89,48 +89,29 @@ class VideoCardH extends StatelessWidget {
                       compactSidebar ? _compactContent(theme) : content(theme),
                     ],
                   );
-                  if (!compactSidebar) return contentRow;
-                  return Stack(
-                    children: [
-                      contentRow,
-                      Positioned(
-                        left: coverWidth - 40,
-                        bottom: 0,
-                        width: 40,
-                        height: 40,
-                        child: VideoPopupMenu(
-                          iconSize: 17,
-                          iconOffset: const Offset(0, 7),
-                          videoItem: videoItem,
-                          onRemove: onRemove,
-                        ),
-                      ),
-                    ],
-                  );
                 },
               ),
             ),
           ),
-          if (!compactSidebar)
-            Positioned(
-              bottom: 3,
-              right: 16,
-              width: 29,
-              height: 29,
-              child: VideoPopupMenu(
-                iconSize: 17,
-                videoItem: videoItem,
-                onRemove: onRemove,
-              ),
+          Positioned(
+            bottom: 3,
+            right: 16,
+            width: 29,
+            height: 29,
+            child: VideoPopupMenu(
+              iconSize: 17,
+              videoItem: videoItem,
+              onRemove: onRemove,
             ),
+          ),
         ],
       ),
     );
     return surface;
   }
 
-  /// Keep metadata directly below the title. The menu sits below the cover,
-  /// leaving this column's full width for readable play/danmaku counts.
+  /// Keep the play count full width; the final row leaves room for the menu
+  /// at the same lower-right position used by the regular sidebar.
   Widget _compactContent(ThemeData theme) {
     final pubdate = DateFormatUtils.dateFormat(videoItem.pubdate!);
     final metadata = [
@@ -184,7 +165,14 @@ class VideoCardH extends StatelessWidget {
           ),
           if (videoItem.isLive != true) ...[
             _compactStat(theme, StatType.play, videoItem.stat.view),
-            _compactStat(theme, StatType.danmaku, videoItem.stat.danmu),
+            Padding(
+              padding: const EdgeInsets.only(right: 36),
+              child: _compactStat(
+                theme,
+                StatType.danmaku,
+                videoItem.stat.danmu,
+              ),
+            ),
           ],
         ],
       ),

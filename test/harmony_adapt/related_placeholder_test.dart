@@ -127,7 +127,15 @@ void main() {
             of: first,
             matching: find.textContaining('相关视频标题'),
           );
-          expect(tester.getSize(menu), const Size(40, 40));
+          expect(tester.getSize(menu), const Size(29, 29));
+          expect(
+            tester.getBottomRight(first).dx - tester.getBottomRight(menu).dx,
+            closeTo(16, .01),
+          );
+          expect(
+            tester.getBottomRight(first).dy - tester.getBottomRight(menu).dy,
+            closeTo(3, .01),
+          );
           expect(tester.widget<Text>(play).style!.fontSize, 12);
           expect(tester.widget<Text>(danmaku).style!.fontSize, 12);
           expect(
@@ -138,7 +146,11 @@ void main() {
             tester.getTopLeft(metadata).dy - tester.getBottomLeft(title).dy,
             closeTo(4, .01),
           );
-          expect(tester.getRect(play).overlaps(tester.getRect(menu)), isFalse);
+          final dots = find.descendant(
+            of: menu,
+            matching: find.byType(RichText),
+          );
+          expect(tester.getRect(play).overlaps(tester.getRect(dots)), isFalse);
           expect(
             tester.getRect(danmaku).overlaps(tester.getRect(menu)),
             isFalse,
@@ -159,21 +171,6 @@ void main() {
           expect(tester.getSize(first).height, closeTo(extent, .01));
           if (scale == 1) {
             if (width == 251) expect(extent, 104);
-            final cover = tester.getRect(find.byType(AspectRatio).first);
-            final dots = find.descendant(
-              of: first,
-              matching: find.byIcon(Icons.more_vert_outlined),
-            );
-            expect(
-              tester
-                  .getTopLeft(
-                    find.descendant(of: dots, matching: find.byType(RichText)),
-                  )
-                  .dy,
-              greaterThan(cover.bottom),
-              reason:
-                  'Visible dots stay below the cover and duration at every column width',
-            );
             final largeCount = find.text('1119.8万');
             expect(largeCount, findsOneWidget);
             expect(
@@ -220,6 +217,31 @@ void main() {
         closeTo(104.42, .01),
       );
       expect(controller.loadingState.value, isA<Loading>());
+      controller.loadingState.value = Success([
+        HotVideoItemModel.fromJson({
+          'bvid': 'BV-existing',
+          'title': '原侧栏菜单位置',
+          'pubdate': 1731650000,
+          'duration': 62,
+          'owner': {'name': '视频作者'},
+          'stat': {'view': 158000, 'danmaku': 893},
+        }),
+      ]);
+      await tester.pump();
+      final card = find.byType(VideoCardH);
+      final menu = find.descendant(
+        of: card,
+        matching: find.byType(VideoPopupMenu),
+      );
+      expect(tester.getSize(menu), const Size(29, 29));
+      expect(
+        tester.getBottomRight(card).dx - tester.getBottomRight(menu).dx,
+        closeTo(16, .01),
+      );
+      expect(
+        tester.getBottomRight(card).dy - tester.getBottomRight(menu).dy,
+        closeTo(3, .01),
+      );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     },
