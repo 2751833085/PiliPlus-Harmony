@@ -1,0 +1,41 @@
+{
+  "tag": "v3.0.0+6250",
+  "release_url": "https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v3.0.0%2B6250",
+  "draft": false,
+  "prerelease": true,
+  "release_id": 437832726,
+  "method": "Anonymous public releases endpoint passed to the app’s actual latestHarmonyRelease/harmonyHapUrl/ReleaseVersion code via Dart; remote asset digests compared with tested local package",
+  "updates": {
+    "3.0.0+6248": true,
+    "3.0.0+6249": true,
+    "3.0.0+6250": false
+  },
+  "hap_url": "https://github.com/2751833085/PiliPlus-Harmony/releases/download/v3.0.0%2B6250/PiliPlus-Harmony-3.0.0-6250-beta-signed.hap",
+  "hap_http_head_status": 200,
+  "assets": [
+    {
+      "name": "6250-source-sha256.json",
+      "bytes": 189920,
+      "sha256": "f934409f8267eee1fa82161e9372cb074643e13e5f4a762d69157b0b1893151c",
+      "remote_digest_matches": true
+    },
+    {
+      "name": "PiliPlus-Harmony-3.0.0-6250-beta-signed.build.json",
+      "bytes": 1973,
+      "sha256": "edc81c352af6ab5e97de176bfa718d77ffdcc66aae6fcbc92610257a330babb5",
+      "remote_digest_matches": true
+    },
+    {
+      "name": "PiliPlus-Harmony-3.0.0-6250-beta-signed.hap",
+      "bytes": 33132666,
+      "sha256": "5838ea7469e756eb1f271d997fe0717f7005a7189f37f796862f7b683432705e",
+      "remote_digest_matches": true
+    },
+    {
+      "name": "PiliPlus-Harmony-3.0.0-6250-beta-signed.hap.sha256",
+      "bytes": 110,
+      "sha256": "1e69bd0674880bbe3407dc3b7d381aaab5188dff399ea7ead517a4ba214f4668",
+      "remote_digest_matches": true
+    }
+  ]
+}
