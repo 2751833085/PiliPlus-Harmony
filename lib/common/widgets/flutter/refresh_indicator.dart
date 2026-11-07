@@ -14,6 +14,7 @@ import 'package:PiliPlus/common/widgets/refresh_layout.dart';
 import 'package:PiliPlus/common/widgets/scroll_behavior.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart'
     show BouncingScrollPhysicsExt;
+import 'package:PiliPlus/models/common/harmony_refresh_sensitivity.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:extended_nested_scroll_view/refresh.dart';
@@ -240,6 +241,8 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   int? _dragPointer;
 
   bool _isArmed = false;
+  double _harmonyTriggerDistance =
+      HarmonyRefreshSensitivity.light.triggerDistance;
 
   // 鸿蒙保留kDragContainerExtentPercentage= Pref.refreshDragPercentage所需
   double _containerExtent = 0.0;
@@ -346,6 +349,10 @@ class RefreshIndicatorState extends State<RefreshIndicator>
       _containerExtent = viewportDimension;
     }
     if (_shouldStart(notification)) {
+      if (_harmony) {
+        _harmonyTriggerDistance =
+            Pref.harmonyRefreshSensitivity.triggerDistance;
+      }
       setState(() {
         _status = RefreshIndicatorStatus.drag;
         // A short, fast pull can start with its only scroll update. Keep it.
@@ -452,7 +459,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   void _checkDragOffset(double containerExtent) {
     if (_harmony) {
       final offset = _harmonyPull;
-      _isArmed = offset >= 64;
+      _isArmed = offset >= _harmonyTriggerDistance;
       _positionController.value = (offset / _harmonyTravel).clamp(0.0, 1.0);
       return;
     }

@@ -1,4 +1,3 @@
-import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -72,7 +71,7 @@ class MainController extends GetxController
 
   final enableMYBar = Pref.enableMYBar;
 
-  /// 鸿蒙原生 HDS 底栏（API >= 23 时由原生渲染液态玻璃页签栏）
+  /// 鸿蒙原生底栏（API >= 23 时由原生渲染液态玻璃页签栏）
   /// 修改设置后需重启应用生效
   final RxBool useNativeTabs = false.obs;
 
@@ -153,7 +152,7 @@ class MainController extends GetxController
       }
     }
 
-    // 鸿蒙：注册原生 HDS 底栏回调，冷启动后主动拉取配置
+    // 鸿蒙：注册原生底栏回调，冷启动后主动拉取配置
     if (OS.isHarmony) {
       HarmonyChannel.onShellTabSwitch = (int index) {
         if (index >= 0 && index < navigationBars.length) {
@@ -201,18 +200,15 @@ class MainController extends GetxController
     _syncNativeTopBarActive();
     HarmonyChannel.setShellBars(
       useNativeTabs: useHdsBar,
-      floating: Pref.harmonyNavigation == HarmonyNavigation.floatingDock,
-      handedness: Pref.harmonyHandedness,
       immersive: Pref.harmonyImmersive,
       translucentBottomBar: Pref.translucentBottomBar,
     );
-    HarmonyChannel.setHandednessEnabled(Pref.harmonyHandedness);
     HarmonyChannel.setShellTopBar(useNativeTopBar: useHdsTopBar);
-    // 同步 Navbar 页签数量与顺序到原生 HDS 底栏（与设置内 Navbar 编辑一致）
+    // 同步 Navbar 页签数量与顺序到原生底栏（与设置内 Navbar 编辑一致）
     if (useHdsBar) {
       HarmonyChannel.setNavBarConfig(navigationBars);
       HarmonyChannel.changeTabIndex(selectedIndex.value);
-      // 初始动态角标（数量与模式）同步到原生 HDS 底栏
+      // 初始动态角标（数量与模式）同步到原生底栏
       if (hasDyn) {
         HarmonyChannel.setDynamicBadge(
           count: dynCount.value,
@@ -341,7 +337,7 @@ class MainController extends GetxController
   void setDynCount([int count = 0]) {
     if (!hasDyn) return;
     dynCount.value = count;
-    // 同步动态角标到 ArkTS HdsTabs 底栏（与 Flutter 内角标保持一致）
+    // 同步动态角标到 原生底栏（与 Flutter 内角标保持一致）
     if (useNativeTabs.value) {
       HarmonyChannel.setDynamicBadge(
         count: count,
@@ -443,7 +439,7 @@ class MainController extends GetxController
           controller.jumpToPage(value);
         }
       }
-      // Flutter 发起的切换同步到 ArkTS HdsTabs
+      // Flutter 发起的切换同步到原生底栏
       if (!_fromArkTS) {
         HarmonyChannel.changeTabIndex(value);
       }

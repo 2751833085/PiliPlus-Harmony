@@ -7,6 +7,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
+import 'package:PiliPlus/models/common/harmony_refresh_sensitivity.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 
 /// The scroll position owns drag resistance and spring motion. This sliver only
 /// reserves space during refresh; it never transforms the list or drives a
@@ -25,9 +27,10 @@ class ElasticRefreshSliver extends StatefulWidget {
 
 class ElasticRefreshSliverState extends State<ElasticRefreshSliver>
     with SingleTickerProviderStateMixin {
-  static const trigger = 72.0;
+  static const _revealExtent = 72.0;
   static const heldExtent = 64.0;
   double _extent = 0;
+  double _triggerDistance = HarmonyRefreshSensitivity.light.triggerDistance;
   bool _holding = false;
   int? _pointer;
   Future<void>? _task;
@@ -38,7 +41,9 @@ class ElasticRefreshSliverState extends State<ElasticRefreshSliver>
   );
 
   void pointerDown(PointerDownEvent event) {
-    _pointer ??= event.pointer;
+    if (_pointer != null) return;
+    _pointer = event.pointer;
+    _triggerDistance = Pref.harmonyRefreshSensitivity.triggerDistance;
     if (_task == null && !_holding) _fade.value = 1;
   }
 
@@ -55,7 +60,7 @@ class ElasticRefreshSliverState extends State<ElasticRefreshSliver>
     final pull = position != null && position.hasContentDimensions
         ? position.minScrollExtent - position.pixels
         : _extent;
-    if (pull >= trigger && !_holding && _task == null) show();
+    if (pull >= _triggerDistance && !_holding && _task == null) show();
   }
 
   Future<void> show({bool reveal = false}) {
@@ -130,7 +135,7 @@ class ElasticRefreshSliverState extends State<ElasticRefreshSliver>
                         opacity:
                             _fade.value *
                             Curves.easeInOut.transform(
-                              (_extent / trigger).clamp(0.0, 1.0),
+                              (_extent / _revealExtent).clamp(0.0, 1.0),
                             ),
                       ),
                     ),

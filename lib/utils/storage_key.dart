@@ -13,20 +13,10 @@ abstract final class SettingBoxKey {
   static const String shortPreload = 'shortPreload';
   static const String shortVideoMode = 'shortVideoMode';
   static const String harmonyFoldOrientation = 'harmonyFoldOrientation';
-  static const String materialYouUI = 'materialYouUI';
-  // Legacy key retained for importing older settings.
-  static const String harmonyUI = 'harmonyUI',
-      harmonyKeepDock = 'harmonyKeepDock',
-      harmonyNavigation = 'harmonyNavigation',
-      harmonyImmersive = 'harmonyImmersive',
-      harmonyNativeColors = 'harmonyNativeColors',
-      harmonyHandedness = 'harmonyHandedness';
+  static const String harmonyImmersive = 'harmonyImmersive',
+      harmonyNativeColors = 'harmonyNativeColors';
 
-  static const String enableLGBar = 'enableLGBar',
-      enableStatusBarTapToTop = 'enableStatusBarTapToTop',
-      showActualVolume = 'showActualVolume',
-      enableHdsBar = 'enableHdsBar',
-      enableHdsTopBar = 'enableHdsTopBar';
+  static const String enableStatusBarTapToTop = 'enableStatusBarTapToTop';
 
   static const String btmProgressBehavior = 'btmProgressBehavior',
       defaultVideoQa = 'defaultVideoQa',
@@ -122,6 +112,7 @@ abstract final class SettingBoxKey {
       banWordForZone = 'banWordForZone',
       savedRcmdTip = 'savedRcmdTip',
       openInBrowser = 'openInBrowser',
+      harmonyRefreshSensitivity = 'harmonyRefreshSensitivity',
       refreshDragPercentage = 'refreshDragPercentage',
       refreshDisplacement = 'refreshDisplacement',
       refreshUseDefault = 'refreshUseDefault',

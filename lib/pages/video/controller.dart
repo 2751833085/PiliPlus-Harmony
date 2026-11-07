@@ -10,7 +10,7 @@ import 'package:PiliPlus/plugin/pl_player/models/playback_owner.dart';
 import 'package:PiliPlus/pages/video/shorts/request_queue.dart';
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' show min, max;
+import 'dart:math' show min;
 import 'dart:ui';
 
 import 'package:PiliPlus/common/style.dart';
@@ -712,8 +712,7 @@ class VideoDetailController extends GetxController
 
   /// 更新画质、音质
   ///
-  /// [autoplay] 默认 true（用户主动切画质/编码时理应继续播）；因链路变化触发的
-  /// 换流则应沿用换流前的播放状态，见 [_onNetworkScopeChanged]。
+  /// [autoplay] 默认在用户主动切换画质或编码后继续播放。
   void updatePlayer({bool autoplay = true}) {
     _manualRoute = false;
     _usingWarmSelection = false;
@@ -748,93 +747,6 @@ class VideoDetailController extends GetxController
       audioUrl = '';
       currentAudioQa = null;
     }
-  }
-
-  StreamSubscription<bool>? _networkScopeSub;
-  // 链路已变、但当前不具备换流条件（正在请求 / 尚无 dash 数据），待条件满足后补做
-  bool _pendingNetworkReselect = false;
-
-  /// 按 [PlPlayerController.cacheVideoQa] / [PlPlayerController.cacheAudioQa]
-  /// 重新挑选目标画质与音质，实际换流交给 [updatePlayer]。
-  ///
-  /// 选取规则与 [queryVideoUrl] 中首次选流的一致；那边还要同时建立 firstVideo /
-  /// videoUrl / 视频高度，这里只需要档位，故未强行合并。
-  void _reselectQuality() {
-    final videoList = data.dash?.video;
-    if (videoList == null || videoList.isEmpty) return;
-
-    final cacheVideoQa = plPlayerController.cacheVideoQa;
-    final targetVideoQa = data.findAvailableVideoQuality(
-      cacheVideoQa ?? videoList.map((e) => e.id).reduce(max),
-    );
-    currentVideoQa.value = VideoQuality.fromCode(targetVideoQa);
-
-    final audioList = data.dash?.audio;
-    if (audioList != null && audioList.isNotEmpty) {
-      final cacheAudioQa = plPlayerController.cacheAudioQa;
-      final List<int> audioIds = audioList.map((e) => e.id).toList();
-      int closestNumber = audioIds.findClosestTarget(
-        (e) => e <= cacheAudioQa,
-        (a, b) => a > b ? a : b,
-      );
-      if (!audioIds.contains(cacheAudioQa) &&
-          audioIds.any((e) => e > cacheAudioQa)) {
-        closestNumber = AudioQuality.k192.code;
-      }
-      final firstAudio = audioList.firstWhere(
-        (e) => e.id == closestNumber,
-        orElse: () => audioList.first,
-      );
-      currentAudioQa = AudioQuality.fromCode(firstAudio.id);
-    } else {
-      currentAudioQa = null;
-    }
-  }
-
-  /// 链路在「宽带档 / 蜂窝档」之间翻转：重新套用该档的画质、音质与编码偏好，
-  /// 并按新档位换流，保留播放进度与播放/暂停状态。
-  void _onNetworkScopeChanged(bool useCellular) {
-    if (isClosed || isFileSource) return;
-    // preferCodecs 是本页自己的状态，无论是否持有播放器都该保持最新，
-    // 这样被叠加在后面的页面恢复时不会用陈旧的编码偏好
-    preferCodecs = useCellular ? Pref.preferCodecsCellular : Pref.preferCodecs;
-
-    // 以下会改动共享的播放器单例，只有当前持有它的页面才能做
-    if (!identical(plPlayerController.sourceOwner, this)) return;
-    plPlayerController
-      ..cacheVideoQa = useCellular
-          ? Pref.defaultVideoQaCellular
-          : Pref.defaultVideoQa
-      ..cacheAudioQa = useCellular
-          ? Pref.defaultAudioQaCellular
-          : Pref.defaultAudioQa;
-
-    // 正在请求播放地址时不要并发换流：queryVideoUrl 会用新的档位选流，
-    // 若它拿到的是 durl 等无法换流的源，_pendingNetworkReselect 也会被清掉
-    if (isQuerying) {
-      _pendingNetworkReselect = true;
-      return;
-    }
-    _applyNetworkScope();
-  }
-
-  void _applyNetworkScope() {
-    _pendingNetworkReselect = false;
-    // 可能是取流结束后补做的，其间播放器有可能已被叠加上来的页面接管
-    if (!identical(plPlayerController.sourceOwner, this)) return;
-    // durl / flv 兜底源没有可切换的流，等下次重新取流时再按新档位生效
-    if (data.dash?.video?.isNotEmpty != true) return;
-
-    _reselectQuality();
-    final qa = currentVideoQa.value;
-    if (qa == null) return;
-    if (plPlayerController.videoPlayerController == null) {
-      // 播放器尚未创建（如关闭了预加载且未起播）：只更新档位与取流地址，
-      // 等用户真正起播时自然用上新档位，不因链路变化提前建实例
-      _refreshSourceUrls(qa);
-      return;
-    }
-    updatePlayer(autoplay: plPlayerController.playerStatus.isPlaying);
   }
 
   Future<void>? _initPlayerIfNeeded(bool autoFullScreenFlag) {
@@ -1469,7 +1381,6 @@ class VideoDetailController extends GetxController
       }
     } finally {
       isQuerying = false;
-      if (!isClosed && _pendingNetworkReselect) _applyNetworkScope();
     }
   });
 
@@ -1932,8 +1843,6 @@ class VideoDetailController extends GetxController
     _overseasRoutes?.dispose();
     _playerRequests.dispose();
     _videoRequests.dispose();
-    _networkScopeSub?.cancel();
-    _networkScopeSub = null;
     if (identical(plPlayerController.sourceOwner, this)) {
       plPlayerController.sourceOwner = null;
     }

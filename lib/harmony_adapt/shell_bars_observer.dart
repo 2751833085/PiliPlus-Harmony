@@ -23,7 +23,14 @@ class ShellBarsObserver extends NavigatorObserver {
     route?.completed.then((_) {
       if (identical(_homeCover, route)) {
         _trackHomeCover(null);
-        _sync();
+        // Navigator teardown can complete a route without a didRemove event.
+        // Do not reattach to the same already-completed cover in _sync.
+        _activeRoutes.remove(route);
+        if (navigator?.mounted == true) {
+          _sync();
+        } else {
+          _activeRoutes.clear();
+        }
       }
     });
   }
@@ -87,10 +94,11 @@ class ShellBarsObserver extends NavigatorObserver {
   /// 子页面覆盖期间也照常记录，避免返回主页后用的是过期方向。
   void onOrientationChanged(bool useBottomNav) {
     _orientationHidden = !useBottomNav;
-    _sync();
+    // Also called when the native hosts finish initialization or are enabled.
+    _sync(resyncShellBars: true);
   }
 
-  void _sync() {
+  void _sync({bool resyncShellBars = false}) {
     // 底栏隐藏条件：页面覆盖（无弹层）或弹层覆盖（PopupRoute 计入）或横屏。
     // 底栏 + 顶栏宽高比分流共用此信号：dialog/bottomSheet/popupmenu 弹出时
     // 也触发，顶栏按「首页 + 宽高比」由 ArkTS syncTopBarVisibility 收起/隐藏。
@@ -102,8 +110,10 @@ class ShellBarsObserver extends NavigatorObserver {
     );
     _blockingPanelHidden = hasBlockingPanel;
     final pages = _activeRoutes.whereType<PageRoute>().toList();
-    final onVideo = pages.isNotEmpty && pages.last.settings.name == '/videoV';
-    if (onVideo) HarmonyChannel.setShellBarsScrollHidden(false);
+    final topPage = pages.isEmpty ? null : pages.last;
+    if (topPage?.settings.name == '/videoV') {
+      HarmonyChannel.setShellBarsScrollHidden(false);
+    }
     final hasOverlay = hasBlockingPanel || _orientationHidden;
     final obscured =
         !hasOverlay && _activeRoutes.any((route) => route is PopupRoute);
@@ -112,8 +122,13 @@ class ShellBarsObserver extends NavigatorObserver {
       blur: !_activeRoutes.any(
         (route) => route.settings.name == 'harmony:coverPreview',
       ),
+      skipUnchanged: !resyncShellBars,
     );
-    HarmonyChannel.setShellBarsHidden(hasOverlay, force: true);
+    HarmonyChannel.setShellBarsHidden(
+      hasOverlay,
+      force: true,
+      skipUnchanged: !resyncShellBars,
+    );
     // 顶栏「强制隐藏」仅针对页面覆盖（PageRoute：如视频页/设置页）与横屏；
     // 弹层（PopupRoute：dialog/bottomSheet/popupmenu）不计入，避免顶栏被
     // 直接隐藏而绕过宽高比分流。
@@ -125,8 +140,6 @@ class ShellBarsObserver extends NavigatorObserver {
     // - 最上层是普通整页（含播放页 → UP 主主页 → 再进播放页 → 返回等嵌套
     //   场景）：立即恢复状态栏，避免新页面继承播放页的沉浸状态
     // - 图片查看器（HeroDialogRoute）自带状态栏逻辑，跳过
-    final pageRoutes = _activeRoutes.whereType<PageRoute>().toList();
-    final topPage = pageRoutes.isEmpty ? null : pageRoutes.last;
     final topIsPlayer =
         topPage != null &&
         (topPage.settings.name == '/videoV' ||

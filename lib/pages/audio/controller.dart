@@ -88,8 +88,7 @@ class AudioController extends GetxController
   late final AnimationController animController;
 
   List<StreamSubscription>? _subscriptions;
-  StreamSubscription<bool>? _networkScopeSub;
-  // _queryPlayUrl 无重入保护，链路翻转可能与首次取流撞在一起
+  // 避免首次播放与切换播放列表时重复取流。
   bool _queryingPlayUrl = false;
 
   int? index;
@@ -338,26 +337,6 @@ class AudioController extends GetxController
         final cid = subId.first.toInt();
         querySponsorBlock(bvid: bvid, cid: cid);
       } catch (_) {}
-    }
-  }
-
-  /// 链路在「宽带档 / 蜂窝档」之间翻转：改用该档的默认音质重新取流，
-  /// 保留当前进度与播放/暂停状态。
-  Future<void> _onNetworkScopeChanged(bool useCellular) async {
-    if (isClosed) return;
-    cacheAudioQa = useCellular
-        ? Pref.defaultAudioQaCellular
-        : Pref.defaultAudioQa;
-    final player = this.player;
-    // 正在取流时丢弃本次事件即可：那次取流会用上面刚写入的 cacheAudioQa
-    if (player == null || _queryingPlayUrl) return;
-    final previousStart = _start;
-    _start = player.state.position;
-    _autoplayOnOpen = player.state.playing;
-    // 取流失败时不会走到 _onOpenMedia，两个一次性状态需要自己还原
-    if (!await _queryPlayUrl()) {
-      _start = previousStart;
-      _autoplayOnOpen = true;
     }
   }
 
@@ -938,8 +917,6 @@ class AudioController extends GetxController
     _subscriptions?.forEach((e) => e.cancel());
     _subscriptions?.clear();
     _subscriptions = null;
-    _networkScopeSub?.cancel();
-    _networkScopeSub = null;
     player?.dispose();
     player = null;
     animController.dispose();

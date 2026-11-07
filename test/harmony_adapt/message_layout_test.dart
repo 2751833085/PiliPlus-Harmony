@@ -7,13 +7,11 @@ import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/pages/whisper/message_route.dart';
 import 'package:PiliPlus/pages/whisper_detail/widget/chat_item.dart';
 import 'package:PiliPlus/utils/storage.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
 import 'helpers/memory_box.dart';
 
 void main() {
   setUpAll(() {
     GStorage.setting = MemoryBox();
-    Pref.captureAppearanceAtStartup();
   });
   testWidgets(
     'chat bubbles wrap on native fold widths and keep neutral surfaces',

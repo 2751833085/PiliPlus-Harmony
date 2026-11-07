@@ -124,22 +124,14 @@ class ImmersiveInteraction extends StatefulWidget {
 class _ImmersiveInteractionState extends State<ImmersiveInteraction>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   static final _owners = <int, _ImmersiveInteractionState>{};
-  late final _motion = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 300),
-  )..addListener(_tick);
+  AnimationController? _motion;
   final _revision = ValueNotifier<int>(0);
   int? _pointer;
   Offset _start = Offset.zero, _point = Offset.zero, _shift = Offset.zero;
   Offset _released = Offset.zero;
   double _light = 0;
   bool _enabled = false;
-  @override
-  void initState() {
-    super.initState();
-    _motion; // Initialize ticker while the element is active, never in dispose.
-    WidgetsBinding.instance.addObserver(this);
-  }
+  bool _observingLifecycle = false;
 
   @override
   void didChangeDependencies() {
@@ -157,23 +149,36 @@ class _ImmersiveInteractionState extends State<ImmersiveInteraction>
     if (state != AppLifecycleState.resumed) _reset();
   }
 
+  void _clearPointer() {
+    if (_pointer case final pointer?) {
+      _owners.remove(pointer);
+      _pointer = null;
+    }
+  }
+
+  void _stopObservingLifecycle() {
+    if (!_observingLifecycle) return;
+    WidgetsBinding.instance.removeObserver(this);
+    _observingLifecycle = false;
+  }
+
   void _reset() {
-    _owners.removeWhere((_, value) => identical(value, this));
-    _pointer = null;
-    _motion.stop();
+    _clearPointer();
+    _motion?.stop();
+    _stopObservingLifecycle();
+    if (_shift == Offset.zero && _light == 0) return;
     _shift = Offset.zero;
     _light = 0;
     _revision.value++;
   }
 
   void _tick() {
-    final t = _motion.value;
-    _shift = _released * (math.exp(-7 * t) * math.cos(10 * t));
+    final t = _motion!.value;
+    _shift = widget.allowMovement && t < 1
+        ? _released * (math.exp(-7 * t) * math.cos(10 * t))
+        : Offset.zero;
     _light = (1 - t).clamp(0.0, 1.0);
-    if (t == 1) {
-      _shift = Offset.zero;
-      _light = 0;
-    }
+    if (t == 1) _stopObservingLifecycle();
     _revision.value++;
   }
 
@@ -181,7 +186,11 @@ class _ImmersiveInteractionState extends State<ImmersiveInteraction>
     if (!_enabled || _pointer != null || _owners.containsKey(e.pointer)) return;
     _owners[e.pointer] = this;
     _pointer = e.pointer;
-    _motion.stop();
+    if (!_observingLifecycle) {
+      WidgetsBinding.instance.addObserver(this);
+      _observingLifecycle = true;
+    }
+    _motion?.stop();
     _start = _point = e.localPosition;
     _shift = Offset.zero;
     _light = 1;
@@ -205,51 +214,61 @@ class _ImmersiveInteractionState extends State<ImmersiveInteraction>
 
   void _release(PointerEvent e) {
     if (_pointer != e.pointer) return;
-    _owners.remove(e.pointer);
-    _pointer = null;
+    _clearPointer();
     _released = _shift;
-    _motion.forward(from: 0);
+    final motion = _motion ??= (AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    )..addListener(_tick));
+    motion.forward(from: 0);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _owners.removeWhere((_, value) => identical(value, this));
-    _motion.dispose();
+    _stopObservingLifecycle();
+    _clearPointer();
+    _motion?.dispose();
     _revision.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => Listener(
-    onPointerDown: _down,
-    onPointerMove: _move,
-    onPointerUp: _release,
-    onPointerCancel: _release,
-    child: RepaintBoundary(
-      child: AnimatedBuilder(
-        animation: _revision,
-        child: widget.child,
-        builder: (_, child) => Transform.translate(
-          offset: _shift,
-          child: CustomPaint(
-            foregroundPainter: _TouchLight(_point, _light, widget.borderRadius),
-            child: child,
-          ),
-        ),
+  Widget build(BuildContext context) {
+    final surface = CustomPaint(
+      foregroundPainter: _TouchLight(this, widget.borderRadius),
+      child: widget.child,
+    );
+    return Listener(
+      onPointerDown: _down,
+      onPointerMove: _move,
+      onPointerUp: _release,
+      onPointerCancel: _release,
+      child: RepaintBoundary(
+        child: widget.allowMovement
+            ? AnimatedBuilder(
+                animation: _revision,
+                child: surface,
+                builder: (_, child) => Transform.translate(
+                  offset: _shift,
+                  child: child,
+                ),
+              )
+            : surface,
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _TouchLight extends CustomPainter {
-  _TouchLight(this.point, this.strength, this.radius);
-  final Offset point;
-  final double strength;
+  _TouchLight(this.interaction, this.radius)
+    : super(repaint: interaction._revision);
+  final _ImmersiveInteractionState interaction;
   final BorderRadius radius;
   @override
   void paint(Canvas canvas, Size size) {
+    final strength = interaction._light;
     if (strength <= 0 || size.isEmpty) return;
+    final point = interaction._point;
     canvas.save();
     canvas.clipRRect(radius.toRRect(Offset.zero & size));
     final extent = math.min(110.0, math.max(32.0, size.shortestSide * 1.4));
@@ -269,5 +288,5 @@ class _TouchLight extends CustomPainter {
 
   @override
   bool shouldRepaint(_TouchLight old) =>
-      old.point != point || old.strength != strength || old.radius != radius;
+      old.interaction != interaction || old.radius != radius;
 }

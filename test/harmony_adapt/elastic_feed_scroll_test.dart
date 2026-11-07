@@ -5,14 +5,18 @@ import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart'
     as refresh;
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
+import 'package:PiliPlus/models/common/harmony_refresh_sensitivity.dart';
 import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
 import 'helpers/memory_box.dart';
 
 void main() {
   setUpAll(() => GStorage.setting = MemoryBox());
   testWidgets(
-    'first fast pull releases before layout and still refreshes once',
+    'a light fast release refreshes while an accidental or canceled pull does not',
     (tester) async {
+      final scroll = ScrollController();
+      addTearDown(scroll.dispose);
       var calls = 0;
       await tester.pumpWidget(
         MaterialApp(
@@ -22,8 +26,9 @@ void main() {
               onRefresh: () async {
                 calls++;
               },
-              child: const CustomScrollView(
-                slivers: [
+              child: CustomScrollView(
+                controller: scroll,
+                slivers: const [
                   SliverToBoxAdapter(child: SizedBox(height: 1200)),
                 ],
               ),
@@ -31,12 +36,66 @@ void main() {
           ),
         ),
       );
-      final finger = await tester.startGesture(const Offset(150, 180));
-      await finger.moveBy(const Offset(0, 240));
-      // No pump between the move and release: scroll metrics are ahead of paint.
-      await finger.up();
+      Future<TestGesture> pull(double distance) async {
+        final finger = await tester.startGesture(const Offset(150, 180));
+        await finger.moveBy(Offset(0, distance));
+        return finger;
+      }
+
+      final accidental = await pull(40);
+      await accidental.up();
       await tester.pumpAndSettle();
-      expect(calls, 1);
+      expect(calls, 0);
+
+      final canceled = await pull(60);
+      expect(-scroll.offset, inInclusiveRange(56, 71));
+      await tester.pump();
+      expect(
+        tester
+            .widget<HarmonyLoadingIndicator>(
+              find.byType(HarmonyLoadingIndicator),
+            )
+            .opacity,
+        inExclusiveRange(0, 1),
+        reason: 'Crossing the earlier trigger must not finish the reveal',
+      );
+      expect(calls, 0);
+      await canceled.cancel();
+      await tester.pumpAndSettle();
+      expect(calls, 0);
+
+      for (var attempt = 1; attempt <= 2; attempt++) {
+        final finger = await pull(60);
+        expect(-scroll.offset, inInclusiveRange(56, 71));
+        expect(calls, attempt - 1);
+        // Release before the first layout catches up with the scroll position.
+        await finger.up();
+        await tester.pumpAndSettle();
+        expect(calls, attempt);
+      }
+
+      const key = SettingBoxKey.harmonyRefreshSensitivity;
+      addTearDown(() => GStorage.setting.delete(key));
+      Future<void> release(double distance, int expectedCalls) async {
+        final gesture = await pull(distance);
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(calls, expectedCalls);
+      }
+
+      await GStorage.setting.put(key, HarmonyRefreshSensitivity.standard.name);
+      await release(60, 2);
+      final standard = await pull(78);
+      await GStorage.setting.put(key, HarmonyRefreshSensitivity.firm.name);
+      await standard.up();
+      await tester.pumpAndSettle();
+      expect(
+        calls,
+        3,
+        reason: 'An active gesture keeps its starting threshold',
+      );
+      await release(78, 3);
+      await release(100, 4);
     },
   );
   for (final width in [350.0, 712.0, 1108.0]) {

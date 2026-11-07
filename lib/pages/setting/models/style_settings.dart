@@ -14,6 +14,7 @@ import 'package:PiliPlus/common/widgets/stateful_builder.dart';
 import 'package:PiliPlus/models/common/bar_hide_type.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
+import 'package:PiliPlus/models/common/harmony_refresh_sensitivity.dart';
 import 'package:PiliPlus/models/common/home_tab_type.dart';
 import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
@@ -72,7 +73,17 @@ List<SettingsModel> get styleSettings => [
 ];
 
 List<SettingsModel> get _appearanceSettings => [
-  ...harmonyNavigationSettings,
+  if (Pref.harmonyUI)
+    PopupModel<HarmonyRefreshSensitivity>(
+      title: '下拉刷新灵敏度',
+      section: '交互与动画',
+      leading: const Icon(Icons.swipe_down_outlined),
+      value: () => Pref.harmonyRefreshSensitivity,
+      items: HarmonyRefreshSensitivity.values,
+      onSelected: (value, update) => GStorage.setting
+          .put(SettingBoxKey.harmonyRefreshSensitivity, value.name)
+          .whenComplete(update),
+    ),
   if (PlatformUtils.isDesktop) ...[
     const SwitchModel(
       title: '显示窗口标题栏',

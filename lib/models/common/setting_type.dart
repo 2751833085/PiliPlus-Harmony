@@ -47,7 +47,6 @@ enum SettingType {
     'setting:${SettingBoxKey.shortPreload}',
     'setting:${SettingBoxKey.enableAi}',
     'setting:${SettingBoxKey.biliPlayerControls}',
-    'setting:${SettingBoxKey.harmonyHandedness}',
     'setting:${SettingBoxKey.harmonyFoldOrientation}',
     'setting:${SettingBoxKey.harmonyImmersive}',
     'title:应用接续',

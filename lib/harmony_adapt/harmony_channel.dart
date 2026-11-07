@@ -10,14 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:os_type/os_type.dart';
 
-enum HarmonyHandSide { center, left, right }
-
 abstract class HarmonyChannel {
   static final nativeDockInset = ValueNotifier<double>(0);
   static final nativeNavigationExtent = ValueNotifier<double>(0);
-  static final handSide = ValueNotifier(HarmonyHandSide.center);
-  static final handAvailable = ValueNotifier(false);
-  static final handStatus = ValueNotifier<String>('waiting');
   static final foldable = ValueNotifier(false);
   static final foldExpanded = ValueNotifier(false);
   static DateTime _foldChangedAt = DateTime.fromMillisecondsSinceEpoch(0);
@@ -68,15 +63,6 @@ abstract class HarmonyChannel {
             );
         nativeDockInset.value =
             ((call.arguments['bottom'] as num?)?.toDouble() ?? 0).clamp(0, 200);
-        break;
-      case 'onHoldingHandChanged':
-        handStatus.value = call.arguments['state'] as String? ?? 'waiting';
-        handAvailable.value = call.arguments['available'] == true;
-        handSide.value = switch (call.arguments['side']) {
-          'left' => HarmonyHandSide.left,
-          'right' => HarmonyHandSide.right,
-          _ => HarmonyHandSide.center,
-        };
         break;
       case 'onFoldPostureChanged':
         _foldChangedAt = DateTime.now();
@@ -176,42 +162,54 @@ abstract class HarmonyChannel {
   /// 向原生发送 shell 配置（Flutter 侧计算后通知 ArkTS）
   static Future<void> setShellBars({
     required bool useNativeTabs,
-    bool floating = false,
-    bool handedness = false,
     bool immersive = false,
     bool translucentBottomBar = true,
   }) => _invoke('setShellBars', {
     'useNativeTabs': useNativeTabs,
-    'floating': floating,
-    'handedness': handedness,
     'immersive': immersive,
     'translucentBottomBar': translucentBottomBar,
   });
 
-  static Future<void> setHandednessEnabled(bool enabled) =>
-      _invoke('setHandednessEnabled', {'enabled': enabled});
-
-  /// 同步 Navbar 页签（数量与顺序，与设置内「Navbar 编辑」一致）到 ArkTS HdsTabs
+  /// 同步 Navbar 页签（数量与顺序，与设置内「Navbar 编辑」一致）到原生底栏
   static Future<void> setNavBarConfig(List<NavigationBarType> bars) =>
       _invoke('setNavBarConfig', {'tabs': bars.map((e) => e.index).toList()});
 
-  /// 同步动态页签角标（数量与模式，与 Flutter Badge 一致）到 ArkTS HdsTabs
+  /// 同步动态页签角标（数量与模式，与 Flutter Badge 一致）到原生底栏
   static Future<void> setDynamicBadge({
     required int count,
     required int mode,
   }) => _invoke('setDynamicBadge', {'count': count, 'mode': mode});
 
-  static Future<void> setShellBarsObscured(bool obscured, {bool blur = true}) {
+  static (bool, bool)? _appliedShellObscured;
+  static int _shellObscuredRevision = 0;
+
+  static Future<void> setShellBarsObscured(
+    bool obscured, {
+    bool blur = true,
+    bool skipUnchanged = false,
+  }) async {
     _shellBarsObscured = obscured;
-    return _invoke('setShellBarsObscured', {
-      'obscured': obscured,
-      'blur': obscured && blur,
-    });
+    if (!OS.isHarmony) return;
+    final blurred = obscured && blur;
+    final state = (obscured, blurred);
+    if (skipUnchanged && _appliedShellObscured == state) return;
+    _appliedShellObscured = null;
+    final revision = ++_shellObscuredRevision;
+    try {
+      await _channel.invokeMethod('setShellBarsObscured', {
+        'obscured': obscured,
+        'blur': blurred,
+      });
+      if (revision == _shellObscuredRevision) _appliedShellObscured = state;
+    } on PlatformException catch (_) {
+      // A later sync can retry this state if the native host was not ready.
+    } on MissingPluginException catch (_) {}
   }
 
   /// HDS 底栏当前是否为显示状态
   static bool _hiddenByPage = false;
   static int _shellVisibilityRevision = 0;
+  static (bool, bool)? _appliedShellVisibility;
   static bool get hdsBarVisible => !_hiddenByPage;
 
   /// 控制原生 HDS 底栏/顶栏的显隐（弹窗、全屏页等场景）
@@ -219,9 +217,15 @@ abstract class HarmonyChannel {
     bool hidden, {
     bool retry = false,
     bool force = false,
+    bool skipUnchanged = false,
   }) async {
     if (!OS.isHarmony) return;
     _hiddenByPage = hidden;
+    final state = (hidden, force);
+    // Force selects the ArkTS route branch. Explicit sync/retry callers can
+    // still resend that state even after a previous native acknowledgement.
+    if (skipUnchanged && !retry && _appliedShellVisibility == state) return;
+    _appliedShellVisibility = null;
     final revision = ++_shellVisibilityRevision;
     final int total = retry ? 8 : 1;
     for (int i = 0; i < total; i++) {
@@ -231,6 +235,9 @@ abstract class HarmonyChannel {
           'hidden': hidden,
           'force': force,
         });
+        if (revision == _shellVisibilityRevision) {
+          _appliedShellVisibility = state;
+        }
         return;
       } on MissingPluginException catch (_) {
         return;
@@ -241,7 +248,7 @@ abstract class HarmonyChannel {
     }
   }
 
-  /// 同步主题色到 ArkTS HdsTabs 底栏
+  /// 同步主题色到原生底栏
   static Future<void> setTabSelectedColor(String hexColor) =>
       _invoke('setTabSelectedColor', {'color': hexColor});
 
@@ -284,26 +291,20 @@ abstract class HarmonyChannel {
   static Future<void> setTopBarIsHome(bool isHome) =>
       _invoke('setTopBarIsHome', {'isHome': isHome});
 
-  static (double, int)? _pendingTopBarExposure;
+  static double? _pendingTopBarExposure;
   static bool _sendingTopBarExposure = false;
 
   /// Coalesce native clipping updates instead of queuing stale gesture frames.
-  static Future<void> setTopBarExposure(
-    double fraction, {
-    int durationMs = 0,
-  }) async {
+  static Future<void> setTopBarExposure(double fraction) async {
     if (!OS.isHarmony) return;
-    _pendingTopBarExposure = (fraction.clamp(0.0, 1.0), durationMs);
+    _pendingTopBarExposure = fraction.clamp(0.0, 1.0);
     if (_sendingTopBarExposure) return;
     _sendingTopBarExposure = true;
     try {
       while (_pendingTopBarExposure != null) {
         final value = _pendingTopBarExposure!;
         _pendingTopBarExposure = null;
-        await _invoke('setTopBarExposure', {
-          'fraction': value.$1,
-          'durationMs': value.$2,
-        });
+        await _invoke('setTopBarExposure', {'fraction': value});
       }
     } finally {
       _sendingTopBarExposure = false;
@@ -332,7 +333,7 @@ abstract class HarmonyChannel {
     'hidden': _topBarHiddenByRoute || _topBarHiddenByTab,
   });
 
-  /// 同步 Flutter 页签切换到 ArkTS HdsTabs
+  /// 同步 Flutter 页签切换到原生底栏
   static Future<void> changeTabIndex(int index) =>
       _invoke('changeTabIndex', {'index': index});
 

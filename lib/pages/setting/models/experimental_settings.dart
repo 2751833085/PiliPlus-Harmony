@@ -74,15 +74,6 @@ List<SettingsModel> get harmonyPlaybackSettings => [
     setKey: SettingBoxKey.harmonyFoldOrientation,
     defaultVal: true,
   ),
-  const SwitchModel(
-    section: '播放控制',
-    title: '显示实际百分比音量',
-    subtitle:
-        '某些系统(鸿蒙)或设备只支持整数音量级别，如0~15，对应的百分比音量只有0%、7%、···、93%和100%，不存在1%、2%和50%等实际百分比音量',
-    leading: Icon(Icons.science_outlined),
-    setKey: SettingBoxKey.showActualVolume,
-    defaultVal: false,
-  ),
 ];
 
 List<SettingsModel> get experimentalSettings => [
@@ -129,5 +120,3 @@ List<SettingsModel> get experimentalSettings => [
           ),
   ),
 ];
-
-List<SettingsModel> get harmonyNavigationSettings => [];

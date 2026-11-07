@@ -8,7 +8,6 @@ import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_loading.dart';
 import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
-import 'package:PiliPlus/harmony_adapt/widgets/harmony_hand_dock.dart';
 import 'package:PiliPlus/harmony_adapt/outlined_subtitles.dart';
 import 'dart:async';
 import 'dart:io';
@@ -460,7 +459,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
     _longPressRecognizer?.dispose();
     _doubleTapGestureRecognizer.dispose();
     _scaleGestureRecognizer.dispose();
-    _feedGestures.dispose();
+    _shortGestures?.dispose();
     _brightnessListener?.cancel();
     _controlsListener?.cancel();
     HarmonyAppearance.revision.removeListener(_refreshControlAppearance);
@@ -1384,7 +1383,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
   late final ImmediateTapGestureRecognizer _tapGestureRecognizer;
   late final DoubleTapGestureRecognizer _doubleTapGestureRecognizer;
   late final PlayerScaleGestureRecognizer _scaleGestureRecognizer;
-  late final _feedGestures = ShortVideoGestures(
+  ShortVideoGestures? _shortGestures;
+  ShortVideoGestures get _feedGestures => _shortGestures ??= ShortVideoGestures(
     onTap: () {
       if (widget.shortMode) {
         widget.videoDetailController?.shortChromeVisible.toggle();
@@ -1921,17 +1921,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       fadeOnly: Pref.biliPlayerControls,
                       isFullScreen: isFullScreen,
                       removeSafeArea: plPlayerController.removeSafeArea,
-                      child: HarmonyHandDock(
-                        preserveWidth: true,
-                        enabled:
-                            OS.isHarmony &&
-                            Pref.harmonyHandedness &&
-                            isFullScreen,
+                      child: SizedBox(
                         width: maxWidth,
-                        builder: (controlWidth) =>
+                        child:
                             widget.bottomControl ??
                             BottomControl(
-                              maxWidth: controlWidth,
+                              maxWidth: maxWidth,
                               isFullScreen: isFullScreen,
                               controller: plPlayerController,
                               videoDetailController: videoDetailController,

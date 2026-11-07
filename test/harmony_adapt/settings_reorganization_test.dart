@@ -11,6 +11,7 @@ import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'package:PiliPlus/pages/setting/models/experimental_settings.dart';
 import 'package:PiliPlus/pages/setting/models/extra_settings.dart';
 import 'package:PiliPlus/pages/setting/models/style_settings.dart';
+import 'package:PiliPlus/models/common/harmony_refresh_sensitivity.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -47,13 +48,40 @@ void main() {
   });
   setUp(() async {
     debugDefaultTargetPlatformOverride = TargetPlatform.ohos;
-    await GStorage.setting.put(SettingBoxKey.materialYouUI, true);
-    Pref.captureAppearanceAtStartup();
     await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, false);
     await GStorage.setting.put('isPureBlackTheme', false);
-    await GStorage.setting.put(SettingBoxKey.harmonyNavigation, 0);
   });
   tearDown(() => debugDefaultTargetPlatformOverride = null);
+
+  testWidgets('pull-to-refresh sensitivity can be changed and reopened', (
+    tester,
+  ) async {
+    final row = styleSettings.singleWhere(
+      (item) => item.title == '下拉刷新灵敏度',
+    );
+    debugDefaultTargetPlatformOverride = null;
+    expect(row.section, '交互与动画');
+    const key = SettingBoxKey.harmonyRefreshSensitivity;
+    await GStorage.setting.delete(key);
+    addTearDown(() => GStorage.setting.delete(key));
+    Widget page() => MaterialApp(
+      theme: HarmonyTheme.apply(ThemeData()),
+      home: Scaffold(body: row.widget),
+    );
+
+    await tester.pumpWidget(page());
+    expect(find.text('轻拉'), findsOneWidget);
+    await tester.tap(find.text('下拉刷新灵敏度'));
+    await tester.pumpAndSettle();
+    expect(find.text('标准'), findsOneWidget);
+    await tester.tap(find.text('较重'));
+    await tester.pumpAndSettle();
+    expect(GStorage.setting.get(key), HarmonyRefreshSensitivity.firm.name);
+    expect(Pref.harmonyRefreshSensitivity, HarmonyRefreshSensitivity.firm);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(page());
+    expect(find.text('较重'), findsOneWidget);
+  });
 
   test(
     'combined right panel defaults on and forces details below the video',
@@ -183,20 +211,11 @@ void main() {
       await GStorage.setting.put(SettingBoxKey.customColor, 12);
       expect(Pref.customColor, 12);
       await GStorage.setting.delete(SettingBoxKey.customColor);
-      // Older disabled Harmony values must not reverse the new default.
-      await GStorage.setting.delete(SettingBoxKey.materialYouUI);
-      await GStorage.setting.put(SettingBoxKey.harmonyUI, false);
-      expect(Pref.materialYouUI, isFalse);
-      Pref.captureAppearanceAtStartup();
+      // Imports may still contain these retired keys.
+      await GStorage.setting.put('harmonyUI', false);
+      await GStorage.setting.put('materialYouUI', true);
       expect(Pref.harmonyUI, isTrue);
-      await GStorage.setting.put(SettingBoxKey.materialYouUI, true);
-      expect(Pref.materialYouUI, isTrue);
-      expect(Pref.harmonyUI, isTrue);
-      Pref.captureAppearanceAtStartup();
-      expect(Pref.harmonyUI, isTrue);
-      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
-      expect(Pref.harmonyUI, isTrue);
-      Pref.captureAppearanceAtStartup();
+      await GStorage.setting.put('materialYouUI', false);
       expect(Pref.harmonyUI, isTrue);
     },
   );
@@ -254,35 +273,19 @@ void main() {
         isNot(contains('Material You 界面风格')),
       );
       expect(styleSettings.map((e) => e.title), contains('沉浸光感'));
-      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
-      Pref.captureAppearanceAtStartup();
-      expect(
-        styleSettings.map((e) => e.title),
-        contains('沉浸光感'),
-      );
       expect(extraSettings.map((e) => e.title), isNot(contains('底栏样式')));
-      expect(
-        harmonyNavigationSettings.map((e) => e.title),
-        isNot(contains('展开时也采用悬浮 Dock')),
-      );
-      await GStorage.setting.put(
-        SettingBoxKey.harmonyNavigation,
-        2,
-      );
-      expect(Pref.harmonyNavigation, HarmonyNavigation.bottomBar);
-      expect(HarmonyNavigation.values.length, 2);
-      expect(
-        harmonyNavigationSettings.map((e) => e.title),
-        isNot(contains('展开时也采用悬浮 Dock')),
-      );
+      await GStorage.setting.put('harmonyNavigation', 0);
+      await GStorage.setting.put('showActualVolume', true);
+      final titles = SettingType.searchSettings.map((row) => row.title);
+      expect(titles, isNot(contains('展开时也采用悬浮 Dock')));
+      expect(titles, isNot(contains('显示实际百分比音量')));
+      expect(titles, contains('底栏沉浸光感'));
     },
   );
 
   test(
     'related categories share settings while search deduplicates and values persist',
     () async {
-      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
-      Pref.captureAppearanceAtStartup();
       await GStorage.setting.put(SettingBoxKey.shortVideoMode, true);
       await GStorage.setting.put(SettingBoxKey.overseasMode, true);
       final catalog = {
@@ -373,7 +376,6 @@ void main() {
           rows.singleWhere((e) => e.title == '海外模式') as SwitchModel;
       expect(Pref.shortVideoMode, isFalse);
       expect(Pref.biliPlayerControls, isTrue);
-      expect(Pref.harmonyHandedness, isFalse);
       expect(GStorage.setting.get(overseas.setKey), isTrue);
     },
   );
@@ -421,8 +423,6 @@ void main() {
   test(
     'custom accent stays available and preserves Harmony surfaces',
     () async {
-      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
-      Pref.captureAppearanceAtStartup();
       await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, true);
       final entry = styleSettings.singleWhere((e) => e.title == '颜色选择');
       expect(entry.disabledReason, isNull);
@@ -451,8 +451,6 @@ void main() {
   test(
     'legacy pure black setting is ignored with Harmony native colors',
     () async {
-      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
-      Pref.captureAppearanceAtStartup();
       await GStorage.setting.put(SettingBoxKey.harmonyNativeColors, true);
       await GStorage.setting.put('isPureBlackTheme', true);
       final theme = ThemeUtils.getThemeData(
@@ -476,8 +474,6 @@ void main() {
     (tester) async {
       debugDefaultTargetPlatformOverride = null;
       Get.testMode = true;
-      await GStorage.setting.put(SettingBoxKey.materialYouUI, false);
-      Pref.captureAppearanceAtStartup();
       tester.view.devicePixelRatio = 2.875;
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetPhysicalSize);

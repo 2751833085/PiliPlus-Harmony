@@ -128,8 +128,7 @@ class LiveRoomController extends GetxController {
 
   // 同 cacheVideoQa：由 queryLiveUrl 按当前链路首次赋值，不再按平台预置
   int? currentQn;
-  StreamSubscription<bool>? _networkScopeSub;
-  // queryLiveUrl 无重入保护，链路翻转与用户切线路可能撞在一起
+  // 避免首次加载与手动切换线路时重复取流。
   bool _queryingLiveUrl = false;
   final currentQnDesc = ''.obs;
   final RxBool isPortrait = false.obs;
@@ -245,20 +244,6 @@ class LiveRoomController extends GetxController {
       isVertical: isPortrait.value,
       autoFullScreenFlag: autoFullScreenFlag,
     );
-  }
-
-  /// 链路在「宽带档 / 蜂窝档」之间翻转：改用该档的默认清晰度重新取流，
-  /// 并沿用翻转前的播放/暂停状态。
-  void _onNetworkScopeChanged(bool useCellular) {
-    if (isClosed) return;
-    // currentQn 是本页自己的状态，无论是否持有播放器都该保持最新
-    currentQn = useCellular ? Pref.liveQualityCellular : Pref.liveQuality;
-    // 叠加的播放页只有当前持有播放器的那个才真正换流
-    if (!identical(plPlayerController.sourceOwner, this)) return;
-    // 直播没有进度可保留，正在取流时直接丢弃本次事件即可：
-    // 那次取流会用上面刚写入的 currentQn
-    if (_queryingLiveUrl) return;
-    queryLiveUrl(autoplay: plPlayerController.playerStatus.isPlaying);
   }
 
   Future<void> queryLiveUrl({
@@ -567,8 +552,6 @@ class LiveRoomController extends GetxController {
 
   @override
   void onClose() {
-    _networkScopeSub?.cancel();
-    _networkScopeSub = null;
     if (identical(plPlayerController.sourceOwner, this)) {
       plPlayerController.sourceOwner = null;
     }

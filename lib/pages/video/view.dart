@@ -141,7 +141,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   bool _enteringShortMode = false;
   bool _shortCommentsVisible = false;
   late ShortVideoEntryPolicy _shortEntryPolicy;
-  final _modeTransitionKey = GlobalKey<PlayerModeTransitionState>();
+  late final _modeTransitionKey = GlobalKey<PlayerModeTransitionState>();
   late final _shortFeedback = ShortVideoFeedback(GStorage.setting);
   ShortVideoSession? _shortSession;
   int _shortRefreshIndex = 1;
@@ -707,36 +707,38 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     // videoSourceInit 中执行），同步创建即可让 didChangeDependencies
     // 立即以正确状态生效。
     videoDetailController = Get.put(VideoDetailController(), tag: heroTag);
-    _shortEntryPolicy = ShortVideoEntryPolicy(
-      enabled: Pref.shortVideoMode,
-      supported: _supportsShortMode,
-      portraitHint: videoDetailController.isVertical.value,
-    );
-    _shortMode = _shortEntryPolicy.initialMode;
-    videoDetailController.shortVideoMode = _shortMode;
-    videoDetailController.onOrientationResolved = (portrait) {
-      final player = videoDetailController.plPlayerController;
-      final target = _shortEntryPolicy.resolve(
-        portrait,
-        allowAutomaticEntry:
-            isShowing &&
-            _lifecycleState == AppLifecycleState.resumed &&
-            !isFullScreen &&
-            !player.isPipMode &&
-            !(OS.isHarmony &&
-                (HarmonyChannel.isWindowMode || HarmonyChannel.isMiniWindow)),
+    if (_supportsShortMode) {
+      _shortEntryPolicy = ShortVideoEntryPolicy(
+        enabled: Pref.shortVideoMode,
+        supported: _supportsShortMode,
+        portraitHint: videoDetailController.isVertical.value,
       );
-      if (!mounted ||
-          target == null ||
-          target == _shortMode ||
-          !Pref.shortVideoMode)
-        return;
-      videoDetailController.shortVideoMode = target;
-      setState(() => _shortMode = target);
-      if (target) _attachPlayerListeners();
-      _syncDecorDark();
-    };
-    HarmonyAppearance.revision.addListener(_shortPreferenceChanged);
+      _shortMode = _shortEntryPolicy.initialMode;
+      videoDetailController.shortVideoMode = _shortMode;
+      videoDetailController.onOrientationResolved = (portrait) {
+        final player = videoDetailController.plPlayerController;
+        final target = _shortEntryPolicy.resolve(
+          portrait,
+          allowAutomaticEntry:
+              isShowing &&
+              _lifecycleState == AppLifecycleState.resumed &&
+              !isFullScreen &&
+              !player.isPipMode &&
+              !(OS.isHarmony &&
+                  (HarmonyChannel.isWindowMode || HarmonyChannel.isMiniWindow)),
+        );
+        if (!mounted ||
+            target == null ||
+            target == _shortMode ||
+            !Pref.shortVideoMode)
+          return;
+        videoDetailController.shortVideoMode = target;
+        setState(() => _shortMode = target);
+        if (target) _attachPlayerListeners();
+        _syncDecorDark();
+      };
+      HarmonyAppearance.revision.addListener(_shortPreferenceChanged);
+    }
     if (videoDetailController.removeSafeArea) {
       hideSystemBar();
     }
@@ -798,17 +800,19 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       localIntroController = Get.put(LocalIntroController(), tag: heroTag);
     } else if (videoDetailController.isUgc) {
       ugcIntroController = Get.put(UgcIntroController(), tag: heroTag);
-      _shortEpisodeWorker = ever(ugcIntroController.cid, (_) {
-        _shortSession?.syncCurrent(
-          ShortVideoEntry(
-            bvid: ugcIntroController.bvid,
-            aid: videoDetailController.aid,
-            cid: ugcIntroController.cid.value,
-            cover: videoDetailController.cover.value,
-            title: ugcIntroController.videoDetail.value.title,
-          ),
-        );
-      });
+      if (_supportsShortMode) {
+        _shortEpisodeWorker = ever(ugcIntroController.cid, (_) {
+          _shortSession?.syncCurrent(
+            ShortVideoEntry(
+              bvid: ugcIntroController.bvid,
+              aid: videoDetailController.aid,
+              cid: ugcIntroController.cid.value,
+              cover: videoDetailController.cover.value,
+              title: ugcIntroController.videoDetail.value.title,
+            ),
+          );
+        });
+      }
     } else {
       pgcIntroController = Get.put(PgcIntroController(), tag: heroTag);
     }
@@ -1038,8 +1042,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   @override
   void dispose() {
-    videoDetailController.onOrientationResolved = null;
-    HarmonyAppearance.revision.removeListener(_shortPreferenceChanged);
+    if (videoDetailController.onOrientationResolved != null) {
+      videoDetailController.onOrientationResolved = null;
+      HarmonyAppearance.revision.removeListener(_shortPreferenceChanged);
+    }
     _shortEpisodeWorker?.dispose();
     _shortSession?.dispose();
     _pipModeWorker?.dispose();
@@ -2611,6 +2617,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
       );
     }
     result = Theme(data: theme, child: child);
+    if (!_supportsShortMode) {
+      return ColoredBox(color: Colors.black, child: result);
+    }
     return Listener(
       // Once the user operates this page, late video dimensions may resize the
       // picture but must not silently select another viewing mode.

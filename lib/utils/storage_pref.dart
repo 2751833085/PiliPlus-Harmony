@@ -1,5 +1,4 @@
 import 'package:PiliPlus/pages/video/shorts/gestures.dart';
-import 'package:PiliPlus/harmony_adapt/appearance.dart';
 import 'dart:io';
 
 import 'package:PiliPlus/common/widgets/pair.dart';
@@ -9,6 +8,7 @@ import 'package:PiliPlus/models/common/dynamic/dynamic_badge_mode.dart';
 import 'package:PiliPlus/models/common/dynamic/dynamics_type.dart';
 import 'package:PiliPlus/models/common/dynamic/up_panel_position.dart';
 import 'package:PiliPlus/models/common/follow_order_type.dart';
+import 'package:PiliPlus/models/common/harmony_refresh_sensitivity.dart';
 import 'package:PiliPlus/models/common/member/tab_type.dart';
 import 'package:PiliPlus/models/common/msg/msg_unread_type.dart';
 import 'package:PiliPlus/models/common/nav_bar_config.dart';
@@ -325,6 +325,14 @@ abstract final class Pref {
 
   static double get blockLimit =>
       _setting.get(SettingBoxKey.blockLimit, defaultValue: 0.0);
+
+  static HarmonyRefreshSensitivity get harmonyRefreshSensitivity {
+    final saved = _setting.get(SettingBoxKey.harmonyRefreshSensitivity);
+    return HarmonyRefreshSensitivity.values.firstWhere(
+      (value) => value.name == saved,
+      orElse: () => HarmonyRefreshSensitivity.light,
+    );
+  }
 
   static bool get refreshUseDefault => true;
   static double get refreshDragPercentage => 0.22;
@@ -775,9 +783,6 @@ abstract final class Pref {
   static bool get enableMYBar =>
       _setting.get(SettingBoxKey.enableMYBar, defaultValue: true);
 
-  static bool get enableLGBar =>
-      _setting.get(SettingBoxKey.enableLGBar, defaultValue: false);
-
   static bool get overseasMode =>
       _setting.get(SettingBoxKey.overseasMode, defaultValue: false);
 
@@ -818,34 +823,15 @@ abstract final class Pref {
 
   static bool get harmonyFoldOrientation =>
       _setting.get(SettingBoxKey.harmonyFoldOrientation, defaultValue: true);
-  static bool get materialYouUI =>
-      _setting.get(SettingBoxKey.materialYouUI, defaultValue: false);
 
-  static void captureAppearanceAtStartup() {}
   static bool get harmonyUI => OS.isHarmony;
-
-  static HarmonyNavigation get harmonyNavigation => HarmonyNavigation.bottomBar;
 
   static bool get harmonyImmersive =>
       harmonyUI &&
       _setting.get(SettingBoxKey.harmonyImmersive, defaultValue: true);
 
-  static bool get harmonyKeepDock =>
-      _setting.get(SettingBoxKey.harmonyKeepDock, defaultValue: true);
-
-  static bool get harmonyHandedness => false;
-
-  static bool get enableHdsBar =>
-      _setting.get(SettingBoxKey.enableHdsBar, defaultValue: false);
-
-  static bool get enableHdsTopBar =>
-      _setting.get(SettingBoxKey.enableHdsTopBar, defaultValue: false);
-
   static bool get enableStatusBarTapToTop =>
       _setting.get(SettingBoxKey.enableStatusBarTapToTop, defaultValue: false);
-
-  static bool get showActualVolume =>
-      _setting.get(SettingBoxKey.showActualVolume, defaultValue: false);
 
   static Transition get pageTransition => OS.isHarmony
       ? Transition.native

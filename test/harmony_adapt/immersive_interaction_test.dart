@@ -83,34 +83,73 @@ void main() {
           ),
         ),
       );
-      final gesture = await tester.startGesture(
-        tester.getCenter(find.byKey(inner)),
-      );
+      final innerSurface = find.byKey(inner);
+      final outerSurface = find.byKey(outer);
+      final innerPaint = _lightPaint(innerSurface);
+      final outerPaint = _lightPaint(outerSurface);
+      final innerBounds = tester.getRect(innerSurface);
+      final outerBounds = tester.getRect(outerSurface);
+      final paintWidget = tester.widget<CustomPaint>(innerPaint);
+      final gesture = await tester.startGesture(tester.getCenter(innerSurface));
       await gesture.moveBy(const Offset(10, 0));
       await tester.pump();
-      final transforms = tester
-          .widgetList<Transform>(
-            find.descendant(
-              of: find.byKey(outer),
-              matching: find.byType(Transform),
-            ),
-          )
-          .toList();
-      expect(transforms.first.transform.storage[12], 0);
-      expect(transforms.last.transform.storage[12], 0);
+      expect(tester.getRect(innerSurface), innerBounds);
+      expect(tester.getRect(outerSurface), outerBounds);
+      _expectLight(tester, innerPaint, visible: true);
+      _expectLight(tester, outerPaint, visible: false);
       await gesture.cancel();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(tester.widget<CustomPaint>(innerPaint), same(paintWidget));
+      _expectLight(tester, innerPaint, visible: true);
       await tester.pumpAndSettle();
-      for (final t in tester.widgetList<Transform>(
-        find.descendant(
-          of: find.byKey(outer),
-          matching: find.byType(Transform),
-        ),
-      )) {
-        expect(t.transform.storage[12], 0);
-      }
+      _expectLight(tester, innerPaint, visible: false);
       expect(tester.binding.transientCallbackCount, 0);
     },
   );
+  testWidgets('background and removal clear active pointer feedback', (
+    tester,
+  ) async {
+    const control = ValueKey('control');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: HarmonyTheme.apply(ThemeData.dark(), immersive: true),
+        home: const Scaffold(
+          body: Center(
+            child: ImmersiveInteraction(
+              key: control,
+              child: SizedBox(
+                width: 100,
+                height: 60,
+                child: ColoredBox(color: Colors.grey),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final surface = find.byKey(control);
+    final paint = _lightPaint(surface);
+    for (final releaseFirst in [false, true]) {
+      final gesture = await tester.startGesture(tester.getCenter(surface));
+      if (releaseFirst) await gesture.up();
+      await tester.pump();
+      _expectLight(tester, paint, visible: true);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      if (!releaseFirst) await gesture.up();
+      await tester.pump();
+      _expectLight(tester, paint, visible: false);
+      expect(tester.binding.transientCallbackCount, 0);
+    }
+    final last = await tester.startGesture(tester.getCenter(surface));
+    await last.up();
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
+    expect(tester.binding.transientCallbackCount, 0);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('search movement is opt-in and sliders do not move their panel', (
     tester,
   ) async {
@@ -163,4 +202,20 @@ void main() {
     await drag.up();
     await tester.pumpAndSettle();
   });
+}
+
+Finder _lightPaint(Finder surface) => find
+    .descendant(
+      of: surface,
+      matching: find.byType(CustomPaint),
+    )
+    .first;
+
+void _expectLight(WidgetTester tester, Finder paint, {required bool visible}) {
+  final painter = tester.widget<CustomPaint>(paint).foregroundPainter!;
+  final size = tester.getSize(paint);
+  expect(
+    (Canvas canvas) => painter.paint(canvas, size),
+    paintsExactlyCountTimes(#drawCircle, visible ? 1 : 0),
+  );
 }

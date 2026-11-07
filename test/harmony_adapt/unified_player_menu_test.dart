@@ -2,10 +2,8 @@ import 'dart:io';
 import 'package:PiliPlus/common/assets.dart';
 import 'dart:ui' as ui;
 import 'package:PiliPlus/common/widgets/dialog/bottom_panel.dart';
-import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/window_layout.dart';
-import 'package:PiliPlus/harmony_adapt/widgets/harmony_hand_dock.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_quick_actions.dart';
 import 'package:PiliPlus/pages/about/harmony_about.dart';
 import 'package:PiliPlus/pages/video/shorts/panel_theme.dart';
@@ -355,52 +353,42 @@ void main() {
   });
 
   testWidgets(
-    'fullscreen seek bar spans the native triple viewport for both hands',
+    'fullscreen seek bar spans the native triple viewport',
     (tester) async {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      final previous = HarmonyChannel.handSide.value;
-      addTearDown(() => HarmonyChannel.handSide.value = previous);
       tester.view.physicalSize = _profiles.last;
       tester.view.devicePixelRatio = 2.875;
       const width = 3184 / 2.875;
-      for (final side in HarmonyHandSide.values) {
-        HarmonyChannel.handSide.value = side;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Align(
-                alignment: Alignment.bottomCenter,
-                child: HarmonyHandDock(
-                  enabled: true,
-                  preserveWidth: true,
-                  width: width,
-                  builder: (_) => CompactPlayerControlBar(
-                    play: const SizedBox(width: 40, height: 40),
-                    progress: const SizedBox(key: ValueKey('seek'), height: 40),
-                    time: const PlayerControlTime(
-                      position: '00:23',
-                      duration: '18:10',
-                    ),
-                    actions: const [SizedBox(width: 40, height: 40)],
-                  ),
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                width: width,
+                child: CompactPlayerControlBar(
+                  play: SizedBox(width: 40, height: 40),
+                  progress: SizedBox(key: ValueKey('seek'), height: 40),
+                  time: PlayerControlTime(position: '00:23', duration: '18:10'),
+                  actions: [SizedBox(width: 40, height: 40)],
                 ),
               ),
             ),
           ),
-        );
-        await tester.pumpAndSettle();
-        expect(
-          tester.getSize(find.byType(CompactPlayerControlBar)).width,
-          closeTo(width, .01),
-        );
-        expect(tester.getRect(find.byKey(const ValueKey('seek'))).left, 40);
-        expect(
-          tester.getSize(find.byKey(const ValueKey('seek'))).width,
-          greaterThan(width * .75),
-        );
-        expect(tester.takeException(), isNull);
-      }
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byType(CompactPlayerControlBar)).width,
+        closeTo(width, .01),
+      );
+      expect(tester.getRect(find.byKey(const ValueKey('seek'))).left, 40);
+      expect(
+        tester.getSize(find.byKey(const ValueKey('seek'))).width,
+        greaterThan(width * .75),
+      );
+      expect(tester.takeException(), isNull);
     },
   );
 

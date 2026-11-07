@@ -412,12 +412,6 @@ export default class HarmonyChannel implements FlutterPlugin {
         result.success(this.posture?.isExpanded() ?? false);
         break;
       }
-      case "setHandednessEnabled": {
-        const enabled: boolean = call.argument('enabled') ?? false;
-        this.posture?.setHandEnabled(enabled);
-        result.success(true);
-        break;
-      }
       case "saveMovingPhoto": {
         const imagePath: string = call.argument("imagePath") ?? '';
         const videoPath: string = call.argument("videoPath") ?? '';
@@ -508,10 +502,7 @@ export default class HarmonyChannel implements FlutterPlugin {
         }
         const useNativeTabs: boolean = call.argument('useNativeTabs') ?? false;
         console.log(`is use native tabs: ${useNativeTabs}`);
-        AppStorage.setOrCreate('floatingNativeTabs', call.argument('floating') ?? false);
         AppStorage.setOrCreate('useNativeTabs', useNativeTabs);
-        const handedness: boolean = call.argument('handedness') ?? false;
-        AppStorage.setOrCreate('handednessEnabled', handedness);
         const immersive: boolean = call.argument('immersive') ?? false;
         AppStorage.setOrCreate('immersiveEnabled', immersive);
         AppStorage.setOrCreate('translucentBottomBar', call.argument('translucentBottomBar') ?? true);
@@ -669,8 +660,6 @@ export default class HarmonyChannel implements FlutterPlugin {
       }
       case "setTopBarExposure": {
         const fraction: number = call.argument('fraction') ?? 1;
-        const duration: number = call.argument('durationMs') ?? 0;
-        AppStorage.setOrCreate('topBarExposureDuration', Math.max(0, duration));
         AppStorage.setOrCreate('topBarExposure', Math.max(0, Math.min(1, fraction)));
         result.success(true);
         break;
