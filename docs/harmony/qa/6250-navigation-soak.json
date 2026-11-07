@@ -1,0 +1,18 @@
+{
+  "status": "time_limit",
+  "reason": "Workload reached its time limit",
+  "version": 6250,
+  "pid": 3194,
+  "mode": "navigation_only",
+  "completed_cycles": 43,
+  "attempted_actions": 658,
+  "verified_actions": 658,
+  "pending_action": null,
+  "setting_may_need_restore": false,
+  "elapsed_s": 900.004,
+  "video_check": "not exercised in navigation-only mode",
+  "source_commit": "9ef7750afb7d2c64eb2c01c1360a9f616d8d6e6b",
+  "hap_sha256": "5838ea7469e756eb1f271d997fe0717f7005a7189f37f796862f7b683432705e",
+  "surface": "dedicated HarmonyOS 7 emulator, 3184x2232, guest account",
+  "scope": "navigation and scroll validation only; UITest timings include shell and tree read latency, not FPS"
+}

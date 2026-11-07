@@ -1,0 +1,931 @@
+{
+  "version": 6250,
+  "workload": "26-second mixed navigation emulator trace",
+  "measured_trace_span_s": 26.012,
+  "buffer_entries_and_written_entries": [
+    701770,
+    701770
+  ],
+  "frame_begin_markers": {
+    "Animator::BeginFrame": 810,
+    "Rasterizer::DoDraw": 759
+  },
+  "all_complete_ui_begin_frame_ms": {
+    "n": 810,
+    "min": 0.019,
+    "median": 0.415,
+    "p90": 1.6712,
+    "p95": 2.9356,
+    "p99": 7.9479,
+    "max": 11.266,
+    "over_8.333_ms": 7,
+    "over_16.667_ms": 0,
+    "over_25_ms": 0,
+    "over_33.333_ms": 0
+  },
+  "all_complete_raster_do_draw_ms": {
+    "n": 758,
+    "min": 2.992,
+    "median": 16.3575,
+    "p90": 17.1486,
+    "p95": 17.3431,
+    "p99": 34.2365,
+    "max": 59.35,
+    "over_8.333_ms": 708,
+    "over_16.667_ms": 234,
+    "over_25_ms": 15,
+    "over_33.333_ms": 10
+  },
+  "unmatched_ui_with_pipeline_full": 51,
+  "matched_frames": 758,
+  "overall_matched": {
+    "ui_ms": {
+      "n": 758,
+      "min": 0.136,
+      "median": 0.438,
+      "p90": 1.7173,
+      "p95": 3.0279,
+      "p99": 8.0864,
+      "max": 11.266,
+      "over_8.333_ms": 7,
+      "over_16.667_ms": 0,
+      "over_25_ms": 0,
+      "over_33.333_ms": 0
+    },
+    "raster_ms": {
+      "n": 758,
+      "min": 2.992,
+      "median": 16.3575,
+      "p90": 17.1486,
+      "p95": 17.3431,
+      "p99": 34.2365,
+      "max": 59.35,
+      "over_8.333_ms": 708,
+      "over_16.667_ms": 234,
+      "over_25_ms": 15,
+      "over_33.333_ms": 10
+    },
+    "swap_ms": {
+      "n": 758,
+      "min": 0.55,
+      "median": 13.949,
+      "p90": 15.4838,
+      "p95": 15.6913,
+      "p99": 16.1543,
+      "max": 16.727,
+      "over_8.333_ms": 631,
+      "over_16.667_ms": 3,
+      "over_25_ms": 0,
+      "over_33.333_ms": 0
+    },
+    "swap_share_pct": {
+      "n": 758,
+      "min": 4.4903,
+      "median": 86.773,
+      "p90": 92.3721,
+      "p95": 92.8317,
+      "p99": 93.8321,
+      "max": 97.3882
+    },
+    "swap_share_of_total_draw_pct": 79.14,
+    "draw_minus_swap_ms": {
+      "n": 758,
+      "min": 0.403,
+      "median": 1.7465,
+      "p90": 5.6038,
+      "p95": 7.4392,
+      "p99": 29.0582,
+      "max": 56.685,
+      "over_8.333_ms": 29,
+      "over_16.667_ms": 16,
+      "over_25_ms": 12,
+      "over_33.333_ms": 2
+    }
+  },
+  "by_phase_matched": {
+    "between_markers": {
+      "ui_ms": {
+        "n": 52,
+        "min": 0.144,
+        "median": 1.7295,
+        "p90": 6.5399,
+        "p95": 8.3666,
+        "p99": 9.6044,
+        "max": 9.864,
+        "over_8.333_ms": 3,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "raster_ms": {
+        "n": 52,
+        "min": 2.992,
+        "median": 8.422,
+        "p90": 16.2219,
+        "p95": 17.0614,
+        "p99": 38.2671,
+        "max": 59.35,
+        "over_8.333_ms": 27,
+        "over_16.667_ms": 4,
+        "over_25_ms": 1,
+        "over_33.333_ms": 1
+      },
+      "swap_ms": {
+        "n": 52,
+        "min": 0.55,
+        "median": 4.758,
+        "p90": 14.2928,
+        "p95": 15.5383,
+        "p99": 16.3126,
+        "max": 16.667,
+        "over_8.333_ms": 8,
+        "over_16.667_ms": 1,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "swap_share_pct": {
+        "n": 52,
+        "min": 4.4903,
+        "median": 69.0625,
+        "p90": 91.0578,
+        "p95": 92.6156,
+        "p99": 95.3376,
+        "max": 95.3776
+      },
+      "swap_share_of_total_draw_pct": 60.39,
+      "draw_minus_swap_ms": {
+        "n": 52,
+        "min": 0.403,
+        "median": 1.507,
+        "p90": 7.295,
+        "p95": 7.622,
+        "p99": 31.9714,
+        "max": 56.685,
+        "over_8.333_ms": 1,
+        "over_16.667_ms": 1,
+        "over_25_ms": 1,
+        "over_33.333_ms": 1
+      }
+    },
+    "list_fling": {
+      "ui_ms": {
+        "n": 589,
+        "min": 0.136,
+        "median": 0.39,
+        "p90": 1.0634,
+        "p95": 1.6898,
+        "p99": 5.4156,
+        "max": 11.266,
+        "over_8.333_ms": 3,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "raster_ms": {
+        "n": 589,
+        "min": 4.041,
+        "median": 16.429,
+        "p90": 17.1484,
+        "p95": 17.3428,
+        "p99": 34.0372,
+        "max": 38.802,
+        "over_8.333_ms": 568,
+        "over_16.667_ms": 193,
+        "over_25_ms": 11,
+        "over_33.333_ms": 8
+      },
+      "swap_ms": {
+        "n": 589,
+        "min": 1.214,
+        "median": 14.124,
+        "p90": 15.478,
+        "p95": 15.668,
+        "p99": 16.0271,
+        "max": 16.669,
+        "over_8.333_ms": 532,
+        "over_16.667_ms": 1,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "swap_share_pct": {
+        "n": 589,
+        "min": 5.9986,
+        "median": 87.1865,
+        "p90": 92.2609,
+        "p95": 92.6476,
+        "p99": 93.1074,
+        "max": 93.5093
+      },
+      "swap_share_of_total_draw_pct": 80.34,
+      "draw_minus_swap_ms": {
+        "n": 589,
+        "min": 1.042,
+        "median": 1.767,
+        "p90": 5.2824,
+        "p95": 6.5124,
+        "p99": 29.0126,
+        "max": 34.193,
+        "over_8.333_ms": 19,
+        "over_16.667_ms": 11,
+        "over_25_ms": 9,
+        "over_33.333_ms": 1
+      }
+    },
+    "route_pop": {
+      "ui_ms": {
+        "n": 20,
+        "min": 0.313,
+        "median": 0.546,
+        "p90": 3.1199,
+        "p95": 4.769,
+        "p99": 6.0466,
+        "max": 6.366,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "raster_ms": {
+        "n": 20,
+        "min": 7.374,
+        "median": 16.52,
+        "p90": 17.0836,
+        "p95": 17.2928,
+        "p99": 17.381,
+        "max": 17.403,
+        "over_8.333_ms": 19,
+        "over_16.667_ms": 7,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "swap_ms": {
+        "n": 20,
+        "min": 5.66,
+        "median": 15.1905,
+        "p90": 16.3088,
+        "p95": 16.3356,
+        "p99": 16.4975,
+        "max": 16.538,
+        "over_8.333_ms": 19,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "swap_share_pct": {
+        "n": 20,
+        "min": 76.7562,
+        "median": 90.3792,
+        "p90": 96.4264,
+        "p95": 97.2521,
+        "p99": 97.3609,
+        "max": 97.3882
+      },
+      "swap_share_of_total_draw_pct": 91.26,
+      "draw_minus_swap_ms": {
+        "n": 20,
+        "min": 0.411,
+        "median": 1.56,
+        "p90": 2.0635,
+        "p95": 2.1275,
+        "p99": 2.2103,
+        "max": 2.231,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      }
+    },
+    "route_push": {
+      "ui_ms": {
+        "n": 21,
+        "min": 0.298,
+        "median": 0.679,
+        "p90": 1.518,
+        "p95": 3.513,
+        "p99": 5.449,
+        "max": 5.933,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "raster_ms": {
+        "n": 21,
+        "min": 3.474,
+        "median": 16.201,
+        "p90": 16.909,
+        "p95": 17.171,
+        "p99": 17.2086,
+        "max": 17.218,
+        "over_8.333_ms": 20,
+        "over_16.667_ms": 6,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "swap_ms": {
+        "n": 21,
+        "min": 2.986,
+        "median": 14.53,
+        "p90": 15.276,
+        "p95": 15.565,
+        "p99": 15.681,
+        "max": 15.71,
+        "over_8.333_ms": 20,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "swap_share_pct": {
+        "n": 21,
+        "min": 82.6058,
+        "median": 89.423,
+        "p90": 93.0299,
+        "p95": 93.4674,
+        "p99": 94.444,
+        "max": 94.6881
+      },
+      "swap_share_of_total_draw_pct": 89.5,
+      "draw_minus_swap_ms": {
+        "n": 21,
+        "min": 0.488,
+        "median": 1.681,
+        "p90": 1.971,
+        "p95": 2.323,
+        "p99": 2.3246,
+        "max": 2.325,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      }
+    },
+    "tab_switch": {
+      "ui_ms": {
+        "n": 76,
+        "min": 0.205,
+        "median": 0.7475,
+        "p90": 4.9235,
+        "p95": 6.41,
+        "p99": 8.4992,
+        "max": 11.158,
+        "over_8.333_ms": 1,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "raster_ms": {
+        "n": 76,
+        "min": 6.689,
+        "median": 16.2645,
+        "p90": 17.268,
+        "p95": 18.1603,
+        "p99": 28.7317,
+        "max": 35.061,
+        "over_8.333_ms": 74,
+        "over_16.667_ms": 24,
+        "over_25_ms": 3,
+        "over_33.333_ms": 1
+      },
+      "swap_ms": {
+        "n": 76,
+        "min": 1.264,
+        "median": 13.1595,
+        "p90": 15.4575,
+        "p95": 15.6247,
+        "p99": 16.2237,
+        "max": 16.727,
+        "over_8.333_ms": 52,
+        "over_16.667_ms": 1,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "swap_share_pct": {
+        "n": 76,
+        "min": 4.748,
+        "median": 79.9575,
+        "p90": 92.8017,
+        "p95": 92.977,
+        "p99": 93.183,
+        "max": 93.2474
+      },
+      "swap_share_of_total_draw_pct": 71.62,
+      "draw_minus_swap_ms": {
+        "n": 76,
+        "min": 1.094,
+        "median": 3.1725,
+        "p90": 8.6365,
+        "p95": 11.8988,
+        "p99": 26.6292,
+        "max": 30.443,
+        "over_8.333_ms": 9,
+        "over_16.667_ms": 4,
+        "over_25_ms": 2,
+        "over_33.333_ms": 0
+      }
+    }
+  },
+  "slow_raster_over_25ms": {
+    "ui_ms": {
+      "n": 15,
+      "min": 0.192,
+      "median": 0.399,
+      "p90": 0.9,
+      "p95": 1.1881,
+      "p99": 1.5392,
+      "max": 1.627,
+      "over_8.333_ms": 0,
+      "over_16.667_ms": 0,
+      "over_25_ms": 0,
+      "over_33.333_ms": 0
+    },
+    "raster_ms": {
+      "n": 15,
+      "min": 25.829,
+      "median": 34.603,
+      "p90": 38.112,
+      "p95": 44.9664,
+      "p99": 56.4733,
+      "max": 59.35,
+      "over_8.333_ms": 15,
+      "over_16.667_ms": 15,
+      "over_25_ms": 15,
+      "over_33.333_ms": 10
+    },
+    "swap_ms": {
+      "n": 15,
+      "min": 1.264,
+      "median": 4.818,
+      "p90": 5.3476,
+      "p95": 8.7569,
+      "p99": 15.0866,
+      "max": 16.669,
+      "over_8.333_ms": 1,
+      "over_16.667_ms": 1,
+      "over_25_ms": 0,
+      "over_33.333_ms": 0
+    },
+    "swap_share_pct": {
+      "n": 15,
+      "min": 4.4903,
+      "median": 14.1873,
+      "p90": 18.3586,
+      "p95": 26.0481,
+      "p99": 39.5769,
+      "max": 42.9591
+    },
+    "swap_share_of_total_draw_pct": 14.59,
+    "draw_minus_swap_ms": {
+      "n": 15,
+      "min": 20.973,
+      "median": 29.142,
+      "p90": 33.2442,
+      "p95": 40.9406,
+      "p99": 53.5361,
+      "max": 56.685,
+      "over_8.333_ms": 15,
+      "over_16.667_ms": 15,
+      "over_25_ms": 12,
+      "over_33.333_ms": 2
+    },
+    "layer_paint_ms": {
+      "n": 15,
+      "min": 19.746,
+      "median": 27.478,
+      "p90": 30.245,
+      "p95": 37.7514,
+      "p99": 51.7111,
+      "max": 55.201,
+      "over_8.333_ms": 15,
+      "over_16.667_ms": 15,
+      "over_25_ms": 10,
+      "over_33.333_ms": 1
+    },
+    "phases": {
+      "list_fling": 11,
+      "tab_switch": 3,
+      "between_markers": 1
+    },
+    "verified_input_windows": {
+      "recommendations_scroll_forward": 10,
+      "recommendations_scroll_back": 1,
+      "popular_tab": 2,
+      "recommendations_tab": 1,
+      "switch_to_dynamics": 1
+    },
+    "inner_complete_markers_in_layer_paint": 0
+  },
+  "known_component_slices_ms": {
+    "ui": {
+      "Animator::Render": {
+        "n": 759,
+        "min": 0.0,
+        "median": 0.001,
+        "p90": 0.001,
+        "p95": 0.002,
+        "p99": 0.002,
+        "max": 0.052,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "Animator::pending_frame_semaphore": {
+        "n": 111,
+        "min": 0.0,
+        "median": 0.001,
+        "p90": 0.001,
+        "p95": 0.001,
+        "p99": 0.0019,
+        "max": 0.008,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "DartIsolate::HandleMessage": {
+        "n": 7,
+        "min": 0.002,
+        "median": 0.14,
+        "p90": 2.3394,
+        "p95": 2.6022,
+        "p99": 2.8124,
+        "max": 2.865,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "Engine::DispatchPointerDataPacket": {
+        "n": 602,
+        "min": 0.005,
+        "median": 0.19,
+        "p90": 0.3057,
+        "p95": 0.3678,
+        "p99": 0.7308,
+        "max": 2.035,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "PipelineFull": {
+        "n": 51,
+        "min": 0.016,
+        "median": 0.028,
+        "p90": 0.062,
+        "p95": 0.0675,
+        "p99": 0.2075,
+        "max": 0.328,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "PlatformConfiguration::begin_frame_": {
+        "n": 759,
+        "min": 0.13,
+        "median": 0.429,
+        "p90": 1.7068,
+        "p95": 2.947,
+        "p99": 8.0751,
+        "max": 11.259,
+        "over_8.333_ms": 7,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "PlatformConfiguration::draw_frame_": {
+        "n": 759,
+        "min": 0.072,
+        "median": 0.311,
+        "p90": 1.5862,
+        "p95": 2.8512,
+        "p99": 7.914,
+        "max": 11.007,
+        "over_8.333_ms": 7,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "RuntimeController::DispatchPlatformMessage": {
+        "n": 9,
+        "min": 0.059,
+        "median": 0.097,
+        "p90": 0.2268,
+        "p95": 0.2804,
+        "p99": 0.3233,
+        "max": 0.334,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "UpdateSemantics": {
+        "n": 162,
+        "min": 0.017,
+        "median": 0.0425,
+        "p90": 0.241,
+        "p95": 0.3221,
+        "p99": 0.4079,
+        "max": 0.497,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      }
+    },
+    "raster": {
+      "CompositorContext::ScopedFrame::Raster": {
+        "n": 759,
+        "min": 0.084,
+        "median": 0.407,
+        "p90": 4.0854,
+        "p95": 5.7317,
+        "p99": 26.8237,
+        "max": 55.234,
+        "over_8.333_ms": 18,
+        "over_16.667_ms": 15,
+        "over_25_ms": 10,
+        "over_33.333_ms": 1
+      },
+      "GrDirectContext::flushAndSubmit": {
+        "n": 759,
+        "min": 0.183,
+        "median": 1.027,
+        "p90": 1.5304,
+        "p95": 1.8288,
+        "p99": 4.2541,
+        "max": 8.37,
+        "over_8.333_ms": 1,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "LayerTree::Paint": {
+        "n": 759,
+        "min": 0.045,
+        "median": 0.301,
+        "p90": 4.015,
+        "p95": 5.6881,
+        "p99": 26.771,
+        "max": 55.201,
+        "over_8.333_ms": 18,
+        "over_16.667_ms": 15,
+        "over_25_ms": 10,
+        "over_33.333_ms": 1
+      },
+      "LayerTree::Preroll": {
+        "n": 759,
+        "min": 0.015,
+        "median": 0.036,
+        "p90": 0.075,
+        "p95": 0.09,
+        "p99": 0.1358,
+        "max": 0.539,
+        "over_8.333_ms": 0,
+        "over_16.667_ms": 0,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      },
+      "OhosContextGL::SwapBuffers": {
+        "n": 758,
+        "min": 0.55,
+        "median": 13.949,
+        "p90": 15.4838,
+        "p95": 15.6913,
+        "p99": 16.1543,
+        "max": 16.727,
+        "over_8.333_ms": 631,
+        "over_16.667_ms": 3,
+        "over_25_ms": 0,
+        "over_33.333_ms": 0
+      }
+    }
+  },
+  "longest_matched_ui": [
+    {
+      "phase": "list_fling",
+      "sample_offset_s": 3.3437,
+      "ui_ms": 11.266,
+      "raster_ms": 14.745,
+      "swap_ms": 10.081,
+      "swap_share": 0.6837,
+      "ui_components_ms": {
+        "dart_begin_frame": 11.259,
+        "dart_draw_frame": 11.007,
+        "animator_render": 0.0
+      },
+      "raster_components_ms": {
+        "scoped_raster": 3.34,
+        "layer_preroll": 0.017,
+        "layer_paint": 3.309,
+        "flush_and_submit": 1.216,
+        "swap_buffers": 10.081
+      },
+      "verified_input_window": "recommendations_scroll_back"
+    },
+    {
+      "phase": "tab_switch",
+      "sample_offset_s": 9.0287,
+      "ui_ms": 11.158,
+      "raster_ms": 17.006,
+      "swap_ms": 15.605,
+      "swap_share": 0.9176,
+      "ui_components_ms": {
+        "dart_begin_frame": 11.151,
+        "dart_draw_frame": 10.953,
+        "animator_render": 0.001
+      },
+      "raster_components_ms": {
+        "scoped_raster": 0.388,
+        "layer_preroll": 0.096,
+        "layer_paint": 0.272,
+        "flush_and_submit": 0.899,
+        "swap_buffers": 15.605
+      },
+      "verified_input_window": "categories_tab"
+    },
+    {
+      "phase": "between_markers",
+      "sample_offset_s": 10.6975,
+      "ui_ms": 9.864,
+      "raster_ms": 6.009,
+      "swap_ms": 4.523,
+      "swap_share": 0.7527,
+      "ui_components_ms": {
+        "dart_begin_frame": 9.856,
+        "dart_draw_frame": 9.818,
+        "animator_render": 0.001
+      },
+      "raster_components_ms": {
+        "layer_preroll": 0.037,
+        "scoped_raster": 0.305,
+        "layer_paint": 0.25,
+        "flush_and_submit": 1.0,
+        "swap_buffers": 4.523
+      },
+      "verified_input_window": "not_unambiguously_attributed"
+    },
+    {
+      "phase": "between_markers",
+      "sample_offset_s": 19.5099,
+      "ui_ms": 9.355,
+      "raster_ms": 10.37,
+      "swap_ms": 2.143,
+      "swap_share": 0.2067,
+      "ui_components_ms": {
+        "dart_begin_frame": 9.342,
+        "dart_draw_frame": 9.228,
+        "animator_render": 0.001
+      },
+      "raster_components_ms": {
+        "scoped_raster": 6.981,
+        "layer_preroll": 0.016,
+        "layer_paint": 6.949,
+        "flush_and_submit": 1.077,
+        "swap_buffers": 2.143
+      },
+      "verified_input_window": "not_unambiguously_attributed"
+    },
+    {
+      "phase": "list_fling",
+      "sample_offset_s": 7.8651,
+      "ui_ms": 9.11,
+      "raster_ms": 16.022,
+      "swap_ms": 14.639,
+      "swap_share": 0.9137,
+      "ui_components_ms": {
+        "dart_begin_frame": 9.102,
+        "dart_draw_frame": 8.904,
+        "animator_render": 0.001
+      },
+      "raster_components_ms": {
+        "scoped_raster": 0.224,
+        "layer_preroll": 0.022,
+        "layer_paint": 0.186,
+        "flush_and_submit": 1.039,
+        "swap_buffers": 14.639
+      },
+      "verified_input_window": "not_unambiguously_attributed"
+    }
+  ],
+  "longest_matched_raster": [
+    {
+      "phase": "between_markers",
+      "sample_offset_s": 14.6177,
+      "ui_ms": 1.627,
+      "raster_ms": 59.35,
+      "swap_ms": 2.665,
+      "swap_share": 0.0449,
+      "ui_components_ms": {
+        "dart_begin_frame": 1.619,
+        "dart_draw_frame": 1.587,
+        "animator_render": 0.002
+      },
+      "raster_components_ms": {
+        "scoped_raster": 55.234,
+        "layer_preroll": 0.015,
+        "layer_paint": 55.201,
+        "flush_and_submit": 1.348,
+        "swap_buffers": 2.665
+      },
+      "verified_input_window": "switch_to_dynamics"
+    },
+    {
+      "phase": "list_fling",
+      "sample_offset_s": 3.2172,
+      "ui_ms": 0.486,
+      "raster_ms": 38.802,
+      "swap_ms": 16.669,
+      "swap_share": 0.4296,
+      "ui_components_ms": {
+        "dart_begin_frame": 0.471,
+        "dart_draw_frame": 0.287,
+        "animator_render": 0.0
+      },
+      "raster_components_ms": {
+        "scoped_raster": 20.245,
+        "layer_preroll": 0.029,
+        "layer_paint": 20.199,
+        "flush_and_submit": 1.549,
+        "swap_buffers": 16.669
+      },
+      "verified_input_window": "recommendations_scroll_back"
+    },
+    {
+      "phase": "list_fling",
+      "sample_offset_s": 20.7342,
+      "ui_ms": 0.404,
+      "raster_ms": 37.077,
+      "swap_ms": 5.366,
+      "swap_share": 0.1447,
+      "ui_components_ms": {
+        "dart_begin_frame": 0.394,
+        "dart_draw_frame": 0.3,
+        "animator_render": 0.001
+      },
+      "raster_components_ms": {
+        "scoped_raster": 30.313,
+        "layer_preroll": 0.024,
+        "layer_paint": 30.273,
+        "flush_and_submit": 1.299,
+        "swap_buffers": 5.366
+      },
+      "verified_input_window": "recommendations_scroll_forward"
+    },
+    {
+      "phase": "list_fling",
+      "sample_offset_s": 21.2782,
+      "ui_ms": 0.25,
+      "raster_ms": 36.508,
+      "swap_ms": 4.687,
+      "swap_share": 0.1284,
+      "ui_components_ms": {
+        "dart_begin_frame": 0.24,
+        "dart_draw_frame": 0.209,
+        "animator_render": 0.0
+      },
+      "raster_components_ms": {
+        "scoped_raster": 30.25,
+        "layer_preroll": 0.03,
+        "layer_paint": 30.203,
+        "flush_and_submit": 1.462,
+        "swap_buffers": 4.687
+      },
+      "verified_input_window": "recommendations_scroll_forward"
+    },
+    {
+      "phase": "list_fling",
+      "sample_offset_s": 21.3251,
+      "ui_ms": 0.278,
+      "raster_ms": 36.375,
+      "swap_ms": 2.182,
+      "swap_share": 0.06,
+      "ui_components_ms": {
+        "dart_begin_frame": 0.27,
+        "dart_draw_frame": 0.21,
+        "animator_render": 0.001
+      },
+      "raster_components_ms": {
+        "scoped_raster": 29.774,
+        "layer_preroll": 0.032,
+        "layer_paint": 29.722,
+        "flush_and_submit": 4.315,
+        "swap_buffers": 2.182
+      },
+      "verified_input_window": "recommendations_scroll_forward"
+    }
+  ],
+  "limits": [
+    "Only complete per-thread B/E pairs and unique Flutter frame matches are measured.",
+    "UI and draw durations are elapsed slices, not CPU utilization or displayed FPS.",
+    "SwapBuffers is the time in that call and can include presentation or queue waiting.",
+    "Child markers can overlap. No widget-specific or end-to-end display diagnosis follows from these spans.",
+    "This mixed workload is not a settings-only baseline comparison."
+  ],
+  "input_correlation": {
+    "method": "A matching Settings push/pop pair bounds the host-to-device relative clock using input and verification times. A label requires the whole bound to fall between two inputs, including settling time, or a matching Flutter tab/scroll marker start and a unique verified action of that type.",
+    "clock_offset_bound_width_s": 0.913,
+    "limit": "Input windows associate timing with a user flow, not with an individual widget, texture, or draw command."
+  }
+}

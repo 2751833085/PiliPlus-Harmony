@@ -1,0 +1,66 @@
+{
+  "version_code": 6250,
+  "source": "9ef7750afb7d2c64eb2c01c1360a9f616d8d6e6b",
+  "hap_sha256": "5838ea7469e756eb1f271d997fe0717f7005a7189f37f796862f7b683432705e",
+  "platform": "HarmonyOS 7 DevEco emulator",
+  "display_profile_px": [
+    3184,
+    2232
+  ],
+  "session_mode": "guest",
+  "install": {
+    "hap_sha256": "5838ea7469e756eb1f271d997fe0717f7005a7189f37f796862f7b683432705e",
+    "source": "9ef7750afb7d2c64eb2c01c1360a9f616d8d6e6b",
+    "package_bytes": 33132666,
+    "device_kind": "DevEco emulator",
+    "uninstalled": false,
+    "version_before": 6249,
+    "version_after": 6250,
+    "uid_preserved": true,
+    "first_install_time_preserved": true
+  },
+  "before_workload_host_emulator_interruption": "6250-emulator-incident.json",
+  "targeted_sidebar_checks": "6250-creator-sidebar.json",
+  "navigation_soak": {
+    "host_local_start": "2026-11-07T15:48:46-05:00",
+    "workload_limit_seconds": 900,
+    "elapsed_seconds": 900.004,
+    "stop_reason": "time_limit",
+    "complete_rounds": 43,
+    "attempted_actions": 658,
+    "verified_actions": 658,
+    "pending_at_deadline": null,
+    "unchanged_pid": 3194,
+    "verified_actions_by_kind": {
+      "bottom 动态": 44,
+      "bottom 我的": 44,
+      "open Settings": 44,
+      "Settings Back": 44,
+      "bottom 首页": 44,
+      "top 推荐": 87,
+      "推荐 scroll forward": 44,
+      "推荐 scroll back": 44,
+      "top 热门": 44,
+      "热门 scroll forward": 44,
+      "热门 scroll back": 44,
+      "top 分区": 44,
+      "分区 scroll forward": 44,
+      "分区 scroll back": 43
+    },
+    "detail_navigation_exercised_in_soak": false
+  },
+  "post_soak": {
+    "sensitivity_read_back": "轻拉",
+    "settings_value_changed": false,
+    "verified_actions": 13,
+    "end_screen": "recommendations",
+    "end_pid": 3194
+  },
+  "limits": {
+    "action_timing": "HDC input, UITest accessibility tree and process verification",
+    "presented_fps": null,
+    "decoded_playback_verified": false,
+    "download_verified": false,
+    "physical_phone_used_for_these_checks": false
+  }
+}

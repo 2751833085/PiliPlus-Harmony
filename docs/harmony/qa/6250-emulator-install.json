@@ -1,0 +1,11 @@
+{
+  "hap_sha256": "5838ea7469e756eb1f271d997fe0717f7005a7189f37f796862f7b683432705e",
+  "source": "9ef7750afb7d2c64eb2c01c1360a9f616d8d6e6b",
+  "package_bytes": 33132666,
+  "device_kind": "DevEco emulator",
+  "uninstalled": false,
+  "version_before": 6249,
+  "version_after": 6250,
+  "uid_preserved": true,
+  "first_install_time_preserved": true
+}

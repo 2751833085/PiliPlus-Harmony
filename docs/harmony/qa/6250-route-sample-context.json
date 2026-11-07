@@ -1,0 +1,8 @@
+{
+  "version": 6250,
+  "requested_duration_s": 26,
+  "elapsed_s": 28.07,
+  "workload": "bounded navigation soak, separate from 6248/6249 settings-only comparison",
+  "same_pid": true,
+  "presented_fps": null
+}

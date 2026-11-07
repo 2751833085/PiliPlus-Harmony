@@ -1,0 +1,14 @@
+{
+  "version_code": 6250,
+  "phase": "first application launch immediately after successful in-place package installation and metadata readback, before targeted UI checks or timed soak",
+  "host_local_timestamp": "2026-11-07T15:44:49.278-05:00",
+  "dev_eco_emulator_version": "26.0.0.400",
+  "host_emulator_error_code": "00802003",
+  "host_emulator_process_exited": true,
+  "hdc_target_became_offline": true,
+  "hdc_error_code": "E001005",
+  "preceding_emulator_graphics_log": "guest_upload_gbuffer_data reported a null gbuffer",
+  "app_crash_attribution": null,
+  "evidence_boundary": "DevEco crash server identified the emulator process and reported an emulator crash. Nearby graphics logs establish sequence only. App-side crash or initiating cause is not established. No targeted UI assertion or long-test result is counted for this interruption.",
+  "recovery": "Cold boot existing dedicated emulator with installed application data preserved."
+}

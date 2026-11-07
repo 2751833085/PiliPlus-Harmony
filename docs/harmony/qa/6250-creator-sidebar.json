@@ -1,0 +1,42 @@
+{
+  "version_code": 6250,
+  "source": "9ef7750afb7d2c64eb2c01c1360a9f616d8d6e6b",
+  "hap_sha256": "5838ea7469e756eb1f271d997fe0717f7005a7189f37f796862f7b683432705e",
+  "profile_px": [
+    3184,
+    2232
+  ],
+  "guest_pid": 3194,
+  "checks": {
+    "video_enter": {
+      "status": "passed",
+      "verified_actions": 1
+    },
+    "first_creator_back": {
+      "status": "passed",
+      "verified_actions": 1
+    },
+    "second_creator_open": {
+      "status": "passed",
+      "verified_actions": 1
+    },
+    "second_creator_back": {
+      "status": "passed",
+      "verified_actions": 1
+    },
+    "video_back": {
+      "status": "passed",
+      "verified_actions": 1
+    }
+  },
+  "creator_open_visual_confirmations": 2,
+  "creator_open_automated_confirmations": 1,
+  "creator_close_automated_confirmations": 2,
+  "first_creator_check_detail": "The right panel opened, as confirmed by the screenshot and the right-hand profile action. The first selector required the title to have its own right-side semantics rectangle. Flutter merged it into an ancestor. The corrected selector combines the merged title with the right-hand View Profile action and the left-hand video creator row.",
+  "evidence": {
+    "creator_sidebar": "secondary/creator-sidebar.png",
+    "same_video_after_sidebar_back": "secondary/creator-return-related.png",
+    "home_native_bars_after_video_back": "secondary/returned-home-bars.png"
+  },
+  "decoded_playback_verified": false
+}
