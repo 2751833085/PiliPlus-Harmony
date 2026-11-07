@@ -1,0 +1,11 @@
+{
+  "check": "settings",
+  "status": "passed",
+  "pid": 10820,
+  "verified_actions": 18,
+  "pending_action": null,
+  "setting_may_need_restore": false,
+  "elapsed_s": 38.575,
+  "timing_scope": "HDC input, accessibility tree and PID check latency",
+  "playback_decode_verified": false
+}

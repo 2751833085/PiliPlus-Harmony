@@ -1,0 +1,18 @@
+{
+  "status": "time_limit",
+  "reason": "Workload reached its time limit",
+  "version": 6249,
+  "pid": 10820,
+  "mode": "navigation_only",
+  "completed_cycles": 42,
+  "attempted_actions": 637,
+  "verified_actions": 636,
+  "pending_action": "推荐 scroll forward",
+  "setting_may_need_restore": false,
+  "elapsed_s": 901.258,
+  "video_check": "detail navigation only; emulator video decoding was not verified",
+  "source_commit": "d47f3f0aca95c81953b5298f33ee0144e8b9839c",
+  "hap_sha256": "87cdb7f0a3aa1c58f7e2d414d0faa9a8b4564913ef76cad2f3046f789e6e11f5",
+  "surface": "dedicated HarmonyOS 7 emulator, 3184x2232, guest account",
+  "scope": "navigation and scroll validation only; UITest timings include shell and tree read latency, not FPS"
+}

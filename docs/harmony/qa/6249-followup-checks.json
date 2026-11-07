@@ -1,0 +1,41 @@
+{
+  "video_warm": {
+    "check": "video",
+    "status": "passed",
+    "pid": 10820,
+    "verified_actions": 2,
+    "pending_action": null,
+    "setting_may_need_restore": false,
+    "elapsed_s": 3.127,
+    "timing_scope": "HDC input, accessibility tree and PID check latency",
+    "playback_decode_verified": false
+  },
+  "cold_settings_first": {
+    "check": "cold-settings-first",
+    "status": "passed",
+    "pid": 4443,
+    "verified_actions": 14,
+    "pending_action": null,
+    "setting_may_need_restore": false,
+    "elapsed_s": 38.631,
+    "timing_scope": "HDC input, accessibility tree and PID check latency",
+    "playback_decode_verified": false
+  },
+  "cold_video_first": {
+    "check": "cold-video-first",
+    "status": "passed",
+    "pid": 5417,
+    "verified_actions": 14,
+    "pending_action": null,
+    "setting_may_need_restore": false,
+    "elapsed_s": 36.655,
+    "timing_scope": "HDC input, accessibility tree and PID check latency",
+    "playback_decode_verified": false
+  },
+  "search": {
+    "entry_verified": true,
+    "keyword_input_verified": false,
+    "search_results_verified": false,
+    "limitation": "first-use input method agreement declined, returned to home without accepting it"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "trace": "settings-nav-6248.trace",
+  "buffer_entries_and_written_entries": [
+    365525,
+    365525
+  ],
+  "nav_markers": 18,
+  "ui_slices_in_routes": 360,
+  "matched_ui_and_raster_frames": 353,
+  "slices_ms": {
+    "POP": {
+      "route_transition": {
+        "n": 9,
+        "min_ms": 316.06,
+        "median_ms": 320.613,
+        "p90_ms": 329.034,
+        "p95_ms": 332.081,
+        "max_ms": 335.128
+      },
+      "ui_begin_frame": {
+        "n": 174,
+        "min_ms": 0.209,
+        "median_ms": 0.329,
+        "p90_ms": 1.355,
+        "p95_ms": 2.429,
+        "max_ms": 3.545
+      },
+      "raster_do_draw": {
+        "n": 174,
+        "min_ms": 3.019,
+        "median_ms": 15.903,
+        "p90_ms": 17.105,
+        "p95_ms": 17.306,
+        "max_ms": 22.988
+      }
+    },
+    "combined": {
+      "route_transition": {
+        "n": 18,
+        "min_ms": 308.777,
+        "median_ms": 323.644,
+        "p90_ms": 333.164,
+        "p95_ms": 335.419,
+        "max_ms": 337.068
+      },
+      "ui_begin_frame": {
+        "n": 353,
+        "min_ms": 0.183,
+        "median_ms": 0.378,
+        "p90_ms": 1.269,
+        "p95_ms": 2.432,
+        "max_ms": 8.721
+      },
+      "raster_do_draw": {
+        "n": 353,
+        "min_ms": 0.681,
+        "median_ms": 16.009,
+        "p90_ms": 17.07,
+        "p95_ms": 17.255,
+        "max_ms": 52.019
+      }
+    },
+    "PUSH": {
+      "route_transition": {
+        "n": 9,
+        "min_ms": 308.777,
+        "median_ms": 325.819,
+        "p90_ms": 333.271,
+        "p95_ms": 335.17,
+        "max_ms": 337.068
+      },
+      "ui_begin_frame": {
+        "n": 179,
+        "min_ms": 0.183,
+        "median_ms": 0.41,
+        "p90_ms": 1.125,
+        "p95_ms": 2.329,
+        "max_ms": 8.721
+      },
+      "raster_do_draw": {
+        "n": 179,
+        "min_ms": 0.681,
+        "median_ms": 16.114,
+        "p90_ms": 17.022,
+        "p95_ms": 17.225,
+        "max_ms": 52.019
+      }
+    }
+  },
+  "method": "Pair B/E by thread, process and tag, and match UI/raster by Flutter process and frame number. Include matched frames whose UI BeginFrame begins inside a Navigator S/F marker. Flutter slices omit compositor presentation, so these are not FPS measurements."
+}

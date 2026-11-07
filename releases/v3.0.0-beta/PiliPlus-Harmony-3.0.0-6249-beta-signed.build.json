@@ -1,0 +1,61 @@
+{
+  "hap": "PiliPlus-Harmony-3.0.0-6249-beta-signed.hap",
+  "sha256": "87cdb7f0a3aa1c58f7e2d414d0faa9a8b4564913ef76cad2f3046f789e6e11f5",
+  "bytes": 33128568,
+  "mode": "release",
+  "signed": true,
+  "base_commit": "d47f3f0aca95c81953b5298f33ee0144e8b9839c",
+  "source_tree_sha256": "d1d1d821f1d3095bf60b792bf47b98b7776cd7494b04f4b70bfb39289115a211",
+  "toolchain": {
+    "flutter": {
+      "source": "https://gitcode.com/CPF-Flutter/flutter_flutter.git",
+      "tag": "3.44.9+ohos-0.0.1-canary1",
+      "commit": "39285df71a97ffe0c23241dcc459d997a9d8b7c6"
+    },
+    "harmony_sdk": {
+      "release": "26.0.0.821",
+      "sdk_version": "26.0.0.105",
+      "api": 26,
+      "source": "https://github.com/ErBWs/ohos-sdk/releases/tag/26.0.0.821",
+      "archive_sha256": "d53802c52d3d0a6a0836333c9e8f2bb73d9f6753d1658185539e2659c46df1ad",
+      "provenance": "Same distribution and version as the community HarmonyOS branch CI."
+    }
+  },
+  "app": {
+    "iconId": 134217729,
+    "minPatchAPIVersion": 0,
+    "debug": false,
+    "targetPatchAPIVersion": 0,
+    "minMinorAPIVersion": 0,
+    "minAPIVersion": 60002022,
+    "icon": "$media:app_layered_image",
+    "buildMode": "release",
+    "label": "$string:app_name",
+    "bundleType": "app",
+    "versionName": "3.0.0",
+    "versionCode": 6249,
+    "multiAppMode": {
+      "multiAppModeType": "appClone",
+      "maxCount": 5
+    },
+    "appEnvironments": [],
+    "compileSdkType": "HarmonyOS",
+    "labelId": 134217728,
+    "compileSdkVersion": "26.0.0.105",
+    "targetAPIVersion": 260000026,
+    "vendor": "example",
+    "bundleName": "com.example.piliplus",
+    "apiReleaseType": "Release",
+    "appPreloadPhase": "abilityStageCreated",
+    "targetMinorAPIVersion": 0
+  },
+  "device_types": [
+    "phone",
+    "2in1",
+    "tablet"
+  ],
+  "libmpv_sha256": "38664cf7dc7af1b3093a731c94f6e48f9c1092c97a774656e6c2b59cfe0df99e",
+  "layout_diagnostics": false,
+  "qa_guest_isolated": false,
+  "performance_diagnostics": false
+}

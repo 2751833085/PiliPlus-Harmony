@@ -1,0 +1,163 @@
+{
+  "samples": [
+    {
+      "elapsed_s": 0.2,
+      "pss_kb": 325356,
+      "private_clean_kb": 128292,
+      "private_dirty_kb": 158808,
+      "swap_pss_kb": 1877,
+      "heap_alloc_kb": 109181,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 55.4,
+      "pss_kb": 341579,
+      "private_clean_kb": 128144,
+      "private_dirty_kb": 175204,
+      "swap_pss_kb": 1877,
+      "heap_alloc_kb": 119538,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 110.5,
+      "pss_kb": 362457,
+      "private_clean_kb": 129120,
+      "private_dirty_kb": 195108,
+      "swap_pss_kb": 1877,
+      "heap_alloc_kb": 126520,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 165.7,
+      "pss_kb": 407153,
+      "private_clean_kb": 128280,
+      "private_dirty_kb": 240644,
+      "swap_pss_kb": 1877,
+      "heap_alloc_kb": 137253,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 220.8,
+      "pss_kb": 369434,
+      "private_clean_kb": 128148,
+      "private_dirty_kb": 202780,
+      "swap_pss_kb": 1877,
+      "heap_alloc_kb": 143798,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 276.0,
+      "pss_kb": 403912,
+      "private_clean_kb": 128420,
+      "private_dirty_kb": 236988,
+      "swap_pss_kb": 1877,
+      "heap_alloc_kb": 150934,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 331.1,
+      "pss_kb": 419439,
+      "private_clean_kb": 128564,
+      "private_dirty_kb": 252640,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 161149,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 386.3,
+      "pss_kb": 435921,
+      "private_clean_kb": 128512,
+      "private_dirty_kb": 269156,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 168912,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 441.4,
+      "pss_kb": 447372,
+      "private_clean_kb": 129572,
+      "private_dirty_kb": 279272,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 175816,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 496.5,
+      "pss_kb": 467602,
+      "private_clean_kb": 128640,
+      "private_dirty_kb": 300708,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 186013,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 551.7,
+      "pss_kb": 462213,
+      "private_clean_kb": 128852,
+      "private_dirty_kb": 295108,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 192415,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 606.8,
+      "pss_kb": 357142,
+      "private_clean_kb": 128008,
+      "private_dirty_kb": 190636,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 107015,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 662.0,
+      "pss_kb": 381700,
+      "private_clean_kb": 128048,
+      "private_dirty_kb": 215156,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 114174,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 717.2,
+      "pss_kb": 407640,
+      "private_clean_kb": 128296,
+      "private_dirty_kb": 240848,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 123036,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 772.4,
+      "pss_kb": 378457,
+      "private_clean_kb": 128064,
+      "private_dirty_kb": 211884,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 131165,
+      "pid_unchanged": true
+    },
+    {
+      "elapsed_s": 827.5,
+      "pss_kb": 416998,
+      "private_clean_kb": 128580,
+      "private_dirty_kb": 249864,
+      "swap_pss_kb": 1875,
+      "heap_alloc_kb": 138196,
+      "pid_unchanged": true
+    }
+  ],
+  "scope": "read-only hidumper memory samples during emulator navigation, no forced GC; not a proof of leak absence",
+  "pss_min_kb": 325356,
+  "pss_max_kb": 467602,
+  "retained_log_check": {
+    "scope": "specified app PID current retained log buffer; substring counts, not exhaustive crash detection",
+    "elapsed_s": 827.6,
+    "counts": {
+      "unhandled_exception": 0,
+      "missing_plugin": 0,
+      "render_flex_overflow": 0,
+      "set_state_after_dispose": 0,
+      "emulator_video_unsupported": 0,
+      "fatal_signal": 0
+    }
+  }
+}
