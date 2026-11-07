@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
+import 'package:PiliPlus/pages/video/widgets/tablet_video_sidebar.dart';
+import 'package:PiliPlus/utils/storage.dart';
+
+import 'helpers/memory_box.dart';
 
 void main() {
   testWidgets(
@@ -84,6 +89,76 @@ void main() {
     expect(find.text('related'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+  testWidgets('member overlay preserves the combined sidebar tab and route', (
+    tester,
+  ) async {
+    final sidebar = GlobalKey<MiniScaffoldState>();
+    final navigator = GlobalKey<NavigatorState>();
+    GStorage.setting = MemoryBox();
+    final player = GlobalKey();
+    const memberKey = ValueKey('member-overlay');
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: const Scaffold(body: Text('home')),
+      ),
+    );
+    navigator.currentState!.push<void>(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          body: Row(
+            children: [
+              Expanded(child: SizedBox.expand(key: player)),
+              SizedBox(
+                width: 280,
+                child: TabletSidebarSurface(
+                  child: MiniScaffold(
+                    key: sidebar,
+                    body: const TabletDetailTabs(
+                      related: Center(child: Text('recommendations')),
+                      comments: Center(child: Text('comment list')),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('评论'));
+    await tester.pumpAndSettle();
+    final playerBounds = tester.getRect(find.byKey(player));
+    sidebar.currentState!.showBottomSheet(
+      (_) => const Material(
+        child: SizedBox.expand(key: memberKey, child: Text('UP 主主页')),
+      ),
+      constraints: const BoxConstraints(),
+      slideFromRight: true,
+      sheetAnimationStyle: const AnimationStyle(
+        duration: HarmonyMotion.duration,
+        reverseDuration: HarmonyMotion.duration,
+      ),
+    );
+    await tester.pumpAndSettle();
+    final memberBounds = tester.getRect(find.byKey(memberKey));
+    expect(memberBounds.left, greaterThanOrEqualTo(playerBounds.right));
+    expect(memberBounds.right, 800);
+
+    await navigator.currentState!.maybePop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(memberKey), findsNothing);
+    expect(tester.getRect(find.byKey(player)), playerBounds);
+    expect(find.text('comment list').hitTestable(), findsOneWidget);
+    expect(find.text('home'), findsNothing);
+
+    await navigator.currentState!.maybePop();
+    await tester.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'side panel slides horizontally and one back closes a replacement',
     (tester) async {

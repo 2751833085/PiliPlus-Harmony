@@ -1808,6 +1808,11 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
   }
 
   Size get _tabletWindow => Size(maxWidth - padding.horizontal, maxHeight);
+  bool get _opensMemberInTabletSidebar =>
+      _usesTabletVideoLayout &&
+      !isFullScreen &&
+      TabletVideoLayout.wide(_tabletWindow);
+
   // View metrics describe the current app window before the optional UI zoom.
   // Form detection must not mistake a zoomed-out double fold for a triple fold.
   Size get _unscaledTabletWindow {
@@ -1850,7 +1855,10 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     final detailsHeight = max(0.0, maxHeight - padding.top - height);
     final playerWidth = _expand(leftWidth, maxWidth);
     final playerHeight = _expand(height, maxHeight);
-    final intro = _tabletIntro(right: false, inlineMember: false);
+    final intro = _tabletIntro(
+      right: false,
+      inlineMember: _opensMemberInTabletSidebar,
+    );
     return MiniScaffold(
       key: videoDetailController.childKey,
       body: Row(
@@ -3442,10 +3450,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
 
   void onShowMemberPage(int? mid) {
     if (mid == null) return;
-    final inSidebar =
-        _usesTabletVideoLayout &&
-        !isFullScreen &&
-        TabletVideoLayout.wide(Size(maxWidth - padding.horizontal, maxHeight));
+    final inSidebar = _opensMemberInTabletSidebar;
     final host = inSidebar
         ? _tabletSidebarKey.currentState
         : videoDetailController.childKey.currentState;
