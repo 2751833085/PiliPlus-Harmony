@@ -1,0 +1,48 @@
+{
+  "version_code": 6249,
+  "hap_sha256": "87cdb7f0a3aa1c58f7e2d414d0faa9a8b4564913ef76cad2f3046f789e6e11f5",
+  "source": "d47f3f0ac",
+  "emulator_resolution_px": [
+    3184,
+    2232
+  ],
+  "guest_pid": 5417,
+  "verified_actions": {
+    "comment-detail-back": 1,
+    "related": 1,
+    "creator-back": 1,
+    "video-back": 1,
+    "cover-cancel": 1,
+    "mine": 1,
+    "cache": 1,
+    "cache-back": 1,
+    "settings": 1,
+    "about": 1,
+    "about-back": 2,
+    "refresh": 1
+  },
+  "verified_observations": {
+    "video_covers_home_bars": "secondary/video-related.png",
+    "video_back_restores_home_bars": "secondary/returned-home-bars.png",
+    "comment_detail_right_side": "soak-6249-b5scmuiv/failure.png",
+    "cover_overlay_displays_image_actions_and_keeps_bars": "soak-6249-0ekh45qh/failure.png",
+    "offline_cache_guest_entry_exit": "secondary/offline-cache.png",
+    "about_version_6249": "secondary/about.png"
+  },
+  "regression": {
+    "title": "Video author opens a full-screen route in default combined right-side layout",
+    "evidence": "secondary/creator-panel.png",
+    "same_video_restored_after_back": true
+  },
+  "refresh": {
+    "visible_before": 8,
+    "visible_after": 8,
+    "new_visible": 8
+  },
+  "limits": {
+    "download_or_playback_started": false,
+    "hardware_device_touched": false,
+    "presented_fps": null,
+    "actions_submit_user_data": false
+  }
+}
