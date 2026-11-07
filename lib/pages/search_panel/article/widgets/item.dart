@@ -1,6 +1,7 @@
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/models/search/result.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/platform_utils.dart';
@@ -15,6 +16,7 @@ class SearchArticleItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final horizontal = HarmonyStyle.enabled(context);
     final textStyle = TextStyle(
       fontSize: theme.textTheme.labelSmall!.fontSize,
       color: theme.colorScheme.outline,
@@ -44,18 +46,17 @@ class SearchArticleItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               if (item.imageUrls?.isNotEmpty == true)
-                AspectRatio(
-                  aspectRatio: Style.aspectRatio,
-                  child: LayoutBuilder(
-                    builder: (context, boxConstraints) {
-                      double maxWidth = boxConstraints.maxWidth;
-                      double maxHeight = boxConstraints.maxHeight;
-                      return NetworkImgLayer(
-                        width: maxWidth,
-                        height: maxHeight,
+                SizedBox(
+                  width: horizontal ? 82 : null,
+                  child: AspectRatio(
+                    aspectRatio: horizontal ? 1 : Style.aspectRatio,
+                    child: LayoutBuilder(
+                      builder: (context, boxConstraints) => NetworkImgLayer(
+                        width: boxConstraints.maxWidth,
+                        height: boxConstraints.maxHeight,
                         src: item.imageUrls?.firstOrNull,
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ),
               const SizedBox(width: 10),
@@ -66,6 +67,7 @@ class SearchArticleItem extends StatelessWidget {
                   children: [
                     Text.rich(
                       maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       TextSpan(
                         children: item.title
                             .map(
@@ -86,7 +88,7 @@ class SearchArticleItem extends StatelessWidget {
                       DateFormatUtils.dateFormat(item.pubTime),
                       style: textStyle,
                     ),
-                    Row(
+                    Wrap(
                       children: [
                         Text('${item.view}浏览', style: textStyle),
                         Text(' • ', style: textStyle),

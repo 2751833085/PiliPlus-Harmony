@@ -28,10 +28,12 @@ class VideoCardH extends StatelessWidget {
     this.onRemove,
     this.adaptiveCover = false,
     this.compactSidebar = false,
+    this.searchResult = false,
   });
   final HorizontalVideoModel videoItem;
   final bool adaptiveCover;
   final bool compactSidebar;
+  final bool searchResult;
   final VoidCallback? onTap;
   final ValueChanged<int>? onViewLater;
   final VoidCallback? onRemove;
@@ -56,9 +58,11 @@ class VideoCardH extends StatelessWidget {
             onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
             onTap: onTap ?? () => pushVideoH(videoItem),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: Style.safeSpace,
-                vertical: 5,
+                vertical: searchResult
+                    ? VideoCardHLayout.searchVerticalPadding
+                    : 5,
               ),
               child: LayoutBuilder(
                 builder: (context, bounds) {
@@ -71,11 +75,15 @@ class VideoCardH extends StatelessWidget {
                     crossAxisAlignment: .start,
                     children: [
                       SizedBox(
-                        width: adaptiveCover || compactSidebar
+                        width: searchResult
+                            ? VideoCardHLayout.searchCoverWidth(bounds.maxWidth)
+                            : adaptiveCover || compactSidebar
                             ? coverWidth
                             : null,
                         child: AspectRatio(
-                          aspectRatio: Style.aspectRatio,
+                          aspectRatio: searchResult
+                              ? Style.aspectRatio16x9
+                              : Style.aspectRatio,
                           child: _CoverBuilderH(
                             cover: videoItem.cover,
                             badge: videoItem.badge,
@@ -94,7 +102,7 @@ class VideoCardH extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: 3,
+            bottom: searchResult ? 10 : 3,
             right: 16,
             width: 29,
             height: 29,
@@ -182,10 +190,12 @@ class VideoCardH extends StatelessWidget {
   Widget _compactStat(ThemeData theme, StatType type, int? value) {
     final color = theme.colorScheme.outline.withValues(alpha: .8);
     return Row(
+      mainAxisSize: searchResult ? MainAxisSize.min : MainAxisSize.max,
       spacing: 2,
       children: [
         Icon(type.iconData, semanticLabel: type.label, size: 13, color: color),
-        Expanded(
+        Flexible(
+          fit: searchResult ? FlexFit.loose : FlexFit.tight,
           child: Text(
             NumUtils.numFormat(value),
             maxLines: 1,
@@ -198,7 +208,7 @@ class VideoCardH extends StatelessWidget {
   }
 
   Widget content(ThemeData theme) {
-    String pubdate = DateFormatUtils.dateFormat(videoItem.pubdate!);
+    String pubdate = DateFormatUtils.dateFormat(videoItem.pubdate);
     if (pubdate != '') pubdate += '  ';
     return Expanded(
       child: Column(
@@ -242,17 +252,46 @@ class VideoCardH extends StatelessWidget {
                 overflow: .ellipsis,
               ),
             ),
-          Text(
-            "$pubdate${videoItem.owner.name}",
-            maxLines: 1,
-            style: TextStyle(
-              fontSize: 12,
-              height: 1,
-              color: theme.colorScheme.outline,
-              overflow: .clip,
+          Padding(
+            padding: EdgeInsets.only(right: searchResult ? 30 : 0),
+            child: Text(
+              searchResult
+                  ? (videoItem.owner.name ?? '')
+                  : "$pubdate${videoItem.owner.name}",
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1,
+                color: theme.colorScheme.outline,
+                overflow: searchResult ? .ellipsis : .clip,
+              ),
             ),
           ),
-          if (videoItem.isLive != true) ...[
+          if (searchResult) ...[
+            const SizedBox(height: 3),
+            Padding(
+              padding: const EdgeInsets.only(right: 30),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  if (videoItem.stat.view != null)
+                    _compactStat(
+                      theme,
+                      videoItem.isLive == true ? .view : .play,
+                      videoItem.stat.view,
+                    ),
+                  if (videoItem.isLive != true && pubdate.isNotEmpty)
+                    Text(
+                      pubdate.trimRight(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ] else if (videoItem.isLive != true) ...[
             const SizedBox(height: 3),
             Row(
               spacing: 8,

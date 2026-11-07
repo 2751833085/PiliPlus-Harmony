@@ -52,23 +52,28 @@ class _SearchUserPanelState
       child: Padding(
         padding: const .fromLTRB(25, 0, 12, 4),
         child: Row(
+          spacing: 8,
           children: [
-            Obx(
-              () => Text(
-                '排序: ${controller.userOrderType!.value.label}',
-                maxLines: 1,
-                style: TextStyle(color: colorScheme.outline),
+            Expanded(
+              child: Obx(
+                () => Text(
+                  '排序: ${controller.userOrderType!.value.label}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: colorScheme.outline),
+                ),
               ),
             ),
-            const Spacer(),
-            Obx(
-              () => Text(
-                '用户类型: ${controller.userType!.value.label}',
-                maxLines: 1,
-                style: TextStyle(color: colorScheme.outline),
+            Expanded(
+              child: Obx(
+                () => Text(
+                  '用户类型: ${controller.userType!.value.label}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: colorScheme.outline),
+                ),
               ),
             ),
-            const Spacer(),
             SizedBox(
               width: 32,
               height: 32,
@@ -96,28 +101,40 @@ class _SearchUserPanelState
     mainAxisExtent: 66,
   );
 
+  double get _rowExtent => scaledRowExtent(66, 4);
+
   @override
   Widget buildList(List<SearchUserItemModel> list) {
-    return SliverGrid.builder(
-      gridDelegate: gridDelegate,
-      itemBuilder: (BuildContext context, int index) {
-        if (index == list.length - 1) {
-          controller.onLoadMore();
-        }
-        return SearchUserItem(
-          item: list[index],
-        );
-      },
-      itemCount: list.length,
-    );
+    Widget itemBuilder(BuildContext context, int index) {
+      if (index == list.length - 1) controller.onLoadMore();
+      return SearchUserItem(item: list[index]);
+    }
+
+    return useSingleColumnResults
+        ? buildResultRows(
+            itemCount: list.length,
+            itemExtent: _rowExtent,
+            itemBuilder: itemBuilder,
+          )
+        : SliverGrid.builder(
+            gridDelegate: gridDelegate,
+            itemCount: list.length,
+            itemBuilder: itemBuilder,
+          );
   }
 
   @override
-  Widget get buildLoading => SliverGrid(
-    gridDelegate: gridDelegate,
-    delegate: const SliverSingleChildDelegate(
-      count: 10,
-      child: MsgFeedTopSkeleton(),
-    ),
-  );
+  Widget get buildLoading => useSingleColumnResults
+      ? buildResultRows(
+          itemCount: 10,
+          itemExtent: _rowExtent,
+          itemBuilder: (_, _) => const MsgFeedTopSkeleton(),
+        )
+      : SliverGrid(
+          gridDelegate: gridDelegate,
+          delegate: const SliverSingleChildDelegate(
+            count: 10,
+            child: MsgFeedTopSkeleton(),
+          ),
+        );
 }

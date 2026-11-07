@@ -9,8 +9,7 @@ import 'package:PiliPlus/pages/search_panel/video/view.dart';
 import 'package:PiliPlus/pages/search_panel/view.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:get/get.dart';
-import 'package:material_ui/material_ui.dart'
-    hide SliverGridDelegateWithMaxCrossAxisExtent;
+import 'package:material_ui/material_ui.dart';
 
 class SearchAllPanel extends SearchVideoPanel {
   const SearchAllPanel({
@@ -47,6 +46,13 @@ class _SearchAllPanelState
       tag: widget.searchType.name + widget.tag,
     );
   }
+
+  @override
+  bool get hasSupplementalResults =>
+      controller.searchEsports != null ||
+      controller.searchActivity?.isNotEmpty == true ||
+      controller.searchUser?.isNotEmpty == true ||
+      controller.searchMedia?.isNotEmpty == true;
 
   @override
   Widget buildList(List<SearchVideoItemModel> list) {
@@ -89,7 +95,14 @@ class _SearchAllPanelState
     return SliverToBoxAdapter(child: SearchEsportsItem(item: item));
   }
 
-  static Widget _buildPgc(List<SearchPgcItemModel> list) {
+  Widget _buildPgc(List<SearchPgcItemModel> list) {
+    if (useSingleColumnResults) {
+      return buildResultRows(
+        itemCount: list.length,
+        itemExtent: scaledRowExtent(158, 5),
+        itemBuilder: (_, index) => SearchPgcItem(item: list[index]),
+      );
+    }
     final Widget child;
     if (list.length == 1) {
       child = SearchPgcItem(item: list.first);
@@ -107,9 +120,4 @@ class _SearchAllPanelState
     }
     return SliverToBoxAdapter(child: SizedBox(height: 158, child: child));
   }
-
-  late final pgcGridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-    maxCrossAxisExtent: Grid.smallCardWidth * 2,
-    mainAxisExtent: 160,
-  );
 }

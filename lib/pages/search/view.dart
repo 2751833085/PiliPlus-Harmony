@@ -5,12 +5,9 @@ import 'dart:convert';
 
 import 'package:PiliPlus/common/widgets/dialog/export_import.dart';
 import 'package:PiliPlus/common/widgets/disabled_icon.dart';
-import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/sliver_wrap.dart';
-import 'package:PiliPlus/http/loading_state.dart';
-import 'package:PiliPlus/models_new/search/search_rcmd/data.dart';
 import 'package:PiliPlus/pages/search/controller.dart';
-import 'package:PiliPlus/pages/search/widgets/hot_keyword.dart';
+import 'package:PiliPlus/pages/search/widgets/search_keyword_section.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/utils/em.dart' show Em;
 import 'package:PiliPlus/utils/extension/size_ext.dart';
@@ -51,27 +48,25 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final wide = MediaQuery.sizeOf(context).width >= 840;
     final trending = _searchController.enableTrending
-        ? _buildHotSearch()
+        ? _keywordSection(isTrending: true, wide: wide)
         : null;
     final rcmd = _searchController.enableSearchRcmd
-        ? _buildHotSearch(isTrending: false)
+        ? _keywordSection(isTrending: false, wide: wide)
         : null;
 
     return SimpleScaffold(
       appBar: _buildAppBar,
       body: Padding(
         padding: EdgeInsets.only(
-          left:
-              padding.left + (MediaQuery.sizeOf(context).width >= 840 ? 68 : 0),
-          right:
-              padding.right +
-              (MediaQuery.sizeOf(context).width >= 840 ? 68 : 0),
+          left: padding.left + (wide ? 68 : 0),
+          right: padding.right + (wide ? 68 : 0),
         ),
         child: CustomScrollView(
           slivers: [
             if (_searchController.searchSuggestion) _buildSearchSuggest(),
-            if (MediaQuery.sizeOf(context).width >= 840)
+            if (wide)
               SearchSplitSliver(
                 left: SliverMainAxisGroup(slivers: [?trending, ?rcmd]),
                 right: _buildHistory,
@@ -181,118 +176,20 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  Widget _buildHotSearch({
-    bool isTrending = true,
-  }) {
-    final text = Text(
-      isTrending ? 'bilibili热搜' : '搜索发现',
-      strutStyle: const StrutStyle(leading: 0, height: 1),
-      style: theme.textTheme.titleMedium!.copyWith(
-        height: 1,
-        fontWeight: .bold,
-      ),
-    );
-    final outline = theme.colorScheme.outline;
-    final secondary = theme.colorScheme.secondary;
-    final style = TextStyle(
-      height: 1,
-      fontSize: 13,
-      color: outline,
-    );
-    return SliverPadding(
-      padding: .fromLTRB(
-        MediaQuery.sizeOf(context).width >= 840 ? 0 : 10,
-        !isTrending && (isPortrait || _searchController.enableTrending)
-            ? 4
-            : 25,
-        4,
-        25,
-      ),
-      sliver: SliverMainAxisGroup(
-        slivers: [
-          SliverPadding(
-            padding: const .fromLTRB(6, 0, 6, 6),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                mainAxisAlignment: .spaceBetween,
-                children: [
-                  Expanded(
-                    child: isTrending
-                        ? Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              text,
-                              const Spacer(),
-                              TextButton(
-                                style: const ButtonStyle(
-                                  visualDensity: .compact,
-                                  tapTargetSize: .shrinkWrap,
-                                  padding: WidgetStatePropertyAll(
-                                    .symmetric(horizontal: 10),
-                                  ),
-                                ),
-                                onPressed: () => Get.toNamed('/searchTrending'),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      '完整榜单',
-                                      strutStyle: const StrutStyle(
-                                        leading: 0,
-                                        height: 1,
-                                      ),
-                                      style: style,
-                                    ),
-                                    Icon(
-                                      size: 18,
-                                      Icons.keyboard_arrow_right,
-                                      color: outline,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )
-                        : text,
-                  ),
-                  if (!isTrending)
-                    TextButton.icon(
-                      style: const ButtonStyle(
-                        visualDensity: .compact,
-                        tapTargetSize: .shrinkWrap,
-                        padding: WidgetStatePropertyAll(
-                          .symmetric(horizontal: 10),
-                        ),
-                      ),
-                      onPressed: isTrending
-                          ? _searchController.queryTrendingList
-                          : _searchController.queryRecommendList,
-                      icon: Icon(
-                        Icons.refresh_outlined,
-                        size: 18,
-                        color: secondary,
-                      ),
-                      label: Text(
-                        '刷新',
-                        strutStyle: const StrutStyle(leading: 0, height: 1),
-                        style: TextStyle(height: 1, color: secondary),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          Obx(
-            () => _buildHotKey(
-              isTrending
-                  ? _searchController.trendingState.value
-                  : _searchController.recommendData.value,
-              isTrending,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _keywordSection({required bool isTrending, required bool wide}) =>
+      SearchKeywordSection(
+        controller: _searchController.keywords,
+        isTrending: isTrending,
+        padding: EdgeInsets.fromLTRB(
+          wide ? 0 : 10,
+          !isTrending && (isPortrait || _searchController.enableTrending)
+              ? 4
+              : 25,
+          4,
+          25,
+        ),
+        onClick: _searchController.onClickKeyword,
+      );
 
   late final mainAxisExtent = 16 + MediaQuery.textScalerOf(context).scale(14);
   Widget get _buildHistory {
@@ -438,26 +335,4 @@ class _SearchPageState extends State<SearchPage> {
       },
     ),
   );
-
-  Widget _buildHotKey(
-    LoadingState<SearchRcmdData> loadingState,
-    bool isTrending,
-  ) {
-    return switch (loadingState) {
-      Success(:final response) when (response.list?.isNotEmpty ?? false) =>
-        SliverHotKeyword(
-          hotSearchList: response.list!,
-          filled: !isTrending,
-          onClick: _searchController.onClickKeyword,
-        ),
-      Error(:final errMsg) => HttpError(
-        safeArea: false,
-        errMsg: errMsg,
-        onReload: isTrending
-            ? _searchController.queryTrendingList
-            : _searchController.queryRecommendList,
-      ),
-      _ => const SliverToBoxAdapter(),
-    };
-  }
 }

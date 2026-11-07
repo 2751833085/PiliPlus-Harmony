@@ -34,7 +34,8 @@ class ElasticRefreshSliverState extends State<ElasticRefreshSliver>
   bool _holding = false;
   int? _pointer;
   Future<void>? _task;
-  late final _fade = AnimationController(
+  AnimationController? _fadeController;
+  AnimationController get _fade => _fadeController ??= AnimationController(
     vsync: this,
     value: 1,
     duration: const Duration(milliseconds: 280),
@@ -103,7 +104,7 @@ class ElasticRefreshSliverState extends State<ElasticRefreshSliver>
 
   @override
   void dispose() {
-    _fade.dispose();
+    _fadeController?.dispose();
     super.dispose();
   }
 

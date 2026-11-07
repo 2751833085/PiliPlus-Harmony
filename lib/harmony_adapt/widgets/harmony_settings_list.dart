@@ -61,11 +61,16 @@ class HarmonySettingsList extends StatelessWidget {
                   ),
                 Material(
                   color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.vertical(
-                    top: first ? radius : Radius.zero,
-                    bottom: last ? radius : Radius.zero,
-                  ),
-                  clipBehavior: Clip.antiAlias,
+                  // A null shape uses Material's rectangular fast path for
+                  // middle rows. Hard-edge clipping still contains ink; only
+                  // the actual rounded section ends need anti-aliasing.
+                  borderRadius: first || last
+                      ? BorderRadius.vertical(
+                          top: first ? radius : Radius.zero,
+                          bottom: last ? radius : Radius.zero,
+                        )
+                      : null,
+                  clipBehavior: first || last ? Clip.antiAlias : Clip.hardEdge,
                   child: Ink(
                     decoration: theme.extension<PopupSurfaceStyle>() != null
                         ? BoxDecoration(

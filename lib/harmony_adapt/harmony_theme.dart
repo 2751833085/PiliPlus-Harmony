@@ -273,14 +273,13 @@ class HarmonyPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     if (MediaQuery.disableAnimationsOf(context)) return child;
-    // ModalRoute already rebuilds this delegate on animation ticks. Keep the
-    // page cached and move its paint directly instead of adding a second
-    // AnimatedBuilder/merged-listenable subscription to every route.
+    // ModalRoute already caches the page in a repaint boundary and rebuilds
+    // this delegate on ticks. Translate the retained page without another layer.
     return HarmonyRouteTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
       userGestureInProgress: route.navigator?.userGestureInProgressNotifier,
-      child: RepaintBoundary(child: child),
+      child: child,
     );
   }
 }

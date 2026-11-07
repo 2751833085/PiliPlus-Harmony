@@ -56,7 +56,11 @@ class BaseSearchController extends GetxController {
     GStorage.historyWord.get('cacheList') ?? const <String>[],
   ).obs;
 
-  late final Rx<LoadingState<SearchTrendingData>> trendingState;
+  final trendingState = LoadingState<SearchTrendingData>.loading().obs;
+  final recommendData = LoadingState<SearchRcmdData>.loading().obs;
+  bool _recommendationsRequested = false;
+  Future<void>? _trendingRequest;
+  Future<void>? _recommendRequest;
 
   final recordSearchHistory = Pref.recordSearchHistory.obs;
   final searchSuggestion = Pref.searchSuggestion;
@@ -68,14 +72,41 @@ class BaseSearchController extends GetxController {
     super.onInit();
 
     if (enableTrending) {
-      trendingState = LoadingState<SearchTrendingData>.loading().obs;
       queryTrendingList();
     }
   }
 
   // 获取热搜关键词
-  Future<void> queryTrendingList() async {
-    trendingState.value = await SearchHttp.searchTrending(limit: 10);
+  Future<void> queryTrendingList() => _trendingRequest ??= _loadTrending()
+      .whenComplete(() => _trendingRequest = null);
+
+  Future<void> _loadTrending() async {
+    final result = await SearchHttp.searchTrending(limit: 10);
+    if (!isClosed) trendingState.value = result;
+  }
+
+  void ensureRecommendations() {
+    if (enableSearchRcmd && !_recommendationsRequested) {
+      queryRecommendList();
+    }
+  }
+
+  Future<void> queryRecommendList() => _recommendRequest ??=
+      _loadRecommendations().whenComplete(() => _recommendRequest = null);
+
+  Future<void> _loadRecommendations() async {
+    _recommendationsRequested = true;
+    final result = await SearchHttp.searchRecommend();
+    if (!isClosed) recommendData.value = result;
+  }
+
+  void recordKeyword(String text) {
+    if (!recordSearchHistory.value) return;
+    final index = historyList.indexOf(text);
+    if (index == 0) return;
+    if (index != -1) historyList.removeAt(index);
+    historyList.insert(0, text);
+    GStorage.historyWord.put('cacheList', historyList);
   }
 }
 
@@ -86,7 +117,7 @@ class SSearchController extends GetxController
 
   final searchFocusNode = FocusNode();
   final controller = TextEditingController();
-  final _baseCtr = Get.putOrFind(BaseSearchController.new);
+  final keywords = Get.putOrFind(BaseSearchController.new);
 
   String? hintText;
 
@@ -96,23 +127,15 @@ class SSearchController extends GetxController
   final RxBool showUidBtn = false.obs;
 
   // history
-  RxBool get recordSearchHistory => _baseCtr.recordSearchHistory;
-  RxList<String> get historyList => _baseCtr.historyList;
+  RxBool get recordSearchHistory => keywords.recordSearchHistory;
+  RxList<String> get historyList => keywords.historyList;
 
   // suggestion
-  bool get searchSuggestion => _baseCtr.searchSuggestion;
+  bool get searchSuggestion => keywords.searchSuggestion;
   late final RxList<SearchSuggestItem> searchSuggestList;
 
-  // trending
-  bool get enableTrending => _baseCtr.enableTrending;
-  Rx<LoadingState<SearchTrendingData>> get trendingState =>
-      _baseCtr.trendingState;
-
-  // rcmd
-  bool get enableSearchRcmd => _baseCtr.enableSearchRcmd;
-  late final Rx<LoadingState<SearchRcmdData>> recommendData;
-
-  Future<void> Function() get queryTrendingList => _baseCtr.queryTrendingList;
+  bool get enableTrending => keywords.enableTrending;
+  bool get enableSearchRcmd => keywords.enableSearchRcmd;
 
   @override
   void onInit() {
@@ -130,10 +153,7 @@ class SSearchController extends GetxController
       if (text != null) onValueChanged(text);
     }
 
-    if (enableSearchRcmd) {
-      recommendData = LoadingState<SearchRcmdData>.loading().obs;
-      queryRecommendList();
-    }
+    keywords.ensureRecommendations();
   }
 
   void validateUid() {
@@ -176,14 +196,7 @@ class SSearchController extends GetxController
       return;
     }
 
-    if (recordSearchHistory.value) {
-      final index = historyList.indexOf(text);
-      if (index != 0) {
-        if (index != -1) historyList.removeAt(index);
-        historyList.insert(0, text);
-        GStorage.historyWord.put('cacheList', historyList);
-      }
-    }
+    keywords.recordKeyword(text);
 
     searchFocusNode.unfocus();
     Get.toNamed(
@@ -191,15 +204,12 @@ class SSearchController extends GetxController
       parameters: {'tag': tag, 'keyword': text},
       arguments: {'initIndex': initIndex, 'fromSearch': true},
     )?.then((val) {
+      if (isClosed) return;
       searchFocusNode.requestFocus();
       if (val is bool && val) {
         onValueChanged(text);
       }
     });
-  }
-
-  Future<void> queryRecommendList() async {
-    recommendData.value = await SearchHttp.searchRecommend();
   }
 
   void onClickKeyword(String keyword, {bool clearSuggest = true}) {

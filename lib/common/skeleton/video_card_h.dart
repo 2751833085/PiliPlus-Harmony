@@ -8,25 +8,29 @@ class VideoCardHSkeleton extends StatelessWidget {
     super.key,
     this.adaptiveCover = false,
     this.compactSidebar = false,
+    this.searchResult = false,
   });
   final bool adaptiveCover;
   final bool compactSidebar;
+  final bool searchResult;
 
   @override
   Widget build(BuildContext context) {
     final color = ColorScheme.of(context).onInverseSurface;
     return Skeleton(
       child: Padding(
-        padding: const EdgeInsets.symmetric(
+        padding: EdgeInsets.symmetric(
           horizontal: Style.safeSpace,
-          vertical: 5,
+          vertical: searchResult ? VideoCardHLayout.searchVerticalPadding : 5,
         ),
         child: LayoutBuilder(
           builder: (context, bounds) => Row(
             crossAxisAlignment: .start,
             children: [
               SizedBox(
-                width: adaptiveCover
+                width: searchResult
+                    ? VideoCardHLayout.searchCoverWidth(bounds.maxWidth)
+                    : adaptiveCover
                     ? VideoCardHLayout.coverWidth(
                         bounds.maxWidth,
                         bounds.maxHeight,
@@ -34,7 +38,9 @@ class VideoCardHSkeleton extends StatelessWidget {
                       )
                     : null,
                 child: AspectRatio(
-                  aspectRatio: Style.aspectRatio,
+                  aspectRatio: searchResult
+                      ? Style.aspectRatio16x9
+                      : Style.aspectRatio,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: color,
@@ -75,7 +81,7 @@ class VideoCardHSkeleton extends StatelessWidget {
                         height: 13,
                         margin: const .only(bottom: 5),
                       ),
-                      if (compactSidebar)
+                      if (compactSidebar || searchResult)
                         FittedBox(fit: BoxFit.scaleDown, child: _stats(color))
                       else
                         _stats(color),

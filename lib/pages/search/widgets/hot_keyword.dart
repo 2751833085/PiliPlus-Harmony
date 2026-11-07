@@ -15,11 +15,13 @@ class SliverHotKeyword extends StatelessWidget {
   final List<SearchTrendingItemModel> hotSearchList;
   final Function? onClick;
   final bool filled;
+  final int columns;
   const SliverHotKeyword({
     super.key,
     required this.hotSearchList,
     this.onClick,
     this.filled = false,
+    this.columns = 2,
   });
 
   @override
@@ -36,7 +38,7 @@ class SliverHotKeyword extends StatelessWidget {
       child: _HotKeywordGrid(
         mainAxisSpacing: 8,
         crossAxisSpacing: filled ? 8 : 4,
-        crossAxisCount: 2,
+        crossAxisCount: columns,
         children: hotSearchList
             .map(
               (i) => Material(
@@ -184,7 +186,9 @@ class _RenderHotKeywordGrid extends RenderBox
     final childWidth =
         (constraints.maxWidth - mainAxisSpacing * (crossAxisCount - 1)) /
         crossAxisCount;
-    final c = BoxConstraints(maxWidth: childWidth);
+    final c = crossAxisCount == 1
+        ? BoxConstraints.tightFor(width: childWidth)
+        : BoxConstraints(maxWidth: childWidth);
     var child = firstChild;
     double? childHeight;
     int index = 0;

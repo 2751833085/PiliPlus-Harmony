@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/skeleton/video_card_h.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_floating_header.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
 import 'package:PiliPlus/models/common/search/video_search_type.dart';
@@ -111,23 +112,38 @@ mixin SearchVideoPanelMixin<S extends SearchVideoPanel>
 
   @override
   Widget buildList(List<SearchVideoItemModel> list) {
-    return SliverGrid.builder(
-      gridDelegate: gridDelegate,
-      itemBuilder: (context, index) {
-        if (index == list.length - 1) {
-          controller.onLoadMore();
-        }
-        return VideoCardH(
-          videoItem: list[index],
-          onRemove: () => controller.loadingState
-            ..value.data!.removeAt(index)
-            ..refresh(),
-        );
-      },
-      itemCount: list.length,
-    );
+    Widget itemBuilder(BuildContext context, int index) {
+      if (index == list.length - 1) {
+        controller.onLoadMore();
+      }
+      return VideoCardH(
+        videoItem: list[index],
+        searchResult: useSingleColumnResults,
+        onRemove: () => controller.loadingState
+          ..value.data!.removeAt(index)
+          ..refresh(),
+      );
+    }
+
+    return useSingleColumnResults
+        ? buildResultRows(
+            itemCount: list.length,
+            itemExtent: mediaRowExtent,
+            itemBuilder: itemBuilder,
+          )
+        : SliverGrid.builder(
+            gridDelegate: gridDelegate,
+            itemCount: list.length,
+            itemBuilder: itemBuilder,
+          );
   }
 
   @override
-  Widget get buildLoading => gridSkeleton;
+  Widget get buildLoading => useSingleColumnResults
+      ? buildResultRows(
+          itemCount: 10,
+          itemExtent: mediaRowExtent,
+          itemBuilder: (_, _) => const VideoCardHSkeleton(searchResult: true),
+        )
+      : gridSkeleton;
 }

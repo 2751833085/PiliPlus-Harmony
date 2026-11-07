@@ -43,6 +43,7 @@ class SearchPanelController<R extends SearchNumData<T>, T>
   Rx<ArticleZoneType>? articleZoneType; // int? categoryId;
 
   SearchResultController? searchResultController;
+  int _sortRevision = 0;
 
   void onSortSearch({
     bool getBack = true,
@@ -54,7 +55,10 @@ class SearchPanelController<R extends SearchNumData<T>, T>
       SmartDialog.showToast("「$label」的筛选结果");
     }
     SmartDialog.showLoading(msg: 'loading');
-    onReload().whenComplete(SmartDialog.dismiss);
+    final revision = ++_sortRevision;
+    onReload().whenComplete(() {
+      if (revision == _sortRevision && !isClosed) SmartDialog.dismiss();
+    });
   }
 
   StreamSubscription? _listener;
@@ -112,6 +116,14 @@ class SearchPanelController<R extends SearchNumData<T>, T>
       queryData(page == 1);
     },
   );
+
+  @override
+  Future<void> onRefresh() {
+    // Sorting and refreshing replace the source, even while an older first
+    // page or pagination request is pending. Its response must not win later.
+    invalidateRequests();
+    return super.onRefresh();
+  }
 
   @override
   Future<void> onReload() {

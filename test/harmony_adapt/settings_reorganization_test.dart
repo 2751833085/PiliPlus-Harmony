@@ -178,6 +178,55 @@ void main() {
     },
   );
 
+  testWidgets(
+    'open settings refresh conditional rows and replace cached categories',
+    (tester) async {
+      debugDefaultTargetPlatformOverride = null;
+      Get.testMode = true;
+      await GStorage.setting.put(SettingBoxKey.harmonyImmersive, false);
+      await GStorage.setting.put(SettingBoxKey.translucentBottomBar, false);
+      final category = ValueNotifier(SettingType.styleSetting);
+      addTearDown(category.dispose);
+      Widget page() => GetMaterialApp(
+        theme: HarmonyTheme.apply(ThemeData()),
+        home: ValueListenableBuilder<SettingType>(
+          valueListenable: category,
+          builder: (context, value, _) => CommonSetting(settingType: value),
+        ),
+      );
+      await tester.pumpWidget(page());
+      await tester.pumpAndSettle();
+      expect(find.text('沉浸光感'), findsOneWidget);
+      expect(find.text('底栏沉浸光感'), findsNothing);
+
+      await GStorage.setting.put(SettingBoxKey.harmonyImmersive, true);
+      HarmonyAppearance.changed();
+      await tester.pumpAndSettle();
+      expect(find.text('底栏沉浸光感'), findsOneWidget);
+      expect(Pref.translucentBottomBar, isFalse);
+
+      await GStorage.setting.put(SettingBoxKey.harmonyImmersive, false);
+      HarmonyAppearance.changed();
+      await tester.pumpAndSettle();
+      expect(find.text('底栏沉浸光感'), findsNothing);
+      // A bulk import can rebuild the route without the switch callback.
+      await GStorage.setting.put(SettingBoxKey.harmonyImmersive, true);
+      await tester.pumpWidget(page());
+      await tester.pumpAndSettle();
+      expect(find.text('底栏沉浸光感'), findsOneWidget);
+      category.value = SettingType.playSetting;
+      await tester.pumpAndSettle();
+      expect(find.text('自动播放'), findsOneWidget);
+      expect(find.text('沉浸光感'), findsNothing);
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpWidget(const SizedBox());
+      Get.reset();
+      await GStorage.setting.put(SettingBoxKey.harmonyImmersive, true);
+      await GStorage.setting.delete(SettingBoxKey.translucentBottomBar);
+    },
+  );
+
   test('fold options require hardware capability even while folded', () {
     HarmonyChannel.foldExpanded.value = false;
     HarmonyChannel.foldable.value = false;

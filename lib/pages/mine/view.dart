@@ -9,6 +9,7 @@ import 'package:PiliPlus/pages/mine/widgets/recent_history.dart';
 import 'package:PiliPlus/pages/history/open_item.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_quick_actions.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/feed_columns.dart';
 import 'dart:async';
 
 import 'package:PiliPlus/common/assets.dart';
@@ -159,6 +160,11 @@ class _MediaPageState extends CommonPageState<MinePage>
     child: _buildHarmonyContent(theme, accent),
   );
 
+  static Widget _harmonySection(BuildContext context, Widget child) =>
+      FeedColumns.profile(MediaQuery.sizeOf(context)) < 2
+      ? Material(type: MaterialType.transparency, child: child)
+      : ImmersiveSurface(borderRadius: HarmonyTheme.cardRadius, child: child);
+
   Widget _buildHarmonyContent(ThemeData theme, Color accent) => SafeArea(
     // Paint behind the translucent bar, but reserve its actual Scaffold inset
     // at the end of the scroll view (viewPadding only contains system insets).
@@ -185,10 +191,9 @@ class _MediaPageState extends CommonPageState<MinePage>
                       EdgeInsets padding = const EdgeInsets.symmetric(
                         vertical: 10,
                       ),
-                    }) => ImmersiveSurface(
-                      blurBackground: false,
-                      borderRadius: HarmonyTheme.cardRadius,
-                      child: Padding(padding: padding, child: child),
+                    }) => _harmonySection(
+                      context,
+                      Padding(padding: padding, child: child),
                     );
                     final account = panel(
                       _buildUserInfo(theme, accent),
@@ -308,11 +313,7 @@ class _MediaPageState extends CommonPageState<MinePage>
             child: harmony
                 ? SizedBox(
                     width: double.infinity,
-                    child: ImmersiveSurface(
-                      blurBackground: false,
-                      borderRadius: HarmonyTheme.cardRadius,
-                      child: child,
-                    ),
+                    child: _harmonySection(context, child),
                   )
                 : child,
           );

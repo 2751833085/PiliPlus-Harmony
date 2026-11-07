@@ -1,3 +1,4 @@
+import 'package:PiliPlus/common/skeleton/video_card_h.dart';
 import 'package:PiliPlus/common/skeleton/video_card_v.dart';
 import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/style.dart';
@@ -55,30 +56,46 @@ class _SearchLivePanelState
 
   @override
   Widget buildList(List<SearchLiveItemModel> list) {
+    Widget itemBuilder(BuildContext context, int index) {
+      if (index == list.length - 1) controller.onLoadMore();
+      return LiveItem(
+        liveItem: list[index],
+        horizontal: useSingleColumnResults,
+      );
+    }
+
+    if (useSingleColumnResults) {
+      return buildResultRows(
+        itemCount: list.length,
+        itemExtent: mediaRowExtent,
+        itemBuilder: itemBuilder,
+      );
+    }
     return SliverPadding(
       padding: const .only(left: Style.safeSpace, right: Style.safeSpace),
       sliver: SliverGrid.builder(
         gridDelegate: gridDelegate,
-        itemBuilder: (context, index) {
-          if (index == list.length - 1) {
-            controller.onLoadMore();
-          }
-          return LiveItem(liveItem: list[index]);
-        },
+        itemBuilder: itemBuilder,
         itemCount: list.length,
       ),
     );
   }
 
   @override
-  Widget get buildLoading => SliverPadding(
-    padding: const .only(left: Style.safeSpace, right: Style.safeSpace),
-    sliver: SliverGrid(
-      gridDelegate: gridDelegate,
-      delegate: const SliverSingleChildDelegate(
-        count: 10,
-        child: VideoCardVSkeleton(),
-      ),
-    ),
-  );
+  Widget get buildLoading => useSingleColumnResults
+      ? buildResultRows(
+          itemCount: 10,
+          itemExtent: mediaRowExtent,
+          itemBuilder: (_, _) => const VideoCardHSkeleton(searchResult: true),
+        )
+      : SliverPadding(
+          padding: const .only(left: Style.safeSpace, right: Style.safeSpace),
+          sliver: SliverGrid(
+            gridDelegate: gridDelegate,
+            delegate: const SliverSingleChildDelegate(
+              count: 10,
+              child: VideoCardVSkeleton(),
+            ),
+          ),
+        );
 }

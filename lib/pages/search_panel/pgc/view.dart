@@ -50,26 +50,40 @@ class _SearchPgcPanelState
     mainAxisExtent: 158,
   );
 
+  double get _rowExtent => scaledRowExtent(158, 5);
+
   @override
   Widget buildList(List<SearchPgcItemModel> list) {
-    return SliverGrid.builder(
-      gridDelegate: gridDelegate,
-      itemBuilder: (BuildContext context, int index) {
-        if (index == list.length - 1) {
-          controller.onLoadMore();
-        }
-        return SearchPgcItem(item: list[index]);
-      },
-      itemCount: list.length,
-    );
+    Widget itemBuilder(BuildContext context, int index) {
+      if (index == list.length - 1) controller.onLoadMore();
+      return SearchPgcItem(item: list[index]);
+    }
+
+    return useSingleColumnResults
+        ? buildResultRows(
+            itemCount: list.length,
+            itemExtent: _rowExtent,
+            itemBuilder: itemBuilder,
+          )
+        : SliverGrid.builder(
+            gridDelegate: gridDelegate,
+            itemCount: list.length,
+            itemBuilder: itemBuilder,
+          );
   }
 
   @override
-  Widget get buildLoading => SliverGrid(
-    gridDelegate: gridDelegate,
-    delegate: const SliverSingleChildDelegate(
-      count: 10,
-      child: MediaPgcSkeleton(),
-    ),
-  );
+  Widget get buildLoading => useSingleColumnResults
+      ? buildResultRows(
+          itemCount: 10,
+          itemExtent: _rowExtent,
+          itemBuilder: (_, _) => const MediaPgcSkeleton(),
+        )
+      : SliverGrid(
+          gridDelegate: gridDelegate,
+          delegate: const SliverSingleChildDelegate(
+            count: 10,
+            child: MediaPgcSkeleton(),
+          ),
+        );
 }

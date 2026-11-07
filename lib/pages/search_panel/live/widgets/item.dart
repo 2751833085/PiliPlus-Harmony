@@ -1,4 +1,6 @@
 import 'package:PiliPlus/common/style.dart';
+import 'package:PiliPlus/common/widgets/badge.dart';
+import 'package:PiliPlus/common/widgets/video_card/video_card_h_layout.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/models/search/result.dart';
@@ -9,8 +11,9 @@ import 'package:material_ui/material_ui.dart';
 
 class LiveItem extends StatelessWidget {
   final SearchLiveItemModel liveItem;
+  final bool horizontal;
 
-  const LiveItem({super.key, required this.liveItem});
+  const LiveItem({super.key, required this.liveItem, this.horizontal = false});
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +22,76 @@ class LiveItem extends StatelessWidget {
       title: liveItem.title.map((item) => item.text).join(),
       cover: liveItem.cover,
     );
+    if (horizontal) {
+      return Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () => PageUtils.toLiveRoom(liveItem.roomid),
+          onLongPress: onLongPress,
+          onSecondaryTap: PlatformUtils.isMobile ? null : onLongPress,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Style.safeSpace,
+              vertical: VideoCardHLayout.searchVerticalPadding,
+            ),
+            child: LayoutBuilder(
+              builder: (context, bounds) {
+                final width = VideoCardHLayout.searchCoverWidth(
+                  bounds.maxWidth,
+                );
+                final metadataStyle = TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.outline,
+                );
+                return Row(
+                  spacing: 10,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Stack(
+                      children: [
+                        NetworkImgLayer(
+                          src: liveItem.cover,
+                          width: width,
+                          height: width / Style.aspectRatio16x9,
+                        ),
+                        const PBadge(text: '直播中', top: 6, right: 6),
+                      ],
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: _title(theme)),
+                          Text(
+                            liveItem.uname ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: metadataStyle,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            [
+                              if (liveItem.online != null)
+                                '${NumUtils.numFormat(liveItem.online)}围观',
+                              if (liveItem.cateName case final category?
+                                  when category.isNotEmpty)
+                                category,
+                            ].join(' · '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: metadataStyle,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
@@ -75,22 +148,7 @@ class LiveItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text.rich(
-            TextSpan(
-              children: liveItem.title
-                  .map(
-                    (e) => TextSpan(
-                      text: e.text,
-                      style: TextStyle(
-                        color: e.isEm
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
+          _title(theme),
           Text(
             liveItem.uname!,
             maxLines: 1,
@@ -101,6 +159,25 @@ class LiveItem extends StatelessWidget {
           ),
         ],
       ),
+    ),
+  );
+
+  Widget _title(ThemeData theme) => Text.rich(
+    maxLines: horizontal ? 2 : null,
+    overflow: horizontal ? TextOverflow.ellipsis : null,
+    TextSpan(
+      children: liveItem.title
+          .map(
+            (e) => TextSpan(
+              text: e.text,
+              style: TextStyle(
+                color: e.isEm
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface,
+              ),
+            ),
+          )
+          .toList(),
     ),
   );
 

@@ -1,4 +1,4 @@
-import 'dart:math' show max;
+import 'dart:math' show max, min;
 import 'package:PiliPlus/common/style.dart';
 
 /// Shared cover geometry for horizontal cards and their loading placeholders.
@@ -10,6 +10,11 @@ abstract final class VideoCardHLayout {
   }) => (availableWidth * (compactSidebar ? .50 : .46))
       .clamp(96.0, compactSidebar ? 196.0 : 184.0)
       .clamp(0.0, availableHeight * Style.aspectRatio);
+
+  static double searchCoverWidth(double availableWidth) =>
+      min(172, availableWidth * .53);
+
+  static const searchVerticalPadding = 12.0;
 
   /// Grow only for accessibility text, rather than reserving blank title space.
   static double compactRowExtent({

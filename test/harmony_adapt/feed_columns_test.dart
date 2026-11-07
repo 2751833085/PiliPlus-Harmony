@@ -49,7 +49,7 @@ void main() {
                   maxCrossAxisExtent: 240,
                   columns: count,
                   mainAxisExtent: 60,
-                  childAspectRatio: 16 / 9,
+                  childAspectRatio: FeedColumns.coverAspectRatio(window),
                 ),
                 itemCount: 20,
                 itemBuilder: (_, i) => SizedBox(key: ValueKey('card-$i')),
@@ -57,10 +57,10 @@ void main() {
             ),
           );
           await tester.pump();
-          expect(
-            tester.getSize(find.byKey(const ValueKey('card-0'))).width,
-            closeTo(window.width / count, .01),
-          );
+          final card = tester.getSize(find.byKey(const ValueKey('card-0')));
+          expect(card.width, closeTo(window.width / count, .01));
+          final expectedRatio = profile < 2 ? 3 / 2 : 4 / 3;
+          expect(card.height, closeTo(card.width / expectedRatio + 60, .01));
           expect(
             tester
                 .getTopLeft(

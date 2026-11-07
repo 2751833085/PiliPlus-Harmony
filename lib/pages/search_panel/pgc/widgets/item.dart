@@ -2,6 +2,7 @@ import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/badge.dart';
 import 'package:PiliPlus/common/widgets/image/image_save.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/models/search/result.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/page_utils.dart';
@@ -19,6 +20,7 @@ class SearchPgcItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final singleColumn = HarmonyStyle.enabled(context);
     const TextStyle style = TextStyle(fontSize: 13);
     void onLongPress() => imageSaveDialog(
       title: item.title.map((item) => item.text).join(),
@@ -61,6 +63,8 @@ class SearchPgcItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text.rich(
+                      maxLines: singleColumn ? 2 : null,
+                      overflow: singleColumn ? TextOverflow.ellipsis : null,
                       TextSpan(
                         children: item.title
                             .map(
@@ -80,6 +84,8 @@ class SearchPgcItem extends StatelessWidget {
                     Text('评分:${item.mediaScore?['score']}', style: style),
                     Text.rich(
                       style: style,
+                      maxLines: singleColumn ? 1 : null,
+                      overflow: singleColumn ? TextOverflow.ellipsis : null,
                       TextSpan(
                         children: [
                           if (item.areas?.isNotEmpty == true)
@@ -92,6 +98,8 @@ class SearchPgcItem extends StatelessWidget {
                     ),
                     Text.rich(
                       style: style,
+                      maxLines: singleColumn ? 1 : null,
+                      overflow: singleColumn ? TextOverflow.ellipsis : null,
                       TextSpan(
                         children: [
                           if (item.styles?.isNotEmpty == true)

@@ -1,0 +1,423 @@
+import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
+import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
+import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/http/api.dart';
+import 'package:PiliPlus/http/init.dart';
+import 'package:PiliPlus/pages/search/controller.dart';
+import 'package:PiliPlus/pages/search/view.dart';
+import 'package:PiliPlus/models/common/search/search_type.dart';
+import 'package:PiliPlus/pages/search_panel/article/widgets/item.dart';
+import 'package:PiliPlus/pages/search_panel/live/widgets/item.dart';
+import 'package:PiliPlus/pages/search_panel/pgc/widgets/item.dart';
+import 'package:PiliPlus/pages/search_panel/user/widgets/item.dart';
+import 'package:PiliPlus/pages/search_result/view.dart';
+import 'package:PiliPlus/utils/storage.dart';
+import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
+
+import 'helpers/memory_box.dart';
+
+const _single = Size(1008, 2232);
+const _double = Size(2048, 2232);
+const _triple = Size(3184, 2232);
+const _query = '搜索测试词';
+const _videoTitle = '这是很长的测试视频标题，用来检查多行文字和各类视频信息的位置';
+const _liveTitle = '这是很长的测试直播标题，用来检查两行文本和观看数据的布局';
+const _author = '很长很长的作者名字与资料描述';
+
+void main() {
+  final calls = <String, int>{};
+  late Interceptor mockSearch;
+
+  setUpAll(() async {
+    GStorage.setting = MemoryBox();
+    GStorage.historyWord = MemoryBox();
+    GStorage.localCache = MemoryBox();
+    await GStorage.setting.put(SettingBoxKey.searchSuggestion, false);
+    await GStorage.localCache.put(
+      LocalCacheKey.timeStamp,
+      DateTime.now().millisecondsSinceEpoch,
+    );
+    await GStorage.localCache.put(LocalCacheKey.mixinKey, 'test-key');
+    Request();
+    mockSearch = InterceptorsWrapper(
+      onRequest: (options, handler) {
+        calls.update(options.path, (count) => count + 1, ifAbsent: () => 1);
+        handler.resolve(
+          Response(
+            requestOptions: options,
+            statusCode: 200,
+            data: {'code': 0, 'data': _response(options)},
+          ),
+        );
+      },
+    );
+    Request.dio.interceptors.add(mockSearch);
+  });
+  tearDownAll(() => Request.dio.interceptors.remove(mockSearch));
+  setUp(calls.clear);
+  tearDown(Get.reset);
+
+  Future<void> openSearch(
+    WidgetTester tester, {
+    double scale = 1,
+    bool direct = false,
+  }) async {
+    tester.view.devicePixelRatio = 2.875;
+    tester.view.physicalSize = direct ? _double : _single;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: HarmonyTheme.apply(ThemeData.dark(), immersive: true),
+        defaultTransition: Transition.noTransition,
+        home: const Scaffold(body: Text('首页')),
+        getPages: [
+          GetPage(name: '/search', page: SearchPage.new),
+          GetPage(name: '/searchResult', page: SearchResultPage.new),
+          GetPage(
+            name: '/searchTrending',
+            page: () => const Scaffold(body: Text('榜单已打开')),
+          ),
+        ],
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            padding: const EdgeInsets.only(top: 28),
+            viewPadding: const EdgeInsets.only(top: 28, bottom: 16),
+            textScaler: TextScaler.linear(scale),
+          ),
+          child: child!,
+        ),
+      ),
+    );
+    if (direct) {
+      Get.toNamed<void>('/searchResult', parameters: {'keyword': _query});
+      await tester.pumpAndSettle();
+      return;
+    }
+    Get.toNamed<void>('/search', parameters: {'text': _query});
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('搜索'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('search result rows and sidebar follow physical fold sizes', (
+    tester,
+  ) async {
+    await openSearch(tester);
+    for (final size in [_single, _double, _triple, _single.flipped, _single]) {
+      tester.view.physicalSize = size;
+      await tester.pumpAndSettle();
+      final split = size == _double || size == _triple;
+      final route = find.byType(SearchResultPage);
+      final heading = find.descendant(
+        of: route,
+        matching: find.text('bilibili热搜'),
+      );
+      final cards = find.byType(VideoCardH);
+      expect(heading, split ? findsOneWidget : findsNothing);
+      expect(
+        find.descendant(of: route, matching: find.text('搜索发现')),
+        split ? findsOneWidget : findsNothing,
+      );
+      expect(cards.evaluate().length, greaterThanOrEqualTo(2), reason: '$size');
+      final first = tester.getRect(cards.at(0));
+      final second = tester.getRect(cards.at(1));
+      expect(second.left, first.left);
+      expect(second.top, closeTo(first.bottom, .01));
+      final cover = tester.getRect(
+        find.descendant(
+          of: cards.first,
+          matching: find.byType(NetworkImgLayer),
+        ),
+      );
+      expect(cover.width, closeTo(172, .01));
+      expect(cover.width / cover.height, closeTo(16 / 9, .001));
+      final query = tester.getRect(
+        find.descendant(of: route, matching: find.text(_query)),
+      );
+      expect(query.top, greaterThanOrEqualTo(28));
+      if (split) {
+        final divider = tester.getRect(
+          find
+              .descendant(of: route, matching: find.byType(VerticalDivider))
+              .last,
+        );
+        expect(divider.width, 1);
+        expect(divider.top, 28);
+        expect(first.right, divider.left);
+        expect(tester.getTopLeft(heading).dx, greaterThan(divider.right));
+        expect(tester.getCenter(heading).dy, closeTo(query.center.dy, 12));
+        if (size == _triple) {
+          expect(first.left, closeTo((size.width / 2.875 - 960) / 2, .01));
+          expect(first.width, closeTo(719, .01));
+        } else {
+          expect(first.width, closeTo(size.width / 2.875 * 2 / 3 - 1, .01));
+        }
+      }
+      expect(tester.takeException(), isNull, reason: '$size');
+    }
+    expect(
+      calls[Api.searchAll],
+      1,
+      reason: 'folding keeps the results mounted',
+    );
+    expect(calls[Api.searchTrending], 1);
+    expect(calls[Api.searchRecommend], 1);
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'large text fits and the keyword pane scrolls and searches independently',
+    (
+      tester,
+    ) async {
+      await openSearch(tester, scale: 1.3);
+      for (final size in [_single, _double, _triple, const Size(860, 2232)]) {
+        tester.view.physicalSize = size;
+        await tester.pumpAndSettle();
+        final first = find.byType(VideoCardH).first;
+        final cover = find.descendant(
+          of: first,
+          matching: find.byType(NetworkImgLayer),
+        );
+        expect(
+          tester.getRect(cover).right,
+          lessThan(tester.getRect(first).right - 85),
+        );
+        if (size.width == 860) {
+          expect(tester.getSize(cover).width, lessThan(172));
+        }
+        expect(tester.takeException(), isNull, reason: '$size / 1.3');
+      }
+      tester.view.physicalSize = _double;
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('直播间'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(HttpError),
+        findsNothing,
+        reason: tester
+            .widgetList<HttpError>(find.byType(HttpError))
+            .map((e) => e.errMsg)
+            .join('\n'),
+      );
+      final live = find.byType(LiveItem).first;
+      final cover = find.descendant(
+        of: live,
+        matching: find.byType(NetworkImgLayer),
+      );
+      expect(tester.getSize(cover).width, closeTo(172, .01));
+      expect(find.textContaining('围观 ·'), findsWidgets);
+      expect(tester.takeException(), isNull);
+
+      final sidebar = find
+          .ancestor(
+            of: find.text('bilibili热搜'),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      final results = find
+          .ancestor(of: live, matching: find.byType(Scrollable))
+          .first;
+      final sidebarPosition = tester.state<ScrollableState>(sidebar).position;
+      final resultsPosition = tester.state<ScrollableState>(results).position;
+      await tester.drag(sidebar, const Offset(0, -300));
+      await tester.pumpAndSettle();
+      expect(sidebarPosition.pixels, greaterThan(0));
+      expect(resultsPosition.pixels, 0);
+      await tester.drag(results, const Offset(0, -230));
+      await tester.pumpAndSettle();
+      expect(resultsPosition.pixels, greaterThan(0));
+      expect(sidebarPosition.pixels, greaterThan(0));
+
+      sidebarPosition.jumpTo(0);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('完整榜单'));
+      await tester.pumpAndSettle();
+      expect(find.text('榜单已打开'), findsOneWidget);
+      Get.back<void>();
+      await tester.pumpAndSettle();
+      final keywords = Get.find<BaseSearchController>();
+      await tester.tap(find.text('热门搜索词0'));
+      await tester.pumpAndSettle();
+      expect(Get.parameters['keyword'], '热门搜索词0');
+      expect(Get.find<BaseSearchController>(), same(keywords));
+      expect(calls[Api.searchTrending], 1);
+      expect(calls[Api.searchRecommend], 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('editing a direct wide search preserves its keyword session', (
+    tester,
+  ) async {
+    await openSearch(tester, direct: true);
+    final keywords = Get.find<BaseSearchController>();
+    expect(find.text('bilibili热搜'), findsOneWidget);
+    await tester.tap(find.text(_query));
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchPage), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '另一条搜索');
+    await tester.tap(find.byTooltip('搜索'));
+    await tester.pumpAndSettle();
+    expect(Get.parameters['keyword'], '另一条搜索');
+    expect(Get.find<BaseSearchController>(), same(keywords));
+    expect(calls[Api.searchTrending], 1);
+    expect(calls[Api.searchRecommend], 1);
+    Get.back<void>();
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchPage), findsOneWidget);
+    Get.back<void>();
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchResultPage), findsOneWidget);
+    expect(find.text(_query), findsOneWidget);
+    Get.back<void>();
+    await tester.pumpAndSettle();
+    expect(find.text('首页'), findsOneWidget);
+    expect(Get.isRegistered<BaseSearchController>(), isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('all search categories stay in one column with long text', (
+    tester,
+  ) async {
+    await openSearch(tester, direct: true, scale: 1.3);
+    final controller = tester.widget<TabBar>(find.byType(TabBar)).controller!;
+    for (final (type, card) in [
+      (SearchType.video, VideoCardH),
+      (SearchType.media_bangumi, SearchPgcItem),
+      (SearchType.media_ft, SearchPgcItem),
+      (SearchType.live_room, LiveItem),
+      (SearchType.bili_user, SearchUserItem),
+      (SearchType.article, SearchArticleItem),
+    ]) {
+      controller.animateTo(type.index);
+      await tester.pumpAndSettle();
+      for (final size in [_double, _single, _triple]) {
+        tester.view.physicalSize = size;
+        await tester.pumpAndSettle();
+        final rows = find.byType(card).hitTestable();
+        expect(
+          rows.evaluate().length,
+          greaterThanOrEqualTo(2),
+          reason:
+              '$type / $size: ${tester.widgetList<HttpError>(find.byType(HttpError)).map((e) => e.errMsg).join('\n')}',
+        );
+        final first = tester.getRect(rows.at(0));
+        final second = tester.getRect(rows.at(1));
+        expect(second.left, first.left);
+        expect(second.top, closeTo(first.bottom, .01));
+        expect(tester.takeException(), isNull, reason: '$type / $size');
+      }
+    }
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(tester.takeException(), isNull);
+  });
+}
+
+Map<String, dynamic> _response(
+  RequestOptions options,
+) => switch (options.path) {
+  Api.searchTrending => {
+    'list': [
+      for (var i = 0; i < 10; i++) {'keyword': '热门搜索词$i'},
+    ],
+  },
+  Api.searchRecommend => {
+    'list': [
+      for (var i = 0; i < 16; i++) {'keyword': '发现搜索词$i'},
+    ],
+  },
+  Api.searchAll => {
+    'numResults': 20,
+    'result': [
+      {
+        'result_type': 'video',
+        'data': _videoFixtures(),
+      },
+    ],
+  },
+  Api.searchByType when options.queryParameters['search_type'] == 'live_room' =>
+    {
+      'numResults': 20,
+      'result': [
+        for (var i = 0; i < 20; i++)
+          {
+            'roomid': 20000 + i,
+            'title': '$_liveTitle $i',
+            'uname': _author,
+            'online': 10980,
+            'cate_name': '游戏赛事',
+          },
+      ],
+    },
+  Api.searchByType when options.queryParameters['search_type'] == 'video' => {
+    'numResults': 20,
+    'result': _videoFixtures(),
+  },
+  Api.searchByType
+      when const {
+        'media_bangumi',
+        'media_ft',
+      }.contains(options.queryParameters['search_type']) =>
+    {
+      'numResults': 8,
+      'result': [
+        for (var i = 0; i < 8; i++)
+          {
+            'season_id': i + 1,
+            'title': '番剧 $i $_videoTitle$_videoTitle',
+            'areas': '地区 $_videoTitle',
+            'styles': '风格 $_videoTitle',
+            'index_show': '全18话',
+          },
+      ],
+    },
+  Api.searchByType when options.queryParameters['search_type'] == 'bili_user' =>
+    {
+      'numResults': 8,
+      'result': [
+        for (var i = 0; i < 8; i++)
+          {
+            'mid': i + 1,
+            'uname': '用户 $i $_author$_author',
+            'level': 1,
+            'fans': 100000000,
+            'videos': 200000000,
+          },
+      ],
+    },
+  Api.searchByType when options.queryParameters['search_type'] == 'article' => {
+    'numResults': 8,
+    'result': [
+      for (var i = 0; i < 8; i++)
+        {
+          'id': i + 1,
+          'title': '专栏 $i $_videoTitle$_videoTitle',
+          'pub_time': 1740000000,
+          'image_urls': [''],
+          'view': 2000000000,
+          'reply': 2000000000,
+        },
+    ],
+  },
+  _ => {'numResults': 0, 'result': []},
+};
+
+List<Map<String, dynamic>> _videoFixtures() => [
+  for (var i = 0; i < 20; i++)
+    {
+      'aid': 20000 + i,
+      'title': '$_videoTitle $i',
+      'author': _author,
+      'play': 1188000,
+      'pubdate': 1740000000,
+      'duration': '11:00',
+    },
+];

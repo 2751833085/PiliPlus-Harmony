@@ -42,7 +42,7 @@ void main() {
             ? 3
             : 4;
         final itemWidth = (width / 2.875 - (columns - 1) * 6 - 16) / columns;
-        final expectedRatio = width == 1008 ? Style.aspectRatio : 4 / 3;
+        final expectedRatio = width == 1008 ? 3 / 2 : 4 / 3;
         await tester.pumpWidget(
           MaterialApp(
             theme: HarmonyTheme.apply(ThemeData.dark(), immersive: true),

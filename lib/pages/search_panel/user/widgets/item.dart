@@ -37,37 +37,45 @@ class SearchUserItem extends StatelessWidget {
               roomId: item.isLive == 1 ? item.roomId : null,
             ),
             const SizedBox(width: 10),
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      item.uname!,
-                      style: const TextStyle(
-                        fontSize: 14,
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          item.uname ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 14),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    BiliUtils.levelPicture(
-                      item.level!,
-                      isSeniorMember: item.isSeniorMember == 1,
-                      height: 11,
-                    ),
-                  ],
-                ),
-                Text(
-                  '粉丝：${NumUtils.numFormat(item.fans)}  视频：${NumUtils.numFormat(item.videos)}',
-                  style: style,
-                ),
-                if (item.officialVerify?.desc?.isNotEmpty == true)
+                      const SizedBox(width: 6),
+                      BiliUtils.levelPicture(
+                        item.level!,
+                        isSeniorMember: item.isSeniorMember == 1,
+                        height: 11,
+                      ),
+                    ],
+                  ),
                   Text(
-                    item.officialVerify!.desc!,
+                    '粉丝：${NumUtils.numFormat(item.fans)}  视频：${NumUtils.numFormat(item.videos)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: style,
                   ),
-              ],
+                  if (item.officialVerify?.desc?.isNotEmpty == true)
+                    Text(
+                      item.officialVerify!.desc!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: style,
+                    ),
+                ],
+              ),
             ),
           ],
         ),

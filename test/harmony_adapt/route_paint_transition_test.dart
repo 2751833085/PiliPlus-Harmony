@@ -6,8 +6,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _PaintCounts {
+  int builds = 0;
   int layouts = 0;
   int paints = 0;
+
+  (int, int, int) get totals => (builds, layouts, paints);
 }
 
 class _CountedBox extends SingleChildRenderObjectWidget {
@@ -70,71 +73,105 @@ void main() {
         tester.view.devicePixelRatio = 1;
         tester.view.physicalSize = Size(width, 700);
         addTearDown(tester.view.reset);
-        final primary = AnimationController(vsync: tester);
-        final secondary = AnimationController(vsync: tester);
-        final counts = _PaintCounts();
-        addTearDown(primary.dispose);
-        addTearDown(secondary.dispose);
-        const content = ValueKey('page-content');
+        final navigator = GlobalKey<NavigatorState>();
+        const previous = ValueKey('previous-page');
+        const incoming = ValueKey('incoming-page');
+        final previousCounts = _PaintCounts();
+        final incomingCounts = _PaintCounts();
+
+        PageRouteBuilder<void> page(Key key, _PaintCounts counts) {
+          late final PageRouteBuilder<void> route;
+          route = PageRouteBuilder<void>(
+            transitionDuration: HarmonyMotion.duration,
+            reverseTransitionDuration: HarmonyMotion.duration,
+            pageBuilder: (context, _, _) => Builder(
+              builder: (context) {
+                counts.builds++;
+                return _CountedBox(
+                  counts,
+                  child: ColoredBox(color: Colors.white, key: key),
+                );
+              },
+            ),
+            transitionsBuilder: (context, animation, secondary, child) =>
+                const HarmonyPageTransitionsBuilder().buildTransitions(
+                  route,
+                  context,
+                  animation,
+                  secondary,
+                  child,
+                ),
+          );
+          return route;
+        }
+
         await tester.pumpWidget(
           MaterialApp(
-            home: Builder(
-              builder: (context) =>
-                  const HarmonyPageTransitionsBuilder().buildTransitions<void>(
-                    MaterialPageRoute<void>(builder: (_) => const SizedBox()),
-                    context,
-                    primary,
-                    secondary,
-                    _CountedBox(
-                      counts,
-                      child: const SizedBox.expand(key: content),
-                    ),
-                  ),
-            ),
+            navigatorKey: navigator,
+            onGenerateRoute: (_) => page(previous, previousCounts),
           ),
         );
         await tester.pumpAndSettle();
-        final layouts = counts.layouts, paints = counts.paints;
-        final rebuilt = <Type>[];
-        final oldCallback = debugOnRebuildDirtyWidget;
-        debugOnRebuildDirtyWidget = (element, _) =>
-            rebuilt.add(element.widget.runtimeType);
-        try {
-          for (final value in [0.0, .1, .25, .5, .8, 1.0]) {
-            primary.value = value;
-            await tester.pump();
-            expect(
-              tester.getTopLeft(find.byKey(content)).dx,
-              closeTo(
-                width *
-                    (1 - HarmonyMotion.pageCoverage(value, interactive: false)),
-                .002,
-              ),
-            );
-          }
-          secondary.value = .4;
-          await tester.pump();
+        final route = page(incoming, incomingCounts);
+        final nav = navigator.currentState!..push(route);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 30));
+
+        final previousTotals = previousCounts.totals;
+        final incomingTotals = incomingCounts.totals;
+        expect(incomingCounts.builds, 1);
+        expect(incomingCounts.layouts, 1);
+        expect(incomingCounts.paints, 1);
+        for (final element in find.byType(HarmonyRouteTransition).evaluate()) {
           expect(
-            tester.getTopLeft(find.byKey(content)).dx,
-            closeTo(
-              -width * .2 * HarmonyMotion.pageCoverage(.4, interactive: false),
-              .002,
+            find.descendant(
+              of: find.byWidget(element.widget),
+              matching: find.byType(RepaintBoundary),
             ),
+            findsOneWidget,
+            reason: 'reuse the repaint boundary supplied by ModalRoute',
           );
-          expect(
-            rebuilt,
-            isEmpty,
-            reason: 'animation ticks should invalidate paint, not widgets',
-          );
-          expect(counts.layouts, layouts);
-          expect(
-            counts.paints,
-            paints,
-            reason: 'static page paint remains retained',
-          );
-        } finally {
-          debugOnRebuildDirtyWidget = oldCallback;
         }
+
+        void expectPositions({bool interactive = false, bool reverse = false}) {
+          final coverage = HarmonyMotion.pageCoverage(
+            route.animation!.value,
+            interactive: interactive,
+            reverse: reverse,
+          );
+          expect(
+            tester.getTopLeft(find.byKey(incoming)).dx,
+            closeTo(width * (1 - coverage), .002),
+          );
+          expect(
+            tester.getTopLeft(find.byKey(previous)).dx,
+            closeTo(-width * .2 * coverage, .002),
+          );
+        }
+
+        for (final ms in [25, 45, 80, 60]) {
+          await tester.pump(Duration(milliseconds: ms));
+          expectPositions();
+        }
+        nav.didStartUserGesture();
+        await tester.pump();
+        expectPositions(interactive: true);
+        nav.didStopUserGesture();
+        await tester.pump();
+        expectPositions();
+        expect(previousCounts.totals, previousTotals);
+        expect(incomingCounts.totals, incomingTotals);
+
+        nav.pop();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 30));
+        expectPositions(reverse: true);
+        expect(previousCounts.totals, previousTotals);
+        expect(incomingCounts.totals, incomingTotals);
+        await tester.pumpAndSettle();
+        expect(find.byKey(incoming), findsNothing);
+        expect(tester.getTopLeft(find.byKey(previous)), Offset.zero);
+        expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
       },
     );
