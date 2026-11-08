@@ -1,4 +1,3 @@
-import 'package:PiliPlus/common/skeleton/video_card_h.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_floating_header.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_h.dart';
 import 'package:PiliPlus/models/common/search/video_search_type.dart';
@@ -57,7 +56,7 @@ mixin SearchVideoPanelMixin<S extends SearchVideoPanel>
   @override
   Widget buildHeader() {
     return SliverFloatingHeaderWidget(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: filterBarColor,
       child: Padding(
         padding: const .fromLTRB(12, 0, 12, 4),
         child: Row(
@@ -75,7 +74,7 @@ mixin SearchVideoPanelMixin<S extends SearchVideoPanel>
                           bgColor: Colors.transparent,
                           textColor: controller.selectedType.value == e
                               ? colorScheme.primary
-                              : colorScheme.outline,
+                              : inactiveFilterColor,
                           onTap: (_) => controller
                             ..order = e == .totalrank ? '' : e.name
                             ..selectedType.value = e
@@ -137,13 +136,4 @@ mixin SearchVideoPanelMixin<S extends SearchVideoPanel>
             itemBuilder: itemBuilder,
           );
   }
-
-  @override
-  Widget get buildLoading => useSingleColumnResults
-      ? buildResultRows(
-          itemCount: 10,
-          itemExtent: mediaRowExtent,
-          itemBuilder: (_, _) => const VideoCardHSkeleton(searchResult: true),
-        )
-      : gridSkeleton;
 }

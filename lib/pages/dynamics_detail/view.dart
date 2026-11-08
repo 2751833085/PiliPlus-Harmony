@@ -8,7 +8,6 @@ import 'package:PiliPlus/common/widgets/flutter/text_field/controller.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_channel.dart';
 import 'package:PiliPlus/common/widgets/pair.dart';
 import 'package:PiliPlus/common/widgets/refresh_indicator.dart';
-import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_floating_header.dart';
@@ -19,6 +18,7 @@ import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/reply/reply_option_type.dart';
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/pages/common/dyn/common_dyn_page.dart';
+import 'package:PiliPlus/pages/common/dyn/split_detail_actions.dart';
 import 'package:PiliPlus/pages/common/dyn/like_list/controller.dart';
 import 'package:PiliPlus/pages/common/dyn/like_list/view.dart';
 import 'package:PiliPlus/pages/common/dyn/repost_list/controller.dart';
@@ -52,8 +52,8 @@ class DynamicDetailPage extends StatefulWidget {
   State<DynamicDetailPage> createState() => _DynamicDetailPageState();
 }
 
-class _DynamicDetailPageState
-    extends CommonDynPageMultiState<DynamicDetailPage> {
+class _DynamicDetailPageState extends CommonDynPageMultiState<DynamicDetailPage>
+    with SplitDetailActions<DynamicDetailPage> {
   @override
   late final DynamicDetailController controller;
   late final DynRepostController _repostController;
@@ -101,6 +101,7 @@ class _DynamicDetailPageState
   @override
   Widget build(BuildContext context) {
     return SimpleScaffold(
+      backgroundColor: useDetailReplyChrome ? replyChromeBackground : null,
       appBar: _buildAppBar(),
       body: Padding(
         padding: EdgeInsets.only(left: padding.left, right: padding.right),
@@ -111,10 +112,7 @@ class _DynamicDetailPageState
               )
             : _buildBody(),
       ),
-      fab: SlideTransition(
-        position: fabAnimation,
-        child: _buildBottom(),
-      ),
+      fab: isPortrait ? detailActionsTransition(_buildBottom()) : null,
     );
   }
 
@@ -343,7 +341,14 @@ class _DynamicDetailPageState
       ),
       slivers: [
         buildReplyHeader(isPortrait),
-        Obx(() => replyList(controller.loadingState.value)),
+        Obx(
+          () => isPortrait
+              ? replyList(controller.loadingState.value)
+              : splitReplyList(
+                  controller.loadingState.value,
+                  controller.showDynActionBar,
+                ),
+        ),
       ],
     );
     if (!isPortrait) {
@@ -357,12 +362,18 @@ class _DynamicDetailPageState
             (e) => switch (e) {
               .repost => DynRepostPage(
                 isPortrait: isPortrait,
+                bottomInset: isPortrait
+                    ? null
+                    : detailActionInset(controller.showDynActionBar),
                 id: controller.dynItem.idStr,
                 controller: _repostController,
               ),
               .reply => reply,
               .like => DynLikePage(
                 isPortrait: isPortrait,
+                bottomInset: isPortrait
+                    ? null
+                    : detailActionInset(controller.showDynActionBar),
                 id: controller.dynItem.idStr,
                 controller: _likeController,
               ),
@@ -432,7 +443,7 @@ class _DynamicDetailPageState
               SliverPadding(
                 padding: .only(
                   left: padding,
-                  bottom: this.padding.bottom + 100,
+                  bottom: this.padding.bottom,
                 ),
                 sliver: SliverToBoxWithOffsetAdapter(
                   offset: 55,
@@ -454,7 +465,8 @@ class _DynamicDetailPageState
           flex: flex1,
           child: Padding(
             padding: EdgeInsets.only(right: padding),
-            child: MiniScaffold(
+            child: splitDetailPane(
+              actions: _buildBottom(),
               body: Column(
                 children: [
                   _buildTabBar(),
@@ -484,19 +496,20 @@ class _DynamicDetailPageState
     } else {
       child = _buildHorizontal(padding);
     }
-    return fabAnimWrapper(child: child);
+    return isPortrait ? detailScrollTracking(child) : child;
   }
 
   Widget _buildBottom() {
     if (!controller.showDynActionBar) {
-      return fabButton;
+      return detailActions(const []);
     }
 
     final primary = theme.colorScheme.primary;
-    final outline = theme.colorScheme.outline;
+    final outline = detailActionForeground;
     final btnStyle = TextButton.styleFrom(
-      tapTargetSize: .padded,
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      tapTargetSize: .shrinkWrap,
+      minimumSize: const Size(0, 48),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       foregroundColor: outline,
     );
 
@@ -522,123 +535,90 @@ class _DynamicDetailPageState
         icon: child,
         style: btnStyle,
         onPressed: () => onPressed(child.color!),
-        label: Text(count, style: TextStyle(color: color)),
+        label: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(count, maxLines: 1, style: TextStyle(color: color)),
+        ),
       );
     }
 
     final moduleStat = controller.dynItem.modules.moduleStat;
-    return Padding(
-      padding: .only(left: padding.left, right: padding.right),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              right: kFloatingActionButtonMargin,
-              bottom: kFloatingActionButtonMargin,
-            ),
-            child: replyButton,
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              border: Border(
-                top: BorderSide(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.08),
+    return detailActions([
+      Builder(
+        builder: (btnContext) {
+          final forward = moduleStat?.forward;
+          return textIconButton(
+            icon: FontAwesomeIcons.shareFromSquare,
+            text: '转发',
+            stat: forward,
+            onPressed: (_) {
+              final wasVisible = HarmonyChannel.hdsBarVisible;
+              HarmonyChannel.setShellBarsHidden(true);
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                useSafeArea: true,
+                builder: (context) => RepostPanel(
+                  item: controller.dynItem,
+                  onSuccess: () {
+                    if (forward != null) {
+                      int count = forward.count ?? 0;
+                      forward.count = count + 1;
+                      if (btnContext.mounted) {
+                        (btnContext as Element).markNeedsBuild();
+                      }
+                    }
+                  },
                 ),
-              ),
-            ),
-            padding: EdgeInsets.only(bottom: padding.bottom),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Builder(
-                    builder: (btnContext) {
-                      final forward = moduleStat?.forward;
-                      return textIconButton(
-                        icon: FontAwesomeIcons.shareFromSquare,
-                        text: '转发',
-                        stat: forward,
-                        onPressed: (_) {
-                          final wasVisible = HarmonyChannel.hdsBarVisible;
-                          HarmonyChannel.setShellBarsHidden(true);
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            useSafeArea: true,
-                            builder: (context) => RepostPanel(
-                              item: controller.dynItem,
-                              onSuccess: () {
-                                if (forward != null) {
-                                  int count = forward.count ?? 0;
-                                  forward.count = count + 1;
-                                  if (btnContext.mounted) {
-                                    (btnContext as Element).markNeedsBuild();
-                                  }
-                                }
-                              },
-                            ),
-                          ).then((_) {
-                            if (wasVisible) {
-                              HarmonyChannel.setShellBarsHidden(false);
-                            }
-                          });
-                        },
-                      );
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: textIconButton(
-                    icon: CustomIcons.share_node,
-                    text: '分享',
-                    stat: null,
-                    onPressed: (_) => ShareUtils.shareText(
-                      '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: textIconButton(
-                    icon: FontAwesomeIcons.comment,
-                    text: '评论',
-                    stat: moduleStat?.comment,
-                    onPressed: _jumpToComment,
-                  ),
-                ),
-                Expanded(
-                  child: Builder(
-                    builder: (context) {
-                      return textIconButton(
-                        icon: FontAwesomeIcons.thumbsUp,
-                        activatedIcon: FontAwesomeIcons.solidThumbsUp,
-                        text: '点赞',
-                        stat: moduleStat?.like,
-                        onPressed: (iconColor) => RequestUtils.onLikeDynamic(
-                          controller.dynItem,
-                          iconColor == primary,
-                          () {
-                            if (context.mounted) {
-                              (context as Element).markNeedsBuild();
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ).then((_) {
+                if (wasVisible) {
+                  HarmonyChannel.setShellBarsHidden(false);
+                }
+              });
+            },
+          );
+        },
       ),
-    );
+      textIconButton(
+        icon: CustomIcons.share_node,
+        text: '分享',
+        stat: null,
+        onPressed: (_) => ShareUtils.shareText(
+          '${HttpString.dynamicShareBaseUrl}/${controller.dynItem.idStr}',
+        ),
+      ),
+      textIconButton(
+        icon: FontAwesomeIcons.comment,
+        text: '评论',
+        stat: moduleStat?.comment,
+        onPressed: _jumpToComment,
+      ),
+      Builder(
+        builder: (context) {
+          return textIconButton(
+            icon: FontAwesomeIcons.thumbsUp,
+            activatedIcon: FontAwesomeIcons.solidThumbsUp,
+            text: '点赞',
+            stat: moduleStat?.like,
+            onPressed: (iconColor) => RequestUtils.onLikeDynamic(
+              controller.dynItem,
+              iconColor == primary,
+              () {
+                if (context.mounted) {
+                  (context as Element).markNeedsBuild();
+                }
+              },
+            ),
+          );
+        },
+      ),
+    ]);
   }
 
   @override
   Widget buildReplyHeader([bool isPortrait = true]) {
-    final secondary = theme.colorScheme.secondary;
+    final sortColor = replySortForeground;
     final child = Padding(
       padding: const .fromLTRB(12, 2.5, 6, 2.5),
       child: Obx(
@@ -651,10 +631,10 @@ class _DynamicDetailPageState
               TextButton.icon(
                 style: Style.buttonStyle,
                 onPressed: controller.queryBySort,
-                icon: Icon(Icons.sort, size: 16, color: secondary),
+                icon: Icon(Icons.sort, size: 16, color: sortColor),
                 label: Text(
                   sortType.descShort,
-                  style: TextStyle(fontSize: 13, color: secondary),
+                  style: TextStyle(fontSize: 13, color: sortColor),
                 ),
               ),
             ],
@@ -663,7 +643,7 @@ class _DynamicDetailPageState
       ),
     );
     return SliverFloatingHeaderWidget(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: replyChromeBackground,
       child: child,
     );
   }

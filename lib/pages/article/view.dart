@@ -6,7 +6,6 @@ import 'package:PiliPlus/common/widgets/flutter/page/page_view.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/gesture/horizontal_drag_gesture_recognizer.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
-import 'package:PiliPlus/common/widgets/scaffold/mini_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_to_box_adapter.dart';
@@ -18,6 +17,7 @@ import 'package:PiliPlus/pages/article/widgets/article_ops.dart';
 import 'package:PiliPlus/pages/article/widgets/html_render.dart';
 import 'package:PiliPlus/pages/article/widgets/opus_content.dart';
 import 'package:PiliPlus/pages/common/dyn/common_dyn_page.dart';
+import 'package:PiliPlus/pages/common/dyn/split_detail_actions.dart';
 import 'package:PiliPlus/pages/dynamics_repost/view.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
 import 'package:PiliPlus/utils/extension/get_ext.dart';
@@ -42,7 +42,8 @@ class ArticlePage extends StatefulWidget {
   State<ArticlePage> createState() => _ArticlePageState();
 }
 
-class _ArticlePageState extends CommonDynPageState<ArticlePage> {
+class _ArticlePageState extends CommonDynPageState<ArticlePage>
+    with SplitDetailActions<ArticlePage> {
   @override
   final ArticleController controller = Get.putOrFind(
     ArticleController.new,
@@ -55,21 +56,15 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
   };
 
   @override
-  Widget build(BuildContext context) {
-    return fabAnimWrapper(
-      child: SimpleScaffold(
-        appBar: _buildAppBar(),
-        body: Padding(
-          padding: EdgeInsets.only(left: padding.left, right: padding.right),
-          child: _buildPage(),
-        ),
-        fab: SlideTransition(
-          position: fabAnimation,
-          child: _buildBottom(),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SimpleScaffold(
+    backgroundColor: useDetailReplyChrome ? replyChromeBackground : null,
+    appBar: _buildAppBar(),
+    body: Padding(
+      padding: EdgeInsets.only(left: padding.left, right: padding.right),
+      child: _buildPage(),
+    ),
+    fab: isPortrait ? detailActionsTransition(_buildBottom()) : null,
+  );
 
   Widget _buildPage() {
     double padding = max(maxWidth / 2 - Grid.smallCardWidth, 0);
@@ -77,25 +72,27 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
       return Padding(
         padding: .symmetric(horizontal: padding),
         child: SelectionArea(
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              _buildContent(
-                maxWidth - this.padding.horizontal - 2 * padding - 24,
-              ),
-              SelectionContainer.disabled(
-                child: SliverToBoxAdapter(
-                  child: Divider(
-                    thickness: 8,
-                    color: theme.dividerColor.withValues(alpha: 0.05),
+          child: detailScrollTracking(
+            CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                _buildContent(
+                  maxWidth - this.padding.horizontal - 2 * padding - 24,
+                ),
+                SelectionContainer.disabled(
+                  child: SliverToBoxAdapter(
+                    child: Divider(
+                      thickness: 8,
+                      color: theme.dividerColor.withValues(alpha: 0.05),
+                    ),
                   ),
                 ),
-              ),
-              SelectionContainer.disabled(child: buildReplyHeader()),
-              SelectionContainer.disabled(
-                child: Obx(() => replyList(controller.loadingState.value)),
-              ),
-            ],
+                SelectionContainer.disabled(child: buildReplyHeader()),
+                SelectionContainer.disabled(
+                  child: Obx(() => replyList(controller.loadingState.value)),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -116,7 +113,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
                 SliverPadding(
                   padding: .only(
                     left: padding,
-                    bottom: this.padding.bottom + 100,
+                    bottom: this.padding.bottom,
                   ),
                   sliver: _buildContent(
                     (maxWidth - this.padding.horizontal) *
@@ -138,14 +135,21 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
           flex: flex1,
           child: Padding(
             padding: .only(right: padding),
-            child: MiniScaffold(
+            child: splitDetailPane(
+              actions: _buildBottom(),
               body: refreshIndicator(
                 onRefresh: controller.onRefresh,
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
                     buildReplyHeader(),
-                    Obx(() => replyList(controller.loadingState.value)),
+                    Obx(
+                      () => splitReplyList(
+                        controller.loadingState.value,
+                        controller.showDynActionBar &&
+                            controller.stats.value != null,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -332,155 +336,115 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage> {
 
   Widget _buildBottom() {
     if (!controller.showDynActionBar) {
-      return fabButton;
+      return detailActions(const []);
     }
 
     late final primary = theme.colorScheme.primary;
-    late final outline = theme.colorScheme.outline;
+    late final outline = detailActionForeground;
     late final btnStyle = TextButton.styleFrom(
-      tapTargetSize: .padded,
-      padding: const .symmetric(horizontal: 15),
+      tapTargetSize: .shrinkWrap,
+      minimumSize: const Size(0, 48),
+      padding: const .symmetric(horizontal: 6),
       foregroundColor: outline,
     );
 
-    return Padding(
-      padding: .only(left: padding.left, right: padding.right),
-      child: Obx(() {
-        final stats = controller.stats.value;
+    return Obx(() {
+      final stats = controller.stats.value;
+      if (stats == null) return detailActions(const []);
 
-        final fab = Padding(
-          padding: .only(
-            right: kFloatingActionButtonMargin,
-            bottom:
-                kFloatingActionButtonMargin +
-                (stats != null ? 0 : padding.bottom),
+      Widget textIconButton({
+        required IconData icon,
+        required String text,
+        required DynamicStat? stat,
+        required VoidCallback onPressed,
+        IconData? activatedIcon,
+      }) {
+        final bool status;
+        final String count;
+        if (stat != null) {
+          status = stat.status ?? false;
+          count = stat.count != null ? NumUtils.numFormat(stat.count) : text;
+        } else {
+          status = false;
+          count = text;
+        }
+        final color = status ? primary : outline;
+        return TextButton.icon(
+          style: btnStyle,
+          onPressed: onPressed,
+          label: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(count, maxLines: 1, style: TextStyle(color: color)),
           ),
-          child: replyButton,
+          icon: Icon(status ? activatedIcon : icon, size: 16, color: color),
         );
+      }
 
-        if (stats == null) {
-          return Align(alignment: .bottomRight, child: fab);
-        }
-
-        Widget textIconButton({
-          required IconData icon,
-          required String text,
-          required DynamicStat? stat,
-          required VoidCallback onPressed,
-          IconData? activatedIcon,
-        }) {
-          final bool status;
-          final String count;
-          if (stat != null) {
-            status = stat.status ?? false;
-            count = stat.count != null ? NumUtils.numFormat(stat.count) : text;
-          } else {
-            status = false;
-            count = text;
-          }
-          final color = status ? primary : outline;
-          return TextButton.icon(
-            style: btnStyle,
-            onPressed: onPressed,
-            label: Text(count, style: TextStyle(color: color)),
-            icon: Icon(status ? activatedIcon : icon, size: 16, color: color),
-          );
-        }
-
-        return Column(
-          mainAxisSize: .min,
-          crossAxisAlignment: .end,
-          children: [
-            fab,
-            Container(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                border: Border(
-                  top: BorderSide(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.08),
+      return detailActions([
+        Builder(
+          builder: (btnContext) {
+            final forward = stats.forward;
+            return textIconButton(
+              text: '转发',
+              icon: FontAwesomeIcons.shareFromSquare,
+              stat: forward,
+              onPressed: () {
+                if (controller.opusData == null &&
+                    controller.articleData?.dynIdStr == null) {
+                  SmartDialog.showToast(
+                    'err: ${controller.id}',
+                  );
+                  return;
+                }
+                final summary = controller.summary;
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  builder: (context) => RepostPanel(
+                    item: controller.opusData,
+                    dynIdStr: controller.articleData?.dynIdStr,
+                    pic: summary.cover,
+                    title: summary.title,
+                    uname: summary.author?.name,
+                    onSuccess: () {
+                      if (forward != null) {
+                        int count = forward.count ?? 0;
+                        forward.count = count + 1;
+                        if (btnContext.mounted) {
+                          (btnContext as Element?)?.markNeedsBuild();
+                        }
+                      }
+                    },
                   ),
-                ),
-              ),
-              padding: .only(bottom: padding.bottom),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Builder(
-                      builder: (btnContext) {
-                        final forward = stats.forward;
-                        return textIconButton(
-                          text: '转发',
-                          icon: FontAwesomeIcons.shareFromSquare,
-                          stat: forward,
-                          onPressed: () {
-                            if (controller.opusData == null &&
-                                controller.articleData?.dynIdStr == null) {
-                              SmartDialog.showToast(
-                                'err: ${controller.id}',
-                              );
-                              return;
-                            }
-                            final summary = controller.summary;
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              useSafeArea: true,
-                              builder: (context) => RepostPanel(
-                                item: controller.opusData,
-                                dynIdStr: controller.articleData?.dynIdStr,
-                                pic: summary.cover,
-                                title: summary.title,
-                                uname: summary.author?.name,
-                                onSuccess: () {
-                                  if (forward != null) {
-                                    int count = forward.count ?? 0;
-                                    forward.count = count + 1;
-                                    if (btnContext.mounted) {
-                                      (btnContext as Element?)
-                                          ?.markNeedsBuild();
-                                    }
-                                  }
-                                },
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: textIconButton(
-                      text: '分享',
-                      icon: CustomIcons.share_node,
-                      stat: null,
-                      onPressed: () => ShareUtils.shareText(controller.url),
-                    ),
-                  ),
-                  Expanded(
-                    child: textIconButton(
-                      icon: FontAwesomeIcons.star,
-                      activatedIcon: FontAwesomeIcons.solidStar,
-                      text: '收藏',
-                      stat: stats.favorite,
-                      onPressed: controller.onFav,
-                    ),
-                  ),
-                  Expanded(
-                    child: textIconButton(
-                      icon: FontAwesomeIcons.thumbsUp,
-                      activatedIcon: FontAwesomeIcons.solidThumbsUp,
-                      text: '点赞',
-                      stat: stats.like,
-                      onPressed: controller.onLike,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      }),
-    );
+                );
+              },
+            );
+          },
+        ),
+        textIconButton(
+          text: '分享',
+          icon: CustomIcons.share_node,
+          stat: null,
+          onPressed: () => ShareUtils.shareText(controller.url),
+        ),
+        textIconButton(
+          icon: FontAwesomeIcons.star,
+          activatedIcon: FontAwesomeIcons.solidStar,
+          text: '收藏',
+          stat: stats.favorite,
+          onPressed: controller.onFav,
+        ),
+        textIconButton(
+          icon: FontAwesomeIcons.thumbsUp,
+          activatedIcon: FontAwesomeIcons.solidThumbsUp,
+          text: '点赞',
+          stat: stats.like,
+          onPressed: controller.onLike,
+        ),
+      ]);
+    });
   }
 
   Widget? _buildImageGallery(List<Pic> pics) {

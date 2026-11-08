@@ -1,5 +1,3 @@
-import 'package:PiliPlus/common/skeleton/msg_feed_top.dart';
-import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_floating_header.dart';
 import 'package:PiliPlus/models/search/result.dart';
 import 'package:PiliPlus/pages/search_panel/user/controller.dart';
@@ -48,7 +46,7 @@ class _SearchUserPanelState
   @override
   Widget buildHeader() {
     return SliverFloatingHeaderWidget(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: filterBarColor,
       child: Padding(
         padding: const .fromLTRB(25, 0, 12, 4),
         child: Row(
@@ -60,7 +58,7 @@ class _SearchUserPanelState
                   '排序: ${controller.userOrderType!.value.label}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: colorScheme.outline),
+                  style: TextStyle(color: inactiveFilterColor),
                 ),
               ),
             ),
@@ -70,7 +68,7 @@ class _SearchUserPanelState
                   '用户类型: ${controller.userType!.value.label}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: colorScheme.outline),
+                  style: TextStyle(color: inactiveFilterColor),
                 ),
               ),
             ),
@@ -122,19 +120,4 @@ class _SearchUserPanelState
             itemBuilder: itemBuilder,
           );
   }
-
-  @override
-  Widget get buildLoading => useSingleColumnResults
-      ? buildResultRows(
-          itemCount: 10,
-          itemExtent: _rowExtent,
-          itemBuilder: (_, _) => const MsgFeedTopSkeleton(),
-        )
-      : SliverGrid(
-          gridDelegate: gridDelegate,
-          delegate: const SliverSingleChildDelegate(
-            count: 10,
-            child: MsgFeedTopSkeleton(),
-          ),
-        );
 }

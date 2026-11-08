@@ -3,6 +3,7 @@ import 'dart:math' show max;
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
+import 'package:PiliPlus/harmony_adapt/widgets/initial_feed_content.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/search/search_type.dart';
 import 'package:PiliPlus/models/search/result.dart';
@@ -59,18 +60,32 @@ abstract class CommonSearchPanelState<
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           ?buildHeader(),
-          SliverPadding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.viewPaddingOf(context).bottom + 100,
-            ),
-            sliver: Obx(() => _buildBody(controller.loadingState.value)),
-          ),
+          Obx(() {
+            final state = controller.loadingState.value;
+            return InitialFeedContent.sliver(
+              loading: state is Loading,
+              builder: (context) => SliverPadding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewPaddingOf(context).bottom + 100,
+                ),
+                sliver: _buildBody(state),
+              ),
+            );
+          }),
         ],
       ),
     );
   }
 
   bool get useSingleColumnResults => HarmonyStyle.enabled(context);
+
+  Color get filterBarColor => useSingleColumnResults
+      ? Theme.of(context).scaffoldBackgroundColor
+      : colorScheme.surface;
+
+  Color get inactiveFilterColor => useSingleColumnResults
+      ? colorScheme.onSurfaceVariant
+      : colorScheme.outline;
 
   double scaledRowExtent(double baseExtent, int textLines) =>
       baseExtent +
@@ -103,11 +118,9 @@ abstract class CommonSearchPanelState<
 
   bool get hasSupplementalResults => false;
 
-  Widget get buildLoading;
-
   Widget _buildBody(LoadingState<List<T>?> loadingState) {
     return switch (loadingState) {
-      Loading() => buildLoading,
+      Loading() => const SliverToBoxAdapter(),
       Success(:final response) =>
         response?.isNotEmpty == true || hasSupplementalResults
             ? buildList(response ?? <T>[])

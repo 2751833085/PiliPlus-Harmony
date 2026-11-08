@@ -1,10 +1,8 @@
-import 'dart:math';
-
 import 'package:PiliPlus/models/common/search/article_search_type.dart';
 import 'package:PiliPlus/models/search/result.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/pages/search_panel/controller.dart';
-import 'package:PiliPlus/utils/extension/context_ext.dart';
+import 'package:PiliPlus/pages/search_panel/filter_panel.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -44,22 +42,12 @@ class SearchArticleController
   Rx<ArticleOrderType> articleOrderType = ArticleOrderType.totalrank.obs;
 
   void onShowFilterDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      useSafeArea: true,
-      isScrollControlled: true,
-      constraints: BoxConstraints(
-        maxWidth: min(640, ContextExtensions(context).mediaQueryShortestSide),
-      ),
+    showSearchFilterPanel(
+      context,
       builder: (context) {
         final theme = Theme.of(context);
         return SingleChildScrollView(
-          padding: EdgeInsets.only(
-            top: 20,
-            left: 16,
-            right: 16,
-            bottom: 100 + MediaQuery.viewPaddingOf(context).bottom,
-          ),
+          padding: searchFilterPadding(context),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,

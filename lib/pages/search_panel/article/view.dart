@@ -1,4 +1,3 @@
-import 'package:PiliPlus/common/skeleton/video_card_h.dart';
 import 'package:PiliPlus/common/widgets/sliver/sliver_floating_header.dart';
 import 'package:PiliPlus/models/search/result.dart';
 import 'package:PiliPlus/pages/search_panel/article/controller.dart';
@@ -47,7 +46,7 @@ class _SearchArticlePanelState
   @override
   Widget buildHeader() {
     return SliverFloatingHeaderWidget(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: filterBarColor,
       child: Padding(
         padding: const .fromLTRB(25, 0, 12, 4),
         child: Row(
@@ -59,7 +58,7 @@ class _SearchArticlePanelState
                   '排序: ${controller.articleOrderType.value.label}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: colorScheme.outline),
+                  style: TextStyle(color: inactiveFilterColor),
                 ),
               ),
             ),
@@ -69,7 +68,7 @@ class _SearchArticlePanelState
                   '分区: ${controller.articleZoneType!.value.label}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: colorScheme.outline),
+                  style: TextStyle(color: inactiveFilterColor),
                 ),
               ),
             ),
@@ -116,13 +115,4 @@ class _SearchArticlePanelState
             itemBuilder: itemBuilder,
           );
   }
-
-  @override
-  Widget get buildLoading => useSingleColumnResults
-      ? buildResultRows(
-          itemCount: 10,
-          itemExtent: _rowExtent,
-          itemBuilder: (_, _) => const VideoCardHSkeleton(),
-        )
-      : gridSkeleton;
 }

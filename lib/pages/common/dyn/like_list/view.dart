@@ -17,11 +17,13 @@ class DynLikePage extends StatelessWidget {
     super.key,
     required this.id,
     this.isPortrait = true,
+    this.bottomInset,
     required this.controller,
   });
 
   final Object id;
   final bool isPortrait;
+  final double? bottomInset;
   final DynLikeController controller;
 
   @override
@@ -60,7 +62,8 @@ class DynLikePage extends StatelessWidget {
       slivers: [
         SliverPadding(
           padding: .only(
-            bottom: MediaQuery.viewPaddingOf(context).bottom + 100,
+            bottom:
+                bottomInset ?? MediaQuery.viewPaddingOf(context).bottom + 100,
           ),
           sliver: Obx(() => buildBody(controller.loadingState.value)),
         ),

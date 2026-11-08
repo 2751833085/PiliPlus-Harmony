@@ -1,16 +1,13 @@
-import 'dart:math';
-
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/search/video_search_type.dart';
 import 'package:PiliPlus/models/search/result.dart';
 import 'package:PiliPlus/pages/search/widgets/search_text.dart';
 import 'package:PiliPlus/pages/search_panel/controller.dart';
+import 'package:PiliPlus/pages/search_panel/filter_panel.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/date_utils.dart';
-import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/id_utils.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 mixin SearchVideoMixin on SearchVideoController {
@@ -86,13 +83,8 @@ class SearchVideoController
   bool customPubEndDate = false;
 
   void onShowFilterDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      useSafeArea: true,
-      isScrollControlled: true,
-      constraints: BoxConstraints(
-        maxWidth: min(640, ContextExtensions(context).mediaQueryShortestSide),
-      ),
+    showSearchFilterPanel(
+      context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           final theme = Theme.of(context);
@@ -112,7 +104,7 @@ class SearchVideoController
                   firstDate: isFirst ? DateTime(2009, 6, 26) : pubBeginDate,
                   lastDate: isFirst ? pubEndDate : DateTime.now(),
                 ).then((selectedDate) {
-                  if (selectedDate != null) {
+                  if (selectedDate != null && context.mounted) {
                     if (isFirst) {
                       customPubBeginDate = true;
                       pubBeginDate = selectedDate;
@@ -121,7 +113,6 @@ class SearchVideoController
                       pubEndDate = selectedDate;
                     }
                     pubTimeType = null;
-                    SmartDialog.dismiss();
                     pubBegin =
                         DateTime(
                           pubBeginDate.year,
@@ -157,12 +148,7 @@ class SearchVideoController
           }
 
           return SingleChildScrollView(
-            padding: EdgeInsets.only(
-              top: 20,
-              left: 16,
-              right: 16,
-              bottom: 100 + MediaQuery.viewPaddingOf(context).bottom,
-            ),
+            padding: searchFilterPadding(context),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,

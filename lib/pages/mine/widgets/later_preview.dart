@@ -7,7 +7,9 @@ class MineLaterPreviewList extends StatelessWidget {
     super.key,
     required this.items,
     required this.onOpen,
+    this.horizontalPadding = 20,
   });
+  final double horizontalPadding;
   final List<LaterItemModel> items;
   final ValueChanged<LaterItemModel> onOpen;
   @override
@@ -26,7 +28,12 @@ class MineLaterPreviewList extends StatelessWidget {
               2,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+        padding: EdgeInsets.fromLTRB(
+          horizontalPadding,
+          8,
+          horizontalPadding,
+          8,
+        ),
         itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {

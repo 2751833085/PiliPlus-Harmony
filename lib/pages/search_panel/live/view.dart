@@ -1,6 +1,3 @@
-import 'package:PiliPlus/common/skeleton/video_card_h.dart';
-import 'package:PiliPlus/common/skeleton/video_card_v.dart';
-import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/models/search/result.dart';
 import 'package:PiliPlus/pages/search_panel/controller.dart';
@@ -80,22 +77,4 @@ class _SearchLivePanelState
       ),
     );
   }
-
-  @override
-  Widget get buildLoading => useSingleColumnResults
-      ? buildResultRows(
-          itemCount: 10,
-          itemExtent: mediaRowExtent,
-          itemBuilder: (_, _) => const VideoCardHSkeleton(searchResult: true),
-        )
-      : SliverPadding(
-          padding: const .only(left: Style.safeSpace, right: Style.safeSpace),
-          sliver: SliverGrid(
-            gridDelegate: gridDelegate,
-            delegate: const SliverSingleChildDelegate(
-              count: 10,
-              child: VideoCardVSkeleton(),
-            ),
-          ),
-        );
 }

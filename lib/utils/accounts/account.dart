@@ -75,7 +75,11 @@ class LoginAccount extends Account {
 
   @override
   late final String csrf =
-      cookieJar.domainCookies['bilibili.com']!['/']!['bili_jct']!.cookie.value;
+      cookieJar
+          .domainCookies['bilibili.com']?['/']?['bili_jct']
+          ?.cookie
+          .value ??
+      '';
 
   bool _hasDelete = false;
 
@@ -115,12 +119,41 @@ class LoginAccount extends Account {
     cookieJar.setBuvid3();
   }
 
-  factory LoginAccount.fromJson(Map json) => LoginAccount(
-    BiliCookieJar.fromJson(json['cookies']),
-    json['accessKey'],
-    json['refresh'],
-    (json['type'] as Iterable?)?.map((i) => AccountType.values[i]).toSet(),
-  );
+  factory LoginAccount.fromJson(Map json) {
+    final cookies = json['cookies'];
+    final accessKey = json['accessKey'];
+    final refresh = json['refresh'];
+    final type = json['type'];
+    if (cookies is! Map ||
+        cookies.entries.any(
+          (item) => item.key is! String || item.value is! String,
+        ) ||
+        (accessKey != null && accessKey is! String) ||
+        (refresh != null && refresh is! String) ||
+        (type != null && type is! List)) {
+      throw const FormatException('登录凭据格式无效');
+    }
+    final uid = int.tryParse(cookies['DedeUserID'] as String? ?? '');
+    if (uid == null ||
+        uid <= 0 ||
+        ((cookies['SESSDATA'] as String?)?.isNotEmpty != true &&
+            (accessKey as String?)?.isNotEmpty != true)) {
+      throw const FormatException('登录备份缺少账号编号或登录凭据');
+    }
+    final roles = <AccountType>{};
+    for (final index in (type as List?) ?? const []) {
+      if (index is! int || index < 0 || index >= AccountType.values.length) {
+        throw const FormatException('登录备份的账号角色格式无效');
+      }
+      roles.add(AccountType.values[index]);
+    }
+    return LoginAccount(
+      BiliCookieJar.fromJson(cookies),
+      accessKey as String?,
+      refresh as String?,
+      roles,
+    );
+  }
 
   @override
   int get hashCode => mid.hashCode;

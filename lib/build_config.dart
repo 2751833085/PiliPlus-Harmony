@@ -1,6 +1,6 @@
 abstract final class BuildConfig {
   // Keep the public version concise; the build number identifies each signed HAP.
-  static const String releaseLabel = 'Beta 1.0';
+  static const String releaseLabel = 'Beta 1.1';
   static String get displayVersion => '$releaseLabel · 构建 $versionCode';
   static String get fullVersionTag =>
       versionTag.contains('+') ? versionTag : '$versionTag+$versionCode';

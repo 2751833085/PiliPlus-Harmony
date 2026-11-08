@@ -2,9 +2,9 @@
 
 基于 [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus) 的鸿蒙 HAP 项目，面向手机、平板和折叠屏，由 **厄斯因二次编辑** 维护。
 
-当前阶段：**Beta 1.0**，首个 Beta 版本。系统版本为 `1.0.0-beta`，构建号 `6253`；应用内显示 **Beta 1.0**。本次按独立安装发布，请从 GitHub 下载签名 HAP。
+当前阶段：**Beta 1.1**。系统版本为 `1.1.0-beta`，构建号 `6254`；应用内显示 **Beta 1.1**。请从 GitHub 下载签名 HAP 手动安装。
 
-[下载与版本说明](https://github.com/2751833085/PiliPlus-Harmony/releases) · [Beta 1.0 验证记录](docs/harmony/beta-1.0-6253-validation.md) · [问题反馈](https://github.com/2751833085/PiliPlus-Harmony/issues)
+[下载与版本说明](https://github.com/2751833085/PiliPlus-Harmony/releases) · [Beta 1.1 验证记录](docs/harmony/beta-1.1-6254-validation.md) · [问题反馈](https://github.com/2751833085/PiliPlus-Harmony/issues)
 
 ## 功能与范围
 
@@ -13,12 +13,13 @@
 - 推荐、动态、个人页、搜索、评论、消息与离线缓存等原有业务功能。
 - 播放器控制、弹幕、合集/分 P、空降助手和海外线路选项。
 
-Beta 1.0 重点修复快速操作和异步请求的竞态，并核查原生资源释放、下载状态和更新发布流程。验证记录区分自动测试、模拟器检查与仍需真机/登录的项目；不将模拟器结果等同于所有设备无卡顿、无缺陷。
+Beta 1.1 调整单屏“我的”页间距，统一搜索加载与筛选样式，并修复设置、登录备份恢复的完整性问题。验证记录区分自动测试、模拟器检查与仍需真机/登录的项目；不将模拟器结果等同于所有设备无卡顿、无缺陷。
 
 ## 版本管理
 
 Beta 1.0 之前的版本统一归档为 **Alpha**，包括旧说明中曾使用的 Beta、RC 和 Test Build 名称。历史发布保留详情和原始 Git 标签，不再提供旧 HAP 下载。旧目录名、文件名和构建哈希保留用于追溯，不代表当前发布阶段。
 
+- [Beta 1.1 版本说明](releases/beta-1.1/notes.md)
 - [Beta 1.0 版本说明](releases/beta-1.0/notes.md)
 - [历史版本与目录说明](releases/README.md)
 - [开发文档目录](docs/README.md)

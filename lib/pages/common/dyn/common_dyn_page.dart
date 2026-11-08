@@ -94,10 +94,15 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
     padding = MediaQuery.viewPaddingOf(context);
   }
 
+  Color get replyChromeBackground => theme.colorScheme.surface;
+  Color get replySortForeground => theme.colorScheme.secondary;
+  bool get useDetailReplyChrome => false;
+  bool get restoreFabAfterReply => false;
+
   Widget buildReplyHeader() {
-    final secondary = theme.colorScheme.secondary;
+    final sortColor = replySortForeground;
     return SliverPinnedHeader(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: replyChromeBackground,
       child: Padding(
         padding: const .fromLTRB(12, 2.5, 6, 2.5),
         child: Row(
@@ -114,11 +119,11 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
             TextButton.icon(
               style: Style.buttonStyle,
               onPressed: controller.queryBySort,
-              icon: Icon(Icons.sort, size: 16, color: secondary),
+              icon: Icon(Icons.sort, size: 16, color: sortColor),
               label: Obx(
                 () => Text(
                   controller.sortType.value.descShort,
-                  style: TextStyle(fontSize: 13, color: secondary),
+                  style: TextStyle(fontSize: 13, color: sortColor),
                 ),
               ),
             ),
@@ -219,7 +224,7 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
       int oid = replyItem.oid.toInt();
       int rpid = replyItem.id.toInt();
       Widget replyReplyPage({bool showBackBtn = true}) {
-        final child = ViewSafeArea(
+        Widget child = ViewSafeArea(
           left: showBackBtn,
           right: showBackBtn,
           child: VideoReplyReplyPanel(
@@ -233,6 +238,17 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
             upMid: controller.upMid,
           ),
         );
+        if (useDetailReplyChrome) {
+          child = Theme(
+            data: theme.copyWith(
+              colorScheme: theme.colorScheme.copyWith(
+                surface: replyChromeBackground,
+                secondary: replySortForeground,
+              ),
+            ),
+            child: child,
+          );
+        }
         if (showBackBtn) {
           return SimpleScaffold(
             appBar: AppBar(
@@ -259,9 +275,14 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
         final scaffoldState = MiniScaffold.maybeOf(context);
         if (scaffoldState != null) {
           hideFab();
-          scaffoldState.showBottomSheet(
+          final sheet = scaffoldState.showBottomSheet(
             (context) => replyReplyPage(showBackBtn: false),
           );
+          if (restoreFabAfterReply) {
+            sheet.completer.future.then((_) {
+              if (mounted) showFab();
+            });
+          }
         } else {
           Get.to(
             replyReplyPage,

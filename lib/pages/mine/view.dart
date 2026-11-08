@@ -160,6 +160,21 @@ class _MediaPageState extends CommonPageState<MinePage>
     child: _buildHarmonyContent(theme, accent),
   );
 
+  bool get _compactHarmony =>
+      HarmonyStyle.enabled(context) &&
+      FeedColumns.profile(MediaQuery.sizeOf(context)) < 2;
+
+  // One quiet surface per group on phones, instead of nested cards and gutters.
+  Widget _compactGroup(List<Widget> children) => Material(
+    color: Theme.of(context).colorScheme.surface,
+    borderRadius: BorderRadius.circular(18),
+    clipBehavior: Clip.antiAlias,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
+    ),
+  );
+
   static Widget _harmonySection(BuildContext context, Widget child) =>
       FeedColumns.profile(MediaQuery.sizeOf(context)) < 2
       ? Material(type: MaterialType.transparency, child: child)
@@ -183,6 +198,7 @@ class _MediaPageState extends CommonPageState<MinePage>
               child: onBuild(
                 LayoutBuilder(
                   builder: (context, constraints) {
+                    final compact = _compactHarmony;
                     final split =
                         constraints.maxWidth >=
                         840 * MediaQuery.textScalerOf(context).scale(16) / 16;
@@ -229,9 +245,9 @@ class _MediaPageState extends CommonPageState<MinePage>
                     );
                     return ListView(
                       padding: EdgeInsets.fromLTRB(
-                        16,
+                        compact ? 8 : 16,
                         4,
-                        16,
+                        compact ? 8 : 16,
                         24 + MediaQuery.paddingOf(context).bottom,
                       ),
                       physics: const BouncingScrollPhysics(
@@ -269,7 +285,23 @@ class _MediaPageState extends CommonPageState<MinePage>
                               ),
                             ],
                           )
-                        else ...[
+                        else if (compact) ...[
+                          _compactGroup([account, actions]),
+                          const SizedBox(height: 12),
+                          _compactGroup([
+                            _buildRecentHistory(harmony: true),
+                            favorites,
+                            Divider(
+                              height: 1,
+                              thickness: .5,
+                              indent: 8,
+                              endIndent: 8,
+                              color: theme.colorScheme.outlineVariant
+                                  .withValues(alpha: .35),
+                            ),
+                            services,
+                          ]),
+                        ] else ...[
                           account,
                           const SizedBox(height: 10),
                           actions,
@@ -298,6 +330,7 @@ class _MediaPageState extends CommonPageState<MinePage>
           if (!controller.recentHistory.enabled) return const SizedBox.shrink();
           final child = MineHistoryPreview(
             expanded: expanded,
+            horizontalPadding: _compactHarmony ? 8 : 20,
             history: controller.recentHistory,
             onOpen: (item) async {
               await openHistoryItem(item);
@@ -504,7 +537,13 @@ class _MediaPageState extends CommonPageState<MinePage>
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(width: HarmonyStyle.enabled(context) ? 14 : 20),
+                SizedBox(
+                  width: _compactHarmony
+                      ? 8
+                      : HarmonyStyle.enabled(context)
+                      ? 14
+                      : 20,
+                ),
                 userInfo.face != null
                     ? Stack(
                         clipBehavior: .none,
@@ -612,7 +651,7 @@ class _MediaPageState extends CommonPageState<MinePage>
                     ],
                   ),
                 ),
-                const SizedBox(width: 20),
+                SizedBox(width: _compactHarmony ? 8 : 20),
               ],
             ),
           ),
@@ -691,8 +730,11 @@ class _MediaPageState extends CommonPageState<MinePage>
     children: [
       ListTile(
         dense: true,
+        contentPadding: _compactHarmony
+            ? const EdgeInsets.symmetric(horizontal: 8)
+            : null,
         title: Padding(
-          padding: const EdgeInsets.only(left: 10),
+          padding: EdgeInsets.only(left: _compactHarmony ? 0 : 10),
           child: Text(
             '稍后再看',
             style: theme.textTheme.titleMedium?.copyWith(
@@ -710,14 +752,23 @@ class _MediaPageState extends CommonPageState<MinePage>
         final items = controller.laterPreview;
         if (items.isEmpty)
           return Padding(
-            padding: const EdgeInsets.fromLTRB(26, 4, 20, 16),
+            padding: EdgeInsets.fromLTRB(
+              _compactHarmony ? 8 : 26,
+              4,
+              _compactHarmony ? 8 : 20,
+              16,
+            ),
             child: Text(
               controller.laterError.value ??
                   (controller.laterLoading.value ? '正在加载…' : '暂无稍后再看的视频'),
               style: theme.textTheme.bodySmall,
             ),
           );
-        return MineLaterPreviewList(items: items, onOpen: _openLaterItem);
+        return MineLaterPreviewList(
+          items: items,
+          onOpen: _openLaterItem,
+          horizontalPadding: _compactHarmony ? 8 : 20,
+        );
       }),
     ],
   );
@@ -762,8 +813,11 @@ class _MediaPageState extends CommonPageState<MinePage>
         ListTile(
           onTap: () => Get.toNamed('/fav')?.whenComplete(_autoRefresh),
           dense: true,
+          contentPadding: _compactHarmony
+              ? const EdgeInsets.symmetric(horizontal: 8)
+              : null,
           title: Padding(
-            padding: const EdgeInsets.only(left: 10),
+            padding: EdgeInsets.only(left: _compactHarmony ? 0 : 10),
             child: Text.rich(
               TextSpan(
                 children: [
@@ -826,7 +880,11 @@ class _MediaPageState extends CommonPageState<MinePage>
                     1.5,
             child: ListView.separated(
               controller: controller.scrollController,
-              padding: const .only(left: 20, top: 10, right: 20),
+              padding: EdgeInsets.only(
+                left: _compactHarmony ? 8 : 20,
+                top: 10,
+                right: _compactHarmony ? 8 : 20,
+              ),
               itemCount: response.list.length + (flag ? 1 : 0),
               itemBuilder: (context, index) {
                 if (flag && index == favFolderList.length) {

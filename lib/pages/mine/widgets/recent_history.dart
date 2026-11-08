@@ -10,12 +10,14 @@ class MineHistoryPreview extends StatelessWidget {
     super.key,
     required this.history,
     this.expanded = false,
+    this.horizontalPadding = 20,
     required this.onOpen,
     required this.onViewAll,
     required this.onLogin,
   });
   final RecentHistory history;
   final bool expanded;
+  final double horizontalPadding;
   final ValueChanged<HistoryItemModel> onOpen;
   final VoidCallback onViewAll, onLogin;
 
@@ -33,7 +35,12 @@ class MineHistoryPreview extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(26, 8, 16, 8),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding == 20 ? 26 : horizontalPadding,
+                  8,
+                  horizontalPadding == 20 ? 16 : horizontalPadding,
+                  8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -52,7 +59,12 @@ class MineHistoryPreview extends StatelessWidget {
           ),
           if (!history.loggedIn)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                0,
+                horizontalPadding,
+                12,
+              ),
               child: TextButton(
                 onPressed: onLogin,
                 child: const Text('登录后查看观看历史'),
@@ -60,7 +72,12 @@ class MineHistoryPreview extends StatelessWidget {
             )
           else if (history.items.isEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                8,
+                horizontalPadding,
+                20,
+              ),
               child: Text(
                 history.error ?? (history.loading ? '正在读取观看历史…' : '暂无观看历史'),
                 style: theme.textTheme.bodyMedium,
@@ -71,10 +88,13 @@ class MineHistoryPreview extends StatelessWidget {
               builder: (context, constraints) {
                 final scale = MediaQuery.textScalerOf(context);
                 final width = expanded
-                    ? (constraints.maxWidth - 54) / 2
+                    ? (constraints.maxWidth - 2 * horizontalPadding - 14) / 2
                     : math.min(
                         180.0,
-                        math.max(120.0, constraints.maxWidth - 40),
+                        math.max(
+                          120.0,
+                          constraints.maxWidth - 2 * horizontalPadding,
+                        ),
                       );
                 // Text layout rounds each line independently. Reserve whole
                 // line boxes so fractional font scales cannot overflow.
@@ -146,7 +166,12 @@ class MineHistoryPreview extends StatelessWidget {
                   return GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 6, 20, 12),
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      6,
+                      horizontalPadding,
+                      12,
+                    ),
                     itemCount: math.min(6, history.items.length),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
@@ -160,7 +185,12 @@ class MineHistoryPreview extends StatelessWidget {
                 return SizedBox(
                   height: itemHeight + 18,
                   child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 6, 20, 12),
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      6,
+                      horizontalPadding,
+                      12,
+                    ),
                     scrollDirection: Axis.horizontal,
                     itemCount: history.items.length,
                     separatorBuilder: (_, _) => const SizedBox(width: 14),
@@ -171,7 +201,12 @@ class MineHistoryPreview extends StatelessWidget {
             ),
           if (history.error != null && history.items.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                0,
+                horizontalPadding,
+                12,
+              ),
               child: Text(history.error!, style: theme.textTheme.bodySmall),
             ),
         ],

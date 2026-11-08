@@ -1,5 +1,4 @@
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
-import 'harmony_about.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -11,10 +10,10 @@ import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
 import 'package:PiliPlus/common/widgets/dialog/export_import.dart';
 import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
+import 'package:PiliPlus/pages/about/harmony_about.dart';
 import 'package:PiliPlus/pages/mine/controller.dart';
 import 'package:PiliPlus/services/logger.dart';
 import 'package:PiliPlus/utils/accounts.dart';
-import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/android/android_helper.dart';
 import 'package:PiliPlus/utils/app_scheme.dart';
 import 'package:PiliPlus/utils/cache_manager.dart';
@@ -244,16 +243,18 @@ Commit Hash: ${BuildConfig.commitHash}''',
           context,
           title: '登录信息',
           localFileName: () => 'account',
-          onExport: () => Utils.jsonEncoder.convert(Accounts.account.toMap()),
+          sensitive: true,
+          description: '包含登录凭据和四种账号角色，请妥善保存。导入保留已有账号并恢复备份中的角色。过期凭据需重新登录。',
+          onExport: Accounts.exportBackup,
           onImport: (json) async {
-            final res = json.map(
-              (key, value) => MapEntry(key, LoginAccount.fromJson(value)),
-            );
-            await Accounts.account.putAll(res);
+            final wasLoggedIn = Accounts.main.isLogin;
+            await Accounts.importBackup(json);
             await Accounts.refresh();
             MineController.anonymity.value = !Accounts.heartbeat.isLogin;
             if (Accounts.main.isLogin) {
               await LoginUtils.onLoginMain();
+            } else if (wasLoggedIn) {
+              await LoginUtils.onLogoutMain();
             }
           },
         ),
@@ -266,6 +267,9 @@ Commit Hash: ${BuildConfig.commitHash}''',
           context,
           title: '设置',
           localFileName: () => 'setting_${DeviceUtils.platformName}',
+          sensitive: true,
+          description:
+              '恢复应用、播放器设置与本地弹幕屏蔽规则，部分设置需重启生效。备份可能包含 WebDAV 凭据，不包含登录、历史、下载、缓存和字体文件。自定义字体可在新设备重新导入。',
           onExport: GStorage.exportAllSettings,
           onImport: GStorage.importAllJsonSettings,
         ),
@@ -289,7 +293,7 @@ Commit Hash: ${BuildConfig.commitHash}''',
                     ]);
                     SmartDialog.showToast('重置成功');
                   },
-                  child: const Text('重置可导出的设置', style: style),
+                  child: const Text('重置应用和播放器设置', style: style),
                 ),
                 DialogOption(
                   onPressed: () async {

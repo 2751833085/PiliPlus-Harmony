@@ -1,5 +1,3 @@
-import 'package:PiliPlus/common/skeleton/media_bangumi.dart';
-import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/models/search/result.dart';
 import 'package:PiliPlus/pages/search_panel/controller.dart';
 import 'package:PiliPlus/pages/search_panel/pgc/widgets/item.dart';
@@ -71,19 +69,4 @@ class _SearchPgcPanelState
             itemBuilder: itemBuilder,
           );
   }
-
-  @override
-  Widget get buildLoading => useSingleColumnResults
-      ? buildResultRows(
-          itemCount: 10,
-          itemExtent: _rowExtent,
-          itemBuilder: (_, _) => const MediaPgcSkeleton(),
-        )
-      : SliverGrid(
-          gridDelegate: gridDelegate,
-          delegate: const SliverSingleChildDelegate(
-            count: 10,
-            child: MediaPgcSkeleton(),
-          ),
-        );
 }

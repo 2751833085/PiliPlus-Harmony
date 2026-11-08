@@ -212,6 +212,11 @@ class AccountManager extends Interceptor {
         ),
       );
     }
+    // A restore can replace the account while this response is in flight.
+    if (account is LoginAccount &&
+        !identical(Accounts.account.get(account.mid.toString()), account)) {
+      return;
+    }
     await account.onChange();
   }
 

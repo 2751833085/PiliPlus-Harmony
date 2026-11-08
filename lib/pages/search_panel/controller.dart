@@ -43,22 +43,16 @@ class SearchPanelController<R extends SearchNumData<T>, T>
   Rx<ArticleZoneType>? articleZoneType; // int? categoryId;
 
   SearchResultController? searchResultController;
-  int _sortRevision = 0;
 
   void onSortSearch({
     bool getBack = true,
     String? label,
   }) {
     if (getBack) Get.back();
-    SmartDialog.dismiss();
     if (label != null) {
       SmartDialog.showToast("「$label」的筛选结果");
     }
-    SmartDialog.showLoading(msg: 'loading');
-    final revision = ++_sortRevision;
-    onReload().whenComplete(() {
-      if (revision == _sortRevision && !isClosed) SmartDialog.dismiss();
-    });
+    onReload();
   }
 
   StreamSubscription? _listener;

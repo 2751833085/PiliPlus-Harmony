@@ -6,6 +6,7 @@ import 'package:PiliPlus/utils/device_utils.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:uuid/v4.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 
 typedef _WebDavConfig = ({
@@ -83,19 +84,40 @@ class WebDav {
     final webdav.Client client;
     try {
       client = await _connect(config);
-    } catch (e) {
-      SmartDialog.showToast('备份失败，请检查配置: $e');
+    } catch (_) {
+      SmartDialog.showToast('备份失败，请检查 WebDAV 配置');
       return;
     }
+    final path = '${config.directory}/${_getFileName()}';
+    final pending = '$path.${const UuidV4().generate()}.tmp';
     try {
-      final path = '${config.directory}/${_getFileName()}';
-      try {
-        await client.remove(path);
-      } catch (_) {}
-      await client.write(path, utf8.encode(data));
+      await client.write(pending, utf8.encode(data));
+      final base = Uri.parse(client.uri);
+      final basePath = base.path.replaceFirst(RegExp(r'/+$'), '');
+      final backupPath = path.replaceFirst(RegExp(r'^/+'), '');
+      final destination = base.replace(
+        userInfo: '',
+        path: '$basePath/$backupPath',
+      );
+      // The client's rename retries every conflict. This upload needs one MOVE.
+      final response = await client.c.req(
+        client,
+        'MOVE',
+        pending,
+        optionsHandler: (options) {
+          options.headers!['destination'] = destination.toString();
+          options.headers!['overwrite'] = 'T';
+        },
+      );
+      if (response.statusCode != 201 && response.statusCode != 204) {
+        throw StateError('WebDAV MOVE did not complete');
+      }
       SmartDialog.showToast('备份成功');
-    } catch (e) {
-      SmartDialog.showToast('备份失败: $e');
+    } catch (_) {
+      try {
+        await client.remove(pending);
+      } catch (_) {}
+      SmartDialog.showToast('备份失败，请检查 WebDAV 服务状态');
     }
   }
 
