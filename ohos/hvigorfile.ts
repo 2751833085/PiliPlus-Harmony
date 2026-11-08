@@ -5,8 +5,9 @@ import { appTasks, OhosAppContext, OhosPluginId } from '@ohos/hvigor-ohos-plugin
 import { flutterHvigorPlugin } from 'flutter-hvigor-plugin';
 
 // Flutter OH strips prerelease text before generating app.json5. Restore the
-// package version through the supported Hvigor context before packaging/signing.
-hvigor.getRootNode().afterNodeEvaluate(rootNode => {
+// package version after all plugin evaluation hooks, before packaging/signing.
+hvigor.nodesEvaluated(() => {
+    const rootNode = hvigor.getRootNode();
     const pubspec = fs.readFileSync(path.join(path.dirname(__dirname), 'pubspec.yaml'), 'utf8');
     const version = pubspec.match(/^version:\s*(\d+\.\d+\.\d+(?:-beta)?)\+(\d+)\s*$/m);
     if (!version) throw new Error('Expected pubspec version name+build');
