@@ -1,3 +1,5 @@
+此版本已由 [Beta 1.1](https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v1.1.0-beta%2B6254) 取代，仅保留发布详情与源码，旧安装包不再提供。
+
 # Beta 1.0
 
 首个 Beta 版本，系统版本 `1.0.0-beta`，构建号 `6253`。此前全部发布统一归档为 Alpha，保留版本详情和源码标签，旧 HAP 下载撤下。

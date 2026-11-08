@@ -1,0 +1,68 @@
+{
+  "status": "scoped_guest_emulator_smoke_passed",
+  "source": "8746fe0860da8e2546b8a5474c73792d26bedfb1",
+  "hap_sha256": "e2bf533beecb468eef0ca585b6aa27dd90a65a1cabd4b34b461a5f4c59aa64bf",
+  "bytes": 33164762,
+  "version_name": "1.1.0-beta",
+  "version_code": 6254,
+  "uid_and_first_install_retained": true,
+  "emulator_pid": 10322,
+  "profile": {
+    "form": "triple",
+    "native_resolution_px": [
+      3184,
+      2232
+    ],
+    "dpr": 2.875
+  },
+  "about": {
+    "visible_label": "Beta 1.1 · 构建 6254",
+    "local_screenshot": "soak-6250-8qgv8j3a/beta-about.png"
+  },
+  "search": {
+    "native_loading_semantics_observed_before_results": true,
+    "visible_video_rows": 5,
+    "sidebar_headings": {
+      "bilibili热搜": true,
+      "搜索发现": true
+    },
+    "local_screenshot": "soak-6250-mibkk6cj/open.png"
+  },
+  "article": {
+    "successful_on_known_public_sample_after_one_server_throttled_other_item": true,
+    "right_share_bounds_px": [
+      2173,
+      2014,
+      2435,
+      2152
+    ],
+    "right_pane_bounds_px": [
+      1911,
+      273,
+      2958,
+      2232
+    ],
+    "left_content_scroll_kept_right_actions_fixed": true,
+    "right_forward_scroll_hid_actions": true,
+    "right_reverse_scroll_restored_actions_same_bounds": true,
+    "safe_inset_painted_rgb": [
+      241,
+      243,
+      245
+    ],
+    "safe_inset_pixels_matched": 78052,
+    "safe_inset_matching_fraction": 1.0,
+    "same_public_sample_preliminary_match_fraction": 0.15384615384615385,
+    "local_screenshot": "soak-6250-7_jfx0ki/article-open.png",
+    "local_action_scroll_evidence": "soak-6250-iccobsvp/",
+    "local_network_throttle_evidence": "soak-6250-o935upui/failure.png"
+  },
+  "recommendation_home_restored": true,
+  "app_preferences_changed": false,
+  "preliminary_build_evidence": {
+    "summary": "beta-1.1-6254-preliminary-emulator-verification.json",
+    "scope": "Different package SHA. Native single/double/triple search, light filter, single guest My and the original article inset issue."
+  },
+  "limits": "Final emulator scope is triple-screen search, public article scroll/safe-inset and About. Single/double results, light filter and guest My were exercised on the preliminary package. Dark detail and both filter themes were exercised in widget tests. No physical device, real accounts, social writes, video decoding, downloads, or displayed FPS measurement.",
+  "local_evidence_root": "/tmp/pili-beta11-search-qa"
+}

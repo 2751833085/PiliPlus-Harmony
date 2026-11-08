@@ -1,0 +1,52 @@
+{
+  "candidate_version": 6254,
+  "source": "e7180948a9a11d99cfb58766ca8f723f8f90ea4d",
+  "sha256": "c8981dedba4b3c282a1be3f45696b896917fd4f52f53958485716093dc8b7d0f",
+  "device": "Dedicated DevEco HarmonyOS 7 guest emulator",
+  "status": "preliminary_candidate_to_be_replaced_for_article_safe_area",
+  "app_process_same_during_checks": true,
+  "search": {
+    "native_loading_semantics_seen_before_content": true,
+    "pre_post_sort_bounds_px": [
+      246,
+      422,
+      462,
+      503
+    ],
+    "category_vertical_bounds_stable": true,
+    "example_category_horizontal_shift_px_when_count_added": 75,
+    "sidebar_by_native_width_px": {
+      "1008": false,
+      "2048": true,
+      "3184": true
+    },
+    "duration_filter_applied": true,
+    "light_filter_visually_checked": true,
+    "dark_filter_scope": "Widget test only for this candidate"
+  },
+  "single_mine": {
+    "guest_list_shorter_than_viewport": true,
+    "later_row_visible_after_bottom_gesture": true,
+    "long_content_scope": "Widget fixture only for this candidate"
+  },
+  "article": {
+    "public_article_open_and_back_confirmed": true,
+    "actions_in_right_column": true,
+    "observed_issue": "Comment text showed under the action strip in the safe bottom inset."
+  },
+  "about_label": "Beta 1.1 · 构建 6254",
+  "recommendation_home_restored_in_native_triple": true,
+  "app_preferences_changed": false,
+  "coverage_limit": "Guest UI smoke. No sign-in, account actions, physical phone, offline download, audio/video decode, or presented FPS measurement.",
+  "local_screenshots": {
+    "triple_search": "soak-6250-pj6qbhzk/open.png",
+    "double_search": "soak-6250-yo5ramy2/observe.png",
+    "single_search": "soak-6250-z4jheyjl/observe.png",
+    "light_filter": "soak-6250-7xt_2rx_/filter.png",
+    "filtered_results": "soak-6250-n6c402th/apply-filter.png",
+    "single_mine": "soak-6250-a0z2xcap/mine.png",
+    "single_mine_bottom": "soak-6250-j7duqwir/mine-bottom.png",
+    "article_pre_fix": "6254-triple-public-article.png",
+    "about": "soak-6250-b163nqc8/beta-about.png"
+  }
+}

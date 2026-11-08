@@ -1,0 +1,20 @@
+{
+  "release_id": 438011899,
+  "tag": "v1.1.0-beta+6254",
+  "url": "https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v1.1.0-beta%2B6254",
+  "asset_url": "https://github.com/2751833085/PiliPlus-Harmony/releases/download/v1.1.0-beta%2B6254/PiliPlus-Harmony-Beta-1.1-6254-signed.hap",
+  "sha256": "e2bf533beecb468eef0ca585b6aa27dd90a65a1cabd4b34b461a5f4c59aa64bf",
+  "bytes": 33164762,
+  "unauthenticated_download_verified": true,
+  "all_asset_digests_verified": true,
+  "update_check": {
+    "tag": "v1.1.0-beta+6254",
+    "name": "Beta 1.1",
+    "url": "https://github.com/2751833085/PiliPlus-Harmony/releases/download/v1.1.0-beta%2B6254/PiliPlus-Harmony-Beta-1.1-6254-signed.hap",
+    "noRepeatedUpdate": true,
+    "previousBetaCanUpdate": true,
+    "futureBetaDetected": true,
+    "previousReleaseDetailsOnly": true,
+    "api_access": "unauthenticated public GitHub API"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "source": "8746fe0860da8e2546b8a5474c73792d26bedfb1",
+  "hap_sha256": "e2bf533beecb468eef0ca585b6aa27dd90a65a1cabd4b34b461a5f4c59aa64bf",
+  "bytes": 33164762,
+  "target": "dedicated DevEco emulator",
+  "uninstalled": false,
+  "version_name_before": "1.1.0-beta",
+  "version_code_before": 6254,
+  "version_name_after": "1.1.0-beta",
+  "version_code_after": 6254,
+  "uid_preserved": true,
+  "first_install_preserved": true,
+  "ui_readback": "Beta 1.1 · 构建 6254",
+  "pid": 10322,
+  "status": "passed",
+  "evidence_directory": "/private/tmp/pili-beta11-6254/soak-6250-x2_fw91y",
+  "tests": {
+    "passed": 401,
+    "skipped": 1,
+    "failed": 0
+  },
+  "verification": {
+    "official_hap_signature": true,
+    "zip_crc": true,
+    "aot_source_commit": true,
+    "libmpv_sha256": true,
+    "release_diagnostics_disabled": true
+  },
+  "emulator_report": "beta-1.1-6254-emulator-verification.json"
+}
