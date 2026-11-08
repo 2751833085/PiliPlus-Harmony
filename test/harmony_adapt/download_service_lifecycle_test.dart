@@ -302,8 +302,19 @@ void main() {
       ).writeAsBytes([0]);
       final audioRejected = Completer<void>();
       final releaseVideo = Completer<void>();
-      addTearDown(() {
+      var verifiedAudioFailure = false;
+      addTearDown(() async {
         if (!releaseVideo.isCompleted) releaseVideo.complete();
+        // The failure status is visible before the service saves its entry.
+        // Pausing joins both media tasks and queues a final metadata write
+        // behind any earlier saves, before the fixture directory is removed.
+        await service.cancelDownload(isDelete: false, downloadNext: false);
+        if (verifiedAudioFailure) {
+          final metadata = File('${entry.entryDirPath}/entry.json');
+          final saved = jsonDecode(await metadata.readAsString()) as Map;
+          expect(saved['is_completed'], isFalse);
+          expect(saved['downloaded_bytes'], 4);
+        }
       });
       server.listen((request) async {
         request.response.bufferOutput = false;
@@ -335,6 +346,7 @@ void main() {
         ).readAsBytes(),
         [1, 2, 3, 4],
       );
+      verifiedAudioFailure = true;
     },
   );
 }
