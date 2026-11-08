@@ -9,7 +9,8 @@ on:
 jobs:
   release_ohos:
     name: Release for ohos
-    runs-on: ubuntu-latest
+    # SDK 26 BiSheng links against libxml2.so.2; avoid OS changes from -latest.
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -33,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl xz-utils zip libglu1-mesa
+          sudo apt-get install -y curl xz-utils zip libglu1-mesa libxml2
         shell: bash
 
       - name: Setup HarmonyOS toolchain
@@ -41,6 +42,13 @@ jobs:
         with:
           version: "26.0.0.821"
           cache: true
+
+      - name: Verify native compiler runtime
+        run: |
+          sdk_native_bin="${HOS_SDK_HOME:?SDK path was not configured}/default/hms/native/BiSheng/bin"
+          "$sdk_native_bin/clang" --version
+          "$sdk_native_bin/ld.lld" --version
+        shell: bash
 
       - name: Setup JDK17
         uses: actions/setup-java@v4
