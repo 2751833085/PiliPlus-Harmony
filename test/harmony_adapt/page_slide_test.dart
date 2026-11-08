@@ -60,39 +60,47 @@ void main() {
         ),
       ),
     );
-    expect(tester.getTopLeft(find.byKey(const ValueKey('page'))).dx, 800);
+    final page = find.byKey(const ValueKey('page'));
+    expect(tester.getTopLeft(page).dx, 800);
     animation.value = .5;
     await tester.pump();
-    final x = tester.getTopLeft(find.byKey(const ValueKey('page'))).dx;
+    final x = tester.getTopLeft(page).dx;
     expect(x, greaterThan(0));
     expect(x, lessThan(800));
     expect(
       find.ancestor(
-        of: find.byKey(const ValueKey('page')),
+        of: page,
         matching: find.byType(FadeTransition),
       ),
       findsNothing,
     );
     animation.value = 1;
     await tester.pump();
-    expect(tester.getTopLeft(find.byKey(const ValueKey('page'))).dx, 0);
+    final settledPosition = tester.getTopLeft(page);
+    expect(settledPosition.dx, 0);
     animation.value = .5;
     await tester.pump();
-    expect(tester.getTopLeft(find.byKey(const ValueKey('page'))).dx, x);
+    expect(tester.getTopLeft(page).dx, x);
+
+    // A route above the settled page covers and reveals the same position.
     animation.value = 1;
-    secondary.value = .5;
-    await tester.pump();
-    final behind = tester.getTopLeft(find.byKey(const ValueKey('page'))).dx;
-    expect(behind, inExclusiveRange(-160, 0));
-    secondary.value = 0;
+    for (final progress in [.02, .25, .5, .75, 1.0, .75, .5, .25, .02, 0.0]) {
+      secondary.value = progress;
+      await tester.pump();
+      expect(
+        tester.getTopLeft(page),
+        settledPosition,
+        reason: 'settled page moves at secondary coverage $progress',
+      );
+    }
     animation.reverse();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 120));
     expect(
-      tester.getTopLeft(find.byKey(const ValueKey('page'))).dx,
+      tester.getTopLeft(page).dx,
       inExclusiveRange(0, 800),
     );
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.byKey(const ValueKey('page'))).dx, 800);
+    expect(tester.getTopLeft(page).dx, 800);
   });
 }
