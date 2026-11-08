@@ -1,0 +1,24 @@
+{
+  "tag": "v3.0.0+6252",
+  "name": "Beta 1.0",
+  "draft": false,
+  "prerelease": true,
+  "anonymousDownload": true,
+  "bytes": 33144275,
+  "sha256": "388c330fd55e6ab840785ba57620e08a82c6e2bfda8eb735776f3abe0fa033c2",
+  "legacy6251SelectsBeta": true,
+  "current6252RepeatsUpdate": false,
+  "checkedAgainAfterAlphaArchive": true,
+  "alphaArchive": {
+    "beta": "Beta 1.0",
+    "tag": "v3.0.0+6252",
+    "sourceCommit": "e17419e1da9b4b2a2812ca3bead0339553433630",
+    "historicalReleases": 27,
+    "historicalDetailsPreserved": true,
+    "oldTagRefsPreserved": 27,
+    "removedReleaseAssets": 72,
+    "removedObsoleteActionsArtifacts": 4,
+    "betaAssets": 4,
+    "alphaAssetsRemaining": 0
+  }
+}
