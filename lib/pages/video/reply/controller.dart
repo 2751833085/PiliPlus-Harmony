@@ -69,8 +69,8 @@ class VideoReplyController extends ReplyController<MainListReply>
     super.onClose();
   }
 
-  void changeVideo(int nextAid) {
-    if (aid == nextAid) return;
+  void changeVideo(int nextAid, {bool force = false}) {
+    if (aid == nextAid && !force) return;
     aid = nextAid;
     _allowPreloaded = true;
     invalidateRequests();

@@ -37,6 +37,7 @@ import 'package:material_ui/material_ui.dart';
 class PgcIntroController extends CommonIntroController {
   int? seasonId;
   int? epId;
+  int _episodeRequest = 0;
 
   late final String pgcType = pgcItem.type == 1 || pgcItem.type == 4
       ? '追番'
@@ -82,7 +83,10 @@ class PgcIntroController extends CommonIntroController {
 
   // 获取点赞/投币/收藏状态
   Future<void> queryPgcLikeCoinFav() async {
-    final result = await VideoHttp.pgcLikeCoinFav(epId: epId!);
+    final requestedEpisode = epId;
+    if (requestedEpisode == null || isClosed) return;
+    final result = await VideoHttp.pgcLikeCoinFav(epId: requestedEpisode);
+    if (isClosed || epId != requestedEpisode) return;
     if (result case Success(:final response)) {
       final hasLike = response.like == 1;
       final hasFav = response.favorite == 1;
@@ -248,16 +252,22 @@ class PgcIntroController extends CommonIntroController {
 
   // 修改分P或番剧分集
   Future<bool> onChangeEpisode(BaseEpisodeItem episode) async {
+    if (isClosed || !videoDetailCtr.canChangeEpisode) return false;
+    final request = ++_episodeRequest;
     try {
       final int epId = episode.epId ?? episode.id!;
       final String bvid = episode.bvid ?? this.bvid;
       final int aid = episode.aid ?? IdUtils.bv2av(bvid);
       final int? cid =
           episode.cid ?? await SearchHttp.ab2c(aid: aid, bvid: bvid);
-      if (cid == null) {
+      if (cid == null ||
+          isClosed ||
+          request != _episodeRequest ||
+          !videoDetailCtr.canChangeEpisode) {
         return false;
       }
       final String? cover = episode.cover;
+      final episodeChanged = this.epId != epId;
 
       // 重新获取视频资源
       this.epId = epId;
@@ -279,11 +289,8 @@ class PgcIntroController extends CommonIntroController {
       // 重新请求评论
       if (videoDetailCtr.showReply) {
         try {
-          final replyCtr = Get.find<VideoReplyController>(tag: heroTag)
-            ..aid = aid;
-          if (replyCtr.loadingState.value is! Loading) {
-            replyCtr.onReload();
-          }
+          final replyCtr = Get.find<VideoReplyController>(tag: heroTag);
+          replyCtr.changeVideo(aid, force: replyCtr.isPugv && episodeChanged);
         } catch (_) {}
       }
 

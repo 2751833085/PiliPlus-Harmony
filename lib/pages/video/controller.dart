@@ -1124,12 +1124,16 @@ class VideoDetailController extends GetxController
 
   Future<bool>? entranceReady;
   bool _playbackVisible = true;
+  bool get canChangeEpisode => _playbackVisible && !isClosed;
   void suspendPlayback({bool cancelVideoQuery = false}) {
     _playbackVisible = false;
     manualPlayPending.value = false;
     manualPlayFailed.value = false;
     _playerRequests.invalidate();
-    if (cancelVideoQuery) _videoRequests.invalidate();
+    if (cancelVideoQuery) {
+      _videoRequests.invalidate();
+      _cancelVideoQuery();
+    }
     _routeRetry?.cancel();
     _routeRetry = null;
   }
@@ -1321,6 +1325,12 @@ class VideoDetailController extends GetxController
 
   final shortChromeVisible = true.obs;
   final _videoRequests = VideoRequestQueue();
+  CancelToken? _videoQueryCancel;
+
+  void _cancelVideoQuery() {
+    _videoQueryCancel?.cancel();
+    _videoQueryCancel = null;
+  }
 
   final languages = Rxn<List<LanguageItem>>();
   final currLang = Rxn<String>();
@@ -1335,7 +1345,10 @@ class VideoDetailController extends GetxController
     queryVideoUrl(fromReset: true);
   }
 
-  Future<LoadingState<PlayUrlModel>> _getVideoUrl(int quality) {
+  Future<LoadingState<PlayUrlModel>> _getVideoUrl(
+    int quality,
+    CancelToken cancel,
+  ) {
     return VideoHttp.videoUrl(
       cid: cid.value,
       bvid: bvid,
@@ -1346,18 +1359,19 @@ class VideoDetailController extends GetxController
       videoType: _actualVideoType ?? videoType,
       language: currLang.value,
       voiceBalance: plPlayerController.enableAudioNormalization,
+      cancelToken: cancel,
     );
   }
 
-  Future<void> _supplementVideoQualities(int ticket) async {
-    final target = data;
-    final quality = data.missingVideoQualityBelowHighest;
+  Future<void> _supplementVideoQualities(
+    PlayUrlModel target,
+    int ticket,
+    CancelToken cancel,
+  ) async {
+    final quality = target.missingVideoQualityBelowHighest;
     if (quality == -1) return;
-    final result = await _getVideoUrl(quality);
-    if (!_videoRequests.isCurrent(ticket) ||
-        isClosed ||
-        !identical(target, data))
-      return;
+    final result = await _getVideoUrl(quality, cancel);
+    if (!_videoRequests.isCurrent(ticket) || isClosed) return;
     if (result case Success(:final response)) {
       target.dash!.video!.merge(response.dash?.video);
     }
@@ -1370,25 +1384,31 @@ class VideoDetailController extends GetxController
   Future<void> queryVideoUrl({
     bool fromReset = false,
     bool autoFullScreenFlag = false,
-  }) => _videoRequests.run((ticket) async {
-    if (isClosed) return;
-    isQuerying = true;
-    try {
-      if (isFileSource) {
-        await _initPlayerIfNeeded(autoFullScreenFlag);
-      } else {
-        await _queryVideoUrl(fromReset, autoFullScreenFlag, ticket);
+  }) {
+    if (isClosed) return Future.value();
+    _cancelVideoQuery();
+    final cancel = _videoQueryCancel = CancelToken();
+    return _videoRequests.run((ticket) async {
+      if (isClosed) return;
+      isQuerying = true;
+      try {
+        if (isFileSource) {
+          await _initPlayerIfNeeded(autoFullScreenFlag);
+        } else {
+          await _queryVideoUrl(fromReset, autoFullScreenFlag, ticket, cancel);
+        }
+      } finally {
+        isQuerying = false;
       }
-    } finally {
-      isQuerying = false;
-    }
-  });
+    });
+  }
 
   @pragma('vm:prefer-inline')
   Future<void> _queryVideoUrl(
     bool fromReset,
     bool autoFullScreenFlag,
     int ticket,
+    CancelToken cancel,
   ) async {
     if (plPlayerController.enableSponsorBlock && isBlock && !fromReset) {
       querySponsorBlock(bvid: bvid, cid: cid.value);
@@ -1420,21 +1440,21 @@ class VideoDetailController extends GetxController
         _warmUrls[key] = prepared.audioUrl;
     }
     final result = prepared == null
-        ? await _getVideoUrl(VideoQuality.hdrVivid.code)
+        ? await _getVideoUrl(VideoQuality.hdrVivid.code, cancel)
         : Success(prepared.model);
     if (!_videoRequests.isCurrent(ticket) || isClosed) return;
 
     if (result case Success(:final response)) {
-      data = response;
       // Start the available preferred quality immediately. Supplement other
       // quality choices after player initialization, independent of region.
-      final deferQualities = data.canDeferQualitySupplement(
+      final deferQualities = response.canDeferQualitySupplement(
         plPlayerController.cacheVideoQa!,
       );
-      if (data.dash != null && !deferQualities)
-        await _supplementVideoQualities(ticket);
+      if (response.dash != null && !deferQualities)
+        await _supplementVideoQualities(response, ticket, cancel);
       if (!_videoRequests.isCurrent(ticket) || isClosed) return;
 
+      data = response;
       languages.value = data.language?.items;
       currLang.value = data.curLanguage;
 
@@ -1555,7 +1575,13 @@ class VideoDetailController extends GetxController
       await _initPlayerIfNeeded(autoFullScreenFlag);
       _warmUrls.clear();
       if (deferQualities && _videoRequests.isCurrent(ticket) && !isClosed) {
-        unawaited(_supplementVideoQualities(ticket).catchError((Object _) {}));
+        unawaited(
+          _supplementVideoQualities(
+            response,
+            ticket,
+            cancel,
+          ).catchError((Object _) {}),
+        );
       }
     } else {
       _autoPlay.value = false;
@@ -1843,6 +1869,7 @@ class VideoDetailController extends GetxController
     _overseasRoutes?.dispose();
     _playerRequests.dispose();
     _videoRequests.dispose();
+    _cancelVideoQuery();
     if (identical(plPlayerController.sourceOwner, this)) {
       plPlayerController.sourceOwner = null;
     }
@@ -1875,6 +1902,7 @@ class VideoDetailController extends GetxController
     _manualRoute = false;
     _playerRequests.invalidate();
     _videoRequests.invalidate();
+    _cancelVideoQuery();
     if (isFileSource) {
       cacheLocalProgress();
     }

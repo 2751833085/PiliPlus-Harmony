@@ -213,38 +213,48 @@ abstract final class VideoHttp {
     bool voiceBalance = false,
     CancelToken? cancelToken,
   }) async {
-    final dmImgStr = Utils.base64EncodeRandomString(16, 64);
-    final dmCoverImgStr = Utils.base64EncodeRandomString(32, 128);
-    final params = await WbiSign.makSign({
-      'avid': ?avid,
-      'bvid': ?bvid,
-      'ep_id': ?epid,
-      'season_id': ?seasonId,
-      'cid': cid,
-      'qn': qn,
-      // 获取所有格式的视频
-      'fnval': 4048,
-      'fourk': 1,
-      'fnver': 0,
-      'voice_balance': voiceBalance ? 1 : 0,
-      'gaia_source': 'pre-load',
-      'isGaiaAvoided': true,
-      'web_location': 1315873,
-      // 免登录查看1080p
-      if (tryLook) 'try_look': 1,
-      'dm_img_list': '[]',
-      'dm_img_str': dmImgStr,
-      'dm_cover_img_str': dmCoverImgStr,
-      'dm_img_inter': '{"ds":[],"wh":[0,0,0],"of":[0,0,0]}',
-      'cur_language': ?language,
-    });
-
+    const cancelled = Error('请求已取消');
+    if (cancelToken?.isCancelled == true) return cancelled;
     try {
+      final dmImgStr = Utils.base64EncodeRandomString(16, 64);
+      final dmCoverImgStr = Utils.base64EncodeRandomString(32, 128);
+      final signing = WbiSign.makSign({
+        'avid': ?avid,
+        'bvid': ?bvid,
+        'ep_id': ?epid,
+        'season_id': ?seasonId,
+        'cid': cid,
+        'qn': qn,
+        // 获取所有格式的视频
+        'fnval': 4048,
+        'fourk': 1,
+        'fnver': 0,
+        'voice_balance': voiceBalance ? 1 : 0,
+        'gaia_source': 'pre-load',
+        'isGaiaAvoided': true,
+        'web_location': 1315873,
+        // 免登录查看1080p
+        if (tryLook) 'try_look': 1,
+        'dm_img_list': '[]',
+        'dm_img_str': dmImgStr,
+        'dm_cover_img_str': dmCoverImgStr,
+        'dm_img_inter': '{"ds":[],"wh":[0,0,0],"of":[0,0,0]}',
+        'cur_language': ?language,
+      });
+      // The key lookup is shared. A cancelled caller can leave without
+      // interrupting the lookup used by the next video or another screen.
+      final params = cancelToken == null
+          ? await signing
+          : await Future.any([
+              signing,
+              cancelToken.whenCancel.then((error) => throw error),
+            ]);
       final res = await Request().get(
         videoType.api,
         queryParameters: params,
         cancelToken: cancelToken,
       );
+      if (cancelToken?.isCancelled == true) return cancelled;
 
       if (res.data['code'] == 0) {
         late PlayUrlModel data;
@@ -280,7 +290,7 @@ abstract final class VideoHttp {
       }
       return Error(_parseVideoErr(res.data['code'], res.data['message']));
     } catch (e, s) {
-      return Error('$e\n\n$s');
+      return cancelToken?.isCancelled == true ? cancelled : Error('$e\n\n$s');
     }
   }
 

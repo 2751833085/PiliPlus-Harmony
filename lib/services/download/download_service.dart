@@ -414,6 +414,96 @@ class DownloadService extends GetxService {
     }
   }
 
+  static String? _stableMediaPath(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null ||
+        (uri.scheme != 'http' && uri.scheme != 'https') ||
+        uri.host.isEmpty ||
+        uri.path.isEmpty ||
+        uri.path == '/') {
+      return null;
+    }
+    // The CDN host and authorization parameters can change on retries.
+    return uri.path;
+  }
+
+  static Object? _resumeIdentity(BiliDownloadMediaInfo media, String file) {
+    switch (media) {
+      case Type1() when media.segmentList.length == 1:
+        final segment = media.segmentList.single;
+        final resource = _stableMediaPath(segment.url);
+        if (resource == null) return null;
+        return (
+          resource,
+          media.quality,
+          media.format,
+          media.videoCodecId,
+          segment.order,
+          segment.bytes,
+          segment.duration,
+          segment.md5,
+        );
+      case Type2():
+        final track = file == PathUtils.audioNameType2
+            ? media.audio?.firstOrNull
+            : media.video.firstOrNull;
+        if (track == null) return null;
+        final resource = _stableMediaPath(track.baseUrl);
+        if (resource == null) return null;
+        return (
+          resource,
+          track.id,
+          track.codecid,
+          track.bandwidth,
+          track.width,
+          track.height,
+          track.frameRate,
+          track.dashDrmType,
+          track.md5,
+        );
+      default:
+        return null;
+    }
+  }
+
+  Future<void> _verifyResumeIdentity(
+    File index,
+    BiliDownloadMediaInfo media,
+  ) async {
+    final tracks = switch (media) {
+      Type1() => [PathUtils.videoNameType1],
+      Type2(:final audio) => [
+        PathUtils.videoNameType2,
+        if (audio?.isNotEmpty == true) PathUtils.audioNameType2,
+      ],
+      _ => const <String>[],
+    };
+    final existing = <String>[];
+    for (final name in tracks) {
+      final file = File(path.join(index.parent.path, name));
+      if (await file.exists() && await file.length() > 0) existing.add(name);
+    }
+    if (existing.isEmpty) return;
+
+    final incompatible = UnsupportedError('已有缓存与当前媒体不匹配或来源无法确认，请删除该下载后重新缓存');
+    final BiliDownloadMediaInfo previous;
+    try {
+      final saved =
+          jsonDecode(await index.readAsString()) as Map<String, dynamic>;
+      previous = saved.containsKey('segment_list')
+          ? Type1.fromJson(saved)
+          : Type2.fromJson(saved);
+    } catch (_) {
+      throw incompatible;
+    }
+    for (final file in existing) {
+      final identity = _resumeIdentity(media, file);
+      if (identity == null || _resumeIdentity(previous, file) != identity) {
+        throw incompatible;
+      }
+    }
+  }
+
   Future<void> _startDownload(
     BiliDownloadEntryInfo entry,
     int revision,
@@ -441,13 +531,14 @@ class DownloadService extends GetxService {
 
       if (!current()) return;
       final mediaJsonFile = File(path.join(videoDir.path, _indexFile));
-      await _prepare(
-        Future.wait([
-          mediaJsonFile.writeAsString(jsonEncode(mediaFileInfo.toJson())),
-          _downloadCover(entry: entry, cancelToken: cancel),
-        ]),
-        cancel,
-      );
+      await _verifyResumeIdentity(mediaJsonFile, mediaFileInfo);
+      if (!current()) return;
+      // Keep the service lock until the index write finishes. A cancelled
+      // attempt must not publish an index over the next attempt.
+      await Future.wait([
+        mediaJsonFile.writeAsString(jsonEncode(mediaFileInfo.toJson())),
+        _prepare(_downloadCover(entry: entry, cancelToken: cancel), cancel),
+      ]);
 
       if (!current()) {
         return;
@@ -505,6 +596,7 @@ class DownloadService extends GetxService {
     } catch (e) {
       if (!current() || cancel.isCancelled) return;
       _updateCurStatus(DownloadStatus.failPlayUrl);
+      if (e is UnsupportedError) SmartDialog.showToast(e.message ?? '不支持该视频格式');
       if (kDebugMode) {
         debugPrint('get download url error: $e');
       }

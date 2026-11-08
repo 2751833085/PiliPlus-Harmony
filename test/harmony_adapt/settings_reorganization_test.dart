@@ -606,8 +606,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 120));
       expect(
         tester.getTopLeft(find.byKey(const ValueKey('previous-page'))).dx,
-        lessThan(0),
-        reason: 'Previous Get route must move with the native shell',
+        0,
+        reason: 'The new route covers the previous page and shell in place',
       );
       final enteringX = tester
           .getTopLeft(find.byKey(const ValueKey('next-page')))

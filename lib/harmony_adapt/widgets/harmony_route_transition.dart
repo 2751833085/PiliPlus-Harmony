@@ -7,24 +7,23 @@ import 'package:flutter/widgets.dart';
 /// ModalRoute already rebuilds its transition on each tick; another animated
 /// widget here would duplicate subscriptions/builds on every page entrance.
 /// The page stays live, with its original hit testing and semantics transform.
+/// Only the arriving or departing page moves. A page under another route
+/// stays fixed while the new page covers or reveals it.
 class HarmonyRouteTransition extends SingleChildRenderObjectWidget {
   const HarmonyRouteTransition({
     super.key,
     required this.animation,
-    required this.secondaryAnimation,
     this.userGestureInProgress,
     required super.child,
   });
 
   final Animation<double> animation;
-  final Animation<double> secondaryAnimation;
   final ValueListenable<bool>? userGestureInProgress;
 
   @override
   RenderFractionalTranslation createRenderObject(BuildContext context) =>
       _RenderHarmonyRouteTransition(
         animation,
-        secondaryAnimation,
         userGestureInProgress,
       );
 
@@ -34,7 +33,6 @@ class HarmonyRouteTransition extends SingleChildRenderObjectWidget {
     covariant RenderFractionalTranslation renderObject,
   ) => (renderObject as _RenderHarmonyRouteTransition).updateAnimations(
     animation,
-    secondaryAnimation,
     userGestureInProgress,
   );
 }
@@ -42,29 +40,24 @@ class HarmonyRouteTransition extends SingleChildRenderObjectWidget {
 class _RenderHarmonyRouteTransition extends RenderFractionalTranslation {
   _RenderHarmonyRouteTransition(
     this._animation,
-    this._secondaryAnimation,
     this._userGestureInProgress,
   ) : super(translation: Offset.zero) {
     _updateTranslation();
   }
 
   Animation<double> _animation;
-  Animation<double> _secondaryAnimation;
   ValueListenable<bool>? _userGestureInProgress;
 
   void updateAnimations(
     Animation<double> animation,
-    Animation<double> secondaryAnimation,
     ValueListenable<bool>? userGestureInProgress,
   ) {
     if (identical(animation, _animation) &&
-        identical(secondaryAnimation, _secondaryAnimation) &&
         identical(userGestureInProgress, _userGestureInProgress)) {
       return;
     }
     if (attached) _removeListeners();
     _animation = animation;
-    _secondaryAnimation = secondaryAnimation;
     _userGestureInProgress = userGestureInProgress;
     if (attached) _addListeners();
     _updateTranslation();
@@ -72,13 +65,11 @@ class _RenderHarmonyRouteTransition extends RenderFractionalTranslation {
 
   void _addListeners() {
     _animation.addListener(_updateTranslation);
-    _secondaryAnimation.addListener(_updateTranslation);
     _userGestureInProgress?.addListener(_updateTranslation);
   }
 
   void _removeListeners() {
     _animation.removeListener(_updateTranslation);
-    _secondaryAnimation.removeListener(_updateTranslation);
     _userGestureInProgress?.removeListener(_updateTranslation);
   }
 
@@ -89,13 +80,8 @@ class _RenderHarmonyRouteTransition extends RenderFractionalTranslation {
       interactive: interactive,
       reverse: _animation.status == AnimationStatus.reverse,
     );
-    final secondary = HarmonyMotion.pageCoverage(
-      _secondaryAnimation.value,
-      interactive: interactive,
-      reverse: _secondaryAnimation.status == AnimationStatus.reverse,
-    );
     // RenderFractionalTranslation invalidates paint/semantics, never layout.
-    translation = Offset(1 - primary - .2 * secondary, 0);
+    translation = Offset(1 - primary, 0);
   }
 
   @override

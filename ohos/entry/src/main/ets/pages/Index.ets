@@ -28,8 +28,8 @@ const TOP_BAR_EXPANDED_HEIGHT = 144;
 /// NativeTopSpacer 的留白动画保持一致。
 const TOP_BAR_MOTION_DURATION = 300;
 const TOP_BAR_MOTION_CURVE: ICurve = curves.cubicBezierCurve(0.2, 0, 0, 1);
-// Flutter supplies the eased progress. Keep these modifiers in their own
-// immediate animation group, separate from the bar's height/scroll motion.
+// Flutter supplies the eased progress for clipping the bars in place. Keep
+// this update immediate and separate from the bar's height/scroll motion.
 const ROUTE_EXPOSURE_UPDATE: AnimateParam = { duration: 0 };
 /// 搜索行淡出/淡入：收起时抢在高度压扁之前淡出，展开时等高度让出空间后
 /// 再淡入，避免文字在被压扁的行内闪现（旧实现同时做，观感发硬）
@@ -591,8 +591,7 @@ struct Index {
     .height(this.topBarHeight())
     .clip(true)
     .animation({ duration: TOP_BAR_MOTION_DURATION, curve: TOP_BAR_MOTION_CURVE })
-    .clipShape(new Rect({ width: Math.max(0, this.winWidth * (0.2 + 0.8 * this.topBarExposure)), height: this.topBarHeight() }))
-    .translate({ x: -0.2 * this.winWidth * (1 - this.topBarExposure), y: 0 })
+    .clipShape(new Rect({ width: Math.max(0, this.winWidth * this.topBarExposure), height: this.topBarHeight() }))
     .animation(ROUTE_EXPOSURE_UPDATE)
     .visibility(this.topBarHidden ? Visibility.Hidden : Visibility.Visible)
     .blur(this.shellBarsBlurred ? 12 : 0)
@@ -797,8 +796,7 @@ struct Index {
     .height(this.topBarHeight())
     .clip(true)
     .animation({ duration: TOP_BAR_MOTION_DURATION, curve: TOP_BAR_MOTION_CURVE })
-    .clipShape(new Rect({ width: Math.max(0, this.winWidth * (0.2 + 0.8 * this.topBarExposure)), height: this.topBarHeight() }))
-    .translate({ x: -0.2 * this.winWidth * (1 - this.topBarExposure), y: 0 })
+    .clipShape(new Rect({ width: Math.max(0, this.winWidth * this.topBarExposure), height: this.topBarHeight() }))
     .animation(ROUTE_EXPOSURE_UPDATE)
     .visibility(this.topBarHidden ? Visibility.Hidden : Visibility.Visible)
     .blur(this.shellBarsBlurred ? 12 : 0)
@@ -842,8 +840,7 @@ struct Index {
     .translate({ y: this.shellBarsScrollHidden ? 52 + this.navigationSafeBottom : 0 })
     .animation({ duration: 180, curve: Curve.EaseOut })
     // Match the retained home route's coverage, not a second show/hide clock.
-    .clipShape(new Rect({ width: Math.max(0, this.winWidth * (0.2 + 0.8 * this.topBarExposure)), height: 52 + this.navigationSafeBottom }))
-    .translate({ x: -0.2 * this.winWidth * (1 - this.topBarExposure), y: this.shellBarsScrollHidden ? 52 + this.navigationSafeBottom : 0 })
+    .clipShape(new Rect({ width: Math.max(0, this.winWidth * this.topBarExposure), height: 52 + this.navigationSafeBottom }))
     .animation(ROUTE_EXPOSURE_UPDATE)
     .position({ x: 0, y: Math.max(0, this.winHeight - 52 - this.navigationSafeBottom) })
     .enabled(!this.shellBarsObscured && this.topBarExposure >= 1)

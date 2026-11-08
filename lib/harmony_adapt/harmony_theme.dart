@@ -260,8 +260,8 @@ abstract final class HarmonyTheme {
   }
 }
 
-/// A bounded entrance distance is consistent on phone and unfolded screens.
-/// The previous page stays cached rather than being scaled or blurred.
+/// The incoming page slides over the stationary previous page.
+/// The same movement reveals the previous page during Back.
 class HarmonyPageTransitionsBuilder extends PageTransitionsBuilder {
   const HarmonyPageTransitionsBuilder();
   @override
@@ -277,7 +277,6 @@ class HarmonyPageTransitionsBuilder extends PageTransitionsBuilder {
     // this delegate on ticks. Translate the retained page without another layer.
     return HarmonyRouteTransition(
       animation: animation,
-      secondaryAnimation: secondaryAnimation,
       userGestureInProgress: route.navigator?.userGestureInProgressNotifier,
       child: child,
     );

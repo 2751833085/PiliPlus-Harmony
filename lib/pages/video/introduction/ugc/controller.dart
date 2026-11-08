@@ -64,6 +64,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
   late final horizontalMemberPage = Pref.horizontalMemberPage;
 
   AiConclusionResult? aiConclusionResult;
+  int _episodeRequest = 0;
 
   late final Map<int?, bool> seasonFavState = {};
 
@@ -485,6 +486,12 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     bool isStein = false,
     bool waitForPlayback = false,
   }) async {
+    if (isClosed || !videoDetailCtr.canChangeEpisode) return false;
+    final request = ++_episodeRequest;
+    bool isCurrent() =>
+        !isClosed &&
+        request == _episodeRequest &&
+        videoDetailCtr.canChangeEpisode;
     try {
       final String bvid = episode.bvid ?? this.bvid;
       final int aid = episode.aid ?? IdUtils.bv2av(bvid);
@@ -497,7 +504,7 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
           dimension = res.dimension;
         }
       }
-      if (isClosed || cid == null) {
+      if (cid == null || !isCurrent()) {
         return false;
       }
 
@@ -588,14 +595,14 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
         try {
           await playback;
         } catch (_) {
-          if (!isClosed && this.bvid == bvid) {
+          if (isCurrent()) {
             videoDetailCtr.autoPlay = false;
             videoDetailCtr.videoState.value = false;
             SmartDialog.showToast('视频暂时无法播放，可点按重试或上滑切换');
           }
         }
       }
-      return !isClosed;
+      return isCurrent();
     } catch (e) {
       if (kDebugMode) debugPrint('ugc onChangeEpisode: $e');
       return false;

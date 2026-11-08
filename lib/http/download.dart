@@ -41,6 +41,7 @@ abstract final class DownloadHttp {
         _ => VideoType.ugc,
       },
     );
+    if (cancelToken?.cancelError case final error?) throw error;
     if (res case Success(:final response)) {
       final dash = response.dash;
       if (dash != null) {
@@ -60,14 +61,6 @@ abstract final class DownloadHttp {
           targetSupportFormats.codecs!,
           Pref.preferCodecs,
         );
-
-        entry
-          ..typeTag = targetVideoQa.toString()
-          ..videoQuality = targetVideoQa
-          ..preferedVideoQuality = targetVideoQa
-          ..qualityPithyDescription =
-              targetSupportFormats.newDesc ??
-              VideoQuality.fromCode(targetVideoQa).desc;
 
         /// 取出符合当前画质的videoList
         final videosList = dash.video!
@@ -133,17 +126,33 @@ abstract final class DownloadHttp {
               dashDrmType: 0,
             ),
           ];
-          entry.hasDashAudio = true;
         }
-        return Type2(
+        final media = Type2(
           duration: dash.duration!,
           video: [videoFile],
           audio: audioFileList,
           referer: referer,
           userAgent: userAgent,
         );
+        entry
+          ..mediaType = 2
+          ..hasDashAudio = audioFileList != null
+          ..typeTag = targetVideoQa.toString()
+          ..videoQuality = targetVideoQa
+          ..preferedVideoQuality = targetVideoQa
+          ..qualityPithyDescription =
+              targetSupportFormats.newDesc ??
+              VideoQuality.fromCode(targetVideoQa).desc;
+        return media;
       } else {
-        final first = response.durl!.first;
+        final segments = response.durl;
+        if (segments == null || segments.isEmpty) {
+          throw StateError('没有可用的离线视频资源');
+        }
+        if (segments.length > 1) {
+          throw UnsupportedError('暂不支持分段视频的离线缓存');
+        }
+        final first = segments.single;
         final List<Type1Segment> segmentList = [
           Type1Segment(
             backupUrls: [],
@@ -162,13 +171,6 @@ abstract final class DownloadHttp {
         final int targetVideoQa =
             formatItem?.quality ?? VideoQuality.clear480.code;
 
-        entry
-          ..mediaType = 1
-          ..typeTag = targetVideoQa.toString()
-          ..videoQuality = targetVideoQa
-          ..preferedVideoQuality = targetVideoQa
-          ..qualityPithyDescription = description;
-
         final List<Type1PlayerCodecConfig> playerCodecConfigList = [
           Type1PlayerCodecConfig(
             player: "IJK_PLAYER",
@@ -180,10 +182,10 @@ abstract final class DownloadHttp {
           ),
         ];
 
-        return Type1(
+        final media = Type1(
           from: pageData?.from ?? ep?.from,
-          quality: entry.preferedVideoQuality,
-          typeTag: entry.typeTag,
+          quality: targetVideoQa,
+          typeTag: targetVideoQa.toString(),
           description: description,
           playerCodecConfigList: playerCodecConfigList,
           segmentList: segmentList,
@@ -203,6 +205,14 @@ abstract final class DownloadHttp {
           referer: referer,
           userAgent: userAgent,
         );
+        entry
+          ..mediaType = 1
+          ..hasDashAudio = false
+          ..typeTag = targetVideoQa.toString()
+          ..videoQuality = targetVideoQa
+          ..preferedVideoQuality = targetVideoQa
+          ..qualityPithyDescription = description;
+        return media;
       }
     } else {
       throw res.toString();

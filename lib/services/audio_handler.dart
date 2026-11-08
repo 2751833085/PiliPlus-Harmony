@@ -52,7 +52,8 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   factory VideoPlayerServiceHandler.local() =>
       VideoPlayerServiceHandler(enableBackgroundPlay: false);
 
-  static final List<MediaItem> _item = [];
+  // Route order follows requests, even when fetching cover art completes out of order.
+  final _items = <String, ({Object request, MediaItem? item})>{};
   bool enableBackgroundPlay;
 
   /// 当前循环模式（同步给系统播控中心/实况窗显示与切换）
@@ -126,7 +127,7 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     required double speed,
     String? debugLabel,
   }) {
-    if (!enableBackgroundPlay || _item.isEmpty) {
+    if (!enableBackgroundPlay || mediaItem.valueOrNull == null) {
       return;
     }
 
@@ -235,11 +236,14 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     //   debugPrint(StackTrace.current);
     // }
     if (data == null) return;
+    final request = Object();
+    _items[herotag] = (request: request, item: _items[herotag]?.item);
     unawaited(
       _handleVideoDetailChange(
         data,
         cid,
         herotag,
+        request,
         artist: artist,
         cover: cover,
       ),
@@ -295,7 +299,8 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
   Future<void> _handleVideoDetailChange(
     dynamic data,
     int cid,
-    String herotag, {
+    String herotag,
+    Object request, {
     String? artist,
     String? cover,
   }) async {
@@ -374,29 +379,38 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
       default:
         return;
     }
-    _item.add(mediaItem);
-    setMediaItem(mediaItem);
+    if (!enableBackgroundPlay ||
+        !identical(_items[herotag]?.request, request)) {
+      return;
+    }
+    _items[herotag] = (request: request, item: mediaItem);
+    if (_items.keys.last == herotag) setMediaItem(mediaItem);
   }
 
   void onVideoDetailDispose(String herotag) {
-    if (!enableBackgroundPlay) return;
+    final wasCurrent = _items.keys.lastOrNull == herotag;
+    _items.remove(herotag);
+    if (!enableBackgroundPlay || !wasCurrent) return;
 
-    if (_item.isNotEmpty) {
-      _item.removeWhere((item) => item.id.endsWith(herotag));
+    final previous = _items.values
+        .map((entry) => entry.item)
+        .nonNulls
+        .lastOrNull;
+    if (previous == null) {
+      if (mediaItem.valueOrNull != null) mediaItem.add(null);
+      return;
     }
-    if (_item.isNotEmpty) {
-      playbackState.add(
-        playbackState.value.copyWith(processingState: .ready, playing: false),
-      );
-      setMediaItem(_item.last);
-      stop();
-    }
+    playbackState.add(
+      playbackState.value.copyWith(processingState: .ready, playing: false),
+    );
+    setMediaItem(previous);
+    stop();
   }
 
   void clear() {
+    _items.clear();
     if (!enableBackgroundPlay) return;
     mediaItem.add(null);
-    _item.clear();
     _lastConfig = null;
     /**
      * if (playbackState.processingState == AudioProcessingState.idle &&

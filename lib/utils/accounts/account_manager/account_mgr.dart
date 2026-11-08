@@ -136,7 +136,8 @@ class AccountManager extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final options = err.requestOptions;
-    if (options.responseType == ResponseType.stream) {
+    if (CancelToken.isCancel(err) ||
+        options.responseType == ResponseType.stream) {
       return handler.next(err);
     }
 

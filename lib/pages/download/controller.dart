@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:PiliPlus/common/widgets/dialog/dialog.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/download/download_info.dart';
 import 'package:PiliPlus/pages/common/multi_select/base.dart'
     show BaseMultiSelectMixin;
 import 'package:PiliPlus/services/download/download_service.dart';
 import 'package:PiliPlus/utils/storage.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart' show Text;
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -16,6 +16,7 @@ class DownloadPageController extends GetxController
   final _downloadService = Get.find<DownloadService>();
   final pages = RxList<DownloadPageInfo>();
   final flag = RxInt(0);
+  final initialLoad = Rx<LoadingState<void>>(LoadingState.loading());
 
   @override
   List<DownloadPageInfo> get list => pages;
@@ -36,16 +37,22 @@ class DownloadPageController extends GetxController
   }
 
   Future<void> _loadList() async {
-    await _downloadService.waitForInitialization;
+    try {
+      await _downloadService.waitForInitialization;
+    } catch (_) {
+      if (!isClosed) initialLoad.value = const Error('无法读取离线缓存');
+      return;
+    }
     if (isClosed) return;
     if (_downloadService.downloadList.isEmpty) {
       pages.clear();
+      initialLoad.value = const Success(null);
       return;
     }
-    final list = <DownloadPageInfo>[];
+    final byPage = <String, DownloadPageInfo>{};
     for (final entry in _downloadService.downloadList) {
       final pageId = entry.pageId;
-      final page = list.firstWhereOrNull((e) => e.pageId == pageId);
+      final page = byPage[pageId];
       if (page != null) {
         final aSortKey = entry.sortKey;
         final bSortKey = page.sortKey;
@@ -56,21 +63,20 @@ class DownloadPageController extends GetxController
         }
         page.entries.add(entry);
       } else {
-        list.add(
-          DownloadPageInfo(
-            pageId: pageId,
-            dirPath: entry.pageDirPath,
-            title: entry.title,
-            cover: entry.cover,
-            sortKey: entry.sortKey,
-            seasonType: entry.ep?.seasonType,
-            entries: [entry],
-          ),
+        byPage[pageId] = DownloadPageInfo(
+          pageId: pageId,
+          dirPath: entry.pageDirPath,
+          title: entry.title,
+          cover: entry.cover,
+          sortKey: entry.sortKey,
+          seasonType: entry.ep?.seasonType,
+          entries: [entry],
         );
       }
     }
-    pages.value = list;
+    pages.value = byPage.values.toList();
     flag.value++;
+    initialLoad.value = const Success(null);
   }
 
   @override

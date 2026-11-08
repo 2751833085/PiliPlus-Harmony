@@ -2132,6 +2132,9 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                     height: introHeight,
                     needRelated: false,
                     needCtr: false,
+                    physics: OS.isHarmony && !videoDetailController.isUgc
+                        ? pgcDetailScrollPhysics
+                        : null,
                   ),
                 ),
               ),
@@ -2997,6 +3000,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
     bool? isHorizontal,
     bool needRelated = true,
     bool needCtr = true,
+    ScrollPhysics? physics,
   }) {
     if (videoDetailController.isFileSource) {
       return localIntroPanel(needCtr: needCtr);
@@ -3007,7 +3011,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
         controller: needCtr
             ? videoDetailController.effectiveIntroScrollCtr
             : null,
-        physics: !needCtr ? platformAlwaysClampingPhysics : null,
+        physics: physics ?? (!needCtr ? platformAlwaysClampingPhysics : null),
         slivers: [
           if (videoDetailController.isUgc) ...[
             UgcIntroPanel(

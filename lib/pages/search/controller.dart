@@ -134,6 +134,7 @@ class SSearchController extends GetxController
   bool get searchSuggestion => keywords.searchSuggestion;
   late final RxList<SearchSuggestItem> searchSuggestList;
   int _suggestionRevision = 0;
+  bool _submitting = false;
 
   bool get enableTrending => keywords.enableTrending;
   bool get enableSearchRcmd => keywords.enableSearchRcmd;
@@ -182,6 +183,11 @@ class SSearchController extends GetxController
 
   // 搜索
   Future<void> submit() async {
+    if (_submitting || isClosed) return;
+    final context = searchFocusNode.context;
+    final sourceRoute = context == null ? null : ModalRoute.of(context);
+    if (sourceRoute?.isCurrent == false) return;
+
     if (controller.text.isEmpty) {
       if (hintText.isNullOrEmpty) return;
       controller.text = hintText!;
@@ -189,25 +195,39 @@ class SSearchController extends GetxController
     }
 
     final text = controller.text;
+    _submitting = true;
+    try {
+      if (await PiliScheme.routePushFromUrl(text, selfHandle: true) ||
+          isClosed ||
+          sourceRoute?.isCurrent == false) {
+        return;
+      }
 
-    if (await PiliScheme.routePushFromUrl(text, selfHandle: true) || isClosed) {
-      return;
-    }
+      keywords.recordKeyword(text);
+      searchFocusNode.unfocus();
+      final result = Get.toNamed(
+        '/searchResult',
+        parameters: {'tag': tag, 'keyword': text},
+        arguments: {'initIndex': initIndex, 'fromSearch': true},
+      );
+      if (result == null) return;
+      final resultRoute = Get.routing.route;
+      final val = await result;
 
-    keywords.recordKeyword(text);
-
-    searchFocusNode.unfocus();
-    Get.toNamed(
-      '/searchResult',
-      parameters: {'tag': tag, 'keyword': text},
-      arguments: {'initIndex': initIndex, 'fromSearch': true},
-    )?.then((val) {
-      if (isClosed) return;
+      // A pop resolves the result before the outgoing page finishes moving.
+      // Wait for the page to leave before showing the keyboard again.
+      if (resultRoute is TransitionRoute &&
+          !identical(resultRoute, sourceRoute)) {
+        await resultRoute.completed;
+      }
+      if (isClosed || sourceRoute?.isCurrent == false) return;
       searchFocusNode.requestFocus();
-      if (val is bool && val) {
+      if (val == true && searchSuggestion) {
         onValueChanged(text);
       }
-    });
+    } finally {
+      _submitting = false;
+    }
   }
 
   void onClickKeyword(String keyword, {bool clearSuggest = true}) {

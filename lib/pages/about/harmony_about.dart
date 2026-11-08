@@ -93,49 +93,16 @@ class HarmonyDevelopmentJourney extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (final step in const [
-              ('V1', '初步移植', '完成鸿蒙端的初步移植，保留原有核心功能。'),
-              ('V2', '界面适配', '适配导航栏与沉浸光感，完善多屏布局。'),
-              ('V3', 'Beta 1.0', '进入 Beta 阶段，持续核查稳定性、界面一致性与加载响应。'),
-            ])
-              Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 46,
-                      child: Text(
-                        step.$1,
-                        style: Theme.of(context).textTheme.labelMedium,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            step.$2,
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            step.$3,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            for (final (phase, summary) in const [
+              ('Alpha', '完成鸿蒙基础移植，适配导航栏、折叠屏布局和沉浸光感。'),
+              ('Beta', '统一各页面的布局和交互，修复日常使用中的问题，持续优化启动、滚动和加载表现。'),
+            ]) ...[
+              Text(phase, style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 3),
+              Text(summary, style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(height: 12),
+            ],
             const Divider(height: 16),
-            Text(
-              '此前版本统一归档为 Alpha；Beta 1.0 为首个 Beta 版本。',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 8),
             Text(
               '感谢 PiliPlus 上游及开源贡献者。改编版本保留原项目的开源许可与署名。',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(

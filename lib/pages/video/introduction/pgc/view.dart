@@ -22,6 +22,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
 
+const pgcDetailScrollPhysics = BouncingScrollPhysics(
+  parent: AlwaysScrollableScrollPhysics(),
+);
+
 class PgcIntroPage extends StatefulWidget {
   final int? cid;
   final String heroTag;
@@ -63,33 +67,37 @@ class _PgcIntroPageState extends State<PgcIntroPage> {
     final colorScheme = ColorScheme.of(context);
     final item = introController.pgcItem;
     final isLandscape = widget.isLandscape;
-    Widget sliver = SliverToBoxAdapter(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 10,
-            children: [
-              _buildCover(colorScheme, isLandscape, item),
-              Expanded(child: _buildInfoPanel(isLandscape, colorScheme, item)),
-            ],
+    final intro = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 10,
+          children: [
+            _buildCover(colorScheme, isLandscape, item),
+            Expanded(child: _buildInfoPanel(isLandscape, colorScheme, item)),
+          ],
+        ),
+        const SizedBox(height: 6),
+        // 点赞收藏转发 布局样式2
+        if (introController.isPgc) actionGrid(item.stat!, introController),
+        // 番剧分集
+        if (item.episodes?.isNotEmpty == true)
+          PgcPanel(
+            heroTag: widget.heroTag,
+            pages: item.episodes!,
+            cid: videoDetailCtr.cid.value,
+            onChangeEpisode: introController.onChangeEpisode,
+            showEpisodes: widget.showEpisodes,
+            newEp: item.newEp,
           ),
-          const SizedBox(height: 6),
-          // 点赞收藏转发 布局样式2
-          if (introController.isPgc) actionGrid(item.stat!, introController),
-          // 番剧分集
-          if (item.episodes?.isNotEmpty == true)
-            PgcPanel(
-              heroTag: widget.heroTag,
-              pages: item.episodes!,
-              cid: videoDetailCtr.cid.value,
-              onChangeEpisode: introController.onChangeEpisode,
-              showEpisodes: widget.showEpisodes,
-              newEp: item.newEp,
-            ),
-        ],
-      ),
+      ],
+    );
+    Widget sliver = SliverToBoxAdapter(
+      // The wide detail pane scrolls the cover and controls as one static group.
+      child: isLandscape && introController.isPgc
+          ? RepaintBoundary(child: intro)
+          : intro,
     );
     if (!introController.isPgc) {
       final brief = _buildBrief(item);

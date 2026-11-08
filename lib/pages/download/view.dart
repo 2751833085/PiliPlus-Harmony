@@ -10,7 +10,9 @@ import 'package:PiliPlus/common/widgets/dialog/simple_dialog_option.dart';
 import 'package:PiliPlus/common/widgets/flutter/pop_scope.dart';
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
+import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/common/widgets/select_mask.dart';
+import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models/common/badge_type.dart';
 import 'package:PiliPlus/models_new/download/bili_download_entry_info.dart';
 import 'package:PiliPlus/models_new/download/download_info.dart';
@@ -153,14 +155,14 @@ class _DownloadPageState extends State<DownloadPage> with GridMixin {
             child: AppBar(
               title: const Text('离线缓存'),
               actions: [
-                IconButton(
-                  tooltip: '搜索',
-                  onPressed: () async {
-                    await _downloadService.waitForInitialization;
-                    if (!mounted) return;
-                    Get.to(DownloadSearchPage(progress: _progress));
-                  },
-                  icon: const Icon(Icons.search),
+                Obx(
+                  () => IconButton(
+                    tooltip: '搜索',
+                    onPressed: _controller.initialLoad.value.isSuccess
+                        ? () => Get.to(DownloadSearchPage(progress: _progress))
+                        : null,
+                    icon: const Icon(Icons.search),
+                  ),
                 ),
                 IconButton(
                   tooltip: '多选',
@@ -217,6 +219,9 @@ class _DownloadPageState extends State<DownloadPage> with GridMixin {
                   return const SliverToBoxAdapter();
                 }),
                 Obx(() {
+                  final load = _controller.initialLoad.value;
+                  if (load is Loading) return linearLoading;
+                  if (load is Error) return HttpError(errMsg: load.errMsg);
                   if (_controller.pages.isNotEmpty) {
                     return SliverMainAxisGroup(
                       slivers: [

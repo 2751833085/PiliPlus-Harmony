@@ -1,9 +1,11 @@
 import 'package:PiliPlus/harmony_adapt/harmony_motion.dart';
 import 'package:PiliPlus/harmony_adapt/harmony_theme.dart';
 import 'package:PiliPlus/harmony_adapt/widgets/harmony_route_transition.dart';
+import 'package:PiliPlus/pages/whisper/message_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get.dart';
 
 class _PaintCounts {
   int builds = 0;
@@ -63,6 +65,12 @@ class _CountedAnimation extends Animation<double> {
   @override
   void removeStatusListener(AnimationStatusListener listener) =>
       delegate.removeStatusListener(listener);
+}
+
+class _InteractiveRoute extends GetPageRoute<void> {
+  _InteractiveRoute({required super.page});
+
+  void setGestureProgress(double progress) => controller!.value = progress;
 }
 
 void main() {
@@ -145,7 +153,7 @@ void main() {
           );
           expect(
             tester.getTopLeft(find.byKey(previous)).dx,
-            closeTo(-width * .2 * coverage, .002),
+            0,
           );
         }
 
@@ -177,6 +185,158 @@ void main() {
     );
   }
 
+  for (final width in [412.0, 712.0, 1108.0]) {
+    testWidgets('named Harmony routes cover fixed source pages at $width', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = Size(width, 760);
+      addTearDown(tester.view.reset);
+      addTearDown(Get.reset);
+      final navigator = GlobalKey<NavigatorState>();
+      final theme = ThemeData(
+        platform: TargetPlatform.ohos,
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {TargetPlatform.ohos: HarmonyPageTransitionsBuilder()},
+        ),
+      );
+      Widget page(String path, {String? next}) => Scaffold(
+        key: ValueKey(path),
+        body: next == null
+            ? Text(path)
+            : TextButton(
+                onPressed: () => Get.toNamed<void>(next),
+                child: Text('open $next'),
+              ),
+      );
+      await tester.pumpWidget(
+        GetMaterialApp(
+          navigatorKey: navigator,
+          theme: theme,
+          defaultTransition: Transition.native,
+          initialRoute: '/',
+          getPages: [
+            GetPage(
+              name: '/',
+              page: () => page('/', next: '/search'),
+            ),
+            GetPage(name: '/search', page: () => page('/search')),
+            GetPage(name: '/member', page: () => page('/member')),
+            GetPage(name: '/fav', page: () => page('/fav')),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      final nav = navigator.currentState!;
+
+      double x(String path) => tester.getTopLeft(find.byKey(ValueKey(path))).dx;
+
+      Future<void> coverAndReveal(String source, String target) async {
+        await tester.tap(find.text('open $target'));
+        await tester.pump();
+        expect(x(source), 0);
+        var prior = width;
+        for (var i = 0; i < 3; i++) {
+          await tester.pump(const Duration(milliseconds: 40));
+          expect(x(source), 0);
+          expect(x(target), inExclusiveRange(0, prior));
+          prior = x(target);
+        }
+        final entryX = prior;
+        await tester.pumpAndSettle();
+        expect(x(target), 0);
+        nav.pop();
+        await tester.pump();
+        prior = 0;
+        for (var i = 0; i < 3; i++) {
+          await tester.pump(const Duration(milliseconds: 40));
+          expect(x(source), 0);
+          expect(x(target), inExclusiveRange(prior, width));
+          prior = x(target);
+        }
+        expect(entryX + prior, closeTo(width, .002));
+        await tester.pumpAndSettle();
+        expect(x(source), 0);
+        expect(find.byKey(ValueKey(target)), findsNothing);
+      }
+
+      await coverAndReveal('/', '/search');
+      nav.push(
+        HarmonyMessageRoute<void>(
+          page: () => page('/whisperDetail', next: '/member'),
+          settings: const RouteSettings(name: '/whisperDetail'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await coverAndReveal('/whisperDetail', '/member');
+      nav.pop();
+      await tester.pumpAndSettle();
+      nav.push(GetPageRoute<void>(page: () => page('/mine', next: '/fav')));
+      await tester.pumpAndSettle();
+      await coverAndReveal('/mine', '/fav');
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
+
+  testWidgets('interactive Back follows its progress over an anchored route', (
+    tester,
+  ) async {
+    addTearDown(Get.reset);
+    final navigator = GlobalKey<NavigatorState>();
+    const source = ValueKey('interactive-source');
+    const incoming = ValueKey('interactive-target');
+    await tester.pumpWidget(
+      GetMaterialApp(
+        navigatorKey: navigator,
+        theme: ThemeData(
+          platform: TargetPlatform.ohos,
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: {TargetPlatform.ohos: HarmonyPageTransitionsBuilder()},
+          ),
+        ),
+        defaultTransition: Transition.native,
+        home: const Scaffold(key: source),
+      ),
+    );
+    final route = _InteractiveRoute(page: () => const Scaffold(key: incoming));
+    final nav = navigator.currentState!..push(route);
+    await tester.pumpAndSettle();
+    nav.didStartUserGesture();
+    for (final progress in [.91, .65, .4, .71, .93, 1.0]) {
+      route.setGestureProgress(progress);
+      await tester.pump();
+      if (progress < 1) {
+        expect(tester.getTopLeft(find.byKey(source)).dx, 0);
+      }
+      expect(
+        tester.getTopLeft(find.byKey(incoming)).dx,
+        closeTo(800 * (1 - progress), .002),
+      );
+    }
+    nav.didStopUserGesture();
+    await tester.pump();
+    expect(tester.getTopLeft(find.byKey(incoming)).dx, 0);
+
+    nav.didStartUserGesture();
+    route.setGestureProgress(.6);
+    await tester.pump();
+    final releaseX = tester.getTopLeft(find.byKey(incoming)).dx;
+    nav.pop();
+    await tester.pump();
+    expect(tester.getTopLeft(find.byKey(incoming)).dx, releaseX);
+    expect(tester.getTopLeft(find.byKey(source)).dx, 0);
+    await tester.pump(const Duration(milliseconds: 45));
+    expect(tester.getTopLeft(find.byKey(incoming)).dx, greaterThan(releaseX));
+    expect(tester.getTopLeft(find.byKey(source)).dx, 0);
+    await tester.pumpAndSettle();
+    nav.didStopUserGesture();
+    await tester.pump();
+    expect(tester.getTopLeft(find.byKey(source)).dx, 0);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets(
     'gesture, hit tests and semantics use the same live translation',
     (tester) async {
@@ -187,10 +347,8 @@ void main() {
           duration: HarmonyMotion.duration,
           value: .75,
         );
-        final secondary = AnimationController(vsync: tester, value: .2);
         final gesture = ValueNotifier(false);
         addTearDown(primary.dispose);
-        addTearDown(secondary.dispose);
         addTearDown(gesture.dispose);
         var taps = 0;
         const target = ValueKey('hit-target');
@@ -198,7 +356,6 @@ void main() {
           MaterialApp(
             home: HarmonyRouteTransition(
               animation: primary,
-              secondaryAnimation: secondary,
               userGestureInProgress: gesture,
               child: Align(
                 alignment: Alignment.topLeft,
@@ -220,7 +377,7 @@ void main() {
         await tester.pump();
         expect(
           tester.getTopLeft(find.byKey(target)).dx,
-          closeTo(800 * (1 - .75 - .2 * .2), .002),
+          closeTo(800 * (1 - .75), .002),
         );
         await tester.tap(find.byKey(target));
         expect(taps, 1);
@@ -259,12 +416,7 @@ void main() {
                       primary.value,
                       interactive: false,
                       reverse: true,
-                    ) -
-                    .2 *
-                        HarmonyMotion.pageCoverage(
-                          secondary.value,
-                          interactive: false,
-                        )),
+                    )),
             .002,
           ),
         );
@@ -281,20 +433,11 @@ void main() {
     (tester) async {
       final oldPrimary = AnimationController(vsync: tester, value: .3);
       final newPrimary = AnimationController(vsync: tester, value: .8);
-      final oldSecondary = AnimationController(vsync: tester);
-      final newSecondary = AnimationController(vsync: tester);
       final oldGesture = ValueNotifier(false),
           newGesture = ValueNotifier(false);
       final oldAnimation = _CountedAnimation(oldPrimary),
           newAnimation = _CountedAnimation(newPrimary);
-      final oldCover = _CountedAnimation(oldSecondary),
-          newCover = _CountedAnimation(newSecondary);
-      for (final controller in [
-        oldPrimary,
-        newPrimary,
-        oldSecondary,
-        newSecondary,
-      ]) {
+      for (final controller in [oldPrimary, newPrimary]) {
         addTearDown(controller.dispose);
       }
       addTearDown(oldGesture.dispose);
@@ -302,22 +445,17 @@ void main() {
       Widget app(bool old) => MaterialApp(
         home: HarmonyRouteTransition(
           animation: old ? oldAnimation : newAnimation,
-          secondaryAnimation: old ? oldCover : newCover,
           userGestureInProgress: old ? oldGesture : newGesture,
           child: const SizedBox.expand(key: ValueKey('replacement')),
         ),
       );
       await tester.pumpWidget(app(true));
       expect(oldAnimation.callbacks.length, 1);
-      expect(oldCover.callbacks.length, 1);
       await tester.pumpWidget(app(false));
       expect(oldAnimation.callbacks, isEmpty);
-      expect(oldCover.callbacks, isEmpty);
       expect(newAnimation.callbacks.length, 1);
-      expect(newCover.callbacks.length, 1);
       final x = tester.getTopLeft(find.byKey(const ValueKey('replacement'))).dx;
       oldPrimary.value = .9;
-      oldSecondary.value = .7;
       oldGesture.value = true;
       await tester.pump();
       expect(
@@ -332,9 +470,7 @@ void main() {
       );
       await tester.pumpWidget(const SizedBox());
       expect(newAnimation.callbacks, isEmpty);
-      expect(newCover.callbacks, isEmpty);
       newPrimary.value = .1;
-      newSecondary.value = .5;
       newGesture.value = false;
       await tester.pump();
       expect(tester.takeException(), isNull);
@@ -382,9 +518,7 @@ void main() {
     'a zero-sized transition remains a no-op across animation updates',
     (tester) async {
       final primary = AnimationController(vsync: tester);
-      final secondary = AnimationController(vsync: tester);
       addTearDown(primary.dispose);
-      addTearDown(secondary.dispose);
       const target = ValueKey('zero-page');
       await tester.pumpWidget(
         MaterialApp(
@@ -392,7 +526,6 @@ void main() {
             child: SizedBox.shrink(
               child: HarmonyRouteTransition(
                 animation: primary,
-                secondaryAnimation: secondary,
                 child: const SizedBox(key: target),
               ),
             ),
@@ -402,7 +535,6 @@ void main() {
       final origin = tester.getTopLeft(find.byKey(target));
       for (final value in [0.0, .3, .6, 1.0]) {
         primary.value = value;
-        secondary.value = value;
         await tester.pump();
         expect(tester.getSize(find.byKey(target)), Size.zero);
         expect(tester.getTopLeft(find.byKey(target)), origin);

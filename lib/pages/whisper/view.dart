@@ -85,105 +85,116 @@ class _WhisperPageState extends State<WhisperPage> {
       }
     }
 
+    final appBar = AppBar(
+      title: const Text('消息'),
+      actions: [
+        messageActionSurface(
+          context,
+          IconButton(
+            tooltip: '新增粉丝',
+            onPressed: () => Get.toNamed(
+              '/webview',
+              parameters: {
+                'url':
+                    'https://www.bilibili.com/h5/follow/newFans?navhide=1&${ThemeUtils.themeUrl(theme.isDark)}',
+              },
+            ),
+            icon: const Icon(Icons.account_circle_outlined),
+          ),
+        ),
+        Obx(() {
+          final outsideItem = _controller.outsideItem.value;
+          if (outsideItem != null && outsideItem.isNotEmpty) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: outsideItem.map((e) {
+                return messageActionSurface(
+                  context,
+                  IconButton(
+                    tooltip: e.hasTitle() ? e.title : null,
+                    onPressed: () => e.type.action(
+                      context: context,
+                      controller: _controller,
+                      item: e,
+                    ),
+                    icon: e.type.icon,
+                  ),
+                );
+              }).toList(),
+            );
+          }
+          return const SizedBox.shrink();
+        }),
+        Obx(() {
+          final threeDotItems = _controller.threeDotItems.value;
+          if (threeDotItems != null && threeDotItems.isNotEmpty) {
+            return messageActionSurface(
+              context,
+              PopupMenuButton(
+                tooltip: '更多',
+                itemBuilder: (context) {
+                  return threeDotItems
+                      .map(
+                        (e) => PopupMenuItem(
+                          onTap: () => e.type.action(
+                            context: context,
+                            controller: _controller,
+                            item: e,
+                          ),
+                          child: Row(
+                            children: [
+                              e.type.icon,
+                              Text('  ${e.title}'),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList();
+                },
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        }),
+        const SizedBox(width: 8),
+      ],
+    );
+
     return MessageBackScope(
       split: split || widget.initialConversation != null,
       hasSelection: hasSelection,
       onCloseSelection: _closeConversation,
       child: SimpleScaffold(
         backgroundColor: harmony ? theme.scaffoldBackgroundColor : null,
-        appBar: !split && hasSelection
-            ? null
-            : AppBar(
-                title: const Text('消息'),
-                actions: [
-                  messageActionSurface(
-                    context,
-                    IconButton(
-                      tooltip: '新增粉丝',
-                      onPressed: () => Get.toNamed(
-                        '/webview',
-                        parameters: {
-                          'url':
-                              'https://www.bilibili.com/h5/follow/newFans?navhide=1&${ThemeUtils.themeUrl(theme.isDark)}',
-                        },
-                      ),
-                      icon: const Icon(Icons.account_circle_outlined),
-                    ),
-                  ),
-                  Obx(() {
-                    final outsideItem = _controller.outsideItem.value;
-                    if (outsideItem != null && outsideItem.isNotEmpty) {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: outsideItem.map((e) {
-                          return messageActionSurface(
-                            context,
-                            IconButton(
-                              tooltip: e.hasTitle() ? e.title : null,
-                              onPressed: () => e.type.action(
-                                context: context,
-                                controller: _controller,
-                                item: e,
-                              ),
-                              icon: e.type.icon,
-                            ),
-                          );
-                        }).toList(),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }),
-                  Obx(() {
-                    final threeDotItems = _controller.threeDotItems.value;
-                    if (threeDotItems != null && threeDotItems.isNotEmpty) {
-                      return messageActionSurface(
-                        context,
-                        PopupMenuButton(
-                          tooltip: '更多',
-                          itemBuilder: (context) {
-                            return threeDotItems
-                                .map(
-                                  (e) => PopupMenuItem(
-                                    onTap: () => e.type.action(
-                                      context: context,
-                                      controller: _controller,
-                                      item: e,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        e.type.icon,
-                                        Text('  ${e.title}'),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                                .toList();
-                          },
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  }),
-                  const SizedBox(width: 8),
-                ],
-              ),
+        appBar: split ? appBar : null,
         body: MessageSplit(
           split: split,
           hasSelection: hasSelection,
           selectionKey: _notification ?? draftKey,
-          list: refreshIndicator(
-            onRefresh: _controller.onRefresh,
-            child: CustomScrollView(
-              key: const PageStorageKey('message-list'),
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                _buildTopItems(theme, padding),
-                SliverPadding(
-                  padding: EdgeInsets.only(bottom: padding.bottom + 24),
-                  sliver: Obx(() => _buildBody(_controller.loadingState.value)),
+          list: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // The conversation slides over the entire narrow list pane.
+              if (!split) appBar,
+              Expanded(
+                child: refreshIndicator(
+                  onRefresh: _controller.onRefresh,
+                  child: CustomScrollView(
+                    key: const PageStorageKey('message-list'),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      _buildTopItems(theme, padding),
+                      SliverPadding(
+                        padding: EdgeInsets.only(bottom: padding.bottom + 24),
+                        sliver: Obx(
+                          () => _buildBody(_controller.loadingState.value),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           detail: MediaQuery.removePadding(
             context: context,

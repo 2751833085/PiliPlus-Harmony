@@ -2,8 +2,8 @@
   "app": {
     "bundleName": "com.example.piliplus",
     "vendor": "example",
-    "versionCode": 6254,
-    "versionName": "1.1.0-beta",
+    "versionCode": 6255,
+    "versionName": "1.2.0-beta",
     "icon": "$media:app_layered_image",
     "label": "$string:app_name",
     "appPreloadPhase": "abilityStageCreated",
