@@ -68,6 +68,8 @@ class DownloadService extends GetxService {
   DownloadManager? _audioDownloadManager;
 
   late Future<void> waitForInitialization;
+  String? _scanningPath;
+  int _scanRevision = 0;
 
   @override
   void onInit() {
@@ -76,18 +78,66 @@ class DownloadService extends GetxService {
   }
 
   void initDownloadList() {
-    waitForInitialization = _readDownloadList();
+    final root = downloadPath;
+    if (_scanningPath == root) return;
+    _scanningPath = root;
+    final revision = ++_scanRevision;
+    final scan = _readDownloadList(root, revision).whenComplete(() {
+      if (revision == _scanRevision) _scanningPath = null;
+    });
+    // A caller may open the cache page after the initial read has failed.
+    waitForInitialization = scan..ignore();
   }
 
-  Future<void> _readDownloadList() async {
-    downloadList.clear();
-    final downloadDir = Directory(await _getDownloadPath());
+  Future<void> _readDownloadList(String root, int revision) async {
+    final previouslyCompleted = Set<BiliDownloadEntryInfo>.identity()
+      ..addAll(downloadList);
+    final previouslyQueued = waitDownloadQueue
+        .map((entry) => entry.entryDirPath)
+        .toSet();
+    final scanned = <BiliDownloadEntryInfo>[];
+    final downloadDir = Directory(await _getDownloadPath(root));
     await for (final dir in downloadDir.list()) {
       if (dir is Directory) {
-        downloadList.addAll(await _readDownloadDirectory(dir));
+        scanned.addAll(await _readDownloadDirectory(dir));
       }
     }
-    downloadList.sort((a, b) => b.timeUpdateStamp.compareTo(a.timeUpdateStamp));
+    if (revision != _scanRevision) return;
+
+    // Keep running or paused task instances and any completion that happened
+    // while the scan was reading older metadata.
+    final knownPaths = {
+      for (final entry in waitDownloadQueue) entry.entryDirPath,
+    };
+    final currentlyCompleted = Set<BiliDownloadEntryInfo>.identity()
+      ..addAll(downloadList);
+    final completed = [
+      for (final entry in currentlyCompleted.difference(previouslyCompleted))
+        if (knownPaths.add(entry.entryDirPath)) entry,
+    ];
+    // Do not resurrect tasks removed while the filesystem scan was in flight.
+    knownPaths
+      ..addAll(previouslyQueued)
+      ..addAll(
+        previouslyCompleted
+            .difference(currentlyCompleted)
+            .map((entry) => entry.entryDirPath),
+      );
+    completed
+      ..addAll(
+        scanned.where(
+          (entry) => entry.isCompleted && knownPaths.add(entry.entryDirPath),
+        ),
+      )
+      ..sort((a, b) => b.timeUpdateStamp.compareTo(a.timeUpdateStamp));
+    final recovered = [
+      for (final entry in scanned)
+        if (!entry.isCompleted && knownPaths.add(entry.entryDirPath)) entry,
+    ];
+    downloadList
+      ..clear()
+      ..addAll(completed);
+    if (recovered.isNotEmpty) waitDownloadQueue.addAll(recovered);
   }
 
   @pragma('vm:notify-debugger-on-exception')
@@ -109,11 +159,7 @@ class DownloadService extends GetxService {
             final entry = BiliDownloadEntryInfo.fromJson(jsonDecode(entryJson))
               ..pageDirPath = pageDir.path
               ..entryDirPath = entryDir.path;
-            if (entry.isCompleted) {
-              result.add(entry);
-            } else {
-              waitDownloadQueue.add(entry..status = DownloadStatus.wait);
-            }
+            result.add(entry);
           } catch (_) {}
         }
       }
@@ -293,8 +339,8 @@ class DownloadService extends GetxService {
     return pageDir;
   }
 
-  static Future<String> _getDownloadPath() async {
-    final dir = Directory(downloadPath);
+  static Future<String> _getDownloadPath([String? root]) async {
+    final dir = Directory(root ?? downloadPath);
     if (!dir.existsSync()) {
       await dir.create(recursive: true);
     }

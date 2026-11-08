@@ -105,18 +105,20 @@ class _SubDetailPageState extends State<SubDetailPage> with GridMixin {
     final info = _subDetailController.subInfo;
     if (info != null) return _buildAppBar(theme, padding, info);
     return Obx(() {
-      return switch (_subDetailController.loadingState.value) {
-        Loading() || Error() => const SliverAppBar(),
-        Success() => _buildAppBar(
-          theme,
-          padding,
-          _subDetailController.subInfo!,
-        ),
-      };
+      final state = _subDetailController.loadingState.value;
+      final loadedInfo = _subDetailController.subInfo;
+      return state.isSuccess && loadedInfo != null
+          ? _buildAppBar(theme, padding, loadedInfo)
+          : const SliverAppBar();
     });
   }
 
   Widget _buildAppBar(ThemeData theme, EdgeInsets padding, SubItemModel info) {
+    final title = info.title ?? '未命名订阅';
+    final author = info.upper;
+    final mid = author?.mid;
+    final count = info.mediaCount;
+    final countLabel = count == null ? '视频数量未知' : '共$count条视频';
     final style = TextStyle(
       height: 1,
       fontSize: 12.5,
@@ -140,13 +142,13 @@ class _SubDetailPageState extends State<SubDetailPage> with GridMixin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            info.title!,
+            title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium,
           ),
           Text(
-            '共${info.mediaCount}条视频',
+            countLabel,
             style: theme.textTheme.labelMedium,
           ),
         ],
@@ -177,7 +179,7 @@ class _SubDetailPageState extends State<SubDetailPage> with GridMixin {
                   children: [
                     Expanded(
                       child: Text(
-                        info.title!,
+                        title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -187,15 +189,20 @@ class _SubDetailPageState extends State<SubDetailPage> with GridMixin {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () =>
-                          Get.toNamed('/member?mid=${info.upper!.mid}'),
+                      onTap: mid == null
+                          ? null
+                          : () => Get.toNamed('/member?mid=$mid'),
                       child: Text(
-                        info.upper!.name!,
-                        style: TextStyle(color: theme.colorScheme.primary),
+                        author?.name ?? '未知UP主',
+                        style: TextStyle(
+                          color: mid == null
+                              ? style.color
+                              : theme.colorScheme.primary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text('共${info.mediaCount}条视频', style: style),
+                    Text(countLabel, style: style),
                     const SizedBox(height: 4),
                     Text(
                       '${NumUtils.numFormat(info.viewCount ?? info.cntInfo?.play)}次播放',

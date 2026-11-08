@@ -1,7 +1,19 @@
+import 'package:PiliPlus/build_config.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:PiliPlus/utils/release_version.dart';
 
 void main() {
+  test('About uses the compiled release name and build number', () {
+    const label = String.fromEnvironment(
+      'pili.testReleaseLabel',
+      defaultValue: 'SNAPSHOT',
+    );
+    expect(BuildConfig.releaseLabel, label);
+    expect(
+      BuildConfig.displayVersion,
+      '$label · 构建 ${BuildConfig.versionCode}',
+    );
+  });
   test('version comparison uses version and build, not release dates', () {
     final current = ReleaseVersion.parse('v3.0.0+6216')!;
     expect(current.compareTo(ReleaseVersion.parse('3.0.0+6216')!), 0);

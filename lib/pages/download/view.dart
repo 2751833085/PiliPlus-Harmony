@@ -221,7 +221,12 @@ class _DownloadPageState extends State<DownloadPage> with GridMixin {
                 Obx(() {
                   final load = _controller.initialLoad.value;
                   if (load is Loading) return linearLoading;
-                  if (load is Error) return HttpError(errMsg: load.errMsg);
+                  if (load is Error) {
+                    return HttpError(
+                      errMsg: load.errMsg,
+                      onReload: _controller.onReload,
+                    );
+                  }
                   if (_controller.pages.isNotEmpty) {
                     return SliverMainAxisGroup(
                       slivers: [

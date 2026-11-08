@@ -36,14 +36,24 @@ class DownloadPageController extends GetxController
     super.onClose();
   }
 
+  void onReload() {
+    if (isClosed || initialLoad.value is! Error) return;
+    initialLoad.value = LoadingState.loading();
+    _downloadService.initDownloadList();
+    _loadList();
+  }
+
   Future<void> _loadList() async {
+    final scan = _downloadService.waitForInitialization;
+    bool isCurrent() =>
+        !isClosed && identical(scan, _downloadService.waitForInitialization);
     try {
-      await _downloadService.waitForInitialization;
+      await scan;
     } catch (_) {
-      if (!isClosed) initialLoad.value = const Error('无法读取离线缓存');
+      if (isCurrent()) initialLoad.value = const Error('无法读取离线缓存');
       return;
     }
-    if (isClosed) return;
+    if (!isCurrent()) return;
     if (_downloadService.downloadList.isEmpty) {
       pages.clear();
       initialLoad.value = const Success(null);

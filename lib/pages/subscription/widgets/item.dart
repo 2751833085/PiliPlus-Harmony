@@ -21,21 +21,23 @@ class SubItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String heroTag = Utils.makeHeroTag(item.id);
+    final id = item.id;
+    final heroTag = Utils.makeHeroTag(id);
     final type = switch (item.type) {
       11 => '收藏夹',
       21 => '合集',
       _ => '其它(${item.type})',
     };
+    final title = item.title ?? (item.state == 1 ? '已失效的$type' : '未命名订阅');
     void onLongPress() => imageSaveDialog(
-      title: item.title,
+      title: title,
       cover: item.cover,
     );
     final surface = Material(
       type: MaterialType.transparency,
       child: InkWell(
         onTap: () {
-          if (item.state == 1) {
+          if (item.state == 1 || id == null) {
             SmartDialog.showToast('该$type已失效');
             return;
           }
@@ -43,13 +45,13 @@ class SubItem extends StatelessWidget {
             Get.toNamed(
               '/favDetail',
               parameters: {
-                'mediaId': item.id!.toString(),
+                'mediaId': id.toString(),
                 'heroTag': heroTag,
               },
             );
           } else {
             SubDetailPage.toSubDetailPage(
-              item.id!,
+              id,
               heroTag: heroTag,
               subInfo: item,
             );
@@ -90,7 +92,7 @@ class SubItem extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              content(context),
+              _content(context, title),
             ],
           ),
         ),
@@ -105,7 +107,7 @@ class SubItem extends StatelessWidget {
     );
   }
 
-  Widget content(BuildContext context) {
+  Widget _content(BuildContext context, String title) {
     final theme = Theme.of(context);
     final style = TextStyle(
       fontSize: 13,
@@ -120,7 +122,7 @@ class SubItem extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  item.title!,
+                  title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.start,
@@ -130,7 +132,7 @@ class SubItem extends StatelessWidget {
                 ),
               ),
               Text(
-                'UP主: ${item.upper!.name!}',
+                'UP主: ${item.upper?.name ?? '未知'}',
                 textAlign: TextAlign.start,
                 style: style,
                 maxLines: 1,
@@ -138,7 +140,7 @@ class SubItem extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '${item.mediaCount}个视频',
+                item.mediaCount == null ? '视频数量未知' : '${item.mediaCount}个视频',
                 textAlign: TextAlign.start,
                 style: style,
               ),
@@ -150,7 +152,9 @@ class SubItem extends StatelessWidget {
             height: 35,
             width: 35,
             child: IconButton(
-              onPressed: cancelSub,
+              onPressed: item.id == null || item.type == null
+                  ? null
+                  : cancelSub,
               style: TextButton.styleFrom(
                 foregroundColor: theme.colorScheme.outline,
                 padding: EdgeInsets.zero,
