@@ -1,6 +1,7 @@
 # 文档目录
 
-- [Beta 1.0 验证记录](harmony/beta-1.0-validation.md)：首个 Beta 版本的稳定性修复、完整回归及实际验证限制。
+- [Beta 1.0 当前版本验证](harmony/beta-1.0-6253-validation.md)：6253 独立安装版本的命名修正、验签与更新核对。
+- [Beta 1.0 前次构建验证](harmony/beta-1.0-validation.md)：6252 的稳定性修复、完整回归及实际验证限制。
 - [Beta 1.0 逐项功能审计](harmony/beta-1.0-feature-audit.json)：147 项功能的源码、自动测试证据与仍需实测的范围。
 - [Beta 1.0 设备验证汇总](harmony/beta-1.0-device-qa.json)：最终安装包三种屏幕状态的 30 分钟回归及专项检查。
 - [版本归档规则](../releases/README.md)：此前版本统一归档为 Alpha，历史目录、构建号与详情保留追溯用途。

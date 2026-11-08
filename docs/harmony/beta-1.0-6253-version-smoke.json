@@ -1,0 +1,18 @@
+{
+  "source": "ff68a382f506e333c58a98ffdc99173f223da505",
+  "hap_sha256": "6f7a7b954bc3e779c70bc0a4b359c69fdcafe6bf3ec52ba8ef67e85f4067da71",
+  "bytes": 33140187,
+  "version_name_before": "3.0.0",
+  "version_code_before": 6252,
+  "version_name_after": "1.0.0-beta",
+  "version_code_after": 6253,
+  "visible_version_label": "Beta 1.0 · 构建 6253",
+  "uid_preserved": true,
+  "first_install_preserved": true,
+  "recommendations_restored": true,
+  "uninstalled": false,
+  "device": "Dedicated DevEco HarmonyOS 7 emulator, triple-screen",
+  "scope": "Version naming smoke only",
+  "first_settings_tap": "The first Settings gear tap immediately after selecting My left the My page visible. The next tap on the settled My page opened Settings.",
+  "about_screenshot_local": "soak-6250-mm_zgggy/beta-about.png"
+}

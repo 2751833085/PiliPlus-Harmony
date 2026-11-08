@@ -4,7 +4,7 @@
 
 当前阶段：**Beta 1.0**，首个 Beta 版本。系统版本为 `1.0.0-beta`，构建号 `6253`；应用内显示 **Beta 1.0**。本次按独立安装发布，请从 GitHub 下载签名 HAP。
 
-[下载与版本说明](https://github.com/2751833085/PiliPlus-Harmony/releases) · [Beta 1.0 验证记录](docs/harmony/beta-1.0-validation.md) · [问题反馈](https://github.com/2751833085/PiliPlus-Harmony/issues)
+[下载与版本说明](https://github.com/2751833085/PiliPlus-Harmony/releases) · [Beta 1.0 验证记录](docs/harmony/beta-1.0-6253-validation.md) · [问题反馈](https://github.com/2751833085/PiliPlus-Harmony/issues)
 
 ## 功能与范围
 

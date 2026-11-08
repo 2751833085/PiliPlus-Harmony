@@ -6,6 +6,7 @@ Beta 1.0 之前的所有发布统一归档为 Alpha。原始 Git 标签不移动
 
 | 原构建标签 | Alpha 详情 |
 | --- | --- |
+| `v3.0.0+6252` | [Alpha 6252 · 旧编号归档](https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v3.0.0%2B6252) |
 | `v3.0.0+6251` | [V3 Alpha 6251](https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v3.0.0%2B6251) |
 | `v3.0.0+6250` | [V3 Alpha 6250 · 刷新灵敏度与转场优化](https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v3.0.0%2B6250) |
 | `v3.0.0+6248` | [V3 Alpha 6248 · 双屏菜单位置调整](https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v3.0.0%2B6248) |
