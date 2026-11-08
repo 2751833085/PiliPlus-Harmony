@@ -1,0 +1,358 @@
+{
+  "version": 6252,
+  "label": "Beta 1.0 · 3.0.0-ohos+6252",
+  "source": "e17419e1da9b4b2a2812ca3bead0339553433630",
+  "hapSHA256": "388c330fd55e6ab840785ba57620e08a82c6e2bfda8eb735776f3abe0fa033c2",
+  "emulator": "DevEco HarmonyOS 7 dedicated guest instance",
+  "uidPreserved": true,
+  "firstInstallPreserved": true,
+  "soakWorkload": "Guest Dynamics and Mine navigation, Settings entry and Back, Home Recommendation/Popular/Category switching, and forward/back list scroll with changed-content tree assertions.",
+  "totalElapsedSeconds": 1800.013,
+  "completeCycles": 83,
+  "attemptedInputs": 1273,
+  "verifiedInputs": 1273,
+  "samePIDAcrossAllThreeSoaks": true,
+  "emulatorAppPID": 1426,
+  "forms": {
+    "triple": {
+      "evidenceDirectory": "soak-6250-2tz_davh",
+      "profile": {
+        "physical_size_px": [
+          3184,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          1107.4782608695652,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "FOLD_STATE_EXPAND_WITH_SECOND_EXPAND"
+      },
+      "status": "time_limit",
+      "elapsedSeconds": 600.005,
+      "pid": 1426,
+      "completedCycles": 28,
+      "attemptedInputs": 428,
+      "verifiedInputs": 428,
+      "verifiedInputKinds": {
+        "Settings Back": 29,
+        "bottom 动态": 29,
+        "bottom 我的": 29,
+        "bottom 首页": 29,
+        "open Settings": 29,
+        "top 分区": 28,
+        "top 推荐": 57,
+        "top 热门": 28,
+        "分区 scroll back": 28,
+        "分区 scroll forward": 28,
+        "推荐 scroll back": 29,
+        "推荐 scroll forward": 29,
+        "热门 scroll back": 28,
+        "热门 scroll forward": 28
+      },
+      "pendingInputAtBoundary": null,
+      "observerErrors": [],
+      "logScope": "Two periodic and final retained app-log snapshots, plus final system-log keyword/PID or bundle filter. Device and host epoch aligned to seconds; boundary allowance 1.5 s. Counts do not cover overwritten, unmarked or differently attributed events.",
+      "logs": {
+        "app": {
+          "unique_retained_lines": 1247,
+          "first_relative_s": 2.059,
+          "last_relative_s": 597.423,
+          "counts": {
+            "uncaught_or_unhandled": 0,
+            "missing_plugin": 0,
+            "render_overflow": 0,
+            "after_dispose": 0,
+            "anr_or_freeze": 0,
+            "fatal_signal": 0,
+            "process_exit": 0
+          }
+        },
+        "system": {
+          "unique_retained_lines": 0,
+          "first_relative_s": null,
+          "last_relative_s": null,
+          "counts": {
+            "uncaught_or_unhandled": 0,
+            "missing_plugin": 0,
+            "render_overflow": 0,
+            "after_dispose": 0,
+            "anr_or_freeze": 0,
+            "fatal_signal": 0,
+            "process_exit": 0
+          }
+        }
+      },
+      "pssKB": {
+        "samples": 10,
+        "first": 342018,
+        "last": 449689,
+        "minimum": 342018,
+        "maximum": 457026
+      }
+    },
+    "single": {
+      "evidenceDirectory": "soak-6250-8ptk1x_b",
+      "profile": {
+        "physical_size_px": [
+          1008,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          350.60869565217394,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "FOLDED"
+      },
+      "status": "time_limit",
+      "elapsedSeconds": 600.003,
+      "pid": 1426,
+      "completedCycles": 28,
+      "attemptedInputs": 428,
+      "verifiedInputs": 428,
+      "verifiedInputKinds": {
+        "Settings Back": 29,
+        "bottom 动态": 29,
+        "bottom 我的": 29,
+        "bottom 首页": 30,
+        "open Settings": 29,
+        "top 分区": 28,
+        "top 推荐": 57,
+        "top 热门": 28,
+        "分区 scroll back": 28,
+        "分区 scroll forward": 28,
+        "推荐 scroll back": 28,
+        "推荐 scroll forward": 29,
+        "热门 scroll back": 28,
+        "热门 scroll forward": 28
+      },
+      "pendingInputAtBoundary": null,
+      "observerErrors": [],
+      "logScope": "Two periodic and final retained app-log snapshots, plus final system-log keyword/PID or bundle filter. Device and host epoch aligned to seconds; boundary allowance 1.5 s. Counts do not cover overwritten, unmarked or differently attributed events.",
+      "logs": {
+        "app": {
+          "unique_retained_lines": 627,
+          "first_relative_s": 1.213,
+          "last_relative_s": 597.53,
+          "counts": {
+            "uncaught_or_unhandled": 0,
+            "missing_plugin": 0,
+            "render_overflow": 0,
+            "after_dispose": 0,
+            "anr_or_freeze": 0,
+            "fatal_signal": 0,
+            "process_exit": 0
+          }
+        },
+        "system": {
+          "unique_retained_lines": 0,
+          "first_relative_s": null,
+          "last_relative_s": null,
+          "counts": {
+            "uncaught_or_unhandled": 0,
+            "missing_plugin": 0,
+            "render_overflow": 0,
+            "after_dispose": 0,
+            "anr_or_freeze": 0,
+            "fatal_signal": 0,
+            "process_exit": 0
+          }
+        }
+      },
+      "pssKB": {
+        "samples": 10,
+        "first": 355517,
+        "last": 400918,
+        "minimum": 342158,
+        "maximum": 415549
+      }
+    },
+    "double": {
+      "evidenceDirectory": "soak-6250-hldygqga",
+      "profile": {
+        "physical_size_px": [
+          2048,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          712.3478260869565,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "EXPAND"
+      },
+      "status": "time_limit",
+      "elapsedSeconds": 600.005,
+      "pid": 1426,
+      "completedCycles": 27,
+      "attemptedInputs": 417,
+      "verifiedInputs": 417,
+      "verifiedInputKinds": {
+        "Settings Back": 28,
+        "bottom 动态": 28,
+        "bottom 我的": 28,
+        "bottom 首页": 29,
+        "open Settings": 28,
+        "top 分区": 27,
+        "top 推荐": 55,
+        "top 热门": 28,
+        "分区 scroll back": 27,
+        "分区 scroll forward": 27,
+        "推荐 scroll back": 28,
+        "推荐 scroll forward": 28,
+        "热门 scroll back": 28,
+        "热门 scroll forward": 28
+      },
+      "pendingInputAtBoundary": null,
+      "observerErrors": [],
+      "logScope": "Two periodic and final retained app-log snapshots, plus final system-log keyword/PID or bundle filter. Device and host epoch aligned to seconds; boundary allowance 1.5 s. Counts do not cover overwritten, unmarked or differently attributed events.",
+      "logs": {
+        "app": {
+          "unique_retained_lines": 759,
+          "first_relative_s": 1.298,
+          "last_relative_s": 599.534,
+          "counts": {
+            "uncaught_or_unhandled": 0,
+            "missing_plugin": 0,
+            "render_overflow": 0,
+            "after_dispose": 0,
+            "anr_or_freeze": 0,
+            "fatal_signal": 0,
+            "process_exit": 0
+          }
+        },
+        "system": {
+          "unique_retained_lines": 0,
+          "first_relative_s": null,
+          "last_relative_s": null,
+          "counts": {
+            "uncaught_or_unhandled": 0,
+            "missing_plugin": 0,
+            "render_overflow": 0,
+            "after_dispose": 0,
+            "anr_or_freeze": 0,
+            "fatal_signal": 0,
+            "process_exit": 0
+          }
+        }
+      },
+      "pssKB": {
+        "samples": 10,
+        "first": 422673,
+        "last": 435773,
+        "minimum": 378958,
+        "maximum": 435773
+      }
+    }
+  },
+  "summedAppRetainedLogLines": 2633,
+  "summedSystemMatchedLogLines": 0,
+  "summedRuntimeErrorMatches": {
+    "uncaught_or_unhandled": 0,
+    "missing_plugin": 0,
+    "render_overflow": 0,
+    "after_dispose": 0,
+    "anr_or_freeze": 0,
+    "fatal_signal": 0,
+    "process_exit": 0
+  },
+  "interruptedAttemptsExcluded": [],
+  "verifiedEvidence": {
+    "install": "6252-final-emulator-install.json",
+    "messages": "soak-6250-lx5rhgg7/guest-path-summary.json",
+    "systemHomeResume": "soak-6250-l0sr1r1w/guest-path-summary.json",
+    "about": "6252-about-version.json",
+    "tripleHomeRestored": "soak-6250-8ya_m6kh/form-regression-summary.json",
+    "publicSearch": {
+      "triple": "soak-6250-1gtmieph/triple-public-link-result.png",
+      "single": "soak-6250-cdx1p6js/single-observe.png",
+      "double": "soak-6250-p8057z_7/double-observe.png"
+    }
+  },
+  "preliminarySignatureEvidence": "6252-preliminary-candidate.json",
+  "limits": [
+    "No on-device audio/video decode, authenticated user actions, real offline download completion, hardware performance, or landscape rotation verification.",
+    "Retained-log scan and periodic PSS measurements cover sampled windows only.",
+    "No presented FPS measurement. Native Settings traces are stored under the preliminary candidate signature.",
+    "Final guest messages checked exposed numeric API errors at open and after Back, not authenticated conversations."
+  ],
+  "presentedFPS": null,
+  "specializedFinalChecks": {
+    "guestMessages": {
+      "status": "passed",
+      "guestSignInGuidance": true,
+      "emptyRightPane": true,
+      "rawNumericErrorCheckedAtOpenAndAfterBack": true,
+      "rawNumericErrorObserved": false,
+      "evidence": "soak-6250-lx5rhgg7/guest-path-summary.json"
+    },
+    "systemHomeAndForegroundResume": {
+      "status": "passed",
+      "launcherVerified": true,
+      "processRetained": true,
+      "evidence": "soak-6250-l0sr1r1w/guest-path-summary.json"
+    },
+    "aboutVersionLabel": {
+      "status": "passed",
+      "text": "Beta 1.0 · 3.0.0-ohos+6252",
+      "evidence": "6252-about-version.json"
+    },
+    "singleMineLayout": {
+      "status": "observed",
+      "guestProfileWithoutCardFrame": true,
+      "evidence": "soak-6250-h3fhjrcs/single-mine.png"
+    },
+    "foldedPublicSearch": {
+      "status": "observed",
+      "screenshots": {
+        "triple": "soak-6250-1gtmieph/triple-public-link-result.png",
+        "single": "soak-6250-cdx1p6js/single-observe.png",
+        "double": "soak-6250-p8057z_7/double-observe.png"
+      }
+    }
+  },
+  "preliminarySettingsPerformance": {
+    "source": "579428f7e2d9afe4aba0dfe67e543127f085594a",
+    "hapSHA256": "e9e726ecc458554858363d4031483ec4f186d9633d4685a770f16689f5e288ca",
+    "captureStatus": "passed",
+    "traces": 6,
+    "coldEntryCount": 3,
+    "warmEntryCount": 15,
+    "coldPushMarkerToFirstMatchedDrawEndMs": {
+      "min": 12.746,
+      "max": 21.22
+    },
+    "warmPushAllUiBeginFrameP95Ms": 3.395,
+    "warmPushMatchedRasterDoDrawP95Ms": 19.817,
+    "warmPushDrawStartGapMs": {
+      "n": 286,
+      "over_25ms": 14,
+      "max": 50.157
+    },
+    "warmPopDrawStartGapMs": {
+      "n": 283,
+      "over_25ms": 6,
+      "max": 44.024
+    },
+    "scope": "Preliminary signature only. Native trace draw/VSYNC timings are not presentation FPS and cannot attribute the underlying waits to application or system alone."
+  }
+}

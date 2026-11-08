@@ -1,4 +1,6 @@
-# V3.0 设置重组预览 · 3.0.0+6125
+# Alpha · V3.0 设置重组预览 · 3.0.0+6125
+
+> Alpha 历史记录：本阶段不再提供安装包，以下详情与验证结果保留用于追溯。旧路径和构建号不变；首个 Beta 版本为 [Beta 1.0](../beta-1.0/notes.md)。
 
 本地 HAP：`PiliPlus-Harmony-3.0.0-6125-settings-preview-signed.hap`。
 

@@ -1,4 +1,6 @@
-# 6212 滚动优化
+# Alpha · 6212 滚动优化
+
+> Alpha 历史记录：本阶段不再提供安装包，以下详情与验证结果保留用于追溯。旧路径和构建号不变；首个 Beta 版本为 [Beta 1.0](../beta-1.0/notes.md)。
 
 - 鸿蒙纵向 CustomScrollView 刷新改为 sliver 预留空间；移除整张列表的外层位移和强制夹紧滚动。
 - 使用与我的页面相同的 BouncingScrollPhysics + AlwaysScrollableScrollPhysics，普通上下滑动、顶部和底部回弹由单一 ScrollPosition 驱动。

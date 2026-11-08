@@ -1,4 +1,6 @@
-# V2.6.13 RC1 · 2.6.13+6100
+# Alpha · V2.6.13 RC1 · 2.6.13+6100
+
+> Alpha 历史记录：本阶段不再提供安装包，以下详情与验证结果保留用于追溯。旧路径和构建号不变；首个 Beta 版本为 [Beta 1.0](../beta-1.0/notes.md)。
 
 本地 HAP：`PiliPlus-Harmony-V2.6.13-2.6.13-6100-signed.hap` · [SHA256](PiliPlus-Harmony-V2.6.13-2.6.13-6100-signed.hap.sha256) · [构建元数据](PiliPlus-Harmony-V2.6.13-2.6.13-6100-signed.build.json)
 

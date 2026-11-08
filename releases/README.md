@@ -1,5 +1,7 @@
 # 版本归档
 
+[GitHub Alpha 历史发布索引](alpha/README.md) · [首个 Beta 1.0](beta-1.0/notes.md)
+
 ## Beta
 
 [Beta 1.0](beta-1.0/notes.md) 是首个 Beta 版本，内部版本 `3.0.0+6252`。可安装签名 HAP 仅通过 [GitHub Releases](https://github.com/2751833085/PiliPlus-Harmony/releases) 提供。
@@ -8,7 +10,7 @@
 
 此前全部版本统一归为 Alpha，包括历史目录 `v3.0.0-beta`、`v2.*-rc*` 和 V1。发布说明和 Git 标签保留；旧 HAP 及其下载附件撤下，仅供查看版本详情。
 
-为保留验证记录中的链接和哈希证据，不批量改名历史目录、源码标签或已记录的包名。历史文档中的 Beta/RC 是当时的工作名称，不是新的 Beta 发布序号。
+为保留验证记录中的链接和哈希证据，不批量改名历史目录、源码标签或已记录的包名。历史说明标题已统一标记 Alpha；正文中的 Beta/RC 是当时的工作名称，不是新的 Beta 发布序号。
 
 - [V3 历史说明与元数据](v3.0.0-beta/)
 - [V2.7 历史版本](v2.7.0-rc1/README.md)

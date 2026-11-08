@@ -1,0 +1,2808 @@
+{
+  "upstreamInventory": "docs/harmony/feature-matrix.json",
+  "inventoryCount": 147,
+  "candidateVersion": 6252,
+  "statusAtPreparation": "Final signed candidate: scoped DevEco evidence attached; upstream statuses unchanged.",
+  "scopeNote": "Source context and automated test links are evidence of scope, not per-feature end-to-end passes. Historical observations refer to older signed packages.",
+  "groups": {
+    "dynamics": {
+      "eligibility": "account_or_public_route",
+      "contextSourceFiles": [
+        "lib/pages/dynamics/view.dart",
+        "lib/pages/dynamics_create/view.dart",
+        "lib/http/dynamics.dart"
+      ],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。"
+    },
+    "casting": {
+      "eligibility": "physical_lan_receiver",
+      "contextSourceFiles": [
+        "lib/pages/dlna/view.dart"
+      ],
+      "remainingValidation": "在获授权的同一局域网用真实 DLNA 接收端验证发现、投放、退出和恢复。"
+    },
+    "offline_download": {
+      "eligibility": "hardware_and_download_entitlement",
+      "contextSourceFiles": [
+        "lib/pages/download/view.dart",
+        "lib/pages/video/download_panel/view.dart",
+        "lib/services/download/download_manager.dart",
+        "lib/services/download/download_service.dart"
+      ],
+      "remainingValidation": "游客只验离线页和权限提示。用授权公开素材及真实设备验证任务、断点续传、系统后台通知、重启后状态与离线播放。"
+    },
+    "danmaku": {
+      "eligibility": "playback_or_account",
+      "contextSourceFiles": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/video/view.dart"
+      ],
+      "remainingValidation": "用有普通、合并、高级和彩色弹幕的真实视频核对渲染、暂停与大小；点赞、举报和会员能力另需合适账号。"
+    },
+    "audio": {
+      "eligibility": "physical_audio_and_media",
+      "contextSourceFiles": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/extra_settings.dart",
+        "lib/plugin/pl_player/controller.dart"
+      ],
+      "remainingValidation": "使用不同音轨的真实设备验证音频、音质、原声翻译和均衡；Android 上游条目独立处理。"
+    },
+    "pgc": {
+      "eligibility": "public_lists_or_account_playback",
+      "contextSourceFiles": [
+        "lib/pages/home/view.dart",
+        "lib/pages/video/introduction/pgc/view.dart"
+      ],
+      "remainingValidation": "公开番剧列表可在游客设备核验；番剧播放、跳过首尾、追番和三连分别需要真实媒体与合适账号。"
+    },
+    "authentication": {
+      "eligibility": "account_or_upstream_desktop",
+      "contextSourceFiles": [
+        "lib/pages/login/view.dart",
+        "lib/pages/login/controller.dart",
+        "lib/utils/accounts.dart"
+      ],
+      "remainingValidation": "使用经授权的测试账号验证登录、多账号隔离和退出。Win/Mac 上游环境不属于鸿蒙模拟器验收。"
+    },
+    "media_capture": {
+      "eligibility": "hardware_and_media_permissions",
+      "contextSourceFiles": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/extra_settings.dart"
+      ],
+      "remainingValidation": "用实际视频和已授权系统图库检验动图或 Live Photo 的生成、保存、预览和回放。"
+    },
+    "live": {
+      "eligibility": "public_live_or_account",
+      "contextSourceFiles": [
+        "lib/pages/live/view.dart",
+        "lib/pages/live_area/view.dart",
+        "lib/pages/live_room/view.dart",
+        "lib/http/live.dart"
+      ],
+      "remainingValidation": "公开分区和直播页可验入口。实际直播播放、实时弹幕、表情及 SuperChat 依赖网络、真实输出或相应账号。"
+    },
+    "courses": {
+      "eligibility": "course_entitlement_and_playback",
+      "contextSourceFiles": [
+        "lib/pages/member_cheese/view.dart",
+        "lib/pages/video/view.dart"
+      ],
+      "remainingValidation": "验证课程授权与真机实际播放，游客只能查看可公开入口。"
+    },
+    "messages": {
+      "eligibility": "account_and_guest_shell",
+      "contextSourceFiles": [
+        "lib/pages/whisper/view.dart",
+        "lib/pages/whisper_detail/view.dart",
+        "lib/pages/whisper_settings/view.dart",
+        "lib/http/msg.dart"
+      ],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。"
+    },
+    "member": {
+      "eligibility": "public_profile_or_account",
+      "contextSourceFiles": [
+        "lib/pages/member/view.dart",
+        "lib/pages/member_profile/view.dart",
+        "lib/pages/member_dynamics/view.dart",
+        "lib/http/member.dart"
+      ],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。"
+    },
+    "collection": {
+      "eligibility": "collection_entitlement",
+      "contextSourceFiles": [
+        "lib/pages/fav_panel/view.dart",
+        "lib/pages/fav_detail/view.dart",
+        "lib/pages/later/view.dart",
+        "lib/http/fav.dart"
+      ],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。"
+    },
+    "webdav": {
+      "eligibility": "external_storage_and_consent",
+      "contextSourceFiles": [
+        "lib/pages/webdav/view.dart",
+        "lib/pages/webdav/webdav.dart"
+      ],
+      "remainingValidation": "使用专用且获授权的 WebDAV 测试空间验证备份、恢复、错误和覆盖确认。当前不接入真实存储。"
+    },
+    "comments": {
+      "eligibility": "public_comments_or_account",
+      "contextSourceFiles": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart",
+        "lib/http/reply.dart"
+      ],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。"
+    },
+    "video_notes": {
+      "eligibility": "account_and_remote_note_storage",
+      "contextSourceFiles": [
+        "lib/pages/video/note/view.dart",
+        "lib/pages/fav/note/view.dart"
+      ],
+      "remainingValidation": "使用专用授权账号验证创建、查看、保存和同步。"
+    },
+    "video_detail": {
+      "eligibility": "physical_playback_or_account",
+      "contextSourceFiles": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。"
+    },
+    "sponsorblock": {
+      "eligibility": "public_segments_and_optional_account",
+      "contextSourceFiles": [
+        "lib/pages/sponsor_block/view.dart",
+        "lib/plugin/pl_player/controller.dart"
+      ],
+      "remainingValidation": "在已知有片段的视频上测试真机自动跳过、撤销、进度和界面；在线贡献另需明确授权。"
+    },
+    "search": {
+      "eligibility": "public_query_or_input_method",
+      "contextSourceFiles": [
+        "lib/pages/search/view.dart",
+        "lib/pages/search/controller.dart",
+        "lib/pages/search_result/view.dart"
+      ],
+      "remainingValidation": "可用公开链接查真实结果并验证宽度、分页、分类或排序。小艺许可不接受，键盘输入、各内容类别与有条件偏好另验。"
+    },
+    "reports": {
+      "eligibility": "authenticated_report_mutation",
+      "contextSourceFiles": [
+        "lib/http/reply.dart",
+        "lib/pages/dynamics/widgets/author_panel.dart",
+        "lib/pages/video/view.dart"
+      ],
+      "remainingValidation": "举报会写入服务端。保留实现核对，待授权测试账号与测试对象后验证。"
+    },
+    "article": {
+      "eligibility": "public_article_or_network",
+      "contextSourceFiles": [
+        "lib/pages/article/view.dart",
+        "lib/pages/search_panel/article/view.dart"
+      ],
+      "remainingValidation": "用公开专栏验证实际内容、Web／图片渲染、导航和跨屏。"
+    },
+    "picture_in_picture": {
+      "eligibility": "hardware_system_window",
+      "contextSourceFiles": [
+        "lib/pages/video/view.dart",
+        "lib/pages/setting/models/extra_settings.dart"
+      ],
+      "remainingValidation": "在真实设备验证系统小窗权限、折叠切换和回到应用；模拟器导航通过不足以证明。"
+    },
+    "home_feed": {
+      "eligibility": "public_feed_or_account",
+      "contextSourceFiles": [
+        "lib/pages/home/view.dart",
+        "lib/pages/home/controller.dart",
+        "lib/pages/hot/view.dart"
+      ],
+      "remainingValidation": "公开推荐、热门、分类、刷新和列表可验；黑名单、无痕与登录态隔离需专用登录账号对照。"
+    },
+    "watch_history": {
+      "eligibility": "account_and_history_data",
+      "contextSourceFiles": [
+        "lib/pages/history/view.dart",
+        "lib/pages/history/controller.dart",
+        "lib/pages/mine/view.dart"
+      ],
+      "remainingValidation": "游客仅能检查入口及不显示私人数据；已登录历史、筛选和多端同步需测试账号。"
+    },
+    "settings": {
+      "eligibility": "read_only_settings_or_hardware",
+      "contextSourceFiles": [
+        "lib/pages/setting/view.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/setting/models/style_settings.dart"
+      ],
+      "remainingValidation": "候选实机仅查看设置及打开取消，不改现有偏好。实际显示刷新率、震动、媒体预设与物理旋转需授权硬件。"
+    },
+    "unscoped_upstream_notes": {
+      "eligibility": "unbounded_label",
+      "contextSourceFiles": [],
+      "remainingValidation": "上游占位描述没有单独可复现验收条件，不能用该名称断言通过。"
+    }
+  },
+  "groupCounts": {
+    "dynamics": 13,
+    "casting": 1,
+    "offline_download": 2,
+    "danmaku": 6,
+    "audio": 4,
+    "pgc": 5,
+    "authentication": 3,
+    "media_capture": 2,
+    "live": 5,
+    "courses": 1,
+    "messages": 9,
+    "member": 10,
+    "collection": 10,
+    "webdav": 1,
+    "comments": 13,
+    "video_notes": 1,
+    "video_detail": 33,
+    "sponsorblock": 1,
+    "search": 7,
+    "reports": 1,
+    "unscoped_upstream_notes": 3,
+    "article": 1,
+    "picture_in_picture": 1,
+    "home_feed": 5,
+    "watch_history": 1,
+    "settings": 8
+  },
+  "legacyRemovalsOutsideUpstreamInventory": [
+    {
+      "scope": "桌面一镜到底封面动画",
+      "state": "removed",
+      "evidence": "releases/v3.0.0-beta/6216-notes.md"
+    },
+    {
+      "scope": "纯黑主题选项",
+      "state": "removed",
+      "evidence": "releases/v3.0.0-beta/6219-notes.md"
+    },
+    {
+      "scope": "视频／评论点踩数量实验开关",
+      "state": "removed_count_experiment_only",
+      "evidence": "releases/v3.0.0-beta/6239-notes.md"
+    },
+    {
+      "scope": "普通播放器短视频入口、监听与设置文案",
+      "state": "user_entry_and_settings_disabled_implementation_remains",
+      "evidence": "releases/v3.0.0-beta/6249-notes.md"
+    },
+    {
+      "scope": "智感握姿、旧浮动底栏、Material You 切换、旧独立音量设置、停用的网络自动重载",
+      "state": "removed_or_retired",
+      "evidence": "releases/v3.0.0-beta/6249-notes.md"
+    }
+  ],
+  "features": [
+    {
+      "id": "F001",
+      "upstreamSection": "feat",
+      "feature": "编辑动态",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics_create/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F002",
+      "upstreamSection": "feat",
+      "feature": "DLNA 投屏",
+      "upstreamStatus": "unverified",
+      "group": "casting",
+      "assessment": "physical_lan_receiver",
+      "sourceImplementationContext": [
+        "lib/pages/dlna/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "在获授权的同一局域网用真实 DLNA 接收端验证发现、投放、退出和恢复。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F003",
+      "upstreamSection": "feat",
+      "feature": "离线缓存/播放",
+      "upstreamStatus": "unverified",
+      "group": "offline_download",
+      "assessment": "hardware_and_download_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/download/view.dart",
+        "lib/pages/video/download_panel/view.dart",
+        "lib/services/download/download_manager.dart",
+        "lib/services/download/download_service.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/download_manager_test.dart",
+        "test/harmony_adapt/download_service_lifecycle_test.dart"
+      ],
+      "remainingValidation": "游客只验离线页和权限提示。用授权公开素材及真实设备验证任务、断点续传、系统后台通知、重启后状态与离线播放。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "historicalPartialObservation": "6250 游客离线缓存空态进入／退出通过；没有启动下载。"
+    },
+    {
+      "id": "F004",
+      "upstreamSection": "feat",
+      "feature": "移动端支持点击弹幕悬停，点赞、复制、举报 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstreamStatus": "unverified",
+      "group": "danmaku",
+      "assessment": "playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/danmaku_action_transition_test.dart"
+      ],
+      "remainingValidation": "用有普通、合并、高级和彩色弹幕的真实视频核对渲染、暂停与大小；点赞、举报和会员能力另需合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F005",
+      "upstreamSection": "feat",
+      "feature": "播放音频",
+      "upstreamStatus": "unverified",
+      "group": "audio",
+      "assessment": "physical_audio_and_media",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/extra_settings.dart",
+        "lib/plugin/pl_player/controller.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "使用不同音轨的真实设备验证音频、音质、原声翻译和均衡；Android 上游条目独立处理。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F006",
+      "upstreamSection": "feat",
+      "feature": "跳过番剧片头/片尾",
+      "upstreamStatus": "unverified",
+      "group": "pgc",
+      "assessment": "public_lists_or_account_playback",
+      "sourceImplementationContext": [
+        "lib/pages/video/controller.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开番剧列表可在游客设备核验；番剧播放、跳过首尾、追番和三连分别需要真实媒体与合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F007",
+      "upstreamSection": "feat",
+      "feature": "安卓端 `loudnorm` 适配 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstreamStatus": "unverified",
+      "group": "audio",
+      "assessment": "legacy_upstream_android_scope",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/extra_settings.dart",
+        "lib/plugin/pl_player/controller.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "原条目限定 Android loudnorm。Harmony 原生播放器有独立实现，不能将 Android 条目标为鸿蒙通过；如需核对，验证 Harmony 实际音轨、均衡启停与听感。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F008",
+      "upstreamSection": "feat",
+      "feature": "Win/Mac 支持极验、短信登录 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstreamStatus": "unverified",
+      "group": "authentication",
+      "assessment": "legacy_upstream_desktop_scope",
+      "sourceImplementationContext": [
+        "lib/pages/login/geetest/geetest_webview_dialog.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "Win/Mac 原条目不属于鸿蒙平台；Harmony 是否支持账号场景需单独验证当前极验／短信登录及服务端权限。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F009",
+      "upstreamSection": "feat",
+      "feature": "视频截取动图 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstreamStatus": "unverified",
+      "group": "media_capture",
+      "assessment": "hardware_and_media_permissions",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/extra_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "用实际视频和已授权系统图库检验动图或 Live Photo 的生成、保存、预览和回放。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F010",
+      "upstreamSection": "feat",
+      "feature": "AI 原声翻译",
+      "upstreamStatus": "unverified",
+      "group": "audio",
+      "assessment": "physical_audio_and_media",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/header_control.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/translated_playback_test.dart"
+      ],
+      "remainingValidation": "使用不同音轨的真实设备验证音频、音质、原声翻译和均衡；Android 上游条目独立处理。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F011",
+      "upstreamSection": "feat",
+      "feature": "SuperChat",
+      "upstreamStatus": "unverified",
+      "group": "live",
+      "assessment": "public_live_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/live_room/superchat/superchat_panel.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开分区和直播页可验入口。实际直播播放、实时弹幕、表情及 SuperChat 依赖网络、真实输出或相应账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F012",
+      "upstreamSection": "feat",
+      "feature": "播放课堂视频",
+      "upstreamStatus": "unverified",
+      "group": "courses",
+      "assessment": "course_entitlement_and_playback",
+      "sourceImplementationContext": [
+        "lib/pages/member_cheese/view.dart",
+        "lib/pages/video/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "验证课程授权与真机实际播放，游客只能查看可公开入口。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F013",
+      "upstreamSection": "feat",
+      "feature": "发起投票",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics_create_vote/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F014",
+      "upstreamSection": "feat",
+      "feature": "发布动态/评论支持`富文本编辑`/`表情显示`/`@用户`",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/common/publish/common_rich_text_pub_page.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/comment_composer_test.dart"
+      ],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F015",
+      "upstreamSection": "feat",
+      "feature": "修改消息设置",
+      "upstreamStatus": "unverified",
+      "group": "messages",
+      "assessment": "account_and_guest_shell",
+      "sourceImplementationContext": [
+        "lib/pages/whisper/view.dart",
+        "lib/pages/whisper_detail/view.dart",
+        "lib/pages/whisper_settings/view.dart",
+        "lib/http/msg.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F016",
+      "upstreamSection": "feat",
+      "feature": "修改聊天设置",
+      "upstreamStatus": "unverified",
+      "group": "messages",
+      "assessment": "account_and_guest_shell",
+      "sourceImplementationContext": [
+        "lib/pages/whisper/view.dart",
+        "lib/pages/whisper_detail/view.dart",
+        "lib/pages/whisper_settings/view.dart",
+        "lib/http/msg.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F017",
+      "upstreamSection": "feat",
+      "feature": "展示折叠消息",
+      "upstreamStatus": "unverified",
+      "group": "messages",
+      "assessment": "account_and_guest_shell",
+      "sourceImplementationContext": [
+        "lib/pages/whisper_secondary/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F018",
+      "upstreamSection": "feat",
+      "feature": "查看用户图文",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member_opus/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F019",
+      "upstreamSection": "feat",
+      "feature": "动态话题",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics_topic/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F020",
+      "upstreamSection": "feat",
+      "feature": "直播分区",
+      "upstreamStatus": "unverified",
+      "group": "live",
+      "assessment": "public_live_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/live_area/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开分区和直播页可验入口。实际直播播放、实时弹幕、表情及 SuperChat 依赖网络、真实输出或相应账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F021",
+      "upstreamSection": "feat",
+      "feature": "分享`视频`/`番剧`/`动态`/`专栏`/`直播`至消息",
+      "upstreamStatus": "unverified",
+      "group": "messages",
+      "assessment": "account_and_guest_shell",
+      "sourceImplementationContext": [
+        "lib/pages/whisper/view.dart",
+        "lib/pages/whisper_detail/view.dart",
+        "lib/pages/whisper_settings/view.dart",
+        "lib/http/msg.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F022",
+      "upstreamSection": "feat",
+      "feature": "创建/修改/删除关注分组",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member/view.dart",
+        "lib/pages/member_profile/view.dart",
+        "lib/pages/member_dynamics/view.dart",
+        "lib/http/member.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F023",
+      "upstreamSection": "feat",
+      "feature": "移除粉丝",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member/view.dart",
+        "lib/pages/member_profile/view.dart",
+        "lib/pages/member_dynamics/view.dart",
+        "lib/http/member.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F024",
+      "upstreamSection": "feat",
+      "feature": "直播弹幕发送表情",
+      "upstreamStatus": "unverified",
+      "group": "live",
+      "assessment": "public_live_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/live_emote/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开分区和直播页可验入口。实际直播播放、实时弹幕、表情及 SuperChat 依赖网络、真实输出或相应账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F025",
+      "upstreamSection": "feat",
+      "feature": "收藏夹排序",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "collection_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/fav_folder_sort/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F026",
+      "upstreamSection": "feat",
+      "feature": "稍后再看 ~~`未看`~~ / `未看完` / ~~`已看完`~~ 分类",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "upstream_struck_submodes",
+      "sourceImplementationContext": [
+        "lib/models/common/later_view_type.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "当前枚举只提供全部与未看完。上游已划掉的未看及已看完不是现版独立入口；验证未看完和保留内容需登录。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F027",
+      "upstreamSection": "feat",
+      "feature": "WebDAV 备份/恢复设置",
+      "upstreamStatus": "unverified",
+      "group": "webdav",
+      "assessment": "external_storage_and_consent",
+      "sourceImplementationContext": [
+        "lib/pages/webdav/view.dart",
+        "lib/pages/webdav/webdav.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "使用专用且获授权的 WebDAV 测试空间验证备份、恢复、错误和覆盖确认。当前不接入真实存储。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F028",
+      "upstreamSection": "feat",
+      "feature": "保存评论/动态",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics/view.dart",
+        "lib/pages/dynamics_create/view.dart",
+        "lib/http/dynamics.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F029",
+      "upstreamSection": "feat",
+      "feature": "高级弹幕 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstreamStatus": "unverified",
+      "group": "danmaku",
+      "assessment": "playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/video/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "用有普通、合并、高级和彩色弹幕的真实视频核对渲染、暂停与大小；点赞、举报和会员能力另需合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F030",
+      "upstreamSection": "feat",
+      "feature": "取消/置顶评论",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart",
+        "lib/http/reply.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/reply_action_order_test.dart"
+      ],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "automatedEvidenceScope": "仅验证置顶响应在刷新后按评论 ID 应用。该文件另有删除顺序测试，未直接验证取消置顶。"
+    },
+    {
+      "id": "F031",
+      "upstreamSection": "feat",
+      "feature": "记笔记",
+      "upstreamStatus": "unverified",
+      "group": "video_notes",
+      "assessment": "account_and_remote_note_storage",
+      "sourceImplementationContext": [
+        "lib/pages/video/note/view.dart",
+        "lib/pages/fav/note/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "使用专用授权账号验证创建、查看、保存和同步。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F032",
+      "upstreamSection": "feat",
+      "feature": "多账号支持 by [@My-Responsitories](https://github.com/My-Responsitories)",
+      "upstreamStatus": "unverified",
+      "group": "authentication",
+      "assessment": "account_or_upstream_desktop",
+      "sourceImplementationContext": [
+        "lib/utils/accounts.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "使用经授权的测试账号验证登录、多账号隔离和退出。Win/Mac 上游环境不属于鸿蒙模拟器验收。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F033",
+      "upstreamSection": "feat",
+      "feature": "屏蔽带货动态/评论",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics/view.dart",
+        "lib/pages/dynamics_create/view.dart",
+        "lib/http/dynamics.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F034",
+      "upstreamSection": "feat",
+      "feature": "互动视频",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F035",
+      "upstreamSection": "feat",
+      "feature": "发评/动态反诈",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics/view.dart",
+        "lib/pages/dynamics_create/view.dart",
+        "lib/http/dynamics.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F036",
+      "upstreamSection": "feat",
+      "feature": "高能进度条",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F037",
+      "upstreamSection": "feat",
+      "feature": "滑动跳转预览视频缩略图",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F038",
+      "upstreamSection": "feat",
+      "feature": "Live Photo",
+      "upstreamStatus": "unverified",
+      "group": "media_capture",
+      "assessment": "hardware_and_media_permissions",
+      "sourceImplementationContext": [
+        "lib/pages/setting/models/extra_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/moving_photo_test.dart"
+      ],
+      "remainingValidation": "用实际视频和已授权系统图库检验动图或 Live Photo 的生成、保存、预览和回放。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F039",
+      "upstreamSection": "feat",
+      "feature": "复制/移动/排序收藏夹/稍后再看视频",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "collection_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/fav_panel/view.dart",
+        "lib/pages/fav_detail/view.dart",
+        "lib/pages/later/view.dart",
+        "lib/http/fav.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F040",
+      "upstreamSection": "feat",
+      "feature": "超分辨率",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/setting/models/extra_settings.dart",
+        "lib/models/common/super_resolution_type.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F041",
+      "upstreamSection": "feat",
+      "feature": "合并弹幕",
+      "upstreamStatus": "unverified",
+      "group": "danmaku",
+      "assessment": "playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/video/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "用有普通、合并、高级和彩色弹幕的真实视频核对渲染、暂停与大小；点赞、举报和会员能力另需合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F042",
+      "upstreamSection": "feat",
+      "feature": "会员彩色弹幕",
+      "upstreamStatus": "unverified",
+      "group": "danmaku",
+      "assessment": "playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/video/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "用有普通、合并、高级和彩色弹幕的真实视频核对渲染、暂停与大小；点赞、举报和会员能力另需合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F043",
+      "upstreamSection": "feat",
+      "feature": "播放全部/继续播放/倒序播放",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F044",
+      "upstreamSection": "feat",
+      "feature": "Cookie登录",
+      "upstreamStatus": "unverified",
+      "group": "authentication",
+      "assessment": "account_or_upstream_desktop",
+      "sourceImplementationContext": [
+        "lib/pages/login/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "使用经授权的测试账号验证登录、多账号隔离和退出。Win/Mac 上游环境不属于鸿蒙模拟器验收。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F045",
+      "upstreamSection": "feat",
+      "feature": "显示视频分段信息",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F046",
+      "upstreamSection": "feat",
+      "feature": "调节字幕大小",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F047",
+      "upstreamSection": "feat",
+      "feature": "调节全屏弹幕大小",
+      "upstreamStatus": "unverified",
+      "group": "danmaku",
+      "assessment": "playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "用有普通、合并、高级和彩色弹幕的真实视频核对渲染、暂停与大小；点赞、举报和会员能力另需合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F048",
+      "upstreamSection": "feat",
+      "feature": "收藏夹/稍后再看多选删除",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "collection_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/fav_panel/view.dart",
+        "lib/pages/fav_detail/view.dart",
+        "lib/pages/later/view.dart",
+        "lib/http/fav.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F049",
+      "upstreamSection": "feat",
+      "feature": "搜索用户动态",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member_dynamics/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F050",
+      "upstreamSection": "feat",
+      "feature": "直播弹幕",
+      "upstreamStatus": "unverified",
+      "group": "live",
+      "assessment": "public_live_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/live/view.dart",
+        "lib/pages/live_area/view.dart",
+        "lib/pages/live_room/view.dart",
+        "lib/http/live.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开分区和直播页可验入口。实际直播播放、实时弹幕、表情及 SuperChat 依赖网络、真实输出或相应账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F051",
+      "upstreamSection": "feat",
+      "feature": "修改头像/用户名/签名/性别/生日",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member_profile/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F052",
+      "upstreamSection": "feat",
+      "feature": "创建/编辑/删除收藏夹",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "collection_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/fav_panel/view.dart",
+        "lib/pages/fav_detail/view.dart",
+        "lib/pages/later/view.dart",
+        "lib/http/fav.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F053",
+      "upstreamSection": "feat",
+      "feature": "评论楼中楼查看对话",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply_reply/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/tablet_reply_panel_test.dart"
+      ],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "automatedEvidenceScope": "仅验证评论详情右栏打开与返回，不验楼中楼对话内容。"
+    },
+    {
+      "id": "F054",
+      "upstreamSection": "feat",
+      "feature": "评论楼中楼定位点击查看的评论",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply_reply/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/tablet_reply_panel_test.dart"
+      ],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "automatedEvidenceScope": "仅验证评论详情右栏打开与返回，不验定位到被点评论。"
+    },
+    {
+      "id": "F055",
+      "upstreamSection": "feat",
+      "feature": "评论楼中楼按热度/时间排序",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply_reply/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F056",
+      "upstreamSection": "feat",
+      "feature": "评论点踩",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "account_operation_retained_count_removed",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart",
+        "lib/http/reply.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "操作保留。实验性的评论点踩总数已移除，不把总数开关列为当前功能；实际点踩或撤销需专用账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F057",
+      "upstreamSection": "feat",
+      "feature": "私信发图",
+      "upstreamStatus": "unverified",
+      "group": "messages",
+      "assessment": "account_and_guest_shell",
+      "sourceImplementationContext": [
+        "lib/pages/whisper_detail/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F058",
+      "upstreamSection": "feat",
+      "feature": "投币动画",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F059",
+      "upstreamSection": "feat",
+      "feature": "取消/追番，更新追番状态",
+      "upstreamStatus": "unverified",
+      "group": "pgc",
+      "assessment": "public_lists_or_account_playback",
+      "sourceImplementationContext": [
+        "lib/pages/home/view.dart",
+        "lib/pages/video/introduction/pgc/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开番剧列表可在游客设备核验；番剧播放、跳过首尾、追番和三连分别需要真实媒体与合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F060",
+      "upstreamSection": "feat",
+      "feature": "取消/订阅合集",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "collection_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/fav_panel/view.dart",
+        "lib/pages/fav_detail/view.dart",
+        "lib/pages/later/view.dart",
+        "lib/http/fav.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F061",
+      "upstreamSection": "feat",
+      "feature": "SponsorBlock",
+      "upstreamStatus": "unverified",
+      "group": "sponsorblock",
+      "assessment": "public_segments_and_optional_account",
+      "sourceImplementationContext": [
+        "lib/pages/sponsor_block/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/sponsor_block_regression_test.dart"
+      ],
+      "remainingValidation": "在已知有片段的视频上测试真机自动跳过、撤销、进度和界面；在线贡献另需明确授权。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F062",
+      "upstreamSection": "feat",
+      "feature": "显示视频完整合集",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/tablet_episode_strip.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/tablet_episode_strip_test.dart",
+        "test/harmony_adapt/collapsible_playlist_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F063",
+      "upstreamSection": "feat",
+      "feature": "三连动画",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F064",
+      "upstreamSection": "feat",
+      "feature": "番剧三连",
+      "upstreamStatus": "unverified",
+      "group": "pgc",
+      "assessment": "public_lists_or_account_playback",
+      "sourceImplementationContext": [
+        "lib/pages/home/view.dart",
+        "lib/pages/video/introduction/pgc/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开番剧列表可在游客设备核验；番剧播放、跳过首尾、追番和三连分别需要真实媒体与合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F065",
+      "upstreamSection": "feat",
+      "feature": "带图评论",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart",
+        "lib/http/reply.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/comment_composer_test.dart"
+      ],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "automatedEvidenceScope": "只覆盖评论输入及表情入口，不验附件图片或实际提交。"
+    },
+    {
+      "id": "F066",
+      "upstreamSection": "feat",
+      "feature": "视频TAG",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F067",
+      "upstreamSection": "feat",
+      "feature": "筛选搜索",
+      "upstreamStatus": "unverified",
+      "group": "search",
+      "assessment": "public_query_or_input_method",
+      "sourceImplementationContext": [
+        "lib/pages/search/view.dart",
+        "lib/pages/search/controller.dart",
+        "lib/pages/search_result/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/search_result_layout_test.dart",
+        "test/harmony_adapt/search_request_order_test.dart"
+      ],
+      "remainingValidation": "可用公开链接查真实结果并验证宽度、分页、分类或排序。小艺许可不接受，键盘输入、各内容类别与有条件偏好另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F068",
+      "upstreamSection": "feat",
+      "feature": "转发动态",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics_repost/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F069",
+      "upstreamSection": "feat",
+      "feature": "合集图片",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "collection_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/fav_panel/view.dart",
+        "lib/pages/fav_detail/view.dart",
+        "lib/pages/later/view.dart",
+        "lib/http/fav.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F070",
+      "upstreamSection": "feat",
+      "feature": "删除/置顶/撤回私信",
+      "upstreamStatus": "unverified",
+      "group": "messages",
+      "assessment": "account_and_guest_shell",
+      "sourceImplementationContext": [
+        "lib/pages/whisper/view.dart",
+        "lib/pages/whisper_detail/view.dart",
+        "lib/pages/whisper_settings/view.dart",
+        "lib/http/msg.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/message_request_order_test.dart"
+      ],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "automatedEvidenceScope": "仅验证撤回按稳定消息键应用，以及刷新覆盖旧分页。未验证会话删除或置顶。"
+    },
+    {
+      "id": "F071",
+      "upstreamSection": "feat",
+      "feature": "举报用户/评论/视频/动态",
+      "upstreamStatus": "unverified",
+      "group": "reports",
+      "assessment": "authenticated_report_mutation",
+      "sourceImplementationContext": [
+        "lib/http/reply.dart",
+        "lib/pages/dynamics/widgets/author_panel.dart",
+        "lib/pages/video/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "举报会写入服务端。保留实现核对，待授权测试账号与测试对象后验证。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F072",
+      "upstreamSection": "feat",
+      "feature": "删除/发布/置顶文本/图片动态",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics/view.dart",
+        "lib/pages/dynamics_create/view.dart",
+        "lib/http/dynamics.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F073",
+      "upstreamSection": "feat",
+      "feature": "其他",
+      "upstreamStatus": "unverified",
+      "group": "unscoped_upstream_notes",
+      "assessment": "unbounded_label",
+      "sourceImplementationContext": [],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "上游占位描述没有单独可复现验收条件，不能用该名称断言通过。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "kind": "unbounded_upstream_description"
+    },
+    {
+      "id": "F074",
+      "upstreamSection": "opt",
+      "feature": "专栏界面",
+      "upstreamStatus": "unverified",
+      "group": "article",
+      "assessment": "public_article_or_network",
+      "sourceImplementationContext": [
+        "lib/pages/article/view.dart",
+        "lib/pages/search_panel/article/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "用公开专栏验证实际内容、Web／图片渲染、导航和跨屏。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F075",
+      "upstreamSection": "opt",
+      "feature": "私信界面",
+      "upstreamStatus": "unverified",
+      "group": "messages",
+      "assessment": "account_and_guest_shell",
+      "sourceImplementationContext": [
+        "lib/pages/whisper/widgets/message_split.dart",
+        "lib/pages/whisper/widgets/message_back_scope.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/message_split_test.dart",
+        "test/harmony_adapt/message_layout_test.dart",
+        "test/harmony_adapt/message_back_scope_test.dart"
+      ],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 实际游客消息分栏、未登录提示和返回通过。",
+      "beta6252Evidence": {
+        "scope": "Guest Message hub, sign-in guidance, empty right-side detail and Back only; authenticated chat not exercised.",
+        "references": [
+          "soak-6250-lx5rhgg7/guest-path-summary.json"
+        ]
+      }
+    },
+    {
+      "id": "F076",
+      "upstreamSection": "opt",
+      "feature": "收藏面板",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "collection_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/fav_panel/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F077",
+      "upstreamSection": "opt",
+      "feature": "PIP",
+      "upstreamStatus": "unverified",
+      "group": "picture_in_picture",
+      "assessment": "hardware_system_window",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/setting/models/extra_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "在真实设备验证系统小窗权限、折叠切换和回到应用；模拟器导航通过不足以证明。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F078",
+      "upstreamSection": "opt",
+      "feature": "视频封面",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/playback_cover.dart",
+        "lib/common/widgets/image/full_cover_preview.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/full_cover_preview_test.dart",
+        "test/harmony_adapt/stable_image_size_test.dart",
+        "test/harmony_adapt/playback_cover_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "historicalPartialObservation": "6249 真实推荐长按封面、弹窗动作与外部点击取消通过。"
+    },
+    {
+      "id": "F079",
+      "upstreamSection": "opt",
+      "feature": "回复界面",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply_reply/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/reply_panel_theme_test.dart",
+        "test/harmony_adapt/tablet_reply_panel_test.dart"
+      ],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F080",
+      "upstreamSection": "opt",
+      "feature": "系统通知",
+      "upstreamStatus": "unverified",
+      "group": "messages",
+      "assessment": "account_and_guest_shell",
+      "sourceImplementationContext": [
+        "lib/pages/msg_feed_top/sys_msg/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/message_layout_test.dart"
+      ],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "automatedEvidenceScope": "只覆盖消息中心布局和路由，不验系统通知的真实内容。"
+    },
+    {
+      "id": "F081",
+      "upstreamSection": "opt",
+      "feature": "评论显示",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart",
+        "lib/http/reply.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/reply_panel_theme_test.dart"
+      ],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F082",
+      "upstreamSection": "opt",
+      "feature": "亮度调节",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F083",
+      "upstreamSection": "opt",
+      "feature": "视频播放",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/buffering_recovery_test.dart",
+        "test/harmony_adapt/audio_recovery_guard_test.dart",
+        "test/harmony_adapt/video_request_queue_test.dart",
+        "test/harmony_adapt/player_disposal_lifecycle_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "historicalPartialObservation": "6251 实际公开详情请求播放后快速返回通过；不含解码。"
+    },
+    {
+      "id": "F084",
+      "upstreamSection": "opt",
+      "feature": "视频staff",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member/view.dart",
+        "lib/pages/member_profile/view.dart",
+        "lib/pages/member_dynamics/view.dart",
+        "lib/http/member.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F085",
+      "upstreamSection": "opt",
+      "feature": "防止bottomsheet遮挡全屏视频",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/player_back_scope_test.dart",
+        "test/harmony_adapt/unified_player_menu_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F086",
+      "upstreamSection": "opt",
+      "feature": "其他",
+      "upstreamStatus": "unverified",
+      "group": "unscoped_upstream_notes",
+      "assessment": "unbounded_label",
+      "sourceImplementationContext": [],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "上游占位描述没有单独可复现验收条件，不能用该名称断言通过。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "kind": "unbounded_upstream_description"
+    },
+    {
+      "id": "F087",
+      "upstreamSection": "fix",
+      "feature": "番剧分集点赞/投币/收藏",
+      "upstreamStatus": "unverified",
+      "group": "pgc",
+      "assessment": "public_lists_or_account_playback",
+      "sourceImplementationContext": [
+        "lib/pages/home/view.dart",
+        "lib/pages/video/introduction/pgc/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开番剧列表可在游客设备核验；番剧播放、跳过首尾、追番和三连分别需要真实媒体与合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F088",
+      "upstreamSection": "fix",
+      "feature": "bugs",
+      "upstreamStatus": "unverified",
+      "group": "unscoped_upstream_notes",
+      "assessment": "unbounded_label",
+      "sourceImplementationContext": [],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "上游占位描述没有单独可复现验收条件，不能用该名称断言通过。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "kind": "unbounded_upstream_description"
+    },
+    {
+      "id": "F089",
+      "upstreamSection": "功能",
+      "feature": "推荐视频列表(app端)",
+      "upstreamStatus": "unverified",
+      "group": "home_feed",
+      "assessment": "public_feed_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/home/view.dart",
+        "lib/pages/home/controller.dart",
+        "lib/pages/hot/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/recommendation_batch_test.dart",
+        "test/harmony_adapt/initial_feed_content_test.dart",
+        "test/harmony_adapt/elastic_feed_scroll_test.dart"
+      ],
+      "remainingValidation": "公开推荐、热门、分类、刷新和列表可验；黑名单、无痕与登录态隔离需专用登录账号对照。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 实际游客推荐列表和滚动通过。",
+      "beta6252Evidence": {
+        "scope": "Guest public recommendation feed and contents changed on upward/downward scroll; personalization not exercised.",
+        "references": [
+          "soak-6250-2tz_davh/summary.json",
+          "soak-6250-8ptk1x_b/summary.json",
+          "soak-6250-hldygqga/summary.json"
+        ]
+      }
+    },
+    {
+      "id": "F090",
+      "upstreamSection": "功能",
+      "feature": "最热视频列表",
+      "upstreamStatus": "unverified",
+      "group": "home_feed",
+      "assessment": "public_feed_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/hot/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/reference_feed_layout_test.dart"
+      ],
+      "remainingValidation": "公开推荐、热门、分类、刷新和列表可验；黑名单、无痕与登录态隔离需专用登录账号对照。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 实际游客热门页切换与滚动通过。",
+      "beta6252Evidence": {
+        "scope": "Public popular feed selection and contents changed on upward/downward scroll.",
+        "references": [
+          "soak-6250-2tz_davh/summary.json",
+          "soak-6250-8ptk1x_b/summary.json",
+          "soak-6250-hldygqga/summary.json"
+        ]
+      }
+    },
+    {
+      "id": "F091",
+      "upstreamSection": "功能",
+      "feature": "热门直播",
+      "upstreamStatus": "unverified",
+      "group": "live",
+      "assessment": "public_live_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/live/view.dart",
+        "lib/pages/live_area/view.dart",
+        "lib/pages/live_room/view.dart",
+        "lib/http/live.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开分区和直播页可验入口。实际直播播放、实时弹幕、表情及 SuperChat 依赖网络、真实输出或相应账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F092",
+      "upstreamSection": "功能",
+      "feature": "番剧列表",
+      "upstreamStatus": "unverified",
+      "group": "pgc",
+      "assessment": "public_lists_or_account_playback",
+      "sourceImplementationContext": [
+        "lib/pages/home/view.dart",
+        "lib/pages/video/introduction/pgc/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开番剧列表可在游客设备核验；番剧播放、跳过首尾、追番和三连分别需要真实媒体与合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F093",
+      "upstreamSection": "功能",
+      "feature": "屏蔽黑名单内用户视频",
+      "upstreamStatus": "unverified",
+      "group": "home_feed",
+      "assessment": "public_feed_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/home/view.dart",
+        "lib/pages/home/controller.dart",
+        "lib/pages/hot/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开推荐、热门、分类、刷新和列表可验；黑名单、无痕与登录态隔离需专用登录账号对照。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F094",
+      "upstreamSection": "功能",
+      "feature": "无痕模式（播放视为未登录）",
+      "upstreamStatus": "unverified",
+      "group": "home_feed",
+      "assessment": "account_state_comparison",
+      "sourceImplementationContext": [
+        "lib/pages/home/view.dart",
+        "lib/pages/home/controller.dart",
+        "lib/pages/hot/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "要用获授权的独立账号测试进入／退出无痕、历史及推荐隔离；纯游客不能证明。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F095",
+      "upstreamSection": "功能",
+      "feature": "游客模式（推荐视为未登录）",
+      "upstreamStatus": "unverified",
+      "group": "home_feed",
+      "assessment": "public_feed_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/home/view.dart",
+        "lib/pages/home/controller.dart",
+        "lib/pages/hot/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/recommendation_cold_refresh_test.dart"
+      ],
+      "remainingValidation": "公开推荐、热门、分类、刷新和列表可验；黑名单、无痕与登录态隔离需专用登录账号对照。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 游客推荐工作负载通过；未切换其他账号。",
+      "beta6252Evidence": {
+        "scope": "App started already signed out; public recommendation feed verified. Account-mode switching not exercised.",
+        "references": [
+          "soak-6250-2tz_davh/summary.json",
+          "soak-6250-8ptk1x_b/summary.json",
+          "soak-6250-hldygqga/summary.json"
+        ]
+      }
+    },
+    {
+      "id": "F096",
+      "upstreamSection": "功能",
+      "feature": "用户相关",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member/view.dart",
+        "lib/pages/member_profile/view.dart",
+        "lib/pages/member_dynamics/view.dart",
+        "lib/http/member.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "kind": "upstream_group_heading"
+    },
+    {
+      "id": "F097",
+      "upstreamSection": "功能",
+      "feature": "粉丝、关注用户、拉黑用户查看",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member/view.dart",
+        "lib/pages/member_profile/view.dart",
+        "lib/pages/member_dynamics/view.dart",
+        "lib/http/member.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F098",
+      "upstreamSection": "功能",
+      "feature": "用户主页查看",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member/view.dart",
+        "lib/pages/video/member/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/member_surface_test.dart",
+        "test/harmony_adapt/tablet_reply_panel_test.dart"
+      ],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "historicalPartialObservation": "6250 DevEco 模拟器三屏原生尺寸下，公开 UP 主右栏打开和返回通过；未用实体手机。"
+    },
+    {
+      "id": "F099",
+      "upstreamSection": "功能",
+      "feature": "关注/取关用户",
+      "upstreamStatus": "unverified",
+      "group": "member",
+      "assessment": "public_profile_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/member/view.dart",
+        "lib/pages/member_profile/view.dart",
+        "lib/pages/member_dynamics/view.dart",
+        "lib/http/member.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开资料与部分图文可用游客验路由；管理关系、黑名单、修改本人资料和隐私列表需登录及服务端条件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F100",
+      "upstreamSection": "功能",
+      "feature": "离线缓存",
+      "upstreamStatus": "unverified",
+      "group": "offline_download",
+      "assessment": "hardware_and_download_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/download/view.dart",
+        "lib/pages/video/download_panel/view.dart",
+        "lib/services/download/download_manager.dart",
+        "lib/services/download/download_service.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/download_manager_test.dart",
+        "test/harmony_adapt/download_service_lifecycle_test.dart"
+      ],
+      "remainingValidation": "游客只验离线页和权限提示。用授权公开素材及真实设备验证任务、断点续传、系统后台通知、重启后状态与离线播放。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "historicalPartialObservation": "6250 实际游客离线页进入退出通过；没有启动下载。"
+    },
+    {
+      "id": "F101",
+      "upstreamSection": "功能",
+      "feature": "稍后再看",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "collection_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/fav_panel/view.dart",
+        "lib/pages/fav_detail/view.dart",
+        "lib/pages/later/view.dart",
+        "lib/http/fav.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F102",
+      "upstreamSection": "功能",
+      "feature": "观看记录",
+      "upstreamStatus": "unverified",
+      "group": "watch_history",
+      "assessment": "account_and_history_data",
+      "sourceImplementationContext": [
+        "lib/pages/history/view.dart",
+        "lib/pages/history/controller.dart",
+        "lib/pages/mine/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/recent_history_test.dart",
+        "test/harmony_adapt/mine_section_layout_test.dart"
+      ],
+      "remainingValidation": "游客仅能检查入口及不显示私人数据；已登录历史、筛选和多端同步需测试账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F103",
+      "upstreamSection": "功能",
+      "feature": "我的收藏",
+      "upstreamStatus": "unverified",
+      "group": "collection",
+      "assessment": "collection_entitlement",
+      "sourceImplementationContext": [
+        "lib/pages/fav_detail/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "收藏、稍后再看和订阅的真实内容与写入需登录；游客只核对可见入口或占位。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F104",
+      "upstreamSection": "功能",
+      "feature": "站内私信",
+      "upstreamStatus": "unverified",
+      "group": "messages",
+      "assessment": "account_and_guest_shell",
+      "sourceImplementationContext": [
+        "lib/pages/whisper/view.dart",
+        "lib/pages/whisper_detail/view.dart",
+        "lib/pages/whisper_settings/view.dart",
+        "lib/http/msg.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/message_layout_test.dart",
+        "test/harmony_adapt/message_back_scope_test.dart"
+      ],
+      "remainingValidation": "6251 游客仅通过入口、四类消息、未登录提示和返回。收发、系统通知内容、读状态与聊天设置需登录测试账号。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 实际游客消息页打开和返回通过；没有实际会话。",
+      "beta6252Evidence": {
+        "scope": "Guest Message hub without raw numeric API errors in the checked page and return; private conversation not exercised.",
+        "references": [
+          "soak-6250-lx5rhgg7/guest-path-summary.json"
+        ]
+      }
+    },
+    {
+      "id": "F105",
+      "upstreamSection": "功能",
+      "feature": "动态相关",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics/view.dart",
+        "lib/pages/dynamics_create/view.dart",
+        "lib/http/dynamics.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "kind": "upstream_group_heading",
+      "beta6252Evidence": {
+        "scope": "Guest Dynamics page navigation and empty-state landmarks; signed-in feed and publishing not exercised.",
+        "references": [
+          "soak-6250-2tz_davh/summary.json",
+          "soak-6250-8ptk1x_b/summary.json",
+          "soak-6250-hldygqga/summary.json"
+        ]
+      }
+    },
+    {
+      "id": "F106",
+      "upstreamSection": "功能",
+      "feature": "全部、投稿、番剧分类查看",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics_tab/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/window_layout_test.dart"
+      ],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "historicalPartialObservation": "6251 只核对游客全部／投稿／专栏入口；未验番剧标签和已登录分类内容。",
+      "automatedEvidenceScope": "只核对布局判据，不覆盖番剧标签的可用性或内容。"
+    },
+    {
+      "id": "F107",
+      "upstreamSection": "功能",
+      "feature": "动态评论查看",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics/view.dart",
+        "lib/pages/dynamics_create/view.dart",
+        "lib/http/dynamics.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F108",
+      "upstreamSection": "功能",
+      "feature": "动态评论回复功能",
+      "upstreamStatus": "unverified",
+      "group": "dynamics",
+      "assessment": "account_or_public_route",
+      "sourceImplementationContext": [
+        "lib/pages/dynamics/view.dart",
+        "lib/pages/dynamics_create/view.dart",
+        "lib/http/dynamics.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验动态空态、分类入口和公开内容。关注流、编辑、发布、投票、回复、屏蔽和同步需专用登录账号及服务端响应。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F109",
+      "upstreamSection": "功能",
+      "feature": "视频播放相关",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "kind": "upstream_group_heading"
+    },
+    {
+      "id": "F110",
+      "upstreamSection": "功能",
+      "feature": "双击快进/快退",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/plugin/pl_player/controller.dart",
+        "lib/plugin/pl_player/view/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F111",
+      "upstreamSection": "功能",
+      "feature": "双击播放/暂停",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/plugin/pl_player/controller.dart",
+        "lib/plugin/pl_player/view/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F112",
+      "upstreamSection": "功能",
+      "feature": "垂直方向调节亮度/音量",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "gesture_scope_separate_from_removed_setting",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "旧的独立播放器音量设置已清理，不能据此判断亮度／音量手势。应在真机分别核对实际手势与音量系统行为。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F113",
+      "upstreamSection": "功能",
+      "feature": "垂直方向上滑全屏、下滑退出全屏",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/player_expansion_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "automatedEvidenceScope": "只覆盖播放器布局过渡，不验上下滑手势。"
+    },
+    {
+      "id": "F114",
+      "upstreamSection": "功能",
+      "feature": "水平方向手势快进/快退",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/fullscreen_seek_gesture_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F115",
+      "upstreamSection": "功能",
+      "feature": "全屏方向设置",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/fold_playback_test.dart",
+        "test/harmony_adapt/window_layout_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F116",
+      "upstreamSection": "功能",
+      "feature": "倍速选择/长按2倍速",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F117",
+      "upstreamSection": "功能",
+      "feature": "硬件加速（视机型而定）",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F118",
+      "upstreamSection": "功能",
+      "feature": "画质选择（高清画质未解锁）",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F119",
+      "upstreamSection": "功能",
+      "feature": "音质选择（视视频而定）",
+      "upstreamStatus": "unverified",
+      "group": "audio",
+      "assessment": "physical_audio_and_media",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/extra_settings.dart",
+        "lib/plugin/pl_player/controller.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "使用不同音轨的真实设备验证音频、音质、原声翻译和均衡；Android 上游条目独立处理。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F120",
+      "upstreamSection": "功能",
+      "feature": "解码格式选择（视视频而定）",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F121",
+      "upstreamSection": "功能",
+      "feature": "弹幕",
+      "upstreamStatus": "unverified",
+      "group": "danmaku",
+      "assessment": "playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/video/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/danmaku_action_transition_test.dart"
+      ],
+      "remainingValidation": "用有普通、合并、高级和彩色弹幕的真实视频核对渲染、暂停与大小；点赞、举报和会员能力另需合适账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F122",
+      "upstreamSection": "功能",
+      "feature": "字幕",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/outlined_subtitles_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F123",
+      "upstreamSection": "功能",
+      "feature": "记忆播放",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F124",
+      "upstreamSection": "功能",
+      "feature": "视频比例：高度/宽度适应、填充、包含等",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/player_expansion_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "automatedEvidenceScope": "只覆盖播放器布局过渡，不验各视频比例选项。"
+    },
+    {
+      "id": "F125",
+      "upstreamSection": "功能",
+      "feature": "搜索相关",
+      "upstreamStatus": "unverified",
+      "group": "search",
+      "assessment": "public_query_or_input_method",
+      "sourceImplementationContext": [
+        "lib/pages/search/view.dart",
+        "lib/pages/search/controller.dart",
+        "lib/pages/search_result/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/search_result_layout_test.dart"
+      ],
+      "remainingValidation": "可用公开链接查真实结果并验证宽度、分页、分类或排序。小艺许可不接受，键盘输入、各内容类别与有条件偏好另验。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 真实公开结果页三形态通过；没有键盘搜索。",
+      "kind": "upstream_group_heading",
+      "beta6252Evidence": {
+        "scope": "One public keyword results page on native single, double and triple profiles; no keyboard protocol accepted.",
+        "references": [
+          "soak-6250-1gtmieph/triple-public-link-result.png",
+          "soak-6250-cdx1p6js/single-observe.png",
+          "soak-6250-p8057z_7/double-observe.png"
+        ]
+      }
+    },
+    {
+      "id": "F126",
+      "upstreamSection": "功能",
+      "feature": "热搜",
+      "upstreamStatus": "unverified",
+      "group": "search",
+      "assessment": "public_query_or_input_method",
+      "sourceImplementationContext": [
+        "lib/pages/search/widgets/search_keyword_section.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/search_result_layout_test.dart"
+      ],
+      "remainingValidation": "可用公开链接查真实结果并验证宽度、分页、分类或排序。小艺许可不接受，键盘输入、各内容类别与有条件偏好另验。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 双／三屏实际热搜在结果右栏显示。",
+      "beta6252Evidence": {
+        "scope": "Visible hot-search sidebar on double and triple result layouts; full hot-list action not exercised.",
+        "references": [
+          "soak-6250-p8057z_7/double-observe.png",
+          "soak-6250-1gtmieph/triple-public-link-result.png"
+        ]
+      }
+    },
+    {
+      "id": "F127",
+      "upstreamSection": "功能",
+      "feature": "搜索历史",
+      "upstreamStatus": "unverified",
+      "group": "search",
+      "assessment": "public_query_or_input_method",
+      "sourceImplementationContext": [
+        "lib/pages/search/controller.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "可用公开链接查真实结果并验证宽度、分页、分类或排序。小艺许可不接受，键盘输入、各内容类别与有条件偏好另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F128",
+      "upstreamSection": "功能",
+      "feature": "默认搜索词",
+      "upstreamStatus": "unverified",
+      "group": "search",
+      "assessment": "public_query_or_input_method",
+      "sourceImplementationContext": [
+        "lib/pages/home/controller.dart",
+        "lib/pages/search/view.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "可用公开链接查真实结果并验证宽度、分页、分类或排序。小艺许可不接受，键盘输入、各内容类别与有条件偏好另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F129",
+      "upstreamSection": "功能",
+      "feature": "投稿、番剧、直播间、用户搜索",
+      "upstreamStatus": "unverified",
+      "group": "search",
+      "assessment": "public_query_or_input_method",
+      "sourceImplementationContext": [
+        "lib/pages/search/view.dart",
+        "lib/pages/search/controller.dart",
+        "lib/pages/search_result/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/search_result_layout_test.dart"
+      ],
+      "remainingValidation": "可用公开链接查真实结果并验证宽度、分页、分类或排序。小艺许可不接受，键盘输入、各内容类别与有条件偏好另验。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 实际综合／视频标签与公开视频结果可查；未逐项验番剧、直播间和用户结果。",
+      "beta6252Evidence": {
+        "scope": "One public keyword/video-results layout across three fold profiles; non-video search categories not exercised.",
+        "references": [
+          "soak-6250-1gtmieph/triple-public-link-result.png",
+          "soak-6250-cdx1p6js/single-observe.png",
+          "soak-6250-p8057z_7/double-observe.png"
+        ]
+      }
+    },
+    {
+      "id": "F130",
+      "upstreamSection": "功能",
+      "feature": "视频搜索排序、按时长筛选",
+      "upstreamStatus": "unverified",
+      "group": "search",
+      "assessment": "public_query_or_input_method",
+      "sourceImplementationContext": [
+        "lib/pages/search/view.dart",
+        "lib/pages/search/controller.dart",
+        "lib/pages/search_result/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/search_request_order_test.dart",
+        "test/harmony_adapt/search_result_layout_test.dart"
+      ],
+      "remainingValidation": "可用公开链接查真实结果并验证宽度、分页、分类或排序。小艺许可不接受，键盘输入、各内容类别与有条件偏好另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F131",
+      "upstreamSection": "功能",
+      "feature": "视频详情页相关",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/dual_fold_video_layout_test.dart",
+        "test/harmony_adapt/tablet_video_sidebar_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "kind": "upstream_group_heading"
+    },
+    {
+      "id": "F132",
+      "upstreamSection": "功能",
+      "feature": "视频选集(分p)切换",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/widgets/collapsible_playlist.dart",
+        "lib/pages/video/widgets/tablet_episode_strip.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/collapsible_playlist_test.dart",
+        "test/harmony_adapt/episode_layout_test.dart",
+        "test/harmony_adapt/tablet_episode_strip_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F133",
+      "upstreamSection": "功能",
+      "feature": "点赞、投币、收藏/取消收藏",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F134",
+      "upstreamSection": "功能",
+      "feature": "相关视频查看",
+      "upstreamStatus": "unverified",
+      "group": "video_detail",
+      "assessment": "physical_playback_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/view.dart",
+        "lib/pages/video/widgets/header_control.dart",
+        "lib/pages/setting/models/play_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/related_placeholder_test.dart",
+        "test/harmony_adapt/tablet_video_sidebar_test.dart"
+      ],
+      "remainingValidation": "游客可验详情、选集、封面、相关项、请求与退出。实际图像、声音、硬解、分辨率／比例、片段和媒体手势需真机。账号互动需授权账号。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "historicalPartialObservation": "6250 实际公开视频详情右栏相关列表和返回通过。"
+    },
+    {
+      "id": "F135",
+      "upstreamSection": "功能",
+      "feature": "评论用户身份标识",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart",
+        "lib/http/reply.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F136",
+      "upstreamSection": "功能",
+      "feature": "评论(排序)查看、二楼评论查看",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart",
+        "lib/http/reply.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/tablet_reply_panel_test.dart",
+        "test/harmony_adapt/reply_panel_theme_test.dart"
+      ],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "historicalPartialObservation": "6249 公开评论查看、右侧评论详情与返回通过。"
+    },
+    {
+      "id": "F137",
+      "upstreamSection": "功能",
+      "feature": "主楼、二楼评论回复功能",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/comment_composer_test.dart"
+      ],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final",
+      "automatedEvidenceScope": "只覆盖评论输入和表情入口，不验提交和真实楼层回复。"
+    },
+    {
+      "id": "F138",
+      "upstreamSection": "功能",
+      "feature": "评论点赞",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart",
+        "lib/http/reply.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F139",
+      "upstreamSection": "功能",
+      "feature": "评论笔记图片查看、保存",
+      "upstreamStatus": "unverified",
+      "group": "comments",
+      "assessment": "public_comments_or_account",
+      "sourceImplementationContext": [
+        "lib/pages/video/reply/view.dart",
+        "lib/pages/video/reply_reply/view.dart",
+        "lib/http/reply.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "公开评论和楼中楼可在游客模式验查看、排序与返回；评论写入、点赞、点踩、置顶、图片保存权限另验。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F140",
+      "upstreamSection": "功能",
+      "feature": "设置相关",
+      "upstreamStatus": "unverified",
+      "group": "settings",
+      "assessment": "read_only_settings_or_hardware",
+      "sourceImplementationContext": [
+        "lib/pages/setting/view.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/setting/models/style_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/settings_reorganization_test.dart",
+        "test/harmony_adapt/anchored_settings_menu_test.dart",
+        "test/harmony_adapt/appearance_regression_test.dart"
+      ],
+      "remainingValidation": "候选实机仅查看设置及打开取消，不改现有偏好。实际显示刷新率、震动、媒体预设与物理旋转需授权硬件。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 设置页实际进出、候选约束下不改偏好。",
+      "kind": "upstream_group_heading",
+      "beta6252Evidence": {
+        "scope": "Settings entry and Back in native single, double and triple forms, plus the About version label; individual setting values not changed.",
+        "references": [
+          "soak-6250-2tz_davh/summary.json",
+          "soak-6250-8ptk1x_b/summary.json",
+          "soak-6250-hldygqga/summary.json",
+          "6252-about-version.json"
+        ]
+      }
+    },
+    {
+      "id": "F141",
+      "upstreamSection": "功能",
+      "feature": "画质、音质、解码方式预设      ",
+      "upstreamStatus": "unverified",
+      "group": "settings",
+      "assessment": "read_only_settings_or_hardware",
+      "sourceImplementationContext": [
+        "lib/pages/setting/view.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/setting/models/style_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "候选实机仅查看设置及打开取消，不改现有偏好。实际显示刷新率、震动、媒体预设与物理旋转需授权硬件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F142",
+      "upstreamSection": "功能",
+      "feature": "图片质量设定",
+      "upstreamStatus": "unverified",
+      "group": "settings",
+      "assessment": "read_only_settings_or_hardware",
+      "sourceImplementationContext": [
+        "lib/pages/setting/view.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/setting/models/style_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/feed_image_budget_test.dart",
+        "test/harmony_adapt/stable_image_size_test.dart"
+      ],
+      "remainingValidation": "候选实机仅查看设置及打开取消，不改现有偏好。实际显示刷新率、震动、媒体预设与物理旋转需授权硬件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F143",
+      "upstreamSection": "功能",
+      "feature": "主题模式：亮色/暗色/跟随系统",
+      "upstreamStatus": "unverified",
+      "group": "settings",
+      "assessment": "read_only_settings_or_hardware",
+      "sourceImplementationContext": [
+        "lib/pages/setting/view.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/setting/models/style_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/harmony_accent_choices_test.dart",
+        "test/harmony_adapt/appearance_regression_test.dart"
+      ],
+      "remainingValidation": "候选实机仅查看设置及打开取消，不改现有偏好。实际显示刷新率、震动、媒体预设与物理旋转需授权硬件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F144",
+      "upstreamSection": "功能",
+      "feature": "震动反馈(可选)",
+      "upstreamStatus": "unverified",
+      "group": "settings",
+      "assessment": "read_only_settings_or_hardware",
+      "sourceImplementationContext": [
+        "lib/utils/feed_back.dart",
+        "lib/pages/setting/models/extra_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "候选实机仅查看设置及打开取消，不改现有偏好。实际显示刷新率、震动、媒体预设与物理旋转需授权硬件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F145",
+      "upstreamSection": "功能",
+      "feature": "高帧率",
+      "upstreamStatus": "unverified",
+      "group": "settings",
+      "assessment": "read_only_settings_or_hardware",
+      "sourceImplementationContext": [
+        "lib/pages/setting/view.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/setting/models/style_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "候选实机仅查看设置及打开取消，不改现有偏好。实际显示刷新率、震动、媒体预设与物理旋转需授权硬件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F146",
+      "upstreamSection": "功能",
+      "feature": "自动全屏",
+      "upstreamStatus": "unverified",
+      "group": "settings",
+      "assessment": "read_only_settings_or_hardware",
+      "sourceImplementationContext": [
+        "lib/pages/setting/view.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/setting/models/style_settings.dart"
+      ],
+      "relatedAutomatedTests": [],
+      "remainingValidation": "候选实机仅查看设置及打开取消，不改现有偏好。实际显示刷新率、震动、媒体预设与物理旋转需授权硬件。",
+      "beta6252ExecutionStatus": "not_exercised_final"
+    },
+    {
+      "id": "F147",
+      "upstreamSection": "功能",
+      "feature": "横屏适配",
+      "upstreamStatus": "unverified",
+      "group": "settings",
+      "assessment": "read_only_settings_or_hardware",
+      "sourceImplementationContext": [
+        "lib/pages/setting/view.dart",
+        "lib/pages/setting/models/play_settings.dart",
+        "lib/pages/setting/models/style_settings.dart"
+      ],
+      "relatedAutomatedTests": [
+        "test/harmony_adapt/window_layout_test.dart",
+        "test/harmony_adapt/cutout_regression_test.dart"
+      ],
+      "remainingValidation": "候选实机仅查看设置及打开取消，不改现有偏好。实际显示刷新率、震动、媒体预设与物理旋转需授权硬件。",
+      "beta6252ExecutionStatus": "observed_subpath_final",
+      "historicalPartialObservation": "6251 用 DevEco 官方折叠控件实读三种尺寸，核对搜索结果和单屏我的；未执行横屏旋转。",
+      "automatedEvidenceScope": "窗口和挖孔布局测试不等于模拟器实际旋转或实体屏幕验收。",
+      "beta6252Evidence": {
+        "scope": "Native single, double and triple fold geometry at display rotation 0; landscape rotation not confirmed.",
+        "references": [
+          "soak-6250-2tz_davh/summary.json",
+          "soak-6250-8ptk1x_b/summary.json",
+          "soak-6250-hldygqga/summary.json"
+        ]
+      }
+    }
+  ],
+  "candidateSource": "e17419e1da9b4b2a2812ca3bead0339553433630",
+  "candidateHapSHA256": "388c330fd55e6ab840785ba57620e08a82c6e2bfda8eb735776f3abe0fa033c2",
+  "finalCandidateSummary": "6252-final-qa-summary.json",
+  "finalCandidateEvidenceScope": "Each execution link describes only an observed subpath. Source implementation and related tests are context and do not establish end-to-end feature coverage. Preliminary-candidate evidence has a separate signature."
+}

@@ -1,4 +1,6 @@
-# V2 RC1 · 鸿蒙体验候选版
+# Alpha · V2 RC1 · 鸿蒙体验候选版
+
+> Alpha 历史记录：本阶段不再提供安装包，以下详情与验证结果保留用于追溯。旧路径和构建号不变；首个 Beta 版本为 [Beta 1.0](../beta-1.0/notes.md)。
 
 - 应用版本：`2.2.0+6083`，包名 `com.example.piliplus`。
 - 源码提交：`faf1f06526cbebfdb08d9ec30922ea412b63252e`，分支 `harmony/v2-native-ui`。
