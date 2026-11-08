@@ -101,7 +101,7 @@ signing_flag=--no-codesign
 if [[ "${HARMONY_CODESIGN:-0}" == 1 ]]; then signing_flag=--codesign; fi
 flutter build hap "--$mode" "$signing_flag" --dart-define-from-file=build/harmony/env.json
 HARMONY_BUILD_MODE="$mode" HARMONY_SIGNED="${HARMONY_CODESIGN:-0}" python3 - <<'PY'
-import hashlib, json, os, shutil, subprocess, zipfile
+import hashlib, json, os, re, shutil, subprocess, zipfile
 from pathlib import Path
 suffix = '*-signed.hap' if os.environ['HARMONY_SIGNED'] == '1' else '*-unsigned.hap'
 paths = list(Path('ohos/entry/build').rglob(suffix))
@@ -115,6 +115,10 @@ for path in paths:
         bad = archive.testzip()
         if bad: raise SystemExit(f'HAP CRC failed: {bad}')
         module = json.loads(archive.read('module.json'))
+        version = re.search(r'^version:\s*(\S+)', Path('pubspec.yaml').read_text(), re.M)[1]
+        expected_name, expected_code = version.split('+')
+        if module['app']['versionName'] != expected_name or module['app']['versionCode'] != int(expected_code):
+            raise SystemExit('HAP version metadata differs from pubspec; refusing to export it.')
         expected = {'ets/modules.abc', 'libs/arm64-v8a/libflutter.so', 'libs/arm64-v8a/libmpv.so'}
         if os.environ['HARMONY_BUILD_MODE'] == 'release': expected.add('libs/arm64-v8a/libapp.so')
         missing = expected - set(archive.namelist())

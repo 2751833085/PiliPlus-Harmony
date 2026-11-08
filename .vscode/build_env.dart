@@ -5,7 +5,7 @@ import 'dart:io';
 Future<void> main(List<String> args) async {
   final content = await File('pubspec.yaml').readAsString();
   final version = RegExp(
-    r'^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$',
+    r'^version:\s*(\d+\.\d+\.\d+(?:-beta)?)\+(\d+)\s*$',
     multiLine: true,
   ).firstMatch(content);
   if (version == null)

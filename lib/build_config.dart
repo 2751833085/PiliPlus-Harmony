@@ -1,8 +1,7 @@
 abstract final class BuildConfig {
-  // The public milestone is independent of the monotonic HAP version/build.
+  // Keep the public version concise; the build number identifies each signed HAP.
   static const String releaseLabel = 'Beta 1.0';
-  static String get displayVersion =>
-      '$releaseLabel · $versionName+$versionCode';
+  static String get displayVersion => '$releaseLabel · 构建 $versionCode';
   static String get fullVersionTag =>
       versionTag.contains('+') ? versionTag : '$versionTag+$versionCode';
   static const int versionCode = int.fromEnvironment(

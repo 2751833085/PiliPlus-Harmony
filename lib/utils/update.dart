@@ -20,9 +20,7 @@ import 'package:material_ui/material_ui.dart';
 abstract final class Update {
   // 检查更新
   static Future<void> checkUpdate([bool isAuto = true]) async {
-    final current = ReleaseVersion.parse(
-      '${BuildConfig.versionName.replaceFirst(RegExp(r'-ohos$'), '')}+${BuildConfig.versionCode}',
-    );
+    final current = ReleaseVersion.parse(BuildConfig.fullVersionTag);
     if (current == null) {
       if (!isAuto) SmartDialog.showToast('无法识别当前版本，请前往项目发布页检查更新');
       return;

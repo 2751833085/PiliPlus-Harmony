@@ -2,7 +2,7 @@
 
 基于 [PiliPlus](https://github.com/bggRGjQaUbCoE/PiliPlus) 的鸿蒙 HAP 项目，面向手机、平板和折叠屏，由 **厄斯因二次编辑** 维护。
 
-当前阶段：**Beta 1.0**，首个 Beta 版本。内部版本为 `3.0.0+6252`，沿用递增构建号，兼容已安装版本的更新检测。
+当前阶段：**Beta 1.0**，首个 Beta 版本。系统版本为 `1.0.0-beta`，构建号 `6253`；应用内显示 **Beta 1.0**。本次按独立安装发布，请从 GitHub 下载签名 HAP。
 
 [下载与版本说明](https://github.com/2751833085/PiliPlus-Harmony/releases) · [Beta 1.0 验证记录](docs/harmony/beta-1.0-validation.md) · [问题反馈](https://github.com/2751833085/PiliPlus-Harmony/issues)
 

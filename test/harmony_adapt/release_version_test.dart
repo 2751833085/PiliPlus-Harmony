@@ -63,6 +63,29 @@ void main() {
       lessThan(0),
     );
   });
+  test('Beta 1.0 uses its own tag and can find later Beta updates', () {
+    const tag = 'v1.0.0-beta+6253';
+    final beta = release(tag)..['name'] = 'Beta 1.0';
+    final asset = (beta['assets'] as List).single;
+    asset['browser_download_url'] =
+        'https://github.com/2751833085/PiliPlus-Harmony/releases/download/v1.0.0-beta%2B6253/PiliPlus-signed.hap';
+    final replaced = release('v3.0.0+6252', asset: false);
+    final installed = ReleaseVersion.parse(tag)!;
+
+    expect(installed.build, 6253);
+    final current = latestHarmonyRelease([replaced, beta])!;
+    expect(current, same(beta));
+    expect(harmonyHapUrl(current), asset['browser_download_url']);
+    expect(installed.compareTo(ReleaseVersion.parse(current['tag_name'])!), 0);
+
+    final next = release('v1.1.0-beta+6254')..['name'] = 'Beta 1.1';
+    final latest = latestHarmonyRelease([replaced, next, beta])!;
+    expect(latest, same(next));
+    expect(
+      installed.compareTo(ReleaseVersion.parse(latest['tag_name'])!),
+      lessThan(0),
+    );
+  });
   test('ignores unsigned, empty, pending and mismatched HAP assets', () {
     for (final change in <String, dynamic>{
       'name': 'PiliPlus-unsigned.hap',

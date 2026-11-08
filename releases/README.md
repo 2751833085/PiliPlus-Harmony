@@ -4,7 +4,7 @@
 
 ## Beta
 
-[Beta 1.0](beta-1.0/notes.md) 是首个 Beta 版本，内部版本 `3.0.0+6252`。可安装签名 HAP 仅通过 [GitHub Releases](https://github.com/2751833085/PiliPlus-Harmony/releases) 提供。
+[Beta 1.0](beta-1.0/notes.md) 是首个 Beta 版本，系统版本 `1.0.0-beta`，构建号 `6253`。可安装签名 HAP 仅通过 [GitHub Releases](https://github.com/2751833085/PiliPlus-Harmony/releases) 提供。
 
 ## Alpha
 
