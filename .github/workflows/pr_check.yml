@@ -24,6 +24,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Flutter OH also prepares Harmony plugins during pub get.
+      - name: Setup HarmonyOS toolchain
+        uses: ErBWs/setup-ohos@v1
+        with:
+          version: "26.0.0.821"
+          cache: true
+
       - name: Setup flutter-ohos
         run: |
           git clone --depth 1 -b 3.44.9+ohos-0.0.1-canary1 https://gitcode.com/CPF-Flutter/flutter_flutter.git "$RUNNER_TEMP/flutter"
