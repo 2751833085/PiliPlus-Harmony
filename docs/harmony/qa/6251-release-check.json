@@ -1,0 +1,46 @@
+{
+  "release_id": 437928557,
+  "tag": "v3.0.0+6251",
+  "published_at": "2026-11-08T00:08:57Z",
+  "public_url": "https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v3.0.0%2B6251",
+  "draft": false,
+  "prerelease": true,
+  "api_access": "anonymous",
+  "update_helper": "lib/utils/release_version.dart",
+  "update_checks": {
+    "TAG": "v3.0.0+6251",
+    "DRAFT": "false",
+    "PRERELEASE": "true",
+    "UPDATE_6249": "true",
+    "UPDATE_6250": "true",
+    "UPDATE_6251": "false",
+    "HAP_URL": "https://github.com/2751833085/PiliPlus-Harmony/releases/download/v3.0.0%2B6251/PiliPlus-Harmony-3.0.0-6251-beta-signed.hap"
+  },
+  "hap_download_http_status": 200,
+  "assets": [
+    {
+      "name": "PiliPlus-Harmony-3.0.0-6251-beta-signed.hap",
+      "bytes": 33136760,
+      "sha256": "2e006850807ba7c357c92f2c7eaebf1b14bdd822ceb672eb87cc06e28649be10",
+      "github_digest_verified": true
+    },
+    {
+      "name": "PiliPlus-Harmony-3.0.0-6251-beta-signed.hap.sha256",
+      "bytes": 110,
+      "sha256": "51d9968a510baecaee1827e5c7419d69690f1698bf05c32d403cf2a10e87cff1",
+      "github_digest_verified": true
+    },
+    {
+      "name": "PiliPlus-Harmony-3.0.0-6251-beta-signed.build.json",
+      "bytes": 1973,
+      "sha256": "e61f5f42c4acd29635b0ceab4cab7f68045ad04316d0cce2943524622b74d9b3",
+      "github_digest_verified": true
+    },
+    {
+      "name": "6251-source-sha256.json",
+      "bytes": 190155,
+      "sha256": "232b2f39f37270ff1b4e1e91d81464f397966277c2be1d62d9b774e776fb5b49",
+      "github_digest_verified": true
+    }
+  ]
+}
