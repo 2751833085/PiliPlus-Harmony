@@ -48,6 +48,8 @@ List<ReplyInfo> _replies() => [
 
 class _ArticleController extends ArticleController {
   @override
+  // The fixture supplies the detail response without starting a request.
+  // ignore: must_call_super
   void onInit() {
     id = '123';
     type = 'read';
@@ -72,6 +74,8 @@ class _DynamicController extends DynamicDetailController {
   final DynamicItemModel fixture;
 
   @override
+  // The fixture supplies the detail response without starting a request.
+  // ignore: must_call_super
   void onInit() {
     dynItem = fixture;
     oid = 123;
@@ -114,7 +118,7 @@ void main() {
         defaultTransition: Transition.noTransition,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.linear(1.3),
+            textScaler: const TextScaler.linear(1.3),
             viewPadding: const EdgeInsets.only(top: 28, bottom: 20),
             padding: const EdgeInsets.only(top: 28, bottom: 20),
           ),
@@ -165,6 +169,23 @@ void main() {
     final theme = Theme.of(tester.element(action(_firstCount)));
     expect(outer.backgroundColor, theme.scaffoldBackgroundColor);
     expect(find.byType(BackdropFilter), findsNothing);
+    final share = action('分享');
+    final paintedStrip = find.ancestor(
+      of: share,
+      matching: find.byWidgetPredicate((widget) {
+        if (widget is! DecoratedBox) return false;
+        final decoration = widget.decoration;
+        return decoration is BoxDecoration &&
+            decoration.color == theme.scaffoldBackgroundColor &&
+            decoration.border is Border;
+      }),
+    );
+    expect(paintedStrip, findsOneWidget);
+    final strip = tester.getRect(paintedStrip);
+    final viewport = tester.getRect(find.byType(SimpleScaffold).first);
+    expect(strip.bottom, viewport.bottom);
+    expect(tester.getRect(share).bottom, strip.bottom - 20);
+    expect(strip.height, 48 + 20);
     for (final target in actions) {
       expect(target, findsOneWidget);
       expect(tester.getSize(target).height, 48);

@@ -88,7 +88,7 @@ mixin SplitDetailActions<T extends StatefulWidget> on CommonDynPageMixin<T> {
       padding: EdgeInsets.only(
         left: isPortrait && hasStrip ? padding.left : 0,
         right: isPortrait && hasStrip ? padding.right : 0,
-        bottom: padding.bottom,
+        bottom: hasStrip ? 0 : padding.bottom,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -129,33 +129,38 @@ mixin SplitDetailActions<T extends StatefulWidget> on CommonDynPageMixin<T> {
                   ),
                 ),
               ),
-              child: SizedBox(
-                width: double.infinity,
-                height: _stripHeight,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final itemWidth = MediaQuery.textScalerOf(context)
-                        .scale(_itemMinWidth)
-                        .clamp(_itemMinWidth, double.infinity);
-                    if (constraints.maxWidth >= itemWidth * items.length) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (final item in items) Expanded(child: item),
-                        ],
+              child: Padding(
+                // The bar owns its safe-area background so replies never
+                // show through between the controls and the screen edge.
+                padding: EdgeInsets.only(bottom: padding.bottom),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: _stripHeight,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final itemWidth = MediaQuery.textScalerOf(context)
+                          .scale(_itemMinWidth)
+                          .clamp(_itemMinWidth, double.infinity);
+                      if (constraints.maxWidth >= itemWidth * items.length) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (final item in items) Expanded(child: item),
+                          ],
+                        );
+                      }
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (final item in items)
+                              SizedBox(width: itemWidth, child: item),
+                          ],
+                        ),
                       );
-                    }
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (final item in items)
-                            SizedBox(width: itemWidth, child: item),
-                        ],
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
               ),
             ),
