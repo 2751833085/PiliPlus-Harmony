@@ -1,4 +1,5 @@
 import 'package:PiliPlus/plugin/pl_player/models/video_buffer_guard.dart';
+import 'package:PiliPlus/plugin/pl_player/models/seek_buffer_wait.dart';
 import 'package:PiliPlus/plugin/pl_player/models/audio_recovery_guard.dart';
 import 'package:PiliPlus/plugin/pl_player/models/buffering_recovery.dart';
 import 'package:PiliPlus/pages/video/shorts/request_queue.dart';
@@ -909,6 +910,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   /// setDataSource 串行队列尾；同一时刻仅一个初始化流程在执行
   final _sourceRequests = VideoRequestQueue();
+  int _sourceRevision = 0;
+  int _seekRevision = 0;
+  bool _resumeAfterSeek = false;
+  int _transportRevision = 0;
+
+  bool _ownsPlayer(Player player, Object? owner, int sourceRevision) =>
+      _playerCount > 0 &&
+      sourceRevision == _sourceRevision &&
+      identical(player, _videoPlayerController) &&
+      identical(owner, sourceOwner);
 
   bool canResumeSource(Object owner, int sourceCid) =>
       identical(sourceOwner, owner) &&
@@ -945,6 +956,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }) async {
     try {
       _processing = true;
+      _sourceRevision++;
+      _resumeAfterSeek = false;
+      _cancelSubForSeek();
       this.isLive = isLive;
       _videoType = videoType ?? VideoType.ugc;
       this.width = width;
@@ -1007,7 +1021,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       await _initializePlayer(isCurrent: isCurrent);
       if (isCurrent == null || isCurrent()) onInit?.call();
     } catch (err, stackTrace) {
-      dataStatus.value = DataStatus.error;
+      if (isCurrent?.call() ?? true) dataStatus.value = DataStatus.error;
       if (kDebugMode) {
         debugPrint(stackTrace.toString());
         debugPrint('plPlayer err:  $err');
@@ -1224,16 +1238,18 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     final source = dataSource;
     bool? result = false;
     return _refreshTask = _sourceRequests
-        .run((_) async {
+        .run((ticket) async {
           if (identical(owner, sourceOwner) && identical(source, dataSource)) {
-            result = await _refreshPlayer();
+            result = await _refreshPlayer(
+              () => _sourceRequests.isCurrent(ticket),
+            );
           }
         })
         .then((_) => result)
         .whenComplete(() => _refreshTask = null);
   }
 
-  Future<bool?> _refreshPlayer() async {
+  Future<bool?> _refreshPlayer(bool Function() isCurrent) async {
     final player = _videoPlayerController;
     final owner = sourceOwner;
     final source = dataSource;
@@ -1249,6 +1265,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       SmartDialog.showToast('视频源为空，请重新进入本页面');
       return false;
     }
+    _sourceRevision++;
+    _resumeAfterSeek = false;
+    _cancelSubForSeek();
     String? audioUri;
     if (!isLive) {
       if (dataSource.audioSource.isNullOrEmpty) {
@@ -1271,7 +1290,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
         '',
       );
     }
-    if (!identical(player, _videoPlayerController) ||
+    if (!isCurrent() ||
+        !identical(player, _videoPlayerController) ||
         !identical(owner, sourceOwner) ||
         !identical(source, dataSource))
       return false;
@@ -1292,7 +1312,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       ),
       play: false,
     );
-    if (!identical(player, _videoPlayerController) ||
+    if (!isCurrent() ||
+        !identical(player, _videoPlayerController) ||
         !identical(owner, sourceOwner) ||
         !identical(source, dataSource))
       return false;
@@ -1313,7 +1334,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     _initVideoFit();
 
     // 自动播放
-    if (_autoPlay) {
+    if (_autoPlay && intendsPlayback) {
       playIfExists();
     }
   }
@@ -1363,7 +1384,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
       // isPipMode 是普通 bool，build 读它不产生依赖；PiP 结束时若窗口尺寸
       // 恰好没变（如画中画期间从应用栏以小窗打开 app），没有任何重建时机，
       // 页面会冻结在画中画布局。用回调驱动 pipModeRx，页面据此重建。
-      Floating().onPipModeChanged = (v) => pipModeRx.value = v;
+      Floating().onPipModeChanged = _onPipModeChanged;
       pipModeRx.value = Floating().isPipMode;
     }
     final stream = player.stream;
@@ -1577,10 +1598,15 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     if (Floating().onPipAction == _onPipAction) {
       Floating().onPipAction = null;
     }
+    if (Floating().onPipModeChanged == _onPipModeChanged) {
+      Floating().onPipModeChanged = null;
+    }
     _subscriptions?.forEach((e) => e.cancel());
     _subscriptions?.clear();
     _subscriptions = null;
   }
+
+  void _onPipModeChanged(bool active) => pipModeRx.value = active;
 
   /// 鸿蒙小窗控制面板按钮回调（floating 插件转发 controlPanelActionEvent）
   void _onPipAction(String event, int? status) {
@@ -1784,51 +1810,54 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   Future<void> seek(Duration position, {bool isSeek = false}) async {
-    _audioRecoveryGuard.reset();
-    if (isSeek) {
-      /// 拖动进度条调节时，不等待第一帧，防止抖动
-      await _videoPlayerController?.stream.buffer.first.timeout(
-        const Duration(milliseconds: 250),
-        onTimeout: () => Duration.zero,
-      );
-    }
-    danmakuController?.clear();
-    final wasHeld = _videoBufferGuard.holding;
     final player = _videoPlayerController;
-    _resetVideoBufferGuard();
-    final epoch = _videoBufferEpoch;
+    if (player == null || _playerCount == 0) return;
+    final owner = sourceOwner;
+    final sourceRevision = _sourceRevision;
+    final revision = ++_seekRevision;
+    bool current() =>
+        revision == _seekRevision && _ownsPlayer(player, owner, sourceRevision);
     try {
-      await player?.seek(position);
-      if (wasHeld &&
+      if (isSeek && !await waitForSeekBuffer(player.stream.buffer, current)) {
+        return;
+      }
+      _audioRecoveryGuard.reset();
+      danmakuController?.clear();
+      _resumeAfterSeek |= _videoBufferGuard.holding;
+      _resetVideoBufferGuard();
+      final epoch = _videoBufferEpoch;
+      await player.seek(position);
+      if (_resumeAfterSeek &&
+          current() &&
           epoch == _videoBufferEpoch &&
-          identical(player, _videoPlayerController) &&
           intendsPlayback &&
           !_pauseRequestedByApp) {
-        await player?.play();
+        _resumeAfterSeek = false;
+        await player.play();
       }
-    } catch (e) {
-      if (kDebugMode) debugPrint('seek failed: $e');
+    } catch (error) {
+      if (current() && kDebugMode) debugPrint('seek failed: $error');
     }
   }
 
   /// 跳转至指定位置
   Future<void> seekTo(Duration position, {bool isSeek = true}) async {
-    if (_playerCount == 0) {
-      return;
-    }
-    if (position < Duration.zero) {
-      position = Duration.zero;
-    }
+    if (_playerCount == 0) return;
+    if (position < Duration.zero) position = Duration.zero;
     _heartDuration = position.inSeconds;
-
+    _cancelSubForSeek();
     if (duration.value != 0) {
-      seek(position, isSeek: isSeek);
+      await seek(position, isSeek: isSeek);
     } else {
-      // if (kDebugMode) debugPrint('seek duration else');
-      _subForSeek?.cancel();
-      _subForSeek = duration.listen((_) {
-        seek(position, isSeek: isSeek);
+      final owner = sourceOwner;
+      final sourceRevision = _sourceRevision;
+      _subForSeek = duration.listen((value) {
+        if (value == 0) return;
         _cancelSubForSeek();
+        if (sourceRevision == _sourceRevision &&
+            identical(owner, sourceOwner)) {
+          unawaited(seek(position, isSeek: isSeek));
+        }
       });
     }
   }
@@ -1869,35 +1898,47 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   /// 播放视频
   Future<void> play({bool repeat = false, bool hideControls = true}) async {
     if (_playerCount == 0) return;
+    final revision = ++_transportRevision;
     _pauseRequestedByApp = false;
     _playbackIntent = true;
     // 播放时自动隐藏控制条
     controls = !hideControls;
-    // repeat为true，将从头播放
-    if (repeat) {
-      await seekTo(Duration.zero, isSeek: false);
+    final player = _videoPlayerController;
+    if (player == null) return;
+    final owner = sourceOwner;
+    final sourceRevision = _sourceRevision;
+    bool current() =>
+        revision == _transportRevision &&
+        _ownsPlayer(player, owner, sourceRevision);
+    try {
+      if (repeat) {
+        await seekTo(Duration.zero, isSeek: false);
+        if (!current()) return;
+      }
+
+      // mpv's Harmony audio output can stay paused after an interruption.
+      if (_audioInterrupted) {
+        try {
+          await audioSessionHandler?.setActive(true);
+        } catch (_) {}
+        if (!current()) return;
+        try {
+          await player.platform?.maybeAsNativePlayer.command(const [
+            'ao-reload',
+          ]);
+        } catch (_) {}
+        if (!current()) return;
+        _audioInterrupted = false;
+      }
+
+      if (!_videoBufferGuard.holding) await player.play();
+      if (!current()) return;
+      audioSessionHandler?.setActive(true);
+      playerStatus = .playing;
+    } catch (_) {
+      // Closing the page can dispose the native player before play returns.
+      if (current()) rethrow;
     }
-
-    // 鸿蒙：被系统打断后 mpv 的音频渲染器已被暂停且 mpv 自身无感知，
-    // 单纯解除暂停不会恢复。先重新激活音频会话抢回焦点（暂停其他 app 的
-    // 音频），再用 ao-reload 重建音频输出，让新渲染器以新焦点启动。
-    if (_audioInterrupted) {
-      _audioInterrupted = false;
-      try {
-        await audioSessionHandler?.setActive(true);
-      } catch (_) {}
-      try {
-        await _videoPlayerController?.platform?.maybeAsNativePlayer.command(
-          const ['ao-reload'],
-        );
-      } catch (_) {}
-    }
-
-    if (!_videoBufferGuard.holding) await _videoPlayerController?.play();
-
-    audioSessionHandler?.setActive(true);
-
-    playerStatus = .playing;
   }
 
   /// 暂停播放
@@ -1937,16 +1978,27 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   }
 
   Future<void> pause({bool notify = true, bool isInterrupt = false}) async {
+    if (_playerCount == 0) return;
+    final revision = ++_transportRevision;
     _pauseRequestedByApp = true;
+    _resumeAfterSeek = false;
     _resetVideoBufferGuard();
     isBuffering.value = false;
     if (notify || isInterrupt) _playbackIntent = false;
-    await _videoPlayerController?.pause();
-    playerStatus = .paused;
-
-    // 主动暂停时让出音频焦点
-    if (!isInterrupt) {
-      audioSessionHandler?.setActive(false);
+    final player = _videoPlayerController;
+    if (player == null) return;
+    final owner = sourceOwner;
+    final sourceRevision = _sourceRevision;
+    bool current() =>
+        revision == _transportRevision &&
+        _ownsPlayer(player, owner, sourceRevision);
+    try {
+      await player.pause();
+      if (!current()) return;
+      playerStatus = .paused;
+      if (!isInterrupt) audioSessionHandler?.setActive(false);
+    } catch (_) {
+      if (current()) rethrow;
     }
   }
 

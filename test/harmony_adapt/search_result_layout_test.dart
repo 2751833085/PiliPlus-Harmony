@@ -104,6 +104,90 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('slow search suggestions cannot replace newer or cleared input', (
+    tester,
+  ) async {
+    await GStorage.setting.put(SettingBoxKey.searchSuggestion, true);
+    addTearDown(
+      () => GStorage.setting.put(SettingBoxKey.searchSuggestion, false),
+    );
+    final pending = <String, (RequestOptions, RequestInterceptorHandler)>{};
+    final responses = InterceptorsWrapper(
+      onRequest: (request, handler) {
+        if (request.path == Api.searchSuggest) {
+          pending[request.queryParameters['term'] as String] = (
+            request,
+            handler,
+          );
+        } else {
+          handler.next(request);
+        }
+      },
+    );
+    Request.dio.interceptors.insert(0, responses);
+    addTearDown(() => Request.dio.interceptors.remove(responses));
+
+    void answer(String term) {
+      final (request, handler) = pending.remove(term)!;
+      handler.resolve(
+        Response(
+          requestOptions: request,
+          statusCode: 200,
+          data: {
+            'code': 0,
+            'data': {
+              'result': {
+                'tag': [
+                  {'term': term, 'name': '$term 建议'},
+                ],
+              },
+            },
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      GetMaterialApp(
+        theme: HarmonyTheme.apply(ThemeData()),
+        home: const Scaffold(body: Text('首页')),
+        getPages: [GetPage(name: '/search', page: SearchPage.new)],
+      ),
+    );
+    Get.toNamed<void>('/search');
+    await tester.pumpAndSettle();
+    final input = find.byType(TextField);
+
+    Future<void> type(String term) async {
+      await tester.enterText(input, term);
+      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pump();
+      expect(pending.containsKey(term), isTrue);
+    }
+
+    await type('旧词');
+    await type('新词');
+    answer('新词');
+    await tester.pumpAndSettle();
+    expect(find.text('新词 建议', findRichText: true), findsOneWidget);
+    answer('旧词');
+    await tester.pumpAndSettle();
+    expect(find.text('旧词 建议', findRichText: true), findsNothing);
+    expect(find.text('新词 建议', findRichText: true), findsOneWidget);
+
+    await type('将清空');
+    await tester.tap(find.byTooltip('清空'));
+    await tester.pumpAndSettle();
+    answer('将清空');
+    await tester.pumpAndSettle();
+    await tester.enterText(input, '再次输入');
+    await tester.pump();
+    expect(find.text('将清空 建议', findRichText: true), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 250));
+  });
+
   testWidgets('search result rows and sidebar follow physical fold sizes', (
     tester,
   ) async {

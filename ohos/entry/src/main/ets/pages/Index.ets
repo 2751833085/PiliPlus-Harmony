@@ -126,6 +126,19 @@ struct Index {
 
   private categoryController: TabsController = new TabsController();
   private classicController: TabsController = new TabsController();
+  private appearanceRevision: number = 0;
+  private changeTabCallback = (index: number): void => {
+    this.currentNavIndex = index;
+    this.classicController.changeIndex(index);
+  };
+  private avoidAreaCallback = (data: window.AvoidAreaOptions): void => {
+    if (this.win === null) return;
+    if (data.type === window.AvoidAreaType.TYPE_SYSTEM) {
+      this.statusBarHeight = px2vp(data.area.topRect.height);
+    } else if (data.type === window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
+      this.navigationSafeBottom = this.getUIContext().px2vp(data.area.bottomRect.height);
+    }
+  };
   private win: window.Window | null = null;
   private sizeCallback: ((size: window.Size) => void) | null = null;
   private rectCallback: ((opts: window.RectChangeOptions) => void) | null = null;
@@ -169,6 +182,7 @@ struct Index {
   /// 屏幕旋转动画：模仿安卓CROSSFADE
   /// 旋转开始时捕获旧画面快照，新旧界面淡入淡出
   private RotatationAnimation(w: window.Window): void {
+    this.cleanupRotationMask();
     try {
       this.rotationMask = w.snapshotSync();
       this.rotationMaskOpacity = 1;
@@ -194,11 +208,12 @@ struct Index {
 
   private cleanupRotationMask(): void {
     this.clearRotationMaskTimers();
-    if (this.rotationMask !== null) {
-      this.rotationMask.release();
-    }
+    const mask = this.rotationMask;
     this.rotationMask = null;
     this.rotationMaskOpacity = 1;
+    mask?.release().catch((err: Object) => {
+      console.warn(TAG, `release rotation mask failed: ${err}`);
+    });
   }
 
   private clearRotationMaskTimers(): void {
@@ -207,20 +222,15 @@ struct Index {
   }
 
   aboutToAppear(): void {
-    this.context.eventHub.on(EVENT_CHANGE_TAB, (index: number) => {
-      this.currentNavIndex = index;
-      this.classicController.changeIndex(index);
-    });
+    const revision = ++this.appearanceRevision;
+    this.context.eventHub.on(EVENT_CHANGE_TAB, this.changeTabCallback);
 
     window.getLastWindow(this.context).then((w: window.Window) => {
+      if (revision !== this.appearanceRevision) return;
       this.win = w;
       let topAvoidArea = w.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
       this.statusBarHeight = px2vp(topAvoidArea.topRect.height);
-      w.on('avoidAreaChange', (data) => {
-        if (data.type === window.AvoidAreaType.TYPE_SYSTEM) {
-          this.statusBarHeight = px2vp(data.area.topRect.height);
-        }
-      });
+      w.on('avoidAreaChange', this.avoidAreaCallback);
 
       const rect = w.getWindowProperties().windowRect;
       this.applySize(rect.width, rect.height);
@@ -249,7 +259,7 @@ struct Index {
             }
           } else if (info.type === window.RotationChangeType.WINDOW_DID_ROTATE) {
             this.currentOrientation = info.orientation;
-            this.rotatingCount--;
+            this.rotatingCount = Math.max(0, this.rotatingCount - 1);
             if (this.rotatingCount === 0) {
               this.bgColor = $r("app.color.start_window_background");
             }
@@ -263,39 +273,33 @@ struct Index {
       let windowBottomAvoidArea = w.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
       let uiContext = this.getUIContext();
       this.navigationSafeBottom = uiContext.px2vp(windowBottomAvoidArea.bottomRect.height);
-
-      w.on('avoidAreaChange', (data) => {
-        if (data.type === window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
-          this.navigationSafeBottom = uiContext.px2vp(data.area.bottomRect.height);
-        }
-      });
     }).catch((err: Object) => {
       console.error(TAG, `getLastWindow failed: ${err}`);
     });
   }
 
   aboutToDisappear(): void {
+    ++this.appearanceRevision;
+    this.context.eventHub.off(EVENT_CHANGE_TAB, this.changeTabCallback);
     this.context.eventHub.emit('EVENT_DOCK_METRICS', 0, 0);
     MovingPhotoSave.cancel();
     if (this.win !== null) {
-      try {
-        if (this.sizeCallback !== null) {
-          this.win.off('windowSizeChange', this.sizeCallback);
-        }
-        if (this.rectCallback !== null) {
-          this.win.off('windowRectChange', this.rectCallback);
-        }
-        if (this.rotationCallback !== null) {
-          this.win.off('rotationChange', this.rotationCallback);
-        }
-      } catch (err) {
-        console.error(TAG, `off window listeners failed: ${err}`);
+      try { this.win.off('avoidAreaChange', this.avoidAreaCallback); } catch (_) {}
+      if (this.sizeCallback !== null) {
+        try { this.win.off('windowSizeChange', this.sizeCallback); } catch (_) {}
+      }
+      if (this.rectCallback !== null) {
+        try { this.win.off('windowRectChange', this.rectCallback); } catch (_) {}
+      }
+      if (this.rotationCallback !== null) {
+        try { this.win.off('rotationChange', this.rotationCallback); } catch (_) {}
       }
       this.sizeCallback = null;
       this.rectCallback = null;
       this.rotationCallback = null;
     }
-    this.clearRotationMaskTimers();
+    this.win = null;
+    this.cleanupRotationMask();
   }
 
   onPageShow(): void {

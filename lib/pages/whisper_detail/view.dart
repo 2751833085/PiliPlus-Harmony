@@ -244,10 +244,9 @@ class _WhisperDetailPageState
                             300,
                     item: item,
                     eInfos: _whisperDetailController.eInfos,
-                    onLongPress: () => onLongPress(index, item, isOwner),
+                    onLongPress: () => onLongPress(item, isOwner),
                     onSecondaryTapUp: PlatformUtils.isDesktop
-                        ? (e) =>
-                              _showMenu(e.globalPosition, index, item, isOwner)
+                        ? (e) => _showMenu(e.globalPosition, item, isOwner)
                         : null,
                     isOwner: isOwner,
                   );
@@ -263,7 +262,7 @@ class _WhisperDetailPageState
     };
   }
 
-  void _showMenu(Offset offset, int index, Msg item, bool isOwner) {
+  void _showMenu(Offset offset, Msg item, bool isOwner) {
     showMenu(
       context: context,
       position: PageUtils.menuPosition(offset),
@@ -275,7 +274,6 @@ class _WhisperDetailPageState
               message: '${item.msgKey}',
               onClearText: editController.clear,
               msgType: .EN_MSG_TYPE_DRAW_BACK,
-              index: index,
             ),
             child: const Text('撤回', style: TextStyle(fontSize: 14)),
           )
@@ -302,7 +300,7 @@ class _WhisperDetailPageState
     );
   }
 
-  void onLongPress(int index, Msg item, bool isOwner) {
+  void onLongPress(Msg item, bool isOwner) {
     Feedback.forLongPress(context);
     showDialog(
       context: context,
@@ -317,7 +315,6 @@ class _WhisperDetailPageState
                     message: '${item.msgKey}',
                     onClearText: editController.clear,
                     msgType: .EN_MSG_TYPE_DRAW_BACK,
-                    index: index,
                   );
                 },
                 dense: true,
@@ -385,9 +382,11 @@ class _WhisperDetailPageState
               return IconButton(
                 onPressed: () async {
                   if (enablePublish) {
+                    final sentText = editController.rawText;
                     _whisperDetailController.sendMsg(
-                      message: editController.rawText,
+                      message: sentText,
                       onClearText: () {
+                        if (editController.rawText != sentText) return;
                         editController.clear();
                         this.enablePublish.value = false;
                       },
@@ -401,11 +400,28 @@ class _WhisperDetailPageState
                       );
                       if (pickedFile != null) {
                         final path = pickedFile.path;
-                        SmartDialog.showLoading(msg: '正在上传图片');
-                        final result = await MsgHttp.uploadBfs(
-                          path: path,
-                          biz: 'im',
+                        if (!mounted) {
+                          if (PlatformUtils.isMobile) File(path).tryDel();
+                          return;
+                        }
+                        var uploadVisible = true;
+                        SmartDialog.showLoading(
+                          msg: '正在上传图片',
+                          onDismiss: () => uploadVisible = false,
                         );
+                        final result =
+                            await MsgHttp.uploadBfs(
+                              path: path,
+                              biz: 'im',
+                            ).whenComplete(() {
+                              if (uploadVisible) {
+                                SmartDialog.dismiss(
+                                  status: SmartStatus.loading,
+                                );
+                              }
+                              if (PlatformUtils.isMobile) File(path).tryDel();
+                            });
+                        if (!mounted) return;
                         if (result case Success(:final response)) {
                           final mimeType =
                               lookupMimeType(
@@ -421,24 +437,16 @@ class _WhisperDetailPageState
                             'size': response.imgSize,
                           };
                           SmartDialog.showLoading(msg: '正在发送');
-                          await _whisperDetailController
-                              .sendMsg(
-                                picMsg: picMsg,
-                                onClearText: editController.clear,
-                              )
-                              .whenComplete(() {
-                                if (PlatformUtils.isMobile) {
-                                  File(path).tryDel();
-                                }
-                              });
+                          await _whisperDetailController.sendMsg(
+                            picMsg: picMsg,
+                            onClearText: () {},
+                          );
                         } else {
-                          SmartDialog.dismiss();
                           result.toast();
-                          return;
                         }
                       }
                     } catch (e) {
-                      SmartDialog.showToast(e.toString());
+                      if (mounted) SmartDialog.showToast(e.toString());
                     }
                   }
                 },

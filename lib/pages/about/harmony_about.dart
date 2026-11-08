@@ -96,7 +96,7 @@ class HarmonyDevelopmentJourney extends StatelessWidget {
             for (final step in const [
               ('V1', '初步移植', '完成鸿蒙端的初步移植，保留原有核心功能。'),
               ('V2', '界面适配', '适配导航栏与沉浸光感，完善多屏布局。'),
-              ('V3', '全面优化', '全面优化系统体验、界面一致性与加载响应。'),
+              ('V3', 'Beta 1.0', '进入 Beta 阶段，持续核查稳定性、界面一致性与加载响应。'),
             ])
               Padding(
                 padding: const EdgeInsets.only(bottom: 14),
@@ -132,7 +132,7 @@ class HarmonyDevelopmentJourney extends StatelessWidget {
               ),
             const Divider(height: 16),
             Text(
-              '开发流程：需求整理 → 实现 → 自动化回归 → 真机验证 → HAP 归档',
+              '此前版本统一归档为 Alpha；Beta 1.0 为首个 Beta 版本。',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 8),

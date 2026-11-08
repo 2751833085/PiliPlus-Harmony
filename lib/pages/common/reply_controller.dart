@@ -205,13 +205,23 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
         );
   }
 
-  void onRemove(int index, ReplyInfo item, int? subIndex) {
-    if (subIndex == null) {
-      loadingState.value.data!.removeAt(index);
+  void onRemove(ReplyInfo item, ReplyInfo? child) {
+    final list = loadingState.value.data;
+    if (isClosed || list == null) return;
+    final index = list.indexWhere((reply) => reply.id == item.id);
+    if (index == -1) return;
+
+    if (child == null) {
+      if (list.removeAt(index).replyControl.isUpTop) hasUpTop = false;
     } else {
-      item
+      final parent = list[index];
+      final childIndex = parent.replies.indexWhere(
+        (reply) => reply.id == child.id,
+      );
+      if (childIndex == -1) return;
+      parent
         ..count -= 1
-        ..replies.removeAt(subIndex);
+        ..replies.removeAt(childIndex);
     }
     count.value -= 1;
     loadingState.refresh();
@@ -226,28 +236,30 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
     );
   }
 
-  Future<void> onToggleTop(
-    ReplyInfo item,
-    int index,
-    oid,
-    int type,
-  ) async {
-    bool isUpTop = item.replyControl.isUpTop;
+  Future<void> onToggleTop(ReplyInfo item, Object oid, int type) async {
+    if (isClosed) return;
+    final isUpTop = item.replyControl.isUpTop;
     final res = await ReplyHttp.replyTop(
       oid: oid,
       type: type,
       rpid: item.id,
       isUpTop: isUpTop,
     );
+    if (isClosed) return;
     if (res.isSuccess) {
-      item.replyControl.isUpTop = !isUpTop;
-      if (!isUpTop && index != 0) {
-        final list = loadingState.value.data!;
-        list
-          ..first.replyControl.isUpTop = false
-          ..insert(0, list.removeAt(index));
+      final list = loadingState.value.data ?? const <ReplyInfo>[];
+      final index = list.indexWhere((reply) => reply.id == item.id);
+      if (index != -1) {
+        list[index].ensureReplyControl().isUpTop = !isUpTop;
+        if (!isUpTop && index != 0) {
+          if (list.first.replyControl.isUpTop) {
+            list.first.replyControl.isUpTop = false;
+          }
+          list.insert(0, list.removeAt(index));
+        }
+        hasUpTop = list.first.replyControl.isUpTop;
+        loadingState.refresh();
       }
-      loadingState.refresh();
       SmartDialog.showToast('${isUpTop ? '取消' : ''}置顶成功');
     } else {
       res.toast();

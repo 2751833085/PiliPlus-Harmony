@@ -50,17 +50,31 @@ Map<String, dynamic>? latestHarmonyRelease(dynamic response) {
 
 String? harmonyHapUrl(Map data) {
   final assets = data['assets'];
-  if (assets is! List) return null;
+  final tag = data['tag_name'];
+  if (assets is! List || tag is! String) return null;
   for (final asset in assets) {
     if (asset is! Map) continue;
-    final name = asset['name']?.toString() ?? '';
+    final name = asset['name'];
+    final size = asset['size'];
+    if (name is! String ||
+        !RegExp(r'(?:^|[-_.])signed\.hap$').hasMatch(name) ||
+        asset['state'] != 'uploaded' ||
+        size is! int ||
+        size <= 0) {
+      continue;
+    }
     final url = Uri.tryParse(asset['browser_download_url']?.toString() ?? '');
-    if (name.endsWith('.hap') &&
-        url?.scheme == 'https' &&
-        url?.host == 'github.com' &&
-        url!.path.startsWith(
-          '/2751833085/PiliPlus-Harmony/releases/download/',
-        )) {
+    if (url == null || url.scheme != 'https' || url.host != 'github.com') {
+      continue;
+    }
+    final path = url.pathSegments;
+    if (path.length == 6 &&
+        path[0] == '2751833085' &&
+        path[1] == 'PiliPlus-Harmony' &&
+        path[2] == 'releases' &&
+        path[3] == 'download' &&
+        path[4] == tag &&
+        path[5] == name) {
       return url.toString();
     }
   }

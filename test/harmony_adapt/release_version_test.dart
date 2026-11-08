@@ -28,6 +28,8 @@ void main() {
         ? [
             {
               'name': 'PiliPlus-signed.hap',
+              'state': 'uploaded',
+              'size': 1024,
               'browser_download_url':
                   'https://github.com/2751833085/PiliPlus-Harmony/releases/download/$tag/PiliPlus-signed.hap',
             },
@@ -50,6 +52,42 @@ void main() {
       expect(latestHarmonyRelease([]), isNull);
     },
   );
+  test('Alpha archives cannot mask the first installable Beta release', () {
+    final beta = release('v3.0.0+6252')..['name'] = 'Beta 1.0';
+    final alpha = release('v3.0.0+6251', asset: false)..['name'] = 'Alpha 6251';
+    expect(latestHarmonyRelease([alpha, beta])?['name'], 'Beta 1.0');
+    expect(
+      ReleaseVersion.parse(
+        '3.0.0+6251',
+      )!.compareTo(ReleaseVersion.parse(beta['tag_name'])!),
+      lessThan(0),
+    );
+  });
+  test('ignores unsigned, empty, pending and mismatched HAP assets', () {
+    for (final change in <String, dynamic>{
+      'name': 'PiliPlus-unsigned.hap',
+      'size': 0,
+      'state': 'starter',
+      'browser_download_url':
+          'https://github.com/2751833085/PiliPlus-Harmony/releases/download/v3.0.0%2B6250/PiliPlus-signed.hap',
+    }.entries) {
+      final data = release('v3.0.0+6252');
+      (data['assets'] as List).first[change.key] = change.value;
+      expect(harmonyHapUrl(data), isNull, reason: change.key);
+    }
+    final valid = release('v3.0.0+6252');
+    final asset = (valid['assets'] as List).first;
+    asset['browser_download_url'] =
+        'https://github.com/2751833085/PiliPlus-Harmony/releases/download/v3.0.0%2B6252/PiliPlus-signed.hap';
+    expect(harmonyHapUrl(valid), isNotNull);
+    expect(
+      latestHarmonyRelease([
+        release('v3.0.0+9999', asset: false),
+        valid,
+      ])?['tag_name'],
+      'v3.0.0+6252',
+    );
+  });
   test('rejects unrelated download links', () {
     expect(
       harmonyHapUrl({

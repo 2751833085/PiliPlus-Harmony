@@ -17,17 +17,18 @@ on:
 jobs:
   analyze:
     name: Dart Analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: "3.44.9"
-          cache: true
+      - name: Setup flutter-ohos
+        run: |
+          git clone --depth 1 -b 3.44.9+ohos-0.0.1-canary1 https://gitcode.com/CPF-Flutter/flutter_flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> $GITHUB_PATH
+        shell: bash
 
       - name: Get Flutter dependencies
         run: flutter pub get
@@ -36,3 +37,6 @@ jobs:
 
       - name: Dart Analyze
         run: dart analyze --no-fatal-warnings
+
+      - name: Application regression tests
+        run: flutter test

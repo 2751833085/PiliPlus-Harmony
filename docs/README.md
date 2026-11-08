@@ -1,5 +1,8 @@
 # 文档目录
 
+- [Beta 1.0 验证记录](harmony/beta-1.0-validation.md)：首个 Beta 版本的稳定性修复、完整回归及实际验证限制。
+- [版本归档规则](../releases/README.md)：此前版本统一归档为 Alpha，历史文档标题仅保留追溯用途。
+
 - [V3.0 可行性研究](v3.0/FEASIBILITY.md)：Material 依赖盘点、官方版观察、技术路线与[功能决策台账](v3.0/FEATURE_DECISIONS.md)。
 
 - [V2.7 首页与评论优化](v2.7/README.md)：默认栏数、刷新衔接、评论播控与光感；[验证记录](v2.7/VALIDATION.md)。

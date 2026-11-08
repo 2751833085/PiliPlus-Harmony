@@ -33,6 +33,8 @@ class DynamicsTabController
     if (dynamicsType == .all) {
       mainController.setDynCount();
     }
+    // Refresh or a new author/account replaces the pending page and cursor.
+    invalidateRequests();
     offset = null;
     return super.onRefresh();
   }

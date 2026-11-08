@@ -94,13 +94,17 @@ class DownloadManager {
       } else {
         // Servers may ignore Range. Start over instead of appending a full copy.
         received = 0;
-        if (data.contentLength >= 0) {
+        if (data.contentLength == 0) {
+          throw StateError('Download server returned an empty media file');
+        }
+        if (data.contentLength > 0) {
           total = data.contentLength;
           expectedEnd = total;
         }
       }
       _checkCancelled();
       await file.parent.create(recursive: true);
+      _checkCancelled();
       sink = file.openWrite(
         mode: received == 0 ? FileMode.writeOnly : FileMode.writeOnlyAppend,
       );
@@ -110,7 +114,11 @@ class DownloadManager {
       await sink.addStream(
         _cancellable(data.stream).map((chunk) {
           _checkCancelled();
-          received += chunk.length;
+          final next = received + chunk.length;
+          if (expectedEnd != null && next > expectedEnd) {
+            throw StateError('Download exceeded the expected byte range');
+          }
+          received = next;
           final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
           if (last != now) {
             last = now;
@@ -122,7 +130,8 @@ class DownloadManager {
       await sink.close();
       sink = null;
       _checkCancelled();
-      if ((expectedEnd != null && received != expectedEnd) ||
+      if (received == 0 ||
+          (expectedEnd != null && received != expectedEnd) ||
           (total > 0 && received != total)) {
         throw StateError(
           'Download ended before the expected byte range completed',

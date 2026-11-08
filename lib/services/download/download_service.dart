@@ -38,6 +38,7 @@ class DownloadService extends GetxService {
 
   final _lock = Lock();
   final _entryWriteLock = Lock();
+  final _creatingCids = <int>{};
   int _downloadRevision = 0;
   CancelToken? _prepareCancel;
   bool _isCurrent(BiliDownloadEntryInfo entry, int revision) =>
@@ -251,16 +252,25 @@ class DownloadService extends GetxService {
   }
 
   Future<void> _createDownload(BiliDownloadEntryInfo entry) async {
-    final entryDir = await _getDownloadEntryDir(entry);
-    final entryJsonFile = File(path.join(entryDir.path, _entryFile));
-    await entryJsonFile.writeAsString(jsonEncode(entry.toJson()));
-    entry
-      ..pageDirPath = entryDir.parent.path
-      ..entryDirPath = entryDir.path
-      ..status = DownloadStatus.wait;
-    waitDownloadQueue.add(entry);
-    if (curDownload.value?.status.isDownloading != true) {
-      startDownload(entry);
+    if (!_creatingCids.add(entry.cid)) return;
+    try {
+      final entryDir = await _getDownloadEntryDir(entry);
+      entry
+        ..pageDirPath = entryDir.parent.path
+        ..entryDirPath = entryDir.path;
+      if (!await _updateBiliDownloadEntryJson(entry)) {
+        SmartDialog.showToast('无法写入缓存记录，请检查存储空间与缓存路径');
+        return;
+      }
+      waitDownloadQueue.add(entry);
+      if (curDownload.value?.status.isDownloading != true) {
+        unawaited(startDownload(entry));
+      }
+    } on FileSystemException catch (error) {
+      if (kDebugMode) debugPrint('create download entry: $error');
+      SmartDialog.showToast('无法写入缓存记录，请检查存储空间与缓存路径');
+    } finally {
+      _creatingCids.remove(entry.cid);
     }
   }
 
@@ -291,7 +301,13 @@ class DownloadService extends GetxService {
     return dir.path;
   }
 
+  bool _isQueued(BiliDownloadEntryInfo entry) =>
+      waitDownloadQueue.any((queued) => identical(queued, entry));
+
   Future<void> startDownload(BiliDownloadEntryInfo entry) {
+    if (entry.isCompleted || !_isQueued(entry)) {
+      return Future.value();
+    }
     final revision = ++_downloadRevision;
     _prepareCancel?.cancel();
     final cancel = _prepareCancel = CancelToken();
@@ -306,8 +322,13 @@ class DownloadService extends GetxService {
         if (curEntry.status.isDownloading)
           curEntry.status = DownloadStatus.pause;
       }
+      if (!_isQueued(entry)) {
+        curDownload.refresh();
+        _stopBackgroundTask();
+        return;
+      }
       _curCid = entry.cid;
-      curDownload.value = entry;
+      curDownload.value = entry..status = DownloadStatus.getDanmaku;
       waitDownloadQueue.refresh();
       await _startDownload(entry, revision, cancel);
     });
@@ -410,16 +431,7 @@ class DownloadService extends GetxService {
       if (!current()) return;
       _updateCurStatus(DownloadStatus.getPlayUrl);
 
-      final mediaFileInfo = await _prepare(
-        DownloadHttp.getVideoUrl(
-          entry: entry,
-          ep: entry.ep,
-          source: entry.source,
-          pageData: entry.pageData,
-          cancelToken: cancel,
-        ),
-        cancel,
-      );
+      final mediaFileInfo = await _prepare(resolveMedia(entry, cancel), cancel);
       if (!current()) return;
 
       final videoDir = Directory(path.join(entry.entryDirPath, entry.typeTag));
@@ -499,17 +511,47 @@ class DownloadService extends GetxService {
     }
   }
 
-  Future<void> _updateBiliDownloadEntryJson(BiliDownloadEntryInfo entry) {
+  @protected
+  Future<BiliDownloadMediaInfo> resolveMedia(
+    BiliDownloadEntryInfo entry,
+    CancelToken cancel,
+  ) => DownloadHttp.getVideoUrl(
+    entry: entry,
+    ep: entry.ep,
+    source: entry.source,
+    pageData: entry.pageData,
+    cancelToken: cancel,
+  );
+
+  Future<bool> _updateBiliDownloadEntryJson(
+    BiliDownloadEntryInfo entry, {
+    bool completed = false,
+    bool Function()? isCurrent,
+  }) {
     final entryJsonFile = File(path.join(entry.entryDirPath, _entryFile));
-    final contents = jsonEncode(entry.toJson());
+    final json = entry.toJson();
+    if (completed) {
+      json['is_completed'] = true;
+      json['downloaded_bytes'] = entry.totalBytes;
+    }
+    final contents = jsonEncode(json);
     return _entryWriteLock.synchronized(() async {
-      if (!await Directory(entry.entryDirPath).exists()) return;
       final temporary = File('${entryJsonFile.path}.tmp');
       try {
+        if (!(isCurrent?.call() ?? true) ||
+            !await Directory(entry.entryDirPath).exists()) {
+          return false;
+        }
         await temporary.writeAsString(contents, flush: true);
+        if (!(isCurrent?.call() ?? true)) return false;
         await temporary.rename(entryJsonFile.path);
-      } on FileSystemException {
-        if (await Directory(entry.entryDirPath).exists()) rethrow;
+        return true;
+      } on FileSystemException catch (error) {
+        if (kDebugMode) debugPrint('write download entry: $error');
+        return false;
+      } finally {
+        // A successful rename already moved the temporary file out of this path.
+        await temporary.tryDel();
       }
     });
   }
@@ -528,12 +570,12 @@ class DownloadService extends GetxService {
 
   void _onReceive(int progress, int total) {
     if (curDownload.value case final entry?) {
-      if (total > 0 && total != entry.totalBytes) {
-        _updateBiliDownloadEntryJson(entry..totalBytes = total);
-      }
       entry
         ..downloadedBytes = progress
         ..status = DownloadStatus.downloading;
+      if (total > 0 && total != entry.totalBytes) {
+        unawaited(_updateBiliDownloadEntryJson(entry..totalBytes = total));
+      }
       curDownload.refresh();
     }
   }
@@ -541,6 +583,7 @@ class DownloadService extends GetxService {
   void _onDone([Object? error]) {
     if (error != null) {
       _updateCurStatus(_downloadManager?.status ?? DownloadStatus.pause);
+      _stopBackgroundTaskIfIdle();
       return;
     }
 
@@ -549,59 +592,86 @@ class DownloadService extends GetxService {
       DownloadStatus.failDownload => DownloadStatus.failDownloadAudio,
       _ => _downloadManager?.status ?? DownloadStatus.pause,
     };
-    _updateCurStatus(status);
-
-    if (curDownload.value case final curEntryInfo?) {
-      curEntryInfo.downloadedBytes = curEntryInfo.totalBytes;
-      if (status == DownloadStatus.completed) {
-        _completeDownload();
-      } else {
-        _updateBiliDownloadEntryJson(curEntryInfo);
+    if (status == DownloadStatus.completed) {
+      unawaited(_completeDownload());
+    } else {
+      _updateCurStatus(status);
+      if (curDownload.value case final entry?) {
+        entry.downloadedBytes = entry.totalBytes;
+        unawaited(_updateBiliDownloadEntryJson(entry));
       }
+      _stopBackgroundTaskIfIdle();
     }
   }
 
   void _onAudioDone([Object? error]) {
     if (_downloadManager?.status == DownloadStatus.completed) {
       if (error == null) {
-        _completeDownload();
-      } else {
-        final status = _audioDownloadManager?.status ?? DownloadStatus.pause;
-        _updateCurStatus(
-          status == DownloadStatus.failDownload
-              ? DownloadStatus.failDownloadAudio
-              : status,
-        );
+        unawaited(_completeDownload());
+        return;
       }
+      final status = _audioDownloadManager?.status ?? DownloadStatus.pause;
+      _updateCurStatus(
+        status == DownloadStatus.failDownload
+            ? DownloadStatus.failDownloadAudio
+            : status,
+      );
+    }
+    _stopBackgroundTaskIfIdle();
+  }
+
+  void _stopBackgroundTaskIfIdle() {
+    if (_downloadManager?.status.isDownloading != true &&
+        _audioDownloadManager?.status.isDownloading != true) {
+      _stopBackgroundTask();
     }
   }
 
-  Future<void> _completeDownload() async {
+  Future<void> _completeDownload() {
     final entry = curDownload.value;
-    if (entry == null) {
-      return;
-    }
+    if (entry == null) return Future.value();
     final revision = _downloadRevision;
-    entry
-      ..downloadedBytes = entry.totalBytes
-      ..isCompleted = true;
-    await _updateBiliDownloadEntryJson(entry);
-    if (!_isCurrent(entry, revision)) return;
-    waitDownloadQueue.remove(entry);
-    downloadList.insert(0, entry);
-    flagNotifier.refresh();
-    _curCid = null;
-    curDownload.value = null;
-    _downloadManager = null;
-    _audioDownloadManager = null;
-    _stopBackgroundTask();
-    nextDownload();
+    bool current() => _isCurrent(entry, revision);
+    return _lock.synchronized(() async {
+      if (!current()) return;
+      final saved = await _updateBiliDownloadEntryJson(
+        entry,
+        completed: true,
+        isCurrent: current,
+      );
+      if (!current()) {
+        // The atomic rename may have completed just as a pause superseded us.
+        if (saved) await _updateBiliDownloadEntryJson(entry);
+        return;
+      }
+      if (!saved) {
+        // Keep the media and queue entry so retry can resume from disk.
+        _updateCurStatus(DownloadStatus.failDownload);
+        _stopBackgroundTask();
+        return;
+      }
+      entry
+        ..downloadedBytes = entry.totalBytes
+        ..isCompleted = true
+        ..status = DownloadStatus.completed;
+      waitDownloadQueue.remove(entry);
+      downloadList.insert(0, entry);
+      _curCid = null;
+      curDownload.value = null;
+      _downloadManager = null;
+      _audioDownloadManager = null;
+      _stopBackgroundTask();
+      flagNotifier.refresh();
+      nextDownload();
+    });
   }
 
   void nextDownload() {
-    if (waitDownloadQueue.isNotEmpty) {
-      startDownload(waitDownloadQueue.first);
-    }
+    if (curDownload.value?.status.isDownloading == true) return;
+    final next = waitDownloadQueue
+        .where((entry) => entry.status == DownloadStatus.wait)
+        .firstOrNull;
+    if (next != null) unawaited(startDownload(next));
   }
 
   Future<void> deleteDownload({
@@ -614,25 +684,18 @@ class DownloadService extends GetxService {
     if (removeList) {
       downloadList.remove(entry);
     }
-    if (removeQueue) {
+    if (removeQueue || !entry.isCompleted) {
       waitDownloadQueue.remove(entry);
     }
-    if (curDownload.value?.cid == entry.cid) {
-      await cancelDownload(
-        isDelete: true,
-        downloadNext: downloadNext,
-      );
+    final deletingCurrent = curDownload.value?.cid == entry.cid;
+    if (deletingCurrent) {
+      await cancelDownload(isDelete: true, downloadNext: false);
     }
-    final downloadDir = Directory(entry.pageDirPath);
-    if (downloadDir.existsSync()) {
-      if (!await downloadDir.lengthGte(2)) {
-        await downloadDir.tryDel(recursive: true);
-      } else {
-        final entryDir = Directory(entry.entryDirPath);
-        if (entryDir.existsSync()) {
-          await entryDir.tryDel(recursive: true);
-        }
-      }
+    await Directory(entry.entryDirPath).tryDel(recursive: true);
+    // Removing an empty parent is safe even if a sibling appears meanwhile.
+    await Directory(entry.pageDirPath).tryDel();
+    if (deletingCurrent && downloadNext && curDownload.value == null) {
+      nextDownload();
     }
     if (refresh) {
       flagNotifier.refresh();
@@ -643,8 +706,15 @@ class DownloadService extends GetxService {
     required String pageDirPath,
     bool refresh = true,
   }) async {
+    final current = curDownload.value;
+    final deletingCurrent = current?.pageDirPath == pageDirPath;
+    waitDownloadQueue.removeWhere((e) => e.pageDirPath == pageDirPath);
+    if (deletingCurrent) {
+      await cancelDownload(isDelete: true, downloadNext: false);
+    }
     await Directory(pageDirPath).tryDel(recursive: true);
     downloadList.removeWhere((e) => e.pageDirPath == pageDirPath);
+    if (deletingCurrent && curDownload.value == null) nextDownload();
     if (refresh) {
       flagNotifier.refresh();
     }
@@ -653,30 +723,32 @@ class DownloadService extends GetxService {
   Future<void> cancelDownload({
     required bool isDelete,
     bool downloadNext = true,
-  }) async {
-    ++_downloadRevision;
+  }) {
+    final revision = ++_downloadRevision;
     _prepareCancel?.cancel();
     _prepareCancel = null;
-    await _downloadManager?.cancel(isDelete: isDelete);
-    await _audioDownloadManager?.cancel(isDelete: isDelete);
-    _downloadManager = null;
-    _audioDownloadManager = null;
-    if (!isDelete) {
-      final entry = curDownload.value;
-      if (entry != null) {
+    return _lock.synchronized(() async {
+      if (revision != _downloadRevision) return;
+      await Future.wait([
+        if (_downloadManager case final video?)
+          video.cancel(isDelete: isDelete),
+        if (_audioDownloadManager case final audio?)
+          audio.cancel(isDelete: isDelete),
+      ]);
+      if (revision != _downloadRevision) return;
+      _downloadManager = null;
+      _audioDownloadManager = null;
+      if (isDelete) {
+        _curCid = null;
+        curDownload.value = null;
+      } else if (curDownload.value case final entry?) {
+        _updateCurStatus(DownloadStatus.pause);
         await _updateBiliDownloadEntryJson(entry);
       }
-    }
-    if (isDelete) {
-      _curCid = null;
-      curDownload.value = null;
-    } else {
-      _updateCurStatus(DownloadStatus.pause);
-    }
-    _stopBackgroundTask();
-    if (downloadNext) {
-      nextDownload();
-    }
+      if (revision != _downloadRevision) return;
+      _stopBackgroundTask();
+      if (downloadNext) nextDownload();
+    });
   }
 }
 

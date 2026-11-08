@@ -44,9 +44,8 @@ class AboutPage extends StatefulWidget {
 }
 
 class _AboutPageState extends State<AboutPage> {
-  final currentVersion =
-      '${BuildConfig.versionName}+${BuildConfig.versionCode}';
-  final versionTag = '${BuildConfig.versionTag}+${BuildConfig.versionCode}';
+  final currentVersion = BuildConfig.displayVersion;
+  final versionTag = BuildConfig.fullVersionTag;
   RxString cacheSize = ''.obs;
 
   late int _pressCount = 0;
@@ -143,7 +142,7 @@ class _AboutPageState extends State<AboutPage> {
         title: const Text('当前版本'),
         leading: const Icon(Icons.commit_outlined),
         trailing: Text(
-          versionTag,
+          BuildConfig.releaseLabel,
           style: subTitleStyle,
         ),
       ),

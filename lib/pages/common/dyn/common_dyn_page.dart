@@ -29,8 +29,7 @@ import 'package:get/get.dart';
 enum DynType implements EnumWithLabel {
   repost('转发'),
   reply('评论'),
-  like('赞')
-  ;
+  like('赞');
 
   @override
   final String label;
@@ -177,14 +176,12 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
                   replyLevel: 1,
                   replyReply: (item, id) => replyReply(context, item, id),
                   onReply: controller.onReply,
-                  onDelete: (item, subIndex) =>
-                      controller.onRemove(index, item, subIndex),
+                  onDelete: controller.onRemove,
                   upMid: controller.upMid,
                   onViewImage: hideFab,
                   onCheckReply: controller.onCheckReply,
                   onToggleTop: (item) => controller.onToggleTop(
                     item,
-                    index,
                     controller.oid,
                     controller.replyType,
                   ),

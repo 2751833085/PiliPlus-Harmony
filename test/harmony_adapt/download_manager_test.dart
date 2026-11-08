@@ -346,4 +346,55 @@ void main() {
       await body.close();
     },
   );
+
+  test(
+    'an oversized 206 chunk cannot pollute the existing partial file',
+    () async {
+      final file = File('${root.path}/clip');
+      await file.writeAsBytes([1, 2]);
+      client.httpClientAdapter = _Adapter(
+        (_) async => ResponseBody.fromBytes(
+          [3, 4, 5],
+          206,
+          headers: {
+            'content-range': ['bytes 2-3/4'],
+          },
+        ),
+      );
+      final manager = DownloadManager(
+        url: 'https://cdn.test/clip',
+        path: file.path,
+        client: client,
+        onReceiveProgress: null,
+        onDone: ([error]) => expect(error, isNotNull),
+      );
+      await manager.task;
+      expect(manager.status, DownloadStatus.failDownload);
+      expect(await file.readAsBytes(), [1, 2]);
+    },
+  );
+
+  test('an empty full response cannot truncate a valid partial', () async {
+    final file = File('${root.path}/clip');
+    await file.writeAsBytes([1, 2]);
+    client.httpClientAdapter = _Adapter(
+      (_) async => ResponseBody.fromBytes(
+        [],
+        200,
+        headers: {
+          'content-length': ['0'],
+        },
+      ),
+    );
+    final manager = DownloadManager(
+      url: 'https://cdn.test/clip',
+      path: file.path,
+      client: client,
+      onReceiveProgress: null,
+      onDone: ([error]) => expect(error, isNotNull),
+    );
+    await manager.task;
+    expect(manager.status, DownloadStatus.failDownload);
+    expect(await file.readAsBytes(), [1, 2]);
+  });
 }

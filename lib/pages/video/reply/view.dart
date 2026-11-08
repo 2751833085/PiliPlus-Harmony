@@ -190,14 +190,12 @@ class _VideoReplyPanelState extends State<VideoReplyPanel>
                   replyLevel: widget.replyLevel,
                   replyReply: replyReply,
                   onReply: _videoReplyController.onReply,
-                  onDelete: (item, subIndex) =>
-                      _videoReplyController.onRemove(index, item, subIndex),
+                  onDelete: _videoReplyController.onRemove,
                   upMid: _videoReplyController.upMid,
                   getTag: () => heroTag,
                   onCheckReply: _videoReplyController.onCheckReply,
                   onToggleTop: (item) => _videoReplyController.onToggleTop(
                     item,
-                    index,
                     _videoReplyController.aid,
                     _videoReplyController.videoType.replyType,
                   ),

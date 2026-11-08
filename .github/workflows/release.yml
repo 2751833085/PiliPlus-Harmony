@@ -72,8 +72,8 @@ jobs:
         env:
           GIT_LFS_SKIP_SMUDGE: 1
 
-      - name: Harmony regression tests
-        run: flutter test test/harmony_adapt
+      - name: Application regression tests
+        run: flutter test
         shell: bash
 
       - name: Build Flutter for ohos

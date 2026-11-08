@@ -1,4 +1,10 @@
 abstract final class BuildConfig {
+  // The public milestone is independent of the monotonic HAP version/build.
+  static const String releaseLabel = 'Beta 1.0';
+  static String get displayVersion =>
+      '$releaseLabel · $versionName+$versionCode';
+  static String get fullVersionTag =>
+      versionTag.contains('+') ? versionTag : '$versionTag+$versionCode';
   static const int versionCode = int.fromEnvironment(
     'pili.code',
     defaultValue: 1,

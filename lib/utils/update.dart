@@ -64,7 +64,7 @@ abstract final class Update {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${data['tag_name']}',
+                        '${data['name'] ?? data['tag_name']}',
                         style: const TextStyle(fontSize: 20),
                       ),
                       const SizedBox(height: 8),

@@ -11,6 +11,7 @@ import 'package:PiliPlus/pages/common/common_list_controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/extension/scroll_controller_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
@@ -80,7 +81,6 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
     Map? picMsg,
     required VoidCallback onClearText,
     MsgType? msgType,
-    int? index,
   }) async {
     // debug
     // if (loadingState.value case Success(:final response)) {
@@ -107,7 +107,7 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
     // SmartDialog.showToast('发送成功');
     // return;
     assert((message != null) ^ (picMsg != null));
-    if (_isSending) return;
+    if (isClosed || _isSending) return;
     feedBack();
     SmartDialog.dismiss();
     if (!account.isLogin) {
@@ -129,9 +129,14 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
       SmartDialog.dismiss();
       if (res.isSuccess) {
         if (msgType == .EN_MSG_TYPE_DRAW_BACK) {
-          loadingState
-            ..value.data![index!].msgStatus = 1
-            ..refresh();
+          // A refresh may have inserted new messages while recall was pending.
+          final recalled = loadingState.value.data?.firstWhereOrNull(
+            (item) => item.msgKey.toString() == message,
+          );
+          if (recalled != null) {
+            recalled.msgStatus = 1;
+            loadingState.refresh();
+          }
           SmartDialog.showToast('撤回成功');
         } else {
           onRefresh();
@@ -158,6 +163,7 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
 
   @override
   Future<void> onRefresh() {
+    invalidateRequests();
     msgSeqno = null;
     eInfos = null;
     scrollController.jumpToTop();

@@ -74,7 +74,7 @@ if [[ -f "$HARMONY_SOURCE_ROOT/ohos/build-profile.local.json5" ]]; then
 fi
 
 flutter pub get
-flutter test test/harmony_adapt
+flutter test
 mkdir -p build/harmony
 python3 - <<'PY'
 import json, os, re, subprocess
@@ -86,6 +86,7 @@ def git(*args):
 version = re.search(r'^version:\s*(\S+)', Path('pubspec.yaml').read_text(), re.M)[1]
 data = {
     'pili.name': version.split('+')[0] + '-ohos',
+    'pili.tag': 'v' + version,
     'pili.hash': git('rev-parse', 'HEAD'),
     'pili.code': int(version.split('+')[1]),
     'pili.time': int(git('show', '-s', '--format=%ct', 'HEAD')),

@@ -133,6 +133,7 @@ class SSearchController extends GetxController
   // suggestion
   bool get searchSuggestion => keywords.searchSuggestion;
   late final RxList<SearchSuggestItem> searchSuggestList;
+  int _suggestionRevision = 0;
 
   bool get enableTrending => keywords.enableTrending;
   bool get enableSearchRcmd => keywords.enableSearchRcmd;
@@ -163,20 +164,17 @@ class SSearchController extends GetxController
   void onChange(String value) {
     validateUid();
     if (searchSuggestion) {
-      if (value.isEmpty) {
-        searchSuggestList.clear();
-      } else {
-        ctr!.add(value);
-      }
+      _suggestionRevision++;
+      searchSuggestList.clear();
+      if (value.isNotEmpty) ctr!.add(value);
     }
   }
 
   void onClear() {
     if (controller.value.text != '') {
       controller.clear();
-      if (searchSuggestion) searchSuggestList.clear();
+      onChange('');
       searchFocusNode.requestFocus();
-      showUidBtn.value = false;
     } else {
       Get.back();
     }
@@ -192,7 +190,7 @@ class SSearchController extends GetxController
 
     final text = controller.text;
 
-    if (await PiliScheme.routePushFromUrl(text, selfHandle: true)) {
+    if (await PiliScheme.routePushFromUrl(text, selfHandle: true) || isClosed) {
       return;
     }
 
@@ -222,12 +220,15 @@ class SSearchController extends GetxController
 
   @override
   Future<void> onValueChanged(String value) async {
+    if (isClosed || value.isEmpty || controller.text != value) return;
+    final revision = ++_suggestionRevision;
     final res = await SearchHttp.searchSuggest(term: value);
-    if (res case Success(:final response)) {
-      if (response.tag?.isNotEmpty == true) {
-        searchSuggestList.value = response.tag!;
-      }
+    if (isClosed ||
+        revision != _suggestionRevision ||
+        controller.text != value) {
+      return;
     }
+    searchSuggestList.value = res.dataOrNull?.tag ?? <SearchSuggestItem>[];
   }
 
   void onLongSelect(String word) {
