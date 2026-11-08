@@ -1,0 +1,25 @@
+{
+  "tag": "v1.0.0-beta+6253",
+  "name": "Beta 1.0",
+  "url": "https://github.com/2751833085/PiliPlus-Harmony/releases/download/v1.0.0-beta%2B6253/PiliPlus-Harmony-Beta-1.0-6253-signed.hap",
+  "noRepeatedUpdate": true,
+  "futureBetaDetected": true,
+  "supersededAssets": 0,
+  "source": "ff68a382f506e333c58a98ffdc99173f223da505",
+  "versionName": "1.0.0-beta",
+  "versionCode": 6253,
+  "bytes": 33140187,
+  "sha256": "6f7a7b954bc3e779c70bc0a4b359c69fdcafe6bf3ec52ba8ef67e85f4067da71",
+  "anonymousDownloadMatchesSignedHap": true,
+  "historicalReleases": 28,
+  "historicalDetailsPreserved": true,
+  "historicalInstallAssets": 0,
+  "oldTagHashesPreserved": true,
+  "removedSupersededReleaseAssets": 4,
+  "removedSupersededActionsArtifacts": 2,
+  "githubActions": {
+    "run": 42438313826,
+    "conclusion": "success",
+    "source": "ff68a382f506e333c58a98ffdc99173f223da505"
+  }
+}

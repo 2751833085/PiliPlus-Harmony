@@ -22,6 +22,10 @@
 
 - 专用 HarmonyOS 7 模拟器实际安装成功，系统登记 `1.0.0-beta / 6253`，关于页实读 `Beta 1.0 · 构建 6253`。应用 UID、首次安装时间保留，已回到三屏推荐首页；见[版本核验汇总](beta-1.0-6253-version-smoke.json)。
 - 首次从“我的”转场后立即点击设置未进入，稳定页面后再次点击成功，本轮没有将其视为完整流畅性验证。
-- [GitHub 标签流水线](https://github.com/2751833085/PiliPlus-Harmony/actions/runs/42438313826)仍在执行，最终公开下载结果另行记录。
+- [GitHub 标签流水线](https://github.com/2751833085/PiliPlus-Harmony/actions/runs/42438313826)已通过完整自动回归和鸿蒙编译，公开下载结果见下文。
 
 此前 6252 的三屏态累计 30 分钟回归保留在[历史验证记录](beta-1.0-validation.md)，不冒充 6253 的独立长测。真实媒体、弱网、登录和真机性能限制继续适用。本轮不操作用户实体手机。
+
+## 公开发布
+
+[Beta 1.0 下载页](https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v1.0.0-beta%2B6253) 已开放，匿名下载的 HAP 大小和 SHA-256 与最终签名包相同。新客户端选择该发布，同版本不重复提示，并能识别后续 Beta。此前 6252 发布撤下四个附件，标题归档为 Alpha；两个已替代 Actions HAP 附件也已撤下。全部 28 个历史发布详情与原标签保留，指向当前 Beta 的链接已更新。见[公开发布核对](beta-1.0-6253-release-verification.json)。
