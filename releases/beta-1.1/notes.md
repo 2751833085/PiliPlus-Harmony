@@ -12,4 +12,6 @@
 
 完整 Dart 回归 401 项通过，1 项诊断构建测试按条件跳过；签名和包完整性核对通过。专用模拟器完成搜索布局、筛选、单屏“我的”、专栏右栏操作与版本显示检查；未替代真机音视频和弱网测试。
 
+GitHub 云端回归与构建已通过；修复了下载测试异步清理临时目录的竞态，正式签名包内容不变。
+
 验证范围见 [Beta 1.1 验证记录](https://github.com/2751833085/PiliPlus-Harmony/blob/harmony/v2.6-video-experience/docs/harmony/beta-1.1-6254-validation.md)。

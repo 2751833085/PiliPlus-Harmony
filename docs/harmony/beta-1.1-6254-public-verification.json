@@ -16,5 +16,6 @@
     "futureBetaDetected": true,
     "previousReleaseDetailsOnly": true,
     "api_access": "unauthenticated public GitHub API"
-  }
+  },
+  "cloud_verification": "beta-1.1-6254-cloud-verification.json"
 }

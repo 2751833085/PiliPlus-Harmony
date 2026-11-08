@@ -1,0 +1,31 @@
+{
+  "verification_commit": "3f48843b8047d4c9670e609f857bf2495829f264",
+  "signed_app_source_commit": "8746fe0860da8e2546b8a5474c73792d26bedfb1",
+  "matching_source_files": 1648,
+  "app_source_unchanged": true,
+  "test_cleanup_fix_only": true,
+  "focused_download_test_passes": 42,
+  "focused_download_test_runs": 6,
+  "initial_run": {
+    "id": 42443436299,
+    "status": "failure",
+    "passed": 400,
+    "failed": 1,
+    "skipped": 1,
+    "reason": "Download fixture deleted its temporary directory before asynchronous entry persistence finished."
+  },
+  "repeat_run": {
+    "id": 42444259942,
+    "url": "https://github.com/2751833085/PiliPlus-Harmony/actions/runs/42444259942",
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "3f48843b8047d4c9670e609f857bf2495829f264",
+    "tests": {
+      "passed": 401,
+      "skipped": 1,
+      "failed": 0
+    },
+    "hap_build_succeeded": true,
+    "unsigned_artifact_id": 13603092733
+  }
+}
