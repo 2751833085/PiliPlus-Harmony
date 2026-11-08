@@ -1,0 +1,1192 @@
+{
+  "version": 6251,
+  "capture_status": "passed",
+  "sessions": [
+    {
+      "file": "cold-1.trace",
+      "pid": 9654,
+      "buffer_entries": [
+        51606,
+        51606
+      ],
+      "trace_span_s": 7.997,
+      "route_count": 2,
+      "unclosed_route_markers": 0,
+      "frame_start_counts": {
+        "Animator::BeginFrame": 46,
+        "Rasterizer::DoDraw": 44
+      },
+      "unmatched_stack_counts": {},
+      "verified_entries": 1,
+      "verified_exits": 1,
+      "truncated_buffer": false,
+      "by_route": [
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 325.461,
+          "marker_to_first_matched_draw_start_ms": 21.335,
+          "marker_to_first_matched_draw_end_ms": 27.382,
+          "first_matched_ui_ms": 6.012,
+          "first_matched_draw_ms": 6.047,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 27.382,
+          "first_ui_allowing_overlap_ms": 6.012
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 324.757,
+          "marker_to_first_matched_draw_start_ms": 15.972,
+          "marker_to_first_matched_draw_end_ms": 22.001,
+          "first_matched_ui_ms": 0.921,
+          "first_matched_draw_ms": 6.029,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 22.001,
+          "first_ui_allowing_overlap_ms": 0.921
+        }
+      ]
+    },
+    {
+      "file": "cold-2.trace",
+      "pid": 10104,
+      "buffer_entries": [
+        50841,
+        50841
+      ],
+      "trace_span_s": 8.039,
+      "route_count": 2,
+      "unclosed_route_markers": 0,
+      "frame_start_counts": {
+        "Animator::BeginFrame": 45,
+        "Rasterizer::DoDraw": 43
+      },
+      "unmatched_stack_counts": {},
+      "verified_entries": 1,
+      "verified_exits": 1,
+      "truncated_buffer": false,
+      "by_route": [
+        {
+          "direction": "PUSH",
+          "paired_frames": 19,
+          "transition_ms": 316.203,
+          "marker_to_first_matched_draw_start_ms": 19.224,
+          "marker_to_first_matched_draw_end_ms": 29.589,
+          "first_matched_ui_ms": 1.142,
+          "first_matched_draw_ms": 10.365,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 29.589,
+          "first_ui_allowing_overlap_ms": 1.142
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 328.208,
+          "marker_to_first_matched_draw_start_ms": 17.82,
+          "marker_to_first_matched_draw_end_ms": 23.972,
+          "first_matched_ui_ms": 1.002,
+          "first_matched_draw_ms": 6.152,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 23.972,
+          "first_ui_allowing_overlap_ms": 1.002
+        }
+      ]
+    },
+    {
+      "file": "cold-3.trace",
+      "pid": 10507,
+      "buffer_entries": [
+        50962,
+        50962
+      ],
+      "trace_span_s": 8.084,
+      "route_count": 2,
+      "unclosed_route_markers": 0,
+      "frame_start_counts": {
+        "Animator::BeginFrame": 44,
+        "Rasterizer::DoDraw": 42
+      },
+      "unmatched_stack_counts": {},
+      "verified_entries": 1,
+      "verified_exits": 1,
+      "truncated_buffer": false,
+      "by_route": [
+        {
+          "direction": "PUSH",
+          "paired_frames": 19,
+          "transition_ms": 329.282,
+          "marker_to_first_matched_draw_start_ms": 20.578,
+          "marker_to_first_matched_draw_end_ms": 25.646,
+          "first_matched_ui_ms": 5.963,
+          "first_matched_draw_ms": 5.068,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 25.646,
+          "first_ui_allowing_overlap_ms": 5.963
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 321.947,
+          "marker_to_first_matched_draw_start_ms": 9.111,
+          "marker_to_first_matched_draw_end_ms": 15.37,
+          "first_matched_ui_ms": 0.936,
+          "first_matched_draw_ms": 6.259,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 15.37,
+          "first_ui_allowing_overlap_ms": 0.936
+        }
+      ]
+    },
+    {
+      "file": "warm-1.trace",
+      "pid": 10507,
+      "buffer_entries": [
+        202338,
+        202338
+      ],
+      "trace_span_s": 17.99,
+      "route_count": 10,
+      "unclosed_route_markers": 0,
+      "frame_start_counts": {
+        "Animator::BeginFrame": 223,
+        "Rasterizer::DoDraw": 220
+      },
+      "unmatched_stack_counts": {},
+      "verified_entries": 5,
+      "verified_exits": 5,
+      "truncated_buffer": false,
+      "by_route": [
+        {
+          "direction": "PUSH",
+          "paired_frames": 21,
+          "transition_ms": 324.13,
+          "marker_to_first_matched_draw_start_ms": 15.939,
+          "marker_to_first_matched_draw_end_ms": 16.993,
+          "first_matched_ui_ms": 4.05,
+          "first_matched_draw_ms": 1.054,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 16.993,
+          "first_ui_allowing_overlap_ms": 4.05
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 21,
+          "transition_ms": 317.363,
+          "marker_to_first_matched_draw_start_ms": 2.407,
+          "marker_to_first_matched_draw_end_ms": 7.549,
+          "first_matched_ui_ms": 0.891,
+          "first_matched_draw_ms": 5.142,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 7.549,
+          "first_ui_allowing_overlap_ms": 0.891
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 21,
+          "transition_ms": 314.106,
+          "marker_to_first_matched_draw_start_ms": 5.323,
+          "marker_to_first_matched_draw_end_ms": 7.353,
+          "first_matched_ui_ms": 3.995,
+          "first_matched_draw_ms": 2.03,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 7.353,
+          "first_ui_allowing_overlap_ms": 3.995
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 333.014,
+          "marker_to_first_matched_draw_start_ms": 20.058,
+          "marker_to_first_matched_draw_end_ms": 26.091,
+          "first_matched_ui_ms": 2.551,
+          "first_matched_draw_ms": 6.033,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 26.091,
+          "first_ui_allowing_overlap_ms": 2.551
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 313.456,
+          "marker_to_first_matched_draw_start_ms": 5.764,
+          "marker_to_first_matched_draw_end_ms": 6.453,
+          "first_matched_ui_ms": 3.904,
+          "first_matched_draw_ms": 0.689,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 6.453,
+          "first_ui_allowing_overlap_ms": 3.904
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 19,
+          "transition_ms": 320.748,
+          "marker_to_first_matched_draw_start_ms": 6.957,
+          "marker_to_first_matched_draw_end_ms": 13.025,
+          "first_matched_ui_ms": 0.889,
+          "first_matched_draw_ms": 6.068,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 13.025,
+          "first_ui_allowing_overlap_ms": 0.889
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 21,
+          "transition_ms": 319.059,
+          "marker_to_first_matched_draw_start_ms": 12.095,
+          "marker_to_first_matched_draw_end_ms": 13.847,
+          "first_matched_ui_ms": 3.377,
+          "first_matched_draw_ms": 1.752,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 13.847,
+          "first_ui_allowing_overlap_ms": 3.377
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 324.78,
+          "marker_to_first_matched_draw_start_ms": 15.943,
+          "marker_to_first_matched_draw_end_ms": 23.115,
+          "first_matched_ui_ms": 1.02,
+          "first_matched_draw_ms": 7.172,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 23.115,
+          "first_ui_allowing_overlap_ms": 1.02
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 21,
+          "transition_ms": 336.328,
+          "marker_to_first_matched_draw_start_ms": 18.144,
+          "marker_to_first_matched_draw_end_ms": 18.851,
+          "first_matched_ui_ms": 3.799,
+          "first_matched_draw_ms": 0.707,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 18.851,
+          "first_ui_allowing_overlap_ms": 3.799
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 321.929,
+          "marker_to_first_matched_draw_start_ms": 7.887,
+          "marker_to_first_matched_draw_end_ms": 12.981,
+          "first_matched_ui_ms": 0.888,
+          "first_matched_draw_ms": 5.094,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 12.981,
+          "first_ui_allowing_overlap_ms": 0.888
+        }
+      ]
+    },
+    {
+      "file": "warm-2.trace",
+      "pid": 10507,
+      "buffer_entries": [
+        201138,
+        201138
+      ],
+      "trace_span_s": 17.626,
+      "route_count": 10,
+      "unclosed_route_markers": 0,
+      "frame_start_counts": {
+        "Animator::BeginFrame": 223,
+        "Rasterizer::DoDraw": 216
+      },
+      "unmatched_stack_counts": {},
+      "verified_entries": 5,
+      "verified_exits": 5,
+      "truncated_buffer": false,
+      "by_route": [
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 318.347,
+          "marker_to_first_matched_draw_start_ms": 10.397,
+          "marker_to_first_matched_draw_end_ms": 13.212,
+          "first_matched_ui_ms": 3.987,
+          "first_matched_draw_ms": 2.815,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 13.212,
+          "first_ui_allowing_overlap_ms": 3.987
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 316.326,
+          "marker_to_first_matched_draw_start_ms": 1.513,
+          "marker_to_first_matched_draw_end_ms": 3.508,
+          "first_matched_ui_ms": 0.926,
+          "first_matched_draw_ms": 1.995,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 3.508,
+          "first_ui_allowing_overlap_ms": 0.926
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 317.161,
+          "marker_to_first_matched_draw_start_ms": 15.11,
+          "marker_to_first_matched_draw_end_ms": 16.913,
+          "first_matched_ui_ms": 4.537,
+          "first_matched_draw_ms": 1.803,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 16.913,
+          "first_ui_allowing_overlap_ms": 4.537
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 322.559,
+          "marker_to_first_matched_draw_start_ms": 17.818,
+          "marker_to_first_matched_draw_end_ms": 22.326,
+          "first_matched_ui_ms": 1.359,
+          "first_matched_draw_ms": 4.508,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 22.326,
+          "first_ui_allowing_overlap_ms": 1.359
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 21,
+          "transition_ms": 314.79,
+          "marker_to_first_matched_draw_start_ms": 5.543,
+          "marker_to_first_matched_draw_end_ms": 7.402,
+          "first_matched_ui_ms": 3.374,
+          "first_matched_draw_ms": 1.859,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 7.402,
+          "first_ui_allowing_overlap_ms": 3.374
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 319.864,
+          "marker_to_first_matched_draw_start_ms": 3.228,
+          "marker_to_first_matched_draw_end_ms": 9.223,
+          "first_matched_ui_ms": 2.436,
+          "first_matched_draw_ms": 5.995,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 9.223,
+          "first_ui_allowing_overlap_ms": 2.436
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 331.408,
+          "marker_to_first_matched_draw_start_ms": 4.999,
+          "marker_to_first_matched_draw_end_ms": 5.642,
+          "first_matched_ui_ms": 3.216,
+          "first_matched_draw_ms": 0.643,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 5.642,
+          "first_ui_allowing_overlap_ms": 3.216
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 337.825,
+          "marker_to_first_matched_draw_start_ms": 23.523,
+          "marker_to_first_matched_draw_end_ms": 28.763,
+          "first_matched_ui_ms": 0.851,
+          "first_matched_draw_ms": 5.24,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 28.763,
+          "first_ui_allowing_overlap_ms": 0.851
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 316.302,
+          "marker_to_first_matched_draw_start_ms": 7.249,
+          "marker_to_first_matched_draw_end_ms": 9.057,
+          "first_matched_ui_ms": 3.392,
+          "first_matched_draw_ms": 1.808,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 9.057,
+          "first_ui_allowing_overlap_ms": 3.392
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 339.429,
+          "marker_to_first_matched_draw_start_ms": 31.282,
+          "marker_to_first_matched_draw_end_ms": 36.586,
+          "first_matched_ui_ms": 1.857,
+          "first_matched_draw_ms": 5.304,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 36.586,
+          "first_ui_allowing_overlap_ms": 1.857
+        }
+      ]
+    },
+    {
+      "file": "warm-3.trace",
+      "pid": 10507,
+      "buffer_entries": [
+        199914,
+        199914
+      ],
+      "trace_span_s": 17.588,
+      "route_count": 10,
+      "unclosed_route_markers": 0,
+      "frame_start_counts": {
+        "Animator::BeginFrame": 223,
+        "Rasterizer::DoDraw": 218
+      },
+      "unmatched_stack_counts": {},
+      "verified_entries": 5,
+      "verified_exits": 5,
+      "truncated_buffer": false,
+      "by_route": [
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 325.039,
+          "marker_to_first_matched_draw_start_ms": 35.329,
+          "marker_to_first_matched_draw_end_ms": 36.301,
+          "first_matched_ui_ms": 3.3,
+          "first_matched_draw_ms": 0.972,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 36.301,
+          "first_ui_allowing_overlap_ms": 3.3
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 324.552,
+          "marker_to_first_matched_draw_start_ms": 11.742,
+          "marker_to_first_matched_draw_end_ms": 17.889,
+          "first_matched_ui_ms": 0.841,
+          "first_matched_draw_ms": 6.147,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 17.889,
+          "first_ui_allowing_overlap_ms": 0.841
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 309.384,
+          "marker_to_first_matched_draw_start_ms": 14.323,
+          "marker_to_first_matched_draw_end_ms": 17.155,
+          "first_matched_ui_ms": 0.917,
+          "first_matched_draw_ms": 2.832,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 17.155,
+          "first_ui_allowing_overlap_ms": 0.917
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 21,
+          "transition_ms": 323.266,
+          "marker_to_first_matched_draw_start_ms": 7.575,
+          "marker_to_first_matched_draw_end_ms": 13.714,
+          "first_matched_ui_ms": 2.705,
+          "first_matched_draw_ms": 6.139,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 13.714,
+          "first_ui_allowing_overlap_ms": 2.705
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 314.745,
+          "marker_to_first_matched_draw_start_ms": 4.895,
+          "marker_to_first_matched_draw_end_ms": 5.727,
+          "first_matched_ui_ms": 3.992,
+          "first_matched_draw_ms": 0.832,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 5.727,
+          "first_ui_allowing_overlap_ms": 3.992
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 19,
+          "transition_ms": 328.921,
+          "marker_to_first_matched_draw_start_ms": 40.245,
+          "marker_to_first_matched_draw_end_ms": 48.329,
+          "first_matched_ui_ms": 0.954,
+          "first_matched_draw_ms": 8.084,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 48.329,
+          "first_ui_allowing_overlap_ms": 0.954
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 20,
+          "transition_ms": 333.17,
+          "marker_to_first_matched_draw_start_ms": 33.0,
+          "marker_to_first_matched_draw_end_ms": 33.913,
+          "first_matched_ui_ms": 3.732,
+          "first_matched_draw_ms": 0.913,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 33.913,
+          "first_ui_allowing_overlap_ms": 3.732
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 330.332,
+          "marker_to_first_matched_draw_start_ms": 14.2,
+          "marker_to_first_matched_draw_end_ms": 19.528,
+          "first_matched_ui_ms": 0.857,
+          "first_matched_draw_ms": 5.328,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 19.528,
+          "first_ui_allowing_overlap_ms": 0.857
+        },
+        {
+          "direction": "PUSH",
+          "paired_frames": 21,
+          "transition_ms": 313.493,
+          "marker_to_first_matched_draw_start_ms": 3.954,
+          "marker_to_first_matched_draw_end_ms": 4.679,
+          "first_matched_ui_ms": 3.162,
+          "first_matched_draw_ms": 0.725,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 4.679,
+          "first_ui_allowing_overlap_ms": 3.162
+        },
+        {
+          "direction": "POP",
+          "paired_frames": 20,
+          "transition_ms": 317.915,
+          "marker_to_first_matched_draw_start_ms": 3.288,
+          "marker_to_first_matched_draw_end_ms": 10.466,
+          "first_matched_ui_ms": 1.242,
+          "first_matched_draw_ms": 7.178,
+          "marker_to_first_draw_end_allowing_ui_overlap_ms": 10.466,
+          "first_ui_allowing_overlap_ms": 1.242
+        }
+      ]
+    }
+  ],
+  "groups": {
+    "cold_push": {
+      "verified_route_markers": 3,
+      "transition_ms": {
+        "n": 3,
+        "min": 316.203,
+        "p50": 325.461,
+        "p95": 328.9,
+        "max": 329.282,
+        "over_8.333ms": 3,
+        "over_16.667ms": 3,
+        "over_25ms": 3,
+        "over_33.333ms": 3
+      },
+      "marker_to_first_matched_draw_end_ms": {
+        "n": 3,
+        "min": 25.646,
+        "p50": 27.382,
+        "p95": 29.368,
+        "max": 29.589,
+        "over_8.333ms": 3,
+        "over_16.667ms": 3,
+        "over_25ms": 3,
+        "over_33.333ms": 0
+      },
+      "marker_to_first_draw_end_allowing_ui_overlap_ms": {
+        "n": 3,
+        "min": 25.646,
+        "p50": 27.382,
+        "p95": 29.368,
+        "max": 29.589,
+        "over_8.333ms": 3,
+        "over_16.667ms": 3,
+        "over_25ms": 3,
+        "over_33.333ms": 0
+      },
+      "first_ui_allowing_overlap_ms": {
+        "n": 3,
+        "min": 1.142,
+        "p50": 5.963,
+        "p95": 6.007,
+        "max": 6.012,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "first_ui_began_before_marker_count": 0,
+      "first_matched_ui_ms": {
+        "n": 3,
+        "min": 1.142,
+        "p50": 5.963,
+        "p95": 6.007,
+        "max": 6.012,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "first_matched_draw_ms": {
+        "n": 3,
+        "min": 5.068,
+        "p50": 6.047,
+        "p95": 9.933,
+        "max": 10.365,
+        "over_8.333ms": 1,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "all_ui_begin_frame_ms": {
+        "n": 61,
+        "min": 0.033,
+        "p50": 0.594,
+        "p95": 3.482,
+        "max": 6.012,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "matched_ui_begin_frame_ms": {
+        "n": 58,
+        "min": 0.267,
+        "p50": 0.598,
+        "p95": 3.549,
+        "max": 6.012,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "matched_do_draw_ms": {
+        "n": 58,
+        "min": 5.068,
+        "p50": 16.233,
+        "p95": 17.105,
+        "max": 19.094,
+        "over_8.333ms": 56,
+        "over_16.667ms": 12,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "swap_buffers_ms": {
+        "n": 58,
+        "min": 1.056,
+        "p50": 13.143,
+        "p95": 15.306,
+        "max": 16.022,
+        "over_8.333ms": 48,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "layer_paint_ms": {
+        "n": 58,
+        "min": 0.056,
+        "p50": 0.186,
+        "p95": 0.937,
+        "max": 1.029,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "draw_start_gap_ms": {
+        "n": 55,
+        "min": 8.355,
+        "p50": 16.577,
+        "p95": 17.627,
+        "max": 38.265,
+        "over_8.333ms": 55,
+        "over_16.667ms": 25,
+        "over_25ms": 1,
+        "over_33.333ms": 1
+      },
+      "ui_without_draw_pipeline_full": 3,
+      "swap_fraction_of_draw_elapsed": 0.7233,
+      "longest_draw_frame_components_ms": [
+        {
+          "ui_ms": 1.033,
+          "draw_ms": 19.094,
+          "swap_ms": 10.331,
+          "paint_ms": 0.201
+        },
+        {
+          "ui_ms": 0.648,
+          "draw_ms": 17.332,
+          "swap_ms": 10.984,
+          "paint_ms": 0.166
+        },
+        {
+          "ui_ms": 0.69,
+          "draw_ms": 17.162,
+          "swap_ms": 16.022,
+          "paint_ms": 0.145
+        },
+        {
+          "ui_ms": 2.58,
+          "draw_ms": 17.095,
+          "swap_ms": 13.682,
+          "paint_ms": 0.685
+        }
+      ]
+    },
+    "cold_pop": {
+      "verified_route_markers": 3,
+      "transition_ms": {
+        "n": 3,
+        "min": 321.947,
+        "p50": 324.757,
+        "p95": 327.863,
+        "max": 328.208,
+        "over_8.333ms": 3,
+        "over_16.667ms": 3,
+        "over_25ms": 3,
+        "over_33.333ms": 3
+      },
+      "marker_to_first_matched_draw_end_ms": {
+        "n": 3,
+        "min": 15.37,
+        "p50": 22.001,
+        "p95": 23.775,
+        "max": 23.972,
+        "over_8.333ms": 3,
+        "over_16.667ms": 2,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "marker_to_first_draw_end_allowing_ui_overlap_ms": {
+        "n": 3,
+        "min": 15.37,
+        "p50": 22.001,
+        "p95": 23.775,
+        "max": 23.972,
+        "over_8.333ms": 3,
+        "over_16.667ms": 2,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "first_ui_allowing_overlap_ms": {
+        "n": 3,
+        "min": 0.921,
+        "p50": 0.936,
+        "p95": 0.995,
+        "max": 1.002,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "first_ui_began_before_marker_count": 0,
+      "first_matched_ui_ms": {
+        "n": 3,
+        "min": 0.921,
+        "p50": 0.936,
+        "p95": 0.995,
+        "max": 1.002,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "first_matched_draw_ms": {
+        "n": 3,
+        "min": 6.029,
+        "p50": 6.152,
+        "p95": 6.248,
+        "max": 6.259,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "all_ui_begin_frame_ms": {
+        "n": 63,
+        "min": 0.021,
+        "p50": 0.519,
+        "p95": 3.135,
+        "max": 4.798,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "matched_ui_begin_frame_ms": {
+        "n": 60,
+        "min": 0.242,
+        "p50": 0.532,
+        "p95": 3.228,
+        "max": 4.798,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "matched_do_draw_ms": {
+        "n": 60,
+        "min": 6.029,
+        "p50": 16.345,
+        "p95": 17.291,
+        "max": 17.396,
+        "over_8.333ms": 56,
+        "over_16.667ms": 15,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "swap_buffers_ms": {
+        "n": 60,
+        "min": 4.524,
+        "p50": 14.802,
+        "p95": 16.093,
+        "max": 16.434,
+        "over_8.333ms": 56,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "layer_paint_ms": {
+        "n": 60,
+        "min": 0.047,
+        "p50": 0.143,
+        "p95": 0.301,
+        "max": 0.454,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "draw_start_gap_ms": {
+        "n": 57,
+        "min": 7.358,
+        "p50": 16.585,
+        "p95": 17.543,
+        "max": 20.054,
+        "over_8.333ms": 56,
+        "over_16.667ms": 23,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "ui_without_draw_pipeline_full": 3,
+      "swap_fraction_of_draw_elapsed": 0.9067,
+      "longest_draw_frame_components_ms": [
+        {
+          "ui_ms": 0.519,
+          "draw_ms": 17.396,
+          "swap_ms": 15.818,
+          "paint_ms": 0.143
+        },
+        {
+          "ui_ms": 0.441,
+          "draw_ms": 17.385,
+          "swap_ms": 15.982,
+          "paint_ms": 0.085
+        },
+        {
+          "ui_ms": 0.342,
+          "draw_ms": 17.291,
+          "swap_ms": 15.485,
+          "paint_ms": 0.205
+        },
+        {
+          "ui_ms": 0.564,
+          "draw_ms": 17.291,
+          "swap_ms": 16.274,
+          "paint_ms": 0.111
+        }
+      ]
+    },
+    "warm_push": {
+      "verified_route_markers": 15,
+      "transition_ms": {
+        "n": 15,
+        "min": 309.384,
+        "p50": 317.161,
+        "p95": 334.117,
+        "max": 336.328,
+        "over_8.333ms": 15,
+        "over_16.667ms": 15,
+        "over_25ms": 15,
+        "over_33.333ms": 15
+      },
+      "marker_to_first_matched_draw_end_ms": {
+        "n": 15,
+        "min": 4.679,
+        "p50": 13.212,
+        "p95": 34.629,
+        "max": 36.301,
+        "over_8.333ms": 9,
+        "over_16.667ms": 6,
+        "over_25ms": 2,
+        "over_33.333ms": 2
+      },
+      "marker_to_first_draw_end_allowing_ui_overlap_ms": {
+        "n": 15,
+        "min": 4.679,
+        "p50": 13.212,
+        "p95": 34.629,
+        "max": 36.301,
+        "over_8.333ms": 9,
+        "over_16.667ms": 6,
+        "over_25ms": 2,
+        "over_33.333ms": 2
+      },
+      "first_ui_allowing_overlap_ms": {
+        "n": 15,
+        "min": 0.917,
+        "p50": 3.732,
+        "p95": 4.196,
+        "max": 4.537,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "first_ui_began_before_marker_count": 0,
+      "first_matched_ui_ms": {
+        "n": 15,
+        "min": 0.917,
+        "p50": 3.732,
+        "p95": 4.196,
+        "max": 4.537,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "first_matched_draw_ms": {
+        "n": 15,
+        "min": 0.643,
+        "p50": 1.054,
+        "p95": 2.82,
+        "max": 2.832,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "all_ui_begin_frame_ms": {
+        "n": 311,
+        "min": 0.025,
+        "p50": 0.598,
+        "p95": 3.258,
+        "max": 5.181,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "matched_ui_begin_frame_ms": {
+        "n": 306,
+        "min": 0.224,
+        "p50": 0.599,
+        "p95": 3.279,
+        "max": 5.181,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "matched_do_draw_ms": {
+        "n": 306,
+        "min": 0.643,
+        "p50": 15.836,
+        "p95": 17.248,
+        "max": 17.504,
+        "over_8.333ms": 247,
+        "over_16.667ms": 64,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "swap_buffers_ms": {
+        "n": 306,
+        "min": 0.161,
+        "p50": 14.009,
+        "p95": 15.499,
+        "max": 16.363,
+        "over_8.333ms": 237,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "layer_paint_ms": {
+        "n": 306,
+        "min": 0.06,
+        "p50": 0.162,
+        "p95": 0.244,
+        "max": 1.498,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "draw_start_gap_ms": {
+        "n": 291,
+        "min": 4.809,
+        "p50": 16.355,
+        "p95": 19.818,
+        "max": 40.456,
+        "over_8.333ms": 282,
+        "over_16.667ms": 109,
+        "over_25ms": 5,
+        "over_33.333ms": 2
+      },
+      "ui_without_draw_pipeline_full": 5,
+      "swap_fraction_of_draw_elapsed": 0.8801,
+      "longest_draw_frame_components_ms": [
+        {
+          "ui_ms": 0.612,
+          "draw_ms": 17.504,
+          "swap_ms": 15.841,
+          "paint_ms": 0.177
+        },
+        {
+          "ui_ms": 0.5,
+          "draw_ms": 17.451,
+          "swap_ms": 15.715,
+          "paint_ms": 0.155
+        },
+        {
+          "ui_ms": 2.008,
+          "draw_ms": 17.412,
+          "swap_ms": 16.363,
+          "paint_ms": 0.109
+        },
+        {
+          "ui_ms": 0.552,
+          "draw_ms": 17.377,
+          "swap_ms": 15.565,
+          "paint_ms": 0.177
+        }
+      ]
+    },
+    "warm_pop": {
+      "verified_route_markers": 15,
+      "transition_ms": {
+        "n": 15,
+        "min": 316.326,
+        "p50": 323.266,
+        "p95": 338.306,
+        "max": 339.429,
+        "over_8.333ms": 15,
+        "over_16.667ms": 15,
+        "over_25ms": 15,
+        "over_33.333ms": 15
+      },
+      "marker_to_first_matched_draw_end_ms": {
+        "n": 15,
+        "min": 3.508,
+        "p50": 17.889,
+        "p95": 40.109,
+        "max": 48.329,
+        "over_8.333ms": 13,
+        "over_16.667ms": 8,
+        "over_25ms": 4,
+        "over_33.333ms": 2
+      },
+      "marker_to_first_draw_end_allowing_ui_overlap_ms": {
+        "n": 15,
+        "min": 3.508,
+        "p50": 17.889,
+        "p95": 40.109,
+        "max": 48.329,
+        "over_8.333ms": 13,
+        "over_16.667ms": 8,
+        "over_25ms": 4,
+        "over_33.333ms": 2
+      },
+      "first_ui_allowing_overlap_ms": {
+        "n": 15,
+        "min": 0.841,
+        "p50": 0.954,
+        "p95": 2.597,
+        "max": 2.705,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "first_ui_began_before_marker_count": 0,
+      "first_matched_ui_ms": {
+        "n": 15,
+        "min": 0.841,
+        "p50": 0.954,
+        "p95": 2.597,
+        "max": 2.705,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "first_matched_draw_ms": {
+        "n": 15,
+        "min": 1.995,
+        "p50": 5.995,
+        "p95": 7.45,
+        "max": 8.084,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "all_ui_begin_frame_ms": {
+        "n": 310,
+        "min": 0.021,
+        "p50": 0.499,
+        "p95": 3.895,
+        "max": 5.205,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "matched_ui_begin_frame_ms": {
+        "n": 300,
+        "min": 0.207,
+        "p50": 0.503,
+        "p95": 3.997,
+        "max": 5.205,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "matched_do_draw_ms": {
+        "n": 300,
+        "min": 1.995,
+        "p50": 16.206,
+        "p95": 17.272,
+        "max": 18.096,
+        "over_8.333ms": 260,
+        "over_16.667ms": 84,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "swap_buffers_ms": {
+        "n": 300,
+        "min": 0.218,
+        "p50": 14.661,
+        "p95": 16.343,
+        "max": 16.881,
+        "over_8.333ms": 252,
+        "over_16.667ms": 4,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "layer_paint_ms": {
+        "n": 300,
+        "min": 0.049,
+        "p50": 0.151,
+        "p95": 0.248,
+        "max": 0.582,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "draw_start_gap_ms": {
+        "n": 285,
+        "min": 5.294,
+        "p50": 16.591,
+        "p95": 19.696,
+        "max": 39.892,
+        "over_8.333ms": 277,
+        "over_16.667ms": 131,
+        "over_25ms": 6,
+        "over_33.333ms": 2
+      },
+      "ui_without_draw_pipeline_full": 10,
+      "swap_fraction_of_draw_elapsed": 0.9011,
+      "longest_draw_frame_components_ms": [
+        {
+          "ui_ms": 0.314,
+          "draw_ms": 18.096,
+          "swap_ms": 16.04,
+          "paint_ms": 0.154
+        },
+        {
+          "ui_ms": 0.45,
+          "draw_ms": 17.663,
+          "swap_ms": 16.625,
+          "paint_ms": 0.111
+        },
+        {
+          "ui_ms": 0.429,
+          "draw_ms": 17.497,
+          "swap_ms": 16.445,
+          "paint_ms": 0.115
+        },
+        {
+          "ui_ms": 0.441,
+          "draw_ms": 17.462,
+          "swap_ms": 15.046,
+          "paint_ms": 0.248
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Navigator marker starts after input routing and may start within the first Flutter frame. Marked first draw excludes a frame whose UI slice started before the marker.",
+    "UI/raster durations and consecutive draw-start gaps are not displayed FPS or dropped-frame counts.",
+    "SwapBuffers duration can include synchronization/wait. Frame components overlap and cannot by themselves identify application or GPU root cause.",
+    "App cold start preserves data and disk caches; My is opened and verified before each first Settings entry."
+  ]
+}

@@ -1,0 +1,708 @@
+{
+  "version_code": 6250,
+  "profile_px": [
+    3184,
+    2232
+  ],
+  "protocol": "Three cold app launches with preserved data and fifteen warm verified settings push/pop rounds per condition",
+  "conditions": {
+    "original": {
+      "bottom_material_enabled": true,
+      "global_immersive_enabled": true,
+      "evidence": "soak-6250-mpata04r/before.png"
+    },
+    "disabled": {
+      "bottom_material_enabled": false,
+      "global_immersive_enabled": true,
+      "evidence": "soak-6250-t2888yo6/after.png"
+    },
+    "restored": {
+      "bottom_material_enabled": true,
+      "global_immersive_enabled": true,
+      "evidence": "soak-6250-gahsy731/after.png"
+    }
+  },
+  "enabled": {
+    "evidence_directory": "soak-6250-_z6zapz_",
+    "traces": 6,
+    "truncated_traces": 0,
+    "by_group": {
+      "cold_push": {
+        "verified_route_markers": 3,
+        "matched_draws": 59,
+        "ui_begin_frame_ms": {
+          "n": 62,
+          "min": 0.026,
+          "p50": 0.577,
+          "p95": 3.022,
+          "max": 7.836,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "raster_do_draw_ms": {
+          "n": 59,
+          "min": 2.927,
+          "p50": 16.36,
+          "p95": 17.296,
+          "max": 18.701,
+          "over_8.333ms": 57,
+          "over_16.667ms": 18,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_buffers_ms": {
+          "n": 59,
+          "min": 0.721,
+          "p50": 13.786,
+          "p95": 15.504,
+          "max": 15.801,
+          "over_8.333ms": 49,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_fraction_of_raster_elapsed": 0.7406,
+        "adjacent_draw_start_gap_ms": {
+          "n": 56,
+          "min": 5.91,
+          "p50": 16.625,
+          "p95": 18.001,
+          "max": 25.531,
+          "over_8.333ms": 55,
+          "over_16.667ms": 26,
+          "over_25ms": 1,
+          "over_33.333ms": 0
+        },
+        "first_draw_end_after_nav_marker_ms": {
+          "n": 3,
+          "min": 12.287,
+          "p50": 19.787,
+          "p95": 19.856,
+          "max": 19.864,
+          "over_8.333ms": 3,
+          "over_16.667ms": 2,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "receive_vsync_minus_reported_timestamp_ms": {
+          "n": 59,
+          "min": 0.108,
+          "p50": 0.16,
+          "p95": 4.67,
+          "max": 8.457,
+          "over_8.333ms": 1,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "render_service_send_vsync_to_app_receive_ms": {
+          "n": 59,
+          "min": 0.051,
+          "p50": 0.084,
+          "p95": 0.138,
+          "max": 0.262,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "matched_gaps_over_25ms_with_intervening_raw_draw_begin": 0
+      },
+      "cold_pop": {
+        "verified_route_markers": 3,
+        "matched_draws": 59,
+        "ui_begin_frame_ms": {
+          "n": 61,
+          "min": 0.024,
+          "p50": 0.56,
+          "p95": 3.417,
+          "max": 4.879,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "raster_do_draw_ms": {
+          "n": 59,
+          "min": 4.558,
+          "p50": 16.346,
+          "p95": 17.265,
+          "max": 17.87,
+          "over_8.333ms": 50,
+          "over_16.667ms": 15,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_buffers_ms": {
+          "n": 59,
+          "min": 2.69,
+          "p50": 15.045,
+          "p95": 16.44,
+          "max": 16.681,
+          "over_8.333ms": 49,
+          "over_16.667ms": 1,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_fraction_of_raster_elapsed": 0.9066,
+        "adjacent_draw_start_gap_ms": {
+          "n": 56,
+          "min": 5.416,
+          "p50": 16.584,
+          "p95": 20.38,
+          "max": 35.116,
+          "over_8.333ms": 54,
+          "over_16.667ms": 26,
+          "over_25ms": 2,
+          "over_33.333ms": 1
+        },
+        "first_draw_end_after_nav_marker_ms": {
+          "n": 3,
+          "min": 10.4,
+          "p50": 22.852,
+          "p95": 28.263,
+          "max": 28.864,
+          "over_8.333ms": 3,
+          "over_16.667ms": 2,
+          "over_25ms": 1,
+          "over_33.333ms": 0
+        },
+        "receive_vsync_minus_reported_timestamp_ms": {
+          "n": 59,
+          "min": 0.085,
+          "p50": 0.185,
+          "p95": 10.58,
+          "max": 20.031,
+          "over_8.333ms": 5,
+          "over_16.667ms": 1,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "render_service_send_vsync_to_app_receive_ms": {
+          "n": 59,
+          "min": 0.03,
+          "p50": 0.079,
+          "p95": 0.307,
+          "max": 2.027,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "matched_gaps_over_25ms_with_intervening_raw_draw_begin": 0
+      },
+      "warm_push": {
+        "verified_route_markers": 15,
+        "matched_draws": 307,
+        "ui_begin_frame_ms": {
+          "n": 312,
+          "min": 0.025,
+          "p50": 0.604,
+          "p95": 3.521,
+          "max": 8.316,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "raster_do_draw_ms": {
+          "n": 307,
+          "min": 0.644,
+          "p50": 16.057,
+          "p95": 17.261,
+          "max": 18.253,
+          "over_8.333ms": 267,
+          "over_16.667ms": 72,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_buffers_ms": {
+          "n": 307,
+          "min": 0.151,
+          "p50": 14.265,
+          "p95": 15.612,
+          "max": 17.061,
+          "over_8.333ms": 260,
+          "over_16.667ms": 2,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_fraction_of_raster_elapsed": 0.8833,
+        "adjacent_draw_start_gap_ms": {
+          "n": 292,
+          "min": 1.996,
+          "p50": 16.443,
+          "p95": 19.775,
+          "max": 38.588,
+          "over_8.333ms": 281,
+          "over_16.667ms": 115,
+          "over_25ms": 5,
+          "over_33.333ms": 2
+        },
+        "first_draw_end_after_nav_marker_ms": {
+          "n": 15,
+          "min": 4.428,
+          "p50": 17.909,
+          "p95": 27.577,
+          "max": 36.238,
+          "over_8.333ms": 12,
+          "over_16.667ms": 8,
+          "over_25ms": 1,
+          "over_33.333ms": 1
+        },
+        "receive_vsync_minus_reported_timestamp_ms": {
+          "n": 307,
+          "min": 0.057,
+          "p50": 0.198,
+          "p95": 6.765,
+          "max": 21.301,
+          "over_8.333ms": 12,
+          "over_16.667ms": 2,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "render_service_send_vsync_to_app_receive_ms": {
+          "n": 307,
+          "min": 0.02,
+          "p50": 0.089,
+          "p95": 0.637,
+          "max": 3.255,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "matched_gaps_over_25ms_with_intervening_raw_draw_begin": 0
+      },
+      "warm_pop": {
+        "verified_route_markers": 15,
+        "matched_draws": 296,
+        "ui_begin_frame_ms": {
+          "n": 303,
+          "min": 0.028,
+          "p50": 0.508,
+          "p95": 4.055,
+          "max": 6.915,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "raster_do_draw_ms": {
+          "n": 296,
+          "min": 0.592,
+          "p50": 16.128,
+          "p95": 17.217,
+          "max": 19.032,
+          "over_8.333ms": 248,
+          "over_16.667ms": 69,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_buffers_ms": {
+          "n": 296,
+          "min": 0.18,
+          "p50": 14.635,
+          "p95": 16.401,
+          "max": 17.041,
+          "over_8.333ms": 243,
+          "over_16.667ms": 4,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_fraction_of_raster_elapsed": 0.8954,
+        "adjacent_draw_start_gap_ms": {
+          "n": 281,
+          "min": 5.439,
+          "p50": 16.6,
+          "p95": 20.565,
+          "max": 57.009,
+          "over_8.333ms": 272,
+          "over_16.667ms": 127,
+          "over_25ms": 10,
+          "over_33.333ms": 4
+        },
+        "first_draw_end_after_nav_marker_ms": {
+          "n": 15,
+          "min": 7.016,
+          "p50": 14.706,
+          "p95": 32.107,
+          "max": 33.272,
+          "over_8.333ms": 11,
+          "over_16.667ms": 6,
+          "over_25ms": 3,
+          "over_33.333ms": 0
+        },
+        "receive_vsync_minus_reported_timestamp_ms": {
+          "n": 296,
+          "min": 0.066,
+          "p50": 0.218,
+          "p95": 8.631,
+          "max": 43.127,
+          "over_8.333ms": 16,
+          "over_16.667ms": 6,
+          "over_25ms": 3,
+          "over_33.333ms": 2
+        },
+        "render_service_send_vsync_to_app_receive_ms": {
+          "n": 296,
+          "min": 0.031,
+          "p50": 0.085,
+          "p95": 0.719,
+          "max": 2.346,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "matched_gaps_over_25ms_with_intervening_raw_draw_begin": 0
+      }
+    }
+  },
+  "opaque": {
+    "evidence_directory": "soak-6250-a23tzfke",
+    "traces": 6,
+    "truncated_traces": 0,
+    "by_group": {
+      "cold_push": {
+        "verified_route_markers": 3,
+        "matched_draws": 61,
+        "ui_begin_frame_ms": {
+          "n": 64,
+          "min": 0.026,
+          "p50": 0.585,
+          "p95": 5.265,
+          "max": 7.505,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "raster_do_draw_ms": {
+          "n": 61,
+          "min": 1.767,
+          "p50": 16.368,
+          "p95": 17.102,
+          "max": 17.482,
+          "over_8.333ms": 56,
+          "over_16.667ms": 15,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_buffers_ms": {
+          "n": 61,
+          "min": 0.821,
+          "p50": 13.682,
+          "p95": 15.259,
+          "max": 15.593,
+          "over_8.333ms": 47,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_fraction_of_raster_elapsed": 0.7441,
+        "adjacent_draw_start_gap_ms": {
+          "n": 58,
+          "min": 10.261,
+          "p50": 16.529,
+          "p95": 17.263,
+          "max": 17.882,
+          "over_8.333ms": 58,
+          "over_16.667ms": 23,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "first_draw_end_after_nav_marker_ms": {
+          "n": 3,
+          "min": 8.484,
+          "p50": 10.99,
+          "p95": 11.426,
+          "max": 11.475,
+          "over_8.333ms": 3,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "receive_vsync_minus_reported_timestamp_ms": {
+          "n": 61,
+          "min": 0.098,
+          "p50": 0.149,
+          "p95": 2.585,
+          "max": 6.865,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "render_service_send_vsync_to_app_receive_ms": {
+          "n": 61,
+          "min": 0.045,
+          "p50": 0.078,
+          "p95": 0.165,
+          "max": 0.362,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "matched_gaps_over_25ms_with_intervening_raw_draw_begin": 0
+      },
+      "cold_pop": {
+        "verified_route_markers": 3,
+        "matched_draws": 60,
+        "ui_begin_frame_ms": {
+          "n": 62,
+          "min": 0.025,
+          "p50": 0.522,
+          "p95": 2.872,
+          "max": 5.469,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "raster_do_draw_ms": {
+          "n": 60,
+          "min": 5.262,
+          "p50": 16.26,
+          "p95": 17.321,
+          "max": 17.521,
+          "over_8.333ms": 53,
+          "over_16.667ms": 16,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_buffers_ms": {
+          "n": 60,
+          "min": 3.493,
+          "p50": 14.682,
+          "p95": 16.41,
+          "max": 16.912,
+          "over_8.333ms": 53,
+          "over_16.667ms": 1,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_fraction_of_raster_elapsed": 0.8945,
+        "adjacent_draw_start_gap_ms": {
+          "n": 57,
+          "min": 6.178,
+          "p50": 16.593,
+          "p95": 22.577,
+          "max": 25.121,
+          "over_8.333ms": 55,
+          "over_16.667ms": 27,
+          "over_25ms": 1,
+          "over_33.333ms": 0
+        },
+        "first_draw_end_after_nav_marker_ms": {
+          "n": 3,
+          "min": 11.239,
+          "p50": 12.783,
+          "p95": 28.727,
+          "max": 30.498,
+          "over_8.333ms": 3,
+          "over_16.667ms": 1,
+          "over_25ms": 1,
+          "over_33.333ms": 0
+        },
+        "receive_vsync_minus_reported_timestamp_ms": {
+          "n": 60,
+          "min": 0.101,
+          "p50": 0.206,
+          "p95": 10.157,
+          "max": 15.186,
+          "over_8.333ms": 4,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "render_service_send_vsync_to_app_receive_ms": {
+          "n": 60,
+          "min": 0.023,
+          "p50": 0.087,
+          "p95": 0.314,
+          "max": 1.814,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "matched_gaps_over_25ms_with_intervening_raw_draw_begin": 0
+      },
+      "warm_push": {
+        "verified_route_markers": 15,
+        "matched_draws": 307,
+        "ui_begin_frame_ms": {
+          "n": 313,
+          "min": 0.024,
+          "p50": 0.603,
+          "p95": 3.412,
+          "max": 6.295,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "raster_do_draw_ms": {
+          "n": 307,
+          "min": 0.667,
+          "p50": 15.994,
+          "p95": 17.138,
+          "max": 17.598,
+          "over_8.333ms": 243,
+          "over_16.667ms": 64,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_buffers_ms": {
+          "n": 307,
+          "min": 0.152,
+          "p50": 14.228,
+          "p95": 15.475,
+          "max": 16.311,
+          "over_8.333ms": 237,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_fraction_of_raster_elapsed": 0.8819,
+        "adjacent_draw_start_gap_ms": {
+          "n": 292,
+          "min": 2.012,
+          "p50": 16.394,
+          "p95": 19.165,
+          "max": 30.615,
+          "over_8.333ms": 283,
+          "over_16.667ms": 117,
+          "over_25ms": 3,
+          "over_33.333ms": 0
+        },
+        "first_draw_end_after_nav_marker_ms": {
+          "n": 15,
+          "min": 5.96,
+          "p50": 16.212,
+          "p95": 33.397,
+          "max": 34.924,
+          "over_8.333ms": 13,
+          "over_16.667ms": 7,
+          "over_25ms": 3,
+          "over_33.333ms": 1
+        },
+        "receive_vsync_minus_reported_timestamp_ms": {
+          "n": 307,
+          "min": 0.085,
+          "p50": 0.173,
+          "p95": 8.041,
+          "max": 18.178,
+          "over_8.333ms": 14,
+          "over_16.667ms": 1,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "render_service_send_vsync_to_app_receive_ms": {
+          "n": 307,
+          "min": 0.044,
+          "p50": 0.08,
+          "p95": 0.241,
+          "max": 0.759,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "matched_gaps_over_25ms_with_intervening_raw_draw_begin": 0
+      },
+      "warm_pop": {
+        "verified_route_markers": 15,
+        "matched_draws": 301,
+        "ui_begin_frame_ms": {
+          "n": 306,
+          "min": 0.021,
+          "p50": 0.542,
+          "p95": 3.868,
+          "max": 7.081,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "raster_do_draw_ms": {
+          "n": 301,
+          "min": 4.139,
+          "p50": 15.877,
+          "p95": 17.267,
+          "max": 17.723,
+          "over_8.333ms": 261,
+          "over_16.667ms": 65,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_buffers_ms": {
+          "n": 301,
+          "min": 1.333,
+          "p50": 14.359,
+          "p95": 16.404,
+          "max": 16.76,
+          "over_8.333ms": 248,
+          "over_16.667ms": 3,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "swap_fraction_of_raster_elapsed": 0.8958,
+        "adjacent_draw_start_gap_ms": {
+          "n": 286,
+          "min": 4.619,
+          "p50": 16.371,
+          "p95": 19.666,
+          "max": 38.31,
+          "over_8.333ms": 279,
+          "over_16.667ms": 109,
+          "over_25ms": 7,
+          "over_33.333ms": 2
+        },
+        "first_draw_end_after_nav_marker_ms": {
+          "n": 15,
+          "min": 5.947,
+          "p50": 21.638,
+          "p95": 37.343,
+          "max": 41.307,
+          "over_8.333ms": 12,
+          "over_16.667ms": 9,
+          "over_25ms": 4,
+          "over_33.333ms": 2
+        },
+        "receive_vsync_minus_reported_timestamp_ms": {
+          "n": 301,
+          "min": 0.062,
+          "p50": 0.177,
+          "p95": 8.917,
+          "max": 23.153,
+          "over_8.333ms": 18,
+          "over_16.667ms": 5,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "render_service_send_vsync_to_app_receive_ms": {
+          "n": 301,
+          "min": 0.02,
+          "p50": 0.079,
+          "p95": 0.29,
+          "max": 2.076,
+          "over_8.333ms": 0,
+          "over_16.667ms": 0,
+          "over_25ms": 0,
+          "over_33.333ms": 0
+        },
+        "matched_gaps_over_25ms_with_intervening_raw_draw_begin": 0
+      }
+    }
+  },
+  "limits": [
+    "Sequential comparison with one run per condition, no randomized crossover.",
+    "UITest route checks establish page transitions; engine markers and VSync trace timestamps do not establish actual displayed FPS.",
+    "No physical device used."
+  ]
+}

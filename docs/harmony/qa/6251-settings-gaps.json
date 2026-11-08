@@ -1,0 +1,1406 @@
+{
+  "all_gaps_over_25ms_by_group": {
+    "cold_push": 1,
+    "warm_push": 5,
+    "warm_pop": 6
+  },
+  "warm_gaps_with_intervening_raw_draw": 0,
+  "warm_gaps_with_pipeline_full_event": 0,
+  "warm_gaps_with_vsync_send_receive_pair": 11,
+  "paired_frame_vsync_summary": {
+    "cold_pop": {
+      "receive_minus_timestamp_ms": {
+        "n": 60,
+        "min": 0.091,
+        "p50": 0.15,
+        "p95": 6.507,
+        "max": 8.062,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "send_minus_timestamp_ms": {
+        "n": 60,
+        "min": 0.027,
+        "p50": 0.073,
+        "p95": 6.406,
+        "max": 7.973,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "send_to_receive_ms": {
+        "n": 60,
+        "min": 0.037,
+        "p50": 0.071,
+        "p95": 0.168,
+        "max": 1.273,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "receive_to_ui_start_ms": {
+        "n": 60,
+        "min": 0.129,
+        "p50": 1.022,
+        "p95": 2.763,
+        "max": 2.986,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      }
+    },
+    "cold_push": {
+      "receive_minus_timestamp_ms": {
+        "n": 58,
+        "min": 0.107,
+        "p50": 0.165,
+        "p95": 3.417,
+        "max": 22.339,
+        "over_8.333ms": 2,
+        "over_16.667ms": 1,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "send_minus_timestamp_ms": {
+        "n": 58,
+        "min": 0.059,
+        "p50": 0.079,
+        "p95": 3.314,
+        "max": 22.241,
+        "over_8.333ms": 2,
+        "over_16.667ms": 1,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "send_to_receive_ms": {
+        "n": 58,
+        "min": 0.042,
+        "p50": 0.079,
+        "p95": 0.157,
+        "max": 0.179,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "receive_to_ui_start_ms": {
+        "n": 58,
+        "min": 0.16,
+        "p50": 0.99,
+        "p95": 3.149,
+        "max": 6.678,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      }
+    },
+    "warm_pop": {
+      "receive_minus_timestamp_ms": {
+        "n": 300,
+        "min": 0.082,
+        "p50": 0.184,
+        "p95": 8.704,
+        "max": 26.81,
+        "over_8.333ms": 17,
+        "over_16.667ms": 6,
+        "over_25ms": 1,
+        "over_33.333ms": 0
+      },
+      "send_minus_timestamp_ms": {
+        "n": 300,
+        "min": 0.026,
+        "p50": 0.076,
+        "p95": 8.614,
+        "max": 26.612,
+        "over_8.333ms": 16,
+        "over_16.667ms": 6,
+        "over_25ms": 1,
+        "over_33.333ms": 0
+      },
+      "send_to_receive_ms": {
+        "n": 300,
+        "min": 0.033,
+        "p50": 0.085,
+        "p95": 0.319,
+        "max": 2.427,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "receive_to_ui_start_ms": {
+        "n": 300,
+        "min": 0.068,
+        "p50": 0.933,
+        "p95": 2.791,
+        "max": 5.939,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      }
+    },
+    "warm_push": {
+      "receive_minus_timestamp_ms": {
+        "n": 306,
+        "min": 0.099,
+        "p50": 0.182,
+        "p95": 8.09,
+        "max": 26.956,
+        "over_8.333ms": 14,
+        "over_16.667ms": 5,
+        "over_25ms": 1,
+        "over_33.333ms": 0
+      },
+      "send_minus_timestamp_ms": {
+        "n": 306,
+        "min": 0.037,
+        "p50": 0.077,
+        "p95": 8.008,
+        "max": 26.778,
+        "over_8.333ms": 13,
+        "over_16.667ms": 5,
+        "over_25ms": 1,
+        "over_33.333ms": 0
+      },
+      "send_to_receive_ms": {
+        "n": 306,
+        "min": 0.039,
+        "p50": 0.082,
+        "p95": 0.247,
+        "max": 3.241,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      },
+      "receive_to_ui_start_ms": {
+        "n": 306,
+        "min": 0.088,
+        "p50": 0.939,
+        "p95": 2.552,
+        "max": 4.832,
+        "over_8.333ms": 0,
+        "over_16.667ms": 0,
+        "over_25ms": 0,
+        "over_33.333ms": 0
+      }
+    }
+  },
+  "three_longest_by_gap": [
+    {
+      "trace": "warm-2",
+      "direction": "PUSH",
+      "route_marker_index": 7,
+      "draw_frame_numbers": [
+        508,
+        509
+      ],
+      "matched_draw_start_gap_ms": 40.456,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 0.643,
+      "next_ui_ms": 1.245,
+      "raster_no_draw_after_previous_end_ms": 39.813,
+      "adjacent_paired_ui_begin_gap_ms": 42.387,
+      "next_ui_start_to_draw_start_ms": 1.193,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 42.299,
+        "render_service_send_gap_ms": 42.169,
+        "next_send_minus_timestamp_ms": 26.778,
+        "next_receive_minus_timestamp_ms": 26.956,
+        "next_send_to_receive_ms": 0.178,
+        "next_receive_to_ui_begin_ms": 0.336,
+        "actual_vsync_ids": [
+          42974,
+          42975
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.331,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.286
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.331
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.286
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        },
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.056
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.056
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-1",
+      "direction": "POP",
+      "route_marker_index": 6,
+      "draw_frame_numbers": [
+        270,
+        271
+      ],
+      "matched_draw_start_gap_ms": 39.892,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 7.357,
+      "next_ui_ms": 2.746,
+      "raster_no_draw_after_previous_end_ms": 32.535,
+      "adjacent_paired_ui_begin_gap_ms": 40.245,
+      "next_ui_start_to_draw_start_ms": 1.218,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 39.964,
+        "render_service_send_gap_ms": 39.936,
+        "next_send_minus_timestamp_ms": 24.574,
+        "next_receive_minus_timestamp_ms": 24.666,
+        "next_send_to_receive_ms": 0.092,
+        "next_receive_to_ui_begin_ms": 1.166,
+        "actual_vsync_ids": [
+          42645,
+          42646
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "display_present_wait": 0.001,
+            "render_service_do_composition": 0.726,
+            "render_service_process_command": 0.046
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 0.726
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.046
+            },
+            {
+              "type": "display_present_wait",
+              "overlap_ms": 0.001
+            }
+          ]
+        },
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.006
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.006
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 1.032,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.986
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 1.032
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.986
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "cold-3",
+      "direction": "PUSH",
+      "route_marker_index": 1,
+      "draw_frame_numbers": [
+        110,
+        111
+      ],
+      "matched_draw_start_gap_ms": 38.265,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 12.004,
+      "next_ui_ms": 0.399,
+      "raster_no_draw_after_previous_end_ms": 26.261,
+      "adjacent_paired_ui_begin_gap_ms": 38.251,
+      "next_ui_start_to_draw_start_ms": 0.349,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 37.595,
+        "render_service_send_gap_ms": 37.559,
+        "next_send_minus_timestamp_ms": 22.241,
+        "next_receive_minus_timestamp_ms": 22.339,
+        "next_send_to_receive_ms": 0.098,
+        "next_receive_to_ui_begin_ms": 1.52,
+        "actual_vsync_ids": [
+          42426,
+          42427
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.006
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.006
+            }
+          ]
+        },
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "render_service_process_command": 0.032,
+            "render_service_do_composition": 1.452
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 1.452
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.032
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.746,
+            "arkui_out_of_vsync_monitor": 0.0,
+            "arkui_vsync_task": 0.709
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.746
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.709
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    }
+  ],
+  "all_gaps": [
+    {
+      "trace": "cold-3",
+      "direction": "PUSH",
+      "route_marker_index": 1,
+      "draw_frame_numbers": [
+        110,
+        111
+      ],
+      "matched_draw_start_gap_ms": 38.265,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 12.004,
+      "next_ui_ms": 0.399,
+      "raster_no_draw_after_previous_end_ms": 26.261,
+      "adjacent_paired_ui_begin_gap_ms": 38.251,
+      "next_ui_start_to_draw_start_ms": 0.349,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 37.595,
+        "render_service_send_gap_ms": 37.559,
+        "next_send_minus_timestamp_ms": 22.241,
+        "next_receive_minus_timestamp_ms": 22.339,
+        "next_send_to_receive_ms": 0.098,
+        "next_receive_to_ui_begin_ms": 1.52,
+        "actual_vsync_ids": [
+          42426,
+          42427
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.006
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.006
+            }
+          ]
+        },
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "render_service_process_command": 0.032,
+            "render_service_do_composition": 1.452
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 1.452
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.032
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.746,
+            "arkui_out_of_vsync_monitor": 0.0,
+            "arkui_vsync_task": 0.709
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.746
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.709
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-1",
+      "direction": "PUSH",
+      "route_marker_index": 5,
+      "draw_frame_numbers": [
+        247,
+        248
+      ],
+      "matched_draw_start_gap_ms": 28.792,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 5.838,
+      "next_ui_ms": 0.713,
+      "raster_no_draw_after_previous_end_ms": 22.954,
+      "adjacent_paired_ui_begin_gap_ms": 28.52,
+      "next_ui_start_to_draw_start_ms": 0.843,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 30.32,
+        "render_service_send_gap_ms": 30.377,
+        "next_send_minus_timestamp_ms": 15.048,
+        "next_receive_minus_timestamp_ms": 15.141,
+        "next_send_to_receive_ms": 0.093,
+        "next_receive_to_ui_begin_ms": 1.141,
+        "actual_vsync_ids": [
+          42614,
+          42615
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.007
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.007
+            }
+          ]
+        },
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "display_present_wait": 0.001,
+            "render_service_process_command": 0.036,
+            "render_service_do_composition": 0.69
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 0.69
+            },
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 0.448
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.036
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.587,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.556
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.587
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.556
+            },
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.028
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-1",
+      "direction": "POP",
+      "route_marker_index": 6,
+      "draw_frame_numbers": [
+        267,
+        268
+      ],
+      "matched_draw_start_gap_ms": 29.226,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 5.353,
+      "next_ui_ms": 0.359,
+      "raster_no_draw_after_previous_end_ms": 23.873,
+      "adjacent_paired_ui_begin_gap_ms": 29.503,
+      "next_ui_start_to_draw_start_ms": 0.353,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 29.577,
+        "render_service_send_gap_ms": 29.579,
+        "next_send_minus_timestamp_ms": 17.711,
+        "next_receive_minus_timestamp_ms": 17.819,
+        "next_send_to_receive_ms": 0.108,
+        "next_receive_to_ui_begin_ms": 0.836,
+        "actual_vsync_ids": [
+          42642,
+          42643
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "display_present_wait": 0.002,
+            "render_service_do_composition": 0.637,
+            "render_service_process_command": 0.043
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 0.637
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.043
+            },
+            {
+              "type": "display_present_wait",
+              "overlap_ms": 0.002
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.813,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.769
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.813
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.769
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        },
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.05
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.05
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-1",
+      "direction": "POP",
+      "route_marker_index": 6,
+      "draw_frame_numbers": [
+        270,
+        271
+      ],
+      "matched_draw_start_gap_ms": 39.892,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 7.357,
+      "next_ui_ms": 2.746,
+      "raster_no_draw_after_previous_end_ms": 32.535,
+      "adjacent_paired_ui_begin_gap_ms": 40.245,
+      "next_ui_start_to_draw_start_ms": 1.218,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 39.964,
+        "render_service_send_gap_ms": 39.936,
+        "next_send_minus_timestamp_ms": 24.574,
+        "next_receive_minus_timestamp_ms": 24.666,
+        "next_send_to_receive_ms": 0.092,
+        "next_receive_to_ui_begin_ms": 1.166,
+        "actual_vsync_ids": [
+          42645,
+          42646
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "display_present_wait": 0.001,
+            "render_service_do_composition": 0.726,
+            "render_service_process_command": 0.046
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 0.726
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.046
+            },
+            {
+              "type": "display_present_wait",
+              "overlap_ms": 0.001
+            }
+          ]
+        },
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.006
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.006
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 1.032,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.986
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 1.032
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.986
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-1",
+      "direction": "POP",
+      "route_marker_index": 10,
+      "draw_frame_numbers": [
+        355,
+        356
+      ],
+      "matched_draw_start_gap_ms": 30.8,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 9.558,
+      "next_ui_ms": 0.478,
+      "raster_no_draw_after_previous_end_ms": 21.242,
+      "adjacent_paired_ui_begin_gap_ms": 30.659,
+      "next_ui_start_to_draw_start_ms": 0.601,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 32.688,
+        "render_service_send_gap_ms": 32.681,
+        "next_send_minus_timestamp_ms": 17.271,
+        "next_receive_minus_timestamp_ms": 17.329,
+        "next_send_to_receive_ms": 0.058,
+        "next_receive_to_ui_begin_ms": 1.124,
+        "actual_vsync_ids": [
+          42762,
+          42763
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.026
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.026
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.979,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.935
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.979
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.935
+            },
+            {
+              "type": "arkui_out_of_vsync_monitor",
+              "overlap_ms": 0.001
+            }
+          ]
+        },
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "render_service_process_command": 0.104,
+            "render_service_do_composition": 1.531
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 1.531
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.104
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-1",
+      "direction": "POP",
+      "route_marker_index": 10,
+      "draw_frame_numbers": [
+        360,
+        361
+      ],
+      "matched_draw_start_gap_ms": 26.798,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 12.933,
+      "next_ui_ms": 1.17,
+      "raster_no_draw_after_previous_end_ms": 13.865,
+      "adjacent_paired_ui_begin_gap_ms": 26.705,
+      "next_ui_start_to_draw_start_ms": 0.372,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 24.942,
+        "render_service_send_gap_ms": 24.768,
+        "next_send_minus_timestamp_ms": 9.408,
+        "next_receive_minus_timestamp_ms": 9.631,
+        "next_send_to_receive_ms": 0.223,
+        "next_receive_to_ui_begin_ms": 2.687,
+        "actual_vsync_ids": [
+          42767,
+          42768
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.005
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.005
+            }
+          ]
+        },
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "display_present_wait": 0.002,
+            "render_service_process_command": 0.04,
+            "render_service_do_composition": 0.657
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 0.657
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.04
+            },
+            {
+              "type": "display_present_wait",
+              "overlap_ms": 0.002
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 2.525,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 2.432
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 2.525
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 2.432
+            },
+            {
+              "type": "arkui_out_of_vsync_monitor",
+              "overlap_ms": 0.001
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-2",
+      "direction": "PUSH",
+      "route_marker_index": 1,
+      "draw_frame_numbers": [
+        377,
+        378
+      ],
+      "matched_draw_start_gap_ms": 32.179,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 5.284,
+      "next_ui_ms": 1.584,
+      "raster_no_draw_after_previous_end_ms": 26.895,
+      "adjacent_paired_ui_begin_gap_ms": 32.232,
+      "next_ui_start_to_draw_start_ms": 0.332,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 32.778,
+        "render_service_send_gap_ms": 32.751,
+        "next_send_minus_timestamp_ms": 19.049,
+        "next_receive_minus_timestamp_ms": 19.21,
+        "next_send_to_receive_ms": 0.161,
+        "next_receive_to_ui_begin_ms": 1.046,
+        "actual_vsync_ids": [
+          42794,
+          42795
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "display_present_wait": 0.001,
+            "render_service_do_composition": 0.79,
+            "render_service_process_command": 0.043
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 0.79
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.043
+            },
+            {
+              "type": "display_present_wait",
+              "overlap_ms": 0.001
+            }
+          ]
+        },
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.007
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.007
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.921,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.858
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.921
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.858
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-2",
+      "direction": "POP",
+      "route_marker_index": 2,
+      "draw_frame_numbers": [
+        398,
+        399
+      ],
+      "matched_draw_start_gap_ms": 34.788,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 6.886,
+      "next_ui_ms": 0.303,
+      "raster_no_draw_after_previous_end_ms": 27.902,
+      "adjacent_paired_ui_begin_gap_ms": 35.211,
+      "next_ui_start_to_draw_start_ms": 0.471,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 35.611,
+        "render_service_send_gap_ms": 35.66,
+        "next_send_minus_timestamp_ms": 20.664,
+        "next_receive_minus_timestamp_ms": 20.772,
+        "next_send_to_receive_ms": 0.108,
+        "next_receive_to_ui_begin_ms": 1.0,
+        "actual_vsync_ids": [
+          42821,
+          42822
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "display_present_wait": 0.002,
+            "render_service_do_composition": 0.947,
+            "render_service_process_command": 0.104
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 0.947
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.104
+            },
+            {
+              "type": "display_present_wait",
+              "overlap_ms": 0.002
+            }
+          ]
+        },
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.007
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.007
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.88,
+            "arkui_out_of_vsync_monitor": 0.0,
+            "arkui_vsync_task": 0.841
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.88
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.841
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-2",
+      "direction": "PUSH",
+      "route_marker_index": 7,
+      "draw_frame_numbers": [
+        508,
+        509
+      ],
+      "matched_draw_start_gap_ms": 40.456,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 0.643,
+      "next_ui_ms": 1.245,
+      "raster_no_draw_after_previous_end_ms": 39.813,
+      "adjacent_paired_ui_begin_gap_ms": 42.387,
+      "next_ui_start_to_draw_start_ms": 1.193,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 42.299,
+        "render_service_send_gap_ms": 42.169,
+        "next_send_minus_timestamp_ms": 26.778,
+        "next_receive_minus_timestamp_ms": 26.956,
+        "next_send_to_receive_ms": 0.178,
+        "next_receive_to_ui_begin_ms": 0.336,
+        "actual_vsync_ids": [
+          42974,
+          42975
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.331,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.286
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.331
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.286
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        },
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.056
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.056
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-2",
+      "direction": "PUSH",
+      "route_marker_index": 9,
+      "draw_frame_numbers": [
+        553,
+        554
+      ],
+      "matched_draw_start_gap_ms": 25.909,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 1.808,
+      "next_ui_ms": 1.004,
+      "raster_no_draw_after_previous_end_ms": 24.101,
+      "adjacent_paired_ui_begin_gap_ms": 28.214,
+      "next_ui_start_to_draw_start_ms": 0.989,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 28.138,
+        "render_service_send_gap_ms": 28.069,
+        "next_send_minus_timestamp_ms": 12.664,
+        "next_receive_minus_timestamp_ms": 12.798,
+        "next_send_to_receive_ms": 0.134,
+        "next_receive_to_ui_begin_ms": 0.287,
+        "actual_vsync_ids": [
+          43034,
+          43035
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.277,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.223
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.277
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.223
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        },
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.028
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.028
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-3",
+      "direction": "PUSH",
+      "route_marker_index": 5,
+      "draw_frame_numbers": [
+        690,
+        691
+      ],
+      "matched_draw_start_gap_ms": 36.758,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 10.762,
+      "next_ui_ms": 1.181,
+      "raster_no_draw_after_previous_end_ms": 25.996,
+      "adjacent_paired_ui_begin_gap_ms": 36.502,
+      "next_ui_start_to_draw_start_ms": 0.562,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 36.01,
+        "render_service_send_gap_ms": 36.053,
+        "next_send_minus_timestamp_ms": 20.714,
+        "next_receive_minus_timestamp_ms": 20.895,
+        "next_send_to_receive_ms": 0.181,
+        "next_receive_to_ui_begin_ms": 1.098,
+        "actual_vsync_ids": [
+          43221,
+          43222
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.134
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.134
+            }
+          ]
+        },
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.849,
+            "arkui_out_of_vsync_monitor": 0.002,
+            "arkui_vsync_task": 0.708
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.849
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.708
+            },
+            {
+              "type": "arkui_out_of_vsync_monitor",
+              "overlap_ms": 0.002
+            }
+          ]
+        },
+        "system_render_service": {
+          "duration_maxima_ms": {
+            "render_service_process_command": 0.035,
+            "render_service_do_composition": 0.834
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "render_service_do_composition",
+              "overlap_ms": 0.834
+            },
+            {
+              "type": "render_service_process_command",
+              "overlap_ms": 0.035
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    },
+    {
+      "trace": "warm-3",
+      "direction": "POP",
+      "route_marker_index": 10,
+      "draw_frame_numbers": [
+        798,
+        799
+      ],
+      "matched_draw_start_gap_ms": 26.086,
+      "additional_raw_draw_begins": 0,
+      "additional_ui_begins": 0,
+      "adjacent_raw_draw_begins": true,
+      "previous_draw_ms": 7.178,
+      "next_ui_ms": 0.487,
+      "raster_no_draw_after_previous_end_ms": 18.908,
+      "adjacent_paired_ui_begin_gap_ms": 26.755,
+      "next_ui_start_to_draw_start_ms": 0.471,
+      "pipeline_full_between_ui_starts": 0,
+      "vsync": {
+        "app_receive_gap_ms": 26.345,
+        "render_service_send_gap_ms": 26.253,
+        "next_send_minus_timestamp_ms": 11.213,
+        "next_receive_minus_timestamp_ms": 11.339,
+        "next_send_to_receive_ms": 0.126,
+        "next_receive_to_ui_begin_ms": 0.49,
+        "actual_vsync_ids": [
+          43369,
+          43370
+        ]
+      },
+      "trace_markers_during_raster_idle": {
+        "app_main": {
+          "duration_maxima_ms": {
+            "arkui_vsync_callback": 0.439,
+            "arkui_out_of_vsync_monitor": 0.001,
+            "arkui_vsync_task": 0.371
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "arkui_vsync_callback",
+              "overlap_ms": 0.439
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.371
+            },
+            {
+              "type": "arkui_vsync_task",
+              "overlap_ms": 0.001
+            }
+          ]
+        },
+        "app_other": {
+          "duration_maxima_ms": {
+            "vsync_fire_callback": 0.025
+          },
+          "top_complete_marked_spans": [
+            {
+              "type": "vsync_fire_callback",
+              "overlap_ms": 0.025
+            }
+          ]
+        }
+      },
+      "scheduler_switch_or_wakeup_events_in_capture": 0
+    }
+  ],
+  "limitations": [
+    "Markers do not establish the end-to-end surface presentation sequence or physical-device behavior.",
+    "A marker gap is not evidence that a thread was idle or blocked unless other markers or scheduling events establish that.",
+    "Open kernel or application calls outside the selected tracing categories may be unobserved."
+  ]
+}

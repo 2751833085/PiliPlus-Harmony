@@ -1,0 +1,372 @@
+{
+  "version_code": 6251,
+  "source": "0ab8318ba2e7c6058bc8310bf6e9a6ac4df52777",
+  "hap_sha256": "2e006850807ba7c357c92f2c7eaebf1b14bdd822ceb672eb87cc06e28649be10",
+  "guest_pid": 12948,
+  "public_query": "HarmonyOS",
+  "ordinary_search_open_verified_before_ime": true,
+  "xiaoyi_agreement_declined": true,
+  "keyboard_search_verified": false,
+  "result_entry": "Existing bilibili://search public URI via explicit DevEco emulator EntryAbility",
+  "same_result_folded_in_place": true,
+  "display_source": "DevEco official foldedState and actual DisplayManagerService",
+  "no_dpi_change": true,
+  "observations": {
+    "triple_search_combined": {
+      "form": "triple",
+      "display": {
+        "physical_size_px": [
+          3184,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          1107.4782608695652,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "FOLD_STATE_EXPAND_WITH_SECOND_EXPAND"
+      },
+      "raw_screenshot": "soak-6250-0olhdgvx/triple-observe.png",
+      "search_result_tabs_verified": true,
+      "discovery_headings_px": {
+        "bilibili热搜": [
+          [
+            2316,
+            152,
+            2667,
+            198
+          ]
+        ],
+        "搜索发现": [
+          [
+            2316,
+            1469,
+            2701,
+            1515
+          ]
+        ]
+      },
+      "video_result_rows_px": [
+        [
+          212,
+          520,
+          2279,
+          871
+        ],
+        [
+          212,
+          871,
+          2279,
+          1221
+        ],
+        [
+          212,
+          1221,
+          2279,
+          1572
+        ],
+        [
+          212,
+          1572,
+          2279,
+          1923
+        ],
+        [
+          212,
+          1923,
+          2279,
+          2232
+        ]
+      ],
+      "visually_reviewed": true,
+      "verified_visual": "Public results with left thumbnail and adjacent text, plus right trends and discovery."
+    },
+    "triple_search_video": {
+      "form": "triple",
+      "display": {
+        "physical_size_px": [
+          3184,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          1107.4782608695652,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "FOLD_STATE_EXPAND_WITH_SECOND_EXPAND"
+      },
+      "raw_screenshot": "soak-6250-lh1x2pit/triple-video-results.png",
+      "search_result_tabs_verified": true,
+      "discovery_headings_px": {
+        "bilibili热搜": [
+          [
+            2316,
+            152,
+            2667,
+            198
+          ]
+        ],
+        "搜索发现": [
+          [
+            2316,
+            1469,
+            2701,
+            1515
+          ]
+        ]
+      },
+      "video_result_rows_px": [
+        [
+          212,
+          520,
+          2279,
+          871
+        ],
+        [
+          212,
+          871,
+          2279,
+          1221
+        ],
+        [
+          212,
+          1572,
+          2279,
+          1923
+        ],
+        [
+          212,
+          1923,
+          2279,
+          2232
+        ]
+      ],
+      "visually_reviewed": false
+    },
+    "double_search_video": {
+      "form": "double",
+      "display": {
+        "physical_size_px": [
+          2048,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          712.3478260869565,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "EXPAND"
+      },
+      "raw_screenshot": "soak-6250-6_hs5n2i/double-observe.png",
+      "search_result_tabs_verified": true,
+      "discovery_headings_px": {
+        "bilibili热搜": [
+          [
+            1399,
+            152,
+            1743,
+            198
+          ]
+        ],
+        "搜索发现": [
+          [
+            1399,
+            1469,
+            1777,
+            1515
+          ]
+        ]
+      },
+      "video_result_rows_px": [
+        [
+          0,
+          520,
+          1362,
+          871
+        ],
+        [
+          0,
+          871,
+          1362,
+          1221
+        ],
+        [
+          0,
+          1572,
+          1362,
+          1923
+        ],
+        [
+          0,
+          1923,
+          1362,
+          2232
+        ]
+      ],
+      "visually_reviewed": true,
+      "verified_visual": "Public video results on left; trends and discovery visibly loaded on right."
+    },
+    "single_search_video": {
+      "form": "single",
+      "display": {
+        "physical_size_px": [
+          1008,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          350.60869565217394,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "FOLDED"
+      },
+      "raw_screenshot": "soak-6250-vwmtjpiy/single-observe.png",
+      "search_result_tabs_verified": true,
+      "discovery_headings_px": {
+        "bilibili热搜": [],
+        "搜索发现": []
+      },
+      "video_result_rows_px": [
+        [
+          0,
+          520,
+          1008,
+          871
+        ],
+        [
+          0,
+          871,
+          1008,
+          1221
+        ],
+        [
+          0,
+          1572,
+          1008,
+          1923
+        ],
+        [
+          0,
+          1923,
+          1008,
+          2232
+        ]
+      ],
+      "visually_reviewed": true,
+      "verified_visual": "Single result column with thumbnail to the left of text. No trends/discovery sidebar."
+    },
+    "single_search_back": {
+      "form": "single",
+      "display": {
+        "physical_size_px": [
+          1008,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          350.60869565217394,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "FOLDED"
+      },
+      "raw_screenshot": "soak-6250-vtg1xo8l/single-back.png",
+      "search_result_tabs_verified": false,
+      "discovery_headings_px": {
+        "bilibili热搜": [],
+        "搜索发现": []
+      },
+      "video_result_rows_px": [],
+      "visually_reviewed": false,
+      "return_verified": "Back from public results returned to recommendation Home."
+    },
+    "single_mine": {
+      "form": "single",
+      "display": {
+        "physical_size_px": [
+          1008,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          350.60869565217394,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "FOLDED"
+      },
+      "raw_screenshot": "soak-6250-cnxgv0yv/single-mine.png",
+      "search_result_tabs_verified": false,
+      "discovery_headings_px": {
+        "bilibili热搜": [],
+        "搜索发现": []
+      },
+      "video_result_rows_px": [],
+      "visually_reviewed": true,
+      "verified_visual": "Guest profile, statistics, quick shortcuts and watch-later sections have no card backplate. Bottom navigation is fully visible."
+    },
+    "returned_triple_home": {
+      "form": "triple",
+      "display": {
+        "physical_size_px": [
+          3184,
+          2232
+        ],
+        "device_pixel_ratio": 2.875,
+        "logical_size_at_ui_scale_1": [
+          1107.4782608695652,
+          776.3478260869565
+        ],
+        "density_dpi": 460.0,
+        "physical_ppi": [
+          258.871,
+          518.42
+        ],
+        "rotation": 0,
+        "fold_status": "FOLD_STATE_EXPAND_WITH_SECOND_EXPAND"
+      },
+      "raw_screenshot": "soak-6250-ak4hb8n0/triple-observe.png",
+      "search_result_tabs_verified": false,
+      "discovery_headings_px": {
+        "bilibili热搜": [],
+        "搜索发现": []
+      },
+      "video_result_rows_px": [],
+      "visually_reviewed": false
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "version_code": 6251,
+  "source": "0ab8318ba2e7c6058bc8310bf6e9a6ac4df52777",
+  "hap_sha256": "2e006850807ba7c357c92f2c7eaebf1b14bdd822ceb672eb87cc06e28649be10",
+  "emulator_install": {
+    "device_kind": "DevEco emulator",
+    "version_before": 6250,
+    "version_after": 6251,
+    "uid_preserved": true,
+    "first_install_time_preserved": true,
+    "uninstalled": false,
+    "source": "0ab8318ba2e7c6058bc8310bf6e9a6ac4df52777",
+    "hap_sha256": "2e006850807ba7c357c92f2c7eaebf1b14bdd822ceb672eb87cc06e28649be10",
+    "bytes": 33136760
+  },
+  "settings_routes": {
+    "cold_entries_and_returns": 3,
+    "warm_entries_and_returns": 15,
+    "capture_count": 6,
+    "truncated_capture_count": 0,
+    "complete_route_markers": 36,
+    "comparison": "6251-settings-transition-comparison.md",
+    "frame_and_timing_json": "6251-settings-transition.json",
+    "vsync_and_gap_json": "6251-settings-gaps.json",
+    "gap_counts_over_25ms": {
+      "cold_push": 1,
+      "warm_push": 5,
+      "warm_pop": 6
+    },
+    "original_and_bottom_material_settings_enabled": true
+  },
+  "search_and_mine_visual_checks": "6251-search-mine-visual.json",
+  "navigation_soak": {
+    "test_target": "DevEco HarmonyOS 7 triple-fold emulator",
+    "guest_mode": true,
+    "display_profile_px": [
+      3184,
+      2232
+    ],
+    "elapsed_s": 600.002,
+    "time_budget_s": 600,
+    "stop_reason": "time_limit",
+    "complete_rounds": 27,
+    "attempted_actions": 417,
+    "verified_actions": 417,
+    "pending_at_deadline": null,
+    "by_action": {
+      "bottom 动态": 28,
+      "bottom 我的": 28,
+      "open Settings": 28,
+      "Settings Back": 28,
+      "bottom 首页": 28,
+      "top 推荐": 55,
+      "推荐 scroll forward": 28,
+      "推荐 scroll back": 28,
+      "top 热门": 28,
+      "热门 scroll forward": 28,
+      "热门 scroll back": 28,
+      "top 分区": 28,
+      "分区 scroll forward": 27,
+      "分区 scroll back": 27
+    },
+    "unchanged_pid": 12948
+  },
+  "runtime_observation": {
+    "evidence": "6251-runtime-observation.json",
+    "samples": 5,
+    "pss_range_kb": [
+      405236,
+      464614
+    ],
+    "app_pid_retained_counts": {
+      "unhandled_exception": 0,
+      "missing_plugin": 0,
+      "layout_overflow": 0,
+      "setstate_after_dispose": 0,
+      "fatal_signal": 0,
+      "anr_or_app_freeze": 0,
+      "process_exit": 0
+    },
+    "system_retained_counts_with_app_or_pid": {
+      "unhandled_exception": 0,
+      "missing_plugin": 0,
+      "layout_overflow": 0,
+      "setstate_after_dispose": 0,
+      "fatal_signal": 0,
+      "anr_or_app_freeze": 0,
+      "process_exit": 0
+    },
+    "collection_errors": [],
+    "limitations": "Samples start mid-soak. Hilog is retained and partly filtered. System logs without an app/PID match are excluded. Absence of matching lines is not exhaustive ANR/crash detection. Raw lines were not written."
+  },
+  "restored_home": {
+    "version": 6251,
+    "pid": 12948,
+    "profile_px": [
+      3184,
+      2232
+    ],
+    "final_page": "recommendations",
+    "verified_restore_actions": 1,
+    "prefs_changed": false
+  },
+  "scope": {
+    "actual_presented_fps": null,
+    "hardware_phone_tested": false,
+    "keyboard_query_tested": false,
+    "decoded_video_tested": false,
+    "download_tested": false,
+    "actual_public_search_results_verified": true
+  }
+}

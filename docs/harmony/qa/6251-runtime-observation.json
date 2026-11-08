@@ -1,0 +1,67 @@
+{
+  "pid": 12948,
+  "version": 6251,
+  "samples": [
+    {
+      "soak_elapsed_s": 321.316,
+      "pss_kb": 405236,
+      "private_dirty_kb": 224052,
+      "pid_unchanged": true
+    },
+    {
+      "soak_elapsed_s": 380.527,
+      "pss_kb": 430528,
+      "private_dirty_kb": 249304,
+      "pid_unchanged": true
+    },
+    {
+      "soak_elapsed_s": 439.685,
+      "pss_kb": 435162,
+      "private_dirty_kb": 253812,
+      "pid_unchanged": true
+    },
+    {
+      "soak_elapsed_s": 498.818,
+      "pss_kb": 464614,
+      "private_dirty_kb": 283200,
+      "pid_unchanged": true
+    },
+    {
+      "soak_elapsed_s": 557.97,
+      "pss_kb": 434601,
+      "private_dirty_kb": 253400,
+      "pid_unchanged": true
+    }
+  ],
+  "errors": [],
+  "app_pid_buffer": {
+    "unique_retained_lines_in_approx_window": 1018,
+    "first_line_relative_s": 1.665,
+    "last_line_relative_s": 596.853,
+    "counts": {
+      "unhandled_exception": 0,
+      "missing_plugin": 0,
+      "layout_overflow": 0,
+      "setstate_after_dispose": 0,
+      "fatal_signal": 0,
+      "anr_or_app_freeze": 0,
+      "process_exit": 0
+    }
+  },
+  "system_buffer_for_named_app_or_pid": {
+    "unique_retained_lines_in_approx_window": 0,
+    "first_line_relative_s": null,
+    "last_line_relative_s": null,
+    "counts": {
+      "unhandled_exception": 0,
+      "missing_plugin": 0,
+      "layout_overflow": 0,
+      "setstate_after_dispose": 0,
+      "fatal_signal": 0,
+      "anr_or_app_freeze": 0,
+      "process_exit": 0
+    }
+  },
+  "window": "10 minute navigation soak. Device epoch aligned from host and guest seconds with \u00b11.5 s allowance.",
+  "limits": "Samples start mid-soak. Hilog is retained and partly filtered. System logs without an app/PID match are excluded. Absence of matching lines is not exhaustive ANR/crash detection. Raw lines were not written."
+}
