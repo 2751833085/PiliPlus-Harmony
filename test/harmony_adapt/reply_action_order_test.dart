@@ -73,7 +73,7 @@ void main() {
     controller.loadingState.value = Success([_reply(7), selected, _reply(9)]);
     final pin = controller.onToggleTop(selected, 1, 1);
     await tester.pump(const Duration(milliseconds: 1));
-    final (request, handler) = pending.single;
+    final (request, _) = pending.single;
     expect(request.data['rpid'], selected.id);
 
     final refreshedTarget = _reply(10);
@@ -84,13 +84,18 @@ void main() {
       subjectControl: SubjectControl(count: Int64(3)),
     );
     await controller.onRefresh();
-    handler.resolve(
-      Response(
-        requestOptions: request,
-        statusCode: 200,
-        data: {'code': 0},
-      ),
-    );
+    void resolvePin() {
+      final (request, handler) = pending.last;
+      handler.resolve(
+        Response(
+          requestOptions: request,
+          statusCode: 200,
+          data: {'code': 0},
+        ),
+      );
+    }
+
+    resolvePin();
     await tester.pump(const Duration(milliseconds: 1));
     await pin;
     expect(controller.loadingState.value.data!.map((item) => item.id.toInt()), [
@@ -101,6 +106,16 @@ void main() {
     expect(refreshedTarget.replyControl.isUpTop, isTrue);
     expect(previouslyPinned.replyControl.isUpTop, isFalse);
     expect(controller.hasUpTop, isTrue);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pump(const Duration(milliseconds: 150));
+
+    final unpin = controller.onToggleTop(refreshedTarget, 1, 1);
+    await tester.pump(const Duration(milliseconds: 1));
+    controller.loadingState.value = LoadingState.loading();
+    resolvePin();
+    await tester.pump(const Duration(milliseconds: 1));
+    await unpin;
+    expect(controller.loadingState.value, isA<Loading>());
     await tester.pump(const Duration(seconds: 5));
     await tester.pump(const Duration(milliseconds: 150));
     await tester.pumpWidget(const SizedBox());
@@ -133,6 +148,10 @@ void main() {
     expect(controller.count.value, 3);
     controller.onRemove(selected, null);
     expect(controller.loadingState.value.data!.single.id, Int64(20));
+    expect(controller.count.value, 2);
+    controller.loadingState.value = LoadingState.loading();
+    controller.onRemove(selected, null);
+    expect(controller.loadingState.value, isA<Loading>());
     expect(controller.count.value, 2);
   });
 }

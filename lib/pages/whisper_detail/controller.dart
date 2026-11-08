@@ -130,7 +130,7 @@ class WhisperDetailController extends CommonListController<RspSessionMsg, Msg> {
       if (res.isSuccess) {
         if (msgType == .EN_MSG_TYPE_DRAW_BACK) {
           // A refresh may have inserted new messages while recall was pending.
-          final recalled = loadingState.value.data?.firstWhereOrNull(
+          final recalled = loadingState.value.dataOrNull?.firstWhereOrNull(
             (item) => item.msgKey.toString() == message,
           );
           if (recalled != null) {

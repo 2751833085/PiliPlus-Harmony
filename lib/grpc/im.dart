@@ -210,6 +210,7 @@ abstract final class ImGrpc {
       GrpcUrl.getTotalUnread,
       ReqTotalUnread(unreadType: unreadType, showUnfollowList: 1),
       RspTotalUnread.fromBuffer,
+      silent: true,
     );
   }
 

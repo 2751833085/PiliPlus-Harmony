@@ -4,6 +4,7 @@ import 'package:PiliPlus/grpc/im.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/msg/msgfeed_unread.dart';
 import 'package:PiliPlus/pages/common/common_whisper_controller.dart';
+import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -24,6 +25,7 @@ class WhisperController extends CommonWhisperController<SessionMainReply> {
   late final List<MsgFeedTopItem> msgFeedTopItems;
   final disableLikeMsg = Pref.disableLikeMsg;
   late final RxList<int> unreadCounts;
+  int _unreadRequest = 0;
 
   PbMap<int, Offset>? offset;
 
@@ -65,7 +67,16 @@ class WhisperController extends CommonWhisperController<SessionMainReply> {
   }
 
   Future<void> queryMsgFeedUnread() async {
+    final account = Accounts.main;
+    final request = ++_unreadRequest;
+    if (isClosed || !account.isLogin) return;
+
     final res = await ImGrpc.getTotalUnread(unreadType: 2);
+    if (isClosed ||
+        request != _unreadRequest ||
+        !identical(account, Accounts.main)) {
+      return;
+    }
     if (res case Success(:final response)) {
       final data = MsgFeedUnread.fromJson(response.msgFeedUnread.unread);
       final unreadCounts = [

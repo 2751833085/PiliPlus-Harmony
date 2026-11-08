@@ -206,7 +206,7 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
   }
 
   void onRemove(ReplyInfo item, ReplyInfo? child) {
-    final list = loadingState.value.data;
+    final list = loadingState.value.dataOrNull;
     if (isClosed || list == null) return;
     final index = list.indexWhere((reply) => reply.id == item.id);
     if (index == -1) return;
@@ -247,7 +247,7 @@ abstract class ReplyController<R> extends CommonListController<R, ReplyInfo> {
     );
     if (isClosed) return;
     if (res.isSuccess) {
-      final list = loadingState.value.data ?? const <ReplyInfo>[];
+      final list = loadingState.value.dataOrNull ?? const <ReplyInfo>[];
       final index = list.indexWhere((reply) => reply.id == item.id);
       if (index != -1) {
         list[index].ensureReplyControl().isUpTop = !isUpTop;
