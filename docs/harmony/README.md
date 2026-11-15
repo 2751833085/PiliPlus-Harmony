@@ -36,6 +36,30 @@ HARMONY_CODESIGN=1 bash tool/harmony.sh release
 
 每个 HAP 附带 SHA256 与 `.build.json` 源码/SDK 记录。工程沿用社区分支的包名，安装前请留意设备上同包名版本的签名是否一致。
 
+完整 Dart 回归：`flutter test`；工具回归：`python3 -m unittest discover -s test/harmony_adapt/tooling -v`。原生播放器的重建方法见[原生播放器](native-player.md)。
+
+## 工具
+
+| 工具 | 用途 |
+| --- | --- |
+| `tool/harmony.sh` | 环境检查与 HAP 构建 |
+| `tool/stage_harmony.py` | 同步构建目录，由构建脚本调用 |
+| `tool/check_harmony_layout.sh` | 布局自动检查 |
+| `tool/test_harmony_posture.cjs` | 折叠屏状态与生命周期回归 |
+| `tool/capture_harmony_display.py` | 采集设备分辨率与显示证据 |
+| `tool/collect_harmony_performance.py` | 采集运行与帧时间数据 |
+| `tool/rebuild_harmony_mpv.py` | 重建原生播放器 |
+| `tool/research/hap_inventory.py` | 检查 HAP 文件清单 |
+
+## 版本
+
+签名 HAP 只通过 [GitHub Releases](https://github.com/2751833085/PiliPlus-Harmony/releases) 提供，不入库。`docs/releases/` 保存各版本说明、构建信息和哈希：
+
+- [Beta 1.1](../releases/beta-1.1/notes.md) · [验证记录](beta-1.1-6254-validation.md)
+- [Beta 1.2 候选](../releases/beta-1.2/notes.md) · [验证记录](beta-1.2-6255-validation.md)
+
+Beta 1.1 之前的版本（Alpha 与 Beta 1.0）已停止维护，仅以 Git 标签和 GitHub 发布页存档。
+
 ## 验收规则
 
 每项验收记录应包含构建提交、HAP 哈希、设备与 API 版本、操作步骤、预期与实际结果，以及日志或截图。自动测试、模拟器、真机与未验证须分开记录，构建通过不代表功能可用。
