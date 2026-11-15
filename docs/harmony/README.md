@@ -55,10 +55,9 @@ HARMONY_CODESIGN=1 bash tool/harmony.sh release
 
 签名 HAP 只通过 [GitHub Releases](https://github.com/2751833085/PiliPlus-Harmony/releases) 提供，不入库。`docs/releases/` 保存各版本说明、构建信息和哈希：
 
+- [Beta 1.0](../releases/beta-1.0/notes.md)：首个版本，含软件简介与此前开发历程
 - [Beta 1.1](../releases/beta-1.1/notes.md) · [验证记录](beta-1.1-6254-validation.md)
 - [Beta 1.2 候选](../releases/beta-1.2/notes.md) · [验证记录](beta-1.2-6255-validation.md)
-
-Beta 1.1 之前的版本（Alpha 与 Beta 1.0）已停止维护，仅以 Git 标签和 GitHub 发布页存档。
 
 ## 验收规则
 
