@@ -16,4 +16,4 @@
 
 完整 Dart 回归：`flutter test`。工具回归：`python3 -m unittest discover -s test/harmony_adapt/tooling -v`。
 
-参见[构建说明](../docs/harmony/README.md)、[原生播放器说明](../docs/harmony/native-player.md)和[Beta 1.0 验证记录](../docs/harmony/beta-1.0-validation.md)。
+参见[构建说明](../docs/harmony/README.md)和[原生播放器说明](../docs/harmony/native-player.md)。

@@ -54,7 +54,7 @@
 
 [Beta 1.1](https://github.com/2751833085/PiliPlus-Harmony/releases/tag/v1.1.0-beta%2B6254) 的四份附件均核对 GitHub 服务端摘要。通过未登录的公开链接重新下载 HAP，摘要与本地签名包一致。应用实际版本选择函数针对未登录 GitHub API 返回值运行通过：Beta 1.0 能发现更新，当前 Beta 1.1 不重复提醒，后续更高 Beta 可继续比较。
 
-Beta 1.0 保留原 Beta 名称、发布详情和源码，旧附件已下架。此前 Alpha 归档不变。结构化结果见 [公开下载与更新检测](beta-1.1-6254-public-verification.json)。
+结构化结果见 [公开下载与更新检测](beta-1.1-6254-public-verification.json)。
 
 ## 云端测试收尾修正
 

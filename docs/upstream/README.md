@@ -1,6 +1,6 @@
 # PiliPlus鸿蒙版分支
 
-本地 Mate XTS 移植进度、构建环境及验收要求见 [鸿蒙开发说明](docs/harmony/README.md)。当前尚未完成全功能验收。
+构建方法见[构建说明](../harmony/README.md)。
 
 此分支目前主要由[dev4harmony/flutter-dev](https://github.com/orgs/dev4harmony/teams/flutter-dev)维护
 

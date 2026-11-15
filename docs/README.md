@@ -1,46 +1,8 @@
-# 文档目录
+# 文档
 
-- [Beta 1.0 当前版本验证](harmony/beta-1.0-6253-validation.md)：6253 独立安装版本的命名修正、验签与更新核对。
-- [Beta 1.0 前次构建验证](harmony/beta-1.0-validation.md)：6252 的稳定性修复、完整回归及实际验证限制。
-- [Beta 1.0 逐项功能审计](harmony/beta-1.0-feature-audit.json)：147 项功能的源码、自动测试证据与仍需实测的范围。
-- [Beta 1.0 设备验证汇总](harmony/beta-1.0-device-qa.json)：最终安装包三种屏幕状态的 30 分钟回归及专项检查。
-- [版本归档规则](../releases/README.md)：此前版本统一归档为 Alpha，历史目录、构建号与详情保留追溯用途。
-
-- [V3.0 可行性研究](v3.0/FEASIBILITY.md)：Material 依赖盘点、官方版观察、技术路线与[功能决策台账](v3.0/FEATURE_DECISIONS.md)。
-
-- [V2.7 首页与评论优化](v2.7/README.md)：默认栏数、刷新衔接、评论播控与光感；[验证记录](v2.7/VALIDATION.md)。
-
-- [构建与环境](harmony/README.md)：SDK、Flutter OH、HAP、签名与 Mate XTS 验收。
-- [V2 计划](v2/PLAN.md)：鸿蒙界面、Dock、智感握姿、封面动画及工作量。
-- [V2 验证记录](v2/VALIDATION.md)：自动回归、签名构建和真机验证的实际范围。
-- [V2.5 竖屏短视频](v2.5/README.md)：入口、操作、播放器复用与回归。
-- [V2.5 验证记录](v2.5/VALIDATION.md)：本版自动测试、构建和设备验证范围。
-- [V2.6 展开刷视频与海外模式](v2.6/README.md)：操作规则、线路策略及生效范围。
-- [V2.6 验证记录](v2.6/VALIDATION.md)：新增回归、签名构建及实机限制。
-- [V2.6.1 竖屏操作与预加载](v2.6.1/README.md)：简洁模式、左右滑自定义和实际媒体头部缓存。
-- [V2.6.1 验证记录](v2.6.1/VALIDATION.md)：交互、网络缓存回归、签名构建与设备结果。
-- [V2.6.2 分页与自动播放](v2.6.2/README.md)：手势吸附、连续滑动保留播放器及短视频独立自动播放。
-- [V2.6.2 验证记录](v2.6.2/VALIDATION.md)：自动回归、签名构建和设备结果。
-- [V2.6.3 底部播放控制](v2.6.3/README.md)：常驻进度条及播放按钮；[验证记录](v2.6.3/VALIDATION.md)。
-- [V2.6.4 模式过渡与反馈](v2.6.4/README.md)：紧凑评论、缩小图标与本机不想看；[验证记录](v2.6.4/VALIDATION.md)。
-- [V2.6.5 入口、连续预加载与布局](v2.6.5/README.md)：预取机制、iOS 截图适配及[验证记录](v2.6.5/VALIDATION.md)。
-- [V2.6.6 暂停界面](v2.6.6/README.md)：暂停播控、信息层与[验证记录](v2.6.6/VALIDATION.md)。
-- [V2.6.7 作者与操作布局](v2.6.7/README.md)：图标数量、关注位置及等比例预览。
-- [V2.6.9 短视频比例整理](v2.6.9/README.md)：字体、输入入口、图标、进度条与大字号回归。
-- [V2.6.8 底部搜索与弹幕入口](v2.6.8/README.md)：关联词、独立弹幕操作与比例预览。
-- [V2.6.10 圆角与普通播放器](v2.6.10/README.md)：四角裁切、时间单行、进度条与空降助手回归。
-- [V2.6.11 选集与返回交互](v2.6.11/README.md)：选集、同排搜索、暂停显隐、评论配色和普通播控高度。
-- [原生播放器](harmony/native-player.md)：依赖版本、构建脚本、音频滤镜与许可。
-- [功能核对](harmony/feature-matrix.json)：原上游 147 项功能的实现/验证状态。
-- [V1 验证记录](harmony/validation.json)：构建哈希、自动测试与尚待执行的项目。
-- [来源说明](upstream/README.md)：保留的上游及鸿蒙社区 README。
-
-- [V2.6.12 统一贴底菜单](v2.6.12/README.md)：沉浸光感、暗色表面、三折全宽播放栏、我的与关于页。
-- [V2.6.13 双手握持居中](v2.6.13/README.md)：双手状态、防抖、触控保护与验证范围。
-- [V2.6.14 播放模式防误切](v2.6.14/README.md)：播放栏点击保护与延迟数据切换限制。
-
-- [V2.6.15 历史预览与安全边距](v2.6.15/README.md)：可选历史卡片及[真实使用验收清单](v2.6.15/TEST_PLAN.md)。
-
-- [V2.6.16 DevEco 运行回归](v2.6.16/README.md)：预取重建、文件缓存、评论主题和[实际验证范围](v2.6.16/VALIDATION.md)。
-
-- [V2.6.17 增量排错与内部整理](v2.6.17/README.md)：原生显隐异步保护、预加载失败回退和队列快照复用。
+- [构建说明](harmony/README.md)：环境、构建、签名与验收规则。
+- [原生播放器](harmony/native-player.md)：依赖版本、重建方法与许可。
+- [Beta 1.1 验证记录](harmony/beta-1.1-6254-validation.md)
+- [Beta 1.2 验证记录](harmony/beta-1.2-6255-validation.md)（进行中）
+- [来源说明](upstream/README.md)：上游及鸿蒙社区的原始 README。
+- [版本档案](../releases/README.md)
